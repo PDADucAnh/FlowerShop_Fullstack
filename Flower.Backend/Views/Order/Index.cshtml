@@ -1,0 +1,74 @@
+@using Flower.Data.Entities
+@model IEnumerable<OrderDTO>
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Sales Management</h3>
+            <p class="serif text-3xl font-bold">Recent Acquisitions</p>
+        </div>
+        <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
+            <span class="material-symbols-outlined text-lg">add</span>
+            Manual Order
+        </a>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-outline-variant text-label-sm uppercase text-secondary tracking-widest bg-surface-container-low">
+                        <th class="px-lg py-4">Order ID</th>
+                        <th class="px-lg py-4">Customer</th>
+                        <th class="px-lg py-4">Date</th>
+                        <th class="px-lg py-4">Status</th>
+                        <th class="px-lg py-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-outline-variant">
+                    @foreach (var order in Model)
+                    {
+                        <tr class="table-row-hover transition-colors">
+                             <td class="px-lg py-5 font-bold serif">#LX-ORD-@order.Id</td>
+                             <td class="px-lg py-5">
+                                 <div class="flex items-center gap-3">
+                                     <div class="size-8 bg-surface-container-highest flex items-center justify-center font-bold text-[10px]">
+                                         @(order.CustomerName?.Length >= 2 ? order.CustomerName.Substring(0, 2).ToUpper() : "??")
+                                     </div>
+                                     <span class="text-body-md font-semibold">@(order.CustomerName ?? "Unknown")</span>
+                                 </div>
+                             </td>
+                            <td class="px-lg py-5 text-label-sm text-secondary uppercase">@order.OrderDate.ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="px-lg py-5">
+                                @switch (order.Status)
+                                {
+                                    case OrderStatus.Pending:
+                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline bg-surface-container-low text-secondary">Processing</span>
+                                        break;
+                                    case OrderStatus.Shipping:
+                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Shipped</span>
+                                        break;
+                                    case OrderStatus.Completed:
+                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Completed</span>
+                                        break;
+                                    default:
+                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline text-secondary">Unknown</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="px-lg py-5 text-right space-x-4">
+                                <a asp-action="Details" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-0.5">Details</a>
+                                <a asp-action="Edit" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary">Edit</a>
+                                <a asp-action="Delete" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Delete this order?')">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

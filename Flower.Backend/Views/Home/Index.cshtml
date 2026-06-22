@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_LayoutAdmin";
+}
+<div class="max-w-container-max mx-auto">
+    <!-- Page Header -->
+    <div class="mb-stack-lg">
+        <h2 class="font-display-lg text-display-lg text-primary tracking-tight">Overview</h2>
+        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Here's what's happening at the boutique today.</p>
+    </div>
+    <!-- Metrics Bento Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-stack-lg">
+        <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 shadow-petal flex flex-col justify-between group hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-primary-container/30 rounded-lg text-primary">
+                    <span class="material-symbols-outlined">payments</span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                    <span class="material-symbols-outlined text-[16px]">trending_up</span> +12.5%
+                </span>
+            </div>
+            <div>
+                <p class="font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Total Sales</p>
+                <h3 class="font-headline-md text-headline-md text-on-surface">128.430.000 đ</h3>
+            </div>
+        </div>
+        <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 shadow-petal flex flex-col justify-between group hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-secondary-container/50 rounded-lg text-secondary">
+                    <span class="material-symbols-outlined">shopping_basket</span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-sm font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                    <span class="material-symbols-outlined text-[16px]">trending_up</span> +8.2%
+                </span>
+            </div>
+            <div>
+                <p class="font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">New Orders</p>
+                <h3 class="font-headline-md text-headline-md text-on-surface">142</h3>
+            </div>
+        </div>
+        <div class="bg-surface-container-lowest rounded-xl p-stack-md border border-outline-variant/20 shadow-petal flex flex-col justify-between group hover:shadow-md transition-shadow">
+            <div class="flex justify-between items-start mb-4">
+                <div class="p-2 bg-tertiary-container/30 rounded-lg text-tertiary">
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <span class="inline-flex items-center gap-1 text-sm font-medium text-on-surface-variant bg-surface-container px-2 py-1 rounded-full">
+                    <span class="material-symbols-outlined text-[16px]">trending_flat</span> +0.0%
+                </span>
+            </div>
+            <div>
+                <p class="font-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Active Customers</p>
+                <h3 class="font-headline-md text-headline-md text-on-surface">1,204</h3>
+            </div>
+        </div>
+    </div>
+    <!-- Layout Split: Chart & Recent Orders -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+        <!-- Revenue Chart -->
+        <div class="lg:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-petal p-stack-md flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="font-headline-sm text-headline-sm text-primary">Revenue Growth</h3>
+                <select class="bg-surface border border-outline-variant/40 rounded-lg px-3 py-1 font-label-sm text-on-surface-variant focus:ring-primary focus:border-primary outline-none">
+                    <option>Last 7 Days</option>
+                    <option>Last 30 Days</option>
+                    <option>This Year</option>
+                </select>
+            </div>
+            <!-- SVG Chart -->
+            <div class="flex-1 relative w-full min-h-[300px] bg-surface-bright rounded-lg overflow-hidden border border-outline-variant/10">
+                <div class="absolute inset-0 flex flex-col justify-between px-4 py-8 pointer-events-none opacity-20">
+                    <div class="w-full border-b border-outline-variant"></div>
+                    <div class="w-full border-b border-outline-variant"></div>
+                    <div class="w-full border-b border-outline-variant"></div>
+                    <div class="w-full border-b border-outline-variant"></div>
+                </div>
+                <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+                    <defs>
+                        <linearGradient id="gradient" x1="0%" x2="0%" y1="0%" y2="100%">
+                            <stop offset="0%" stop-color="#ab2c5d" stop-opacity="0.2"></stop>
+                            <stop offset="100%" stop-color="#ab2c5d" stop-opacity="0"></stop>
+                        </linearGradient>
+                    </defs>
+                    <path d="M0 80 Q 20 70, 40 50 T 70 30 T 100 10 L 100 100 L 0 100 Z" fill="url(#gradient)"></path>
+                    <path d="M0 80 Q 20 70, 40 50 T 70 30 T 100 10" fill="none" stroke="#ab2c5d" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    <circle cx="40" cy="50" fill="#ffffff" r="1.5" stroke="#ab2c5d" stroke-width="1"></circle>
+                    <circle cx="70" cy="30" fill="#ffffff" r="1.5" stroke="#ab2c5d" stroke-width="1"></circle>
+                    <circle cx="100" cy="10" fill="#ffffff" r="1.5" stroke="#ab2c5d" stroke-width="1"></circle>
+                </svg>
+            </div>
+        </div>
+        <!-- Recent Orders -->
+        <div class="bg-surface-container-lowest rounded-xl border border-outline-variant/20 shadow-petal flex flex-col overflow-hidden">
+            <div class="p-stack-md border-b border-outline-variant/20 flex justify-between items-center bg-surface-bright/50">
+                <h3 class="font-headline-sm text-headline-sm text-primary">Recent Orders</h3>
+                <a asp-controller="Order" asp-action="Index" class="text-primary hover:underline font-label-sm">View All</a>
+            </div>
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+                    <div class="w-12 h-12 rounded-md bg-surface-container-high flex items-center justify-center text-primary font-bold">
+                        <span class="material-symbols-outlined">local_florist</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-label-md text-on-surface truncate">Spring Whisper Bouquet</p>
+                        <p class="font-label-sm text-on-surface-variant">#ORD-092 • 85.000 đ</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary-container text-on-secondary-container">Pending</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+                    <div class="w-12 h-12 rounded-md bg-surface-container-high flex items-center justify-center text-primary font-bold">
+                        <span class="material-symbols-outlined">local_florist</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-label-md text-on-surface truncate">Velvet Night Arrangement</p>
+                        <p class="font-label-sm text-on-surface-variant">#ORD-091 • 140.000 đ</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-outline-variant/30 text-on-surface">Processing</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+                    <div class="w-12 h-12 rounded-md bg-surface-container-high flex items-center justify-center text-primary font-bold">
+                        <span class="material-symbols-outlined">local_florist</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-label-md text-on-surface truncate">Classic Blush Roses</p>
+                        <p class="font-label-sm text-on-surface-variant">#ORD-090 • 95.000 đ</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-800">Delivered</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container-low transition-colors cursor-pointer group">
+                    <div class="w-12 h-12 rounded-md bg-surface-container-high flex items-center justify-center text-primary font-bold">
+                        <span class="material-symbols-outlined">local_florist</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="font-label-md text-on-surface truncate">Rustic Lavender Bundle</p>
+                        <p class="font-label-sm text-on-surface-variant">#ORD-089 • 45.000 đ</p>
+                    </div>
+                    <div class="shrink-0">
+                        <span class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-800">Delivered</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,59 @@
+@model OrderDetailDTO
+@{
+    ViewData["Title"] = "Refine Manifest Entry";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-2xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Logistics Adjustment</h3>
+            <p class="serif text-3xl font-bold">Edit Detail Record</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Back to Details
+        </a>
+    </div>
+
+    <form asp-action="Edit" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Order Reference ID</label>
+                <select asp-for="OrderId" asp-items="ViewBag.OrderList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold"></select>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Acquired Product</label>
+                <select asp-for="ProductId" asp-items="ViewBag.ProductList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold"></select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Quantity Manifested</label>
+                <input asp-for="Quantity" type="number" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold serif text-xl" required />
+                <span asp-validation-for="Quantity" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Unit Value (VNĐ)</label>
+                <input asp-for="UnitPrice" type="number" step="1000" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold serif text-xl" required />
+                <span asp-validation-for="UnitPrice" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
+                Save Adjustments
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
+                Discard
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

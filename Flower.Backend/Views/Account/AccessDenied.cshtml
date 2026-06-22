@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Authority Denied";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="flex flex-col items-center justify-center py-xl space-y-lg">
+    <div class="size-20 bg-error-container flex items-center justify-center text-error mb-4">
+        <span class="material-symbols-outlined text-4xl">gpp_maybe</span>
+    </div>
+    <div class="text-center space-y-md">
+        <h3 class="text-label-sm uppercase tracking-[0.3em] text-error font-bold">Security Violation 403</h3>
+        <p class="serif text-4xl font-bold">Insufficient Authority</p>
+        <p class="text-body-md text-on-surface-variant max-w-md mx-auto">Your identity credentials do not possess the requisite operational authority to access this secure terminal. Please consult with a Senior Administrator.</p>
+    </div>
+    <div class="pt-lg">
+        <a asp-controller="Home" asp-action="Index" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all">
+            Return to Command Center
+        </a>
+    </div>
+</div>

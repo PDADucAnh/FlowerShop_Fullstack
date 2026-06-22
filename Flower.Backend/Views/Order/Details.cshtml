@@ -1,0 +1,88 @@
+@using Flower.Data.Entities
+@model OrderDTO
+@{
+    ViewData["Title"] = "Order Manifest";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Transaction Insight</h3>
+            <p class="serif text-4xl font-bold">Manifest #LX-ORD-@Model.Id</p>
+        </div>
+        <div class="flex gap-md">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Modify Order</a>
+            <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                Back to Orders
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        <div class="lg:col-span-2 space-y-lg">
+            <div class="bg-surface-container-lowest border border-outline-variant p-lg">
+                <h4 class="text-headline-sm uppercase tracking-widest mb-lg border-b border-outline-variant pb-md">Acquisition Items</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-[10px] uppercase text-secondary tracking-widest border-b border-outline-variant">
+                                <th class="py-4">Product Story</th>
+                                <th class="py-4 text-center">Quantity</th>
+                                <th class="py-4 text-right">Unit Value</th>
+                                <th class="py-4 text-right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-outline-variant">
+                            @if (Model.OrderDetails != null)
+                            {
+                                foreach (var detail in Model.OrderDetails)
+                                {
+                                    <tr class="table-row-hover transition-colors">
+                                        <td class="py-5">
+                                            <span class="text-body-md font-bold uppercase tracking-widest">@(detail.ProductName ?? "N/A")</span>
+                                        </td>
+                                        <td class="py-5 text-center text-body-md">@detail.Quantity</td>
+                                        <td class="py-5 text-right text-body-md">@detail.UnitPrice.ToString("N0") đ</td>
+                                        <td class="py-5 text-right font-bold">@((detail.Quantity * detail.UnitPrice).ToString("N0")) đ</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-lg">
+            <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Client Profile</h4>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Name</p>
+                    <p class="text-body-lg font-bold">@(Model.CustomerName ?? "Unknown Client")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Email Insight</p>
+                    <p class="text-body-md">@(Model.CustomerEmail ?? "N/A")</p>
+                </div>
+                <div class="space-y-xs pt-4 border-t border-outline-variant">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Status</p>
+                    @switch (Model.Status)
+                    {
+                        case OrderStatus.Pending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline bg-surface-container-low text-secondary">Processing</span> break;
+                        case OrderStatus.Shipping: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Shipped</span> break;
+                        case OrderStatus.Completed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Completed</span> break;
+                    }
+                </div>
+            </div>
+
+            <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Narrative Notes</h4>
+                <p class="text-body-md text-on-surface-variant italic leading-relaxed">
+                    @(string.IsNullOrEmpty(Model.Notes) ? "No acquisition notes provided." : Model.Notes)
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

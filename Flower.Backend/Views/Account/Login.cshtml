@@ -1,0 +1,78 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - FlowerShop Admin</title>
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#ab2c5d",
+                        "primary-container": "#ffd9e1",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "outline-variant": "#ddbfc5",
+                        "on-surface-variant": "#574146",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display"],
+                        body: ["Plus Jakarta Sans"],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .serif { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body class="bg-[#fbf9f8] flex items-center justify-center min-h-screen p-4">
+    <div class="w-full max-w-md space-y-8">
+        <div class="text-center space-y-4">
+            <div class="inline-flex w-16 h-16 rounded-full bg-[#ab2c5d] items-center justify-center">
+                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">local_florist</span>
+            </div>
+            <h1 class="serif text-4xl font-bold text-[#1b1c1c]">FlowerShop</h1>
+            <p class="text-xs text-[#574146] uppercase tracking-[0.3em] font-bold">Secure Administrative Access</p>
+        </div>
+
+        <form asp-action="Login" method="post" class="bg-white rounded-xl p-6 space-y-6 shadow-petal border border-[#ddbfc5]/30">
+            <div class="space-y-2">
+                <label class="text-xs uppercase tracking-widest text-[#574146] font-bold">Username</label>
+                <input type="text" name="username" class="w-full bg-[#f6f3f2] border border-[#ddbfc5]/30 rounded-lg focus:ring-1 focus:ring-[#ab2c5d] focus:border-[#ab2c5d] px-4 py-3.5 text-sm font-semibold tracking-wider uppercase placeholder:text-[#574146]/40" placeholder="Your username" required />
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-xs uppercase tracking-widest text-[#574146] font-bold">Password</label>
+                <input type="password" name="password" class="w-full bg-[#f6f3f2] border border-[#ddbfc5]/30 rounded-lg focus:ring-1 focus:ring-[#ab2c5d] focus:border-[#ab2c5d] px-4 py-3.5 text-sm tracking-wider placeholder:text-[#574146]/40" placeholder="Your password" required />
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs uppercase tracking-widest font-bold text-center">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <button type="submit" class="w-full bg-[#ab2c5d] text-white py-3.5 rounded-lg text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#8b0e45] transition-all active:scale-95 shadow-petal">
+                Authenticate
+            </button>
+        </form>
+
+        <div class="text-center">
+            <p class="text-xs text-[#574146]/60 uppercase tracking-widest">© 2026 FlowerShop. All Rights Reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

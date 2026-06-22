@@ -1,0 +1,68 @@
+@model PostDTO
+@{
+    ViewData["Title"] = "Editorial Insight";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-5xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Editorial Narrative</h3>
+            <p class="serif text-4xl font-bold">@Model.Title</p>
+        </div>
+        <div class="flex gap-md">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Refine Story</a>
+            <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-lg">arrow_back</span>
+                Back to Stories
+            </a>
+        </div>
+    </div>
+
+    <article class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+        <div class="aspect-video w-full overflow-hidden bg-surface-container-low border-b border-outline-variant">
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <img src="@Model.ImageUrl" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt="Cover Image">
+            }
+            else
+            {
+                <div class="w-full h-full flex items-center justify-center text-outline">
+                    <span class="material-symbols-outlined text-6xl">image</span>
+                </div>
+            }
+        </div>
+
+        <div class="p-xl space-y-xl">
+            <div class="flex justify-between items-center border-b border-outline-variant pb-lg">
+                <div class="flex items-center gap-md">
+                    <div class="size-10 bg-primary flex items-center justify-center text-on-primary font-bold text-xs uppercase tracking-widest">
+                        @(Model.CategoryName?.Substring(0, 1) ?? "E")
+                    </div>
+                    <div>
+                        <p class="text-label-sm font-bold uppercase tracking-widest">@(Model.CategoryName ?? "Editorial")</p>
+                        <p class="text-[10px] text-secondary uppercase tracking-[0.2em]">Published on @Model.CreatedDate.ToString("MMM dd, yyyy")</p>
+                    </div>
+                </div>
+                <div class="flex gap-md">
+                    <span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary">share</span>
+                    <span class="material-symbols-outlined text-secondary cursor-pointer hover:text-primary">bookmark</span>
+                </div>
+            </div>
+
+            <div class="prose prose-neutral max-w-none">
+                <div class="serif text-2xl italic leading-relaxed text-on-surface-variant first-letter:text-5xl first-letter:font-bold first-letter:mr-3 first-letter:float-left">
+                    @Html.Raw(Model.Content)
+                </div>
+            </div>
+
+            <div class="pt-xl border-t border-outline-variant flex justify-between items-center">
+                <p class="text-[10px] text-outline uppercase tracking-[0.4em] font-bold">End of Narrative</p>
+                <div class="flex -space-x-2">
+                    <div class="size-8 rounded-full border-2 border-white bg-neutral-300"></div>
+                    <div class="size-8 rounded-full border-2 border-white bg-neutral-400"></div>
+                </div>
+            </div>
+        </div>
+    </article>
+</div>

@@ -1,0 +1,60 @@
+@model UpdateOrderDTO
+@{
+    ViewData["Title"] = "Adjust Manifest";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-2xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Transaction Adjustment</h3>
+            <p class="serif text-3xl font-bold">Edit Order Record</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Back to Orders
+        </a>
+    </div>
+
+    <form asp-action="Edit" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Acquisition Timestamp</label>
+                <input asp-for="OrderDate" type="datetime-local" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Client Entity</label>
+                <select asp-for="CustomerId" asp-items="ViewBag.CustomerList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold"></select>
+            </div>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Manifest Status</label>
+            <select asp-for="Status" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold">
+                <option value="0">Processing</option>
+                <option value="1">Shipped</option>
+                <option value="2">Completed</option>
+            </select>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Ghi chú (Notes)</label>
+            <textarea asp-for="Notes" rows="4" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed"></textarea>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
+                Update Record
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
+                Discard
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

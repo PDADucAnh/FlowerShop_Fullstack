@@ -1,0 +1,71 @@
+@model UpdatePostDTO
+@{
+    ViewData["Title"] = "Refine Narrative";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Content Refinement</h3>
+            <p class="serif text-3xl font-bold">Edit Editorial Story</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Back to Stories
+        </a>
+    </div>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Story Title</label>
+            <input asp-for="Title" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" required />
+            <span asp-validation-for="Title" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Editorial Category</label>
+                <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest"></select>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Update Visual Asset</label>
+                @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                {
+                    <div class="mb-2">
+                        <img src="@Model.ImageUrl" class="h-20 w-auto border border-outline-variant object-cover grayscale" />
+                    </div>
+                }
+                <input type="file" name="uploadImage" class="w-full text-label-sm uppercase tracking-widest file:mr-lg file:py-2 file:px-lg file:border-0 file:bg-primary file:text-on-primary hover:file:bg-neutral-800" />
+                <p class="text-[10px] text-outline uppercase tracking-widest italic">Leave empty to preserve existing visual asset.</p>
+            </div>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Content</label>
+            <textarea asp-for="Content" rows="12" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg leading-relaxed italic serif placeholder:text-outline-variant"></textarea>
+            <span asp-validation-for="Content" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Summary <span class="text-outline italic normal-case font-normal text-xs">(auto-generated from content if left empty)</span></label>
+            <textarea asp-for="Summary" rows="3" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md leading-relaxed placeholder:text-outline-variant" placeholder="Brief excerpt for preview cards..."></textarea>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
+                Save Refinements
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
+                Discard Changes
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

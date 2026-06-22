@@ -1,0 +1,60 @@
+@model CreateUserDTO
+@{
+    ViewData["Title"] = "Commission Administrator";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-2xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Security Commissioning</h3>
+            <p class="serif text-3xl font-bold">New Administrator</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Back to Personnel
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Full Identity Name</label>
+            <input asp-for="FullName" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg font-bold" placeholder="E.g. Julian Vance" required />
+            <span asp-validation-for="FullName" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Access Identity (Username)</label>
+                <input asp-for="Username" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" required />
+                <span asp-validation-for="Username" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Security Token (Password)</label>
+                <input asp-for="Password" type="password" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3" required />
+                <span asp-validation-for="Password" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Operational Authority (Role)</label>
+            <select asp-for="Role" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold">
+                <option value="Admin">Administrator</option>
+                <option value="Editor">Editor</option>
+            </select>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
+                Commission User
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
