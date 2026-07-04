@@ -19,10 +19,14 @@ namespace Flower.Backend.Controllers
             _customerService = customerService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
         {
-            var orders = await _orderService.GetAll();
-            return View(orders);
+            var paged = await _orderService.GetPaged(page, pageSize);
+            ViewData["TotalPages"] = paged.TotalPages;
+            ViewData["CurrentPage"] = paged.Page;
+            ViewData["TotalCount"] = paged.TotalCount;
+            ViewData["PageSize"] = paged.PageSize;
+            return View(paged.Items);
         }
 
         [HttpGet]
@@ -43,26 +47,18 @@ namespace Flower.Backend.Controllers
                 return View(model);
             }
 
-            // Admin creates order shell — items added later via OrderDetails admin
             var (success, message, orderId) = await _orderService.CreateOrder(
-                model.CustomerId, model.Notes, new List<OrderItemInput>());
+                model.CustomerId, model.Notes, new List<OrderItemInput>(),
+                model.OrderDate, model.Status);
 
-            if (success && model.Status != OrderStatus.Pending)
-            {
-                await _orderService.Update(orderId, new UpdateOrderDTO
-                {
-                    Id = orderId,
-                    Status = model.Status,
-                    Notes = model.Notes
-                });
-            }
-
+            TempData["Success"] = "Đơn hàng đã được tạo thành công.";
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Delete(int id)
         {
             await _orderService.Delete(id);
+            TempData["Success"] = "Đơn hàng đã được xóa.";
             return RedirectToAction("Index");
         }
 
@@ -81,7 +77,11 @@ namespace Flower.Backend.Controllers
                 CustomerId = order.CustomerId,
                 OrderDate = order.OrderDate,
                 Status = order.Status,
-                Notes = order.Notes
+                Notes = order.Notes,
+                DeliveryDate = order.DeliveryDate,
+                DeliveryTimeSlot = order.DeliveryTimeSlot,
+                DeliveryDistrict = order.DeliveryDistrict,
+                DeliveryAddress = order.DeliveryAddress
             };
 
             return View(model);
@@ -98,7 +98,23 @@ namespace Flower.Backend.Controllers
             }
 
             await _orderService.Update(model.Id, model);
+            TempData["Success"] = "Đơn hàng đã được cập nhật.";
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ConfirmCOD(int id)
+        {
+            var (success, message) = await _orderService.ProcessCODOrder(id);
+            if (success)
+            {
+                TempData["Success"] = "Đơn hàng đã được xác nhận thành công.";
+            }
+            else
+            {
+                TempData["Error"] = message;
+            }
+            return RedirectToAction("Details", new { id });
         }
 
         public async Task<IActionResult> Details(int id)

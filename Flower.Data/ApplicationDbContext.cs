@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Flower.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+
 namespace Flower.Data
 {
     public class ApplicationDbContext : DbContext, IApplicationDbContext
@@ -12,7 +8,6 @@ namespace Flower.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
-        // Khai báo các bảng dữ liệu
         public DbSet<Category> Categories { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
@@ -21,6 +16,11 @@ namespace Flower.Data
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderDetail> OrderDetails { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Advertisement> Advertisements { get; set; }
+        public DbSet<DeliverySlot> DeliverySlots { get; set; }
+        public DbSet<Payment> Payments { get; set; }
+        public DbSet<PhoneBlacklist> PhoneBlacklists { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -29,6 +29,11 @@ namespace Flower.Data
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.Sku)
+                .IsUnique()
+                .HasFilter("[Sku] IS NOT NULL");
         }
     }
 }

@@ -15,20 +15,20 @@ const ProductList = ({ products, isLoading, error }: ProductListProps) => {
 
   if (error) {
     return (
-        <div className="p-lg bg-error-container text-error font-label-sm text-label-sm uppercase tracking-widest font-bold text-center border border-error">
-            {error}
-        </div>
+      <div className="p-lg bg-error-container text-error text-label-sm uppercase tracking-widest font-bold text-center border border-error">
+        {error}
+      </div>
     );
   }
 
   if (!products || products.length === 0) {
-    return <LoadingOrEmpty isLoading={false} message="The curator has not yet added items to this division." />;
+    return <LoadingOrEmpty isLoading={false} message="Không tìm thấy sản phẩm trong danh mục này." />;
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
       {products.map((product) => (
-          <ProductCard key={product.id} item={product} />
+        <ProductCard key={product.id} item={product} />
       ))}
     </div>
   );

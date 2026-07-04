@@ -1,29 +1,31 @@
 @model IEnumerable<ProductDTO>
 @{
-    ViewData["Title"] = "Products";
+    ViewData["Title"] = "Kho hàng";
     Layout = "_LayoutAdmin";
 }
 
-<div class="space-y-lg">
-    <div class="flex justify-between items-center">
+<div class="space-y-stack-lg">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Inventory Management</h3>
-            <p class="serif text-3xl font-bold">Curated Collection</p>
+            <h2 class="font-display-lg text-display-lg text-on-background mb-2">Danh sách sản phẩm</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Quản lý danh mục sản phẩm, số lượng tồn kho và giá cả.</p>
         </div>
-        <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
-            <span class="material-symbols-outlined text-lg">add</span>
-            Add New Product
-        </a>
+        <div>
+            <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Thêm sản phẩm
+            </a>
+        </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-lg">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-gutter">
         @foreach (var product in Model)
         {
-            <div class="bg-surface-container-lowest border border-outline-variant overflow-hidden group hover:border-primary transition-all flex flex-col">
-                <div class="aspect-[3/4] overflow-hidden bg-surface-container-low">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden petal-shadow-1 group hover:border-primary/40 transition-all flex flex-col">
+                <div class="aspect-[4/3] overflow-hidden bg-surface-variant">
                     @if (!string.IsNullOrEmpty(product.ImageUrl))
                     {
-                        <img src="@product.ImageUrl" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
+                        <img src="@product.ImageUrl" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                     }
                     else
                     {
@@ -32,22 +34,24 @@
                         </div>
                     }
                 </div>
-                <div class="p-lg flex-1 flex flex-col space-y-md">
-                    <div class="space-y-1">
-                        <p class="text-[10px] text-secondary uppercase tracking-[0.2em]">@(product.CategoryProductName ?? "Uncategorized")</p>
-                        <h4 class="serif text-lg font-bold">@product.Name</h4>
+                <div class="p-4 flex flex-col flex-1 gap-3">
+                    <div>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant mb-1">@(product.CategoryProductName ?? "Chưa phân loại")</p>
+                        <h4 class="font-headline-sm text-headline-sm text-on-surface">@product.Name</h4>
                     </div>
-                    <div class="flex justify-between items-end flex-1">
-                        <p class="text-body-lg font-bold">@product.Price.ToString("N0") đ</p>
-                        <p class="text-label-sm text-secondary">Stock: @product.StockQuantity</p>
+                    <div class="flex justify-between items-center mt-auto">
+                        <p class="font-headline-sm text-headline-sm text-primary font-bold">@product.Price.ToString("C2")</p>
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Tồn kho: @product.StockQuantity</span>
                     </div>
-                    <div class="flex gap-md pt-4 border-t border-outline-variant">
-                        <a asp-action="Details" asp-route-id="@product.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-1">View</a>
-                        <a asp-action="Edit" asp-route-id="@product.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@product.Id" class="text-label-sm uppercase tracking-widest font-bold text-error ml-auto" onclick="return confirm('Delete this product?')">Delete</a>
+                    <div class="flex gap-2 pt-3 border-t border-outline-variant/10">
+                        <a asp-action="Details" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Xem</a>
+                        <a asp-action="Edit" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa sản phẩm này?')">Xóa</a>
                     </div>
                 </div>
             </div>
         }
     </div>
+
+    <partial name="_Pagination" />
 </div>

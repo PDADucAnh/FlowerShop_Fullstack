@@ -6,39 +6,40 @@ const About: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-surface text-on-surface font-body-md antialiased min-h-screen">
-      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
+    <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <main className="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-16 md:py-20">
         <div className="max-w-3xl mx-auto text-center mb-20 md:mb-28">
-          <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary block mb-6">Contemporary Romance</span>
-          <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface uppercase tracking-tight leading-none mb-8">
-            FlowerShop
+          <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary block mb-6">Thương hiệu hoa tươi</span>
+          <h1 className="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-primary uppercase tracking-tight leading-none mb-8">
+            PDA FLOWER<span className="text-outline font-body-md text-body-md tracking-[0.05em] font-normal lowercase">.Flower</span>
           </h1>
           <div className="w-8 h-0.5 bg-primary mx-auto mb-8"></div>
           <p className="font-body-lg text-body-lg text-secondary leading-relaxed max-w-2xl mx-auto">
-            Crafting a new standard in contemporary floral design through meticulous attention to detail, 
-            uncompromising quality, and a deep reverence for the art of botanical arrangement.
+            Nâng tầm nghệ thuật cắm hoa qua từng chi tiết tỉ mỉ, chất lượng không khoan nhượng 
+            và tình yêu sâu sắc dành cho vẻ đẹp của thiên nhiên.
           </p>
         </div>
 
         <div className="max-w-4xl mx-auto space-y-20 md:space-y-28">
           <section className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12">
             <div className="md:col-span-2">
-              <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-outline">Our Story</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-outline">Câu chuyện</span>
             </div>
             <div className="md:col-span-3 space-y-6">
-              <p className="font-headline-md text-headline-md italic leading-relaxed text-on-surface">
-                Every stem has a story. Our arrangements are more than just flowers; they are ephemeral sculptures designed to capture fleeting moments of beauty and emotion.
+              <p className="serif text-2xl md:text-3xl italic leading-relaxed text-primary font-display-xl">
+                Hoa không chỉ là món quà. Đó là ngôn ngữ của trái tim, một lời nhắn gửi yêu thương, 
+                một niềm vui thầm lặng sưởi ấm tâm hồn người nhận.
               </p>
               <div className="space-y-4 text-secondary leading-relaxed">
                 <p>
-                  Founded with a singular vision to create arrangements that transcend seasons and trends, 
-                  FlowerShop represents a return to the essential. Every collection is born from 
-                  a dialogue between heritage craftsmanship and contemporary sensibility.
+                  Được thành lập với một tầm nhìn duy nhất — tạo ra những tác phẩm hoa vượt thời gian — 
+                  PDA FLOWER mang đến vẻ đẹp tinh túy nhất. Mỗi bó hoa là sự kết hợp giữa 
+                  nghệ thuật cắm hoa truyền thống và cảm quan hiện đại.
                 </p>
                 <p>
-                  We believe in the power of reduction: stripping away the superfluous until only 
-                  the purest expression of botanical design remains. Our studio operates at the intersection 
-                  of precision horticulture and artistic freedom, where every stem tells a story.
+                  Chúng tôi tin vào sức mạnh của sự giản đơn: loại bỏ những thứ thừa thãi để chỉ còn lại 
+                  vẻ đẹp thuần khiết nhất. Mỗi tác phẩm hoa của chúng tôi đều là câu chuyện 
+                  về sự tận tâm và tình yêu thiên nhiên.
                 </p>
               </div>
             </div>
@@ -46,17 +47,17 @@ const About: React.FC = () => {
 
           <section className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12">
             <div className="md:col-span-2">
-              <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-outline">Our Values</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-outline">Giá trị</span>
             </div>
             <div className="md:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-6">
               {[
-                { title: 'Craftsmanship', desc: 'Each arrangement is a testament to the hands that made it. We honor the art of slow floristry through meticulous selection and premium botanical curation.' },
-                { title: 'Curation', desc: 'Every collection is thoughtfully edited. We believe in fewer, better things — pieces that earn their place in your space through enduring relevance.' },
-                { title: 'Authenticity', desc: 'We remain true to our vision. No fleeting trends, no compromise on quality. Our identity is defined by what we choose not to do as much as what we create.' },
+                { title: 'Tinh xảo', desc: 'Mỗi sản phẩm là minh chứng cho bàn tay tạo ra nó. Chúng tôi tôn vinh nghệ thuật thời trang chậm thông qua chế tác tỉ mỉ và lựa chọn chất liệu cao cấp.' },
+                { title: 'Tuyển chọn', desc: 'Mỗi bộ sưu tập đều được biên tập kỹ lưỡng. Chúng tôi tin vào ít hơn nhưng tốt hơn — những sản phẩm xứng đáng có vị trí trong tủ đồ của bạn.' },
+                { title: 'Chân thực', desc: 'Chúng tôi luôn trung thành với tầm nhìn của mình. Không chạy theo xu hướng, không thỏa hiệp về chất lượng.' },
               ].map((v) => (
                 <div key={v.title} className="space-y-4">
                   <div className="w-8 h-px bg-primary"></div>
-                  <h3 className="font-headline-sm text-headline-sm uppercase tracking-widest text-on-surface">{v.title}</h3>
+                  <h3 className="font-headline-sm text-headline-sm uppercase tracking-widest text-primary">{v.title}</h3>
                   <p className="text-secondary text-sm leading-relaxed">{v.desc}</p>
                 </div>
               ))}
@@ -65,15 +66,15 @@ const About: React.FC = () => {
 
           <section className="grid grid-cols-1 md:grid-cols-5 gap-8 md:gap-12">
             <div className="md:col-span-2">
-              <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-outline">The Studio</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-outline">Cửa hàng</span>
             </div>
             <div className="md:col-span-3 border-t border-primary pt-8">
               <p className="text-secondary leading-relaxed">
-                Based in the creative heart of the city, our studio is both workshop and sanctuary — 
-                a space where ideas are sketched, blooms are studied, and arrangements take form through 
-                patient collaboration between designer and artisan. Every piece that bears the FlowerShop 
-                label passes through our studio, ensuring that what reaches you carries the integrity 
-                of its origin.
+                Tọa lạc tại trung tâm thành phố, cửa hàng của chúng tôi là không gian nơi 
+                những ý tưởng được ấp ủ, những loài hoa được tuyển chọn kỹ lưỡng và mỗi bó hoa 
+                đều được tạo nên từ sự tỉ mỉ của người nghệ nhân. Mỗi sản phẩm mang thương hiệu 
+                PDA FLOWER đều được chăm chút bởi bàn tay tài hoa, đảm bảo vẻ đẹp và chất lượng 
+                tốt nhất đến tay bạn.
               </p>
             </div>
           </section>

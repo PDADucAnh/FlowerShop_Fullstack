@@ -1,34 +1,34 @@
 @model CategoryDTO
 @{
-    ViewData["Title"] = "Pillar Insights";
+    ViewData["Title"] = "Chi tiết danh mục";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Taxonomy Insight</h3>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Chi tiết danh mục</h3>
             <p class="serif text-4xl font-bold">@Model.Name</p>
         </div>
         <div class="flex gap-md">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Edit Pillar</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Sửa danh mục</a>
             <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
-                Back to Pillars
+                Quay lại
             </a>
         </div>
     </div>
 
     <div class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
         <div class="space-y-md">
-            <p class="text-[10px] text-secondary uppercase tracking-[0.4em] font-bold">Narrative Scope</p>
+            <p class="text-[10px] text-secondary uppercase tracking-[0.4em] font-bold">Phạm vi nội dung</p>
             <p class="text-2xl serif italic leading-relaxed text-on-surface-variant">
-                @(string.IsNullOrEmpty(Model.Description) ? "No narrative scope defined for this pillar." : Model.Description)
+                @(string.IsNullOrEmpty(Model.Description) ? "Chưa có mô tả cho danh mục này." : Model.Description)
             </p>
         </div>
 
         <div class="pt-xl space-y-lg border-t border-outline-variant">
-            <h4 class="text-headline-sm uppercase tracking-widest">Associated Editorial Stories</h4>
+                <h4 class="text-headline-sm uppercase tracking-widest">Bài viết liên quan</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-lg">
                 @if (Model.Posts != null && Model.Posts.Any())
                 {
@@ -36,14 +36,14 @@
                     {
                         <div class="bg-surface-container-low border border-outline-variant p-lg space-y-md group hover:border-primary transition-all">
                             <h5 class="serif text-xl font-bold">@post.Title</h5>
-                            <p class="text-label-sm text-secondary">@post.CreatedDate.ToString("MMM dd, yyyy")</p>
-                            <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id" class="text-[10px] uppercase tracking-widest font-bold border-b border-primary pb-1 inline-block">Read Insight</a>
+                            <p class="text-label-sm text-secondary">@post.CreatedDate.ToString("dd/MM/yyyy")</p>
+                            <a asp-controller="Post" asp-action="Details" asp-route-id="@post.Id" class="text-[10px] uppercase tracking-widest font-bold border-b border-primary pb-1 inline-block">Xem bài viết</a>
                         </div>
                     }
                 }
                 else
                 {
-                    <p class="text-label-sm text-outline uppercase tracking-widest italic">No editorial stories associated with this pillar.</p>
+                    <p class="text-label-sm text-outline uppercase tracking-widest italic">Chưa có bài viết nào trong danh mục này.</p>
                 }
             </div>
         </div>

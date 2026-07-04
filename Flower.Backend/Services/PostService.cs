@@ -28,6 +28,27 @@ namespace Flower.Backend.Services
             return list.Select(p => p.ToDTO());
         }
 
+        public async Task<PagedResult<PostDTO>> GetPaged(int page, int pageSize)
+        {
+            var query = _context.Posts
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.Id);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<PostDTO>
+            {
+                Items = items.Select(p => p.ToDTO()).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<PostDTO?> GetById(int id)
         {
             var post = await _context.Posts
@@ -48,14 +69,19 @@ namespace Flower.Backend.Services
 
         public async Task<PostDTO> Create(CreatePostDTO dto)
         {
+            if (string.IsNullOrEmpty(dto.Slug))
+            {
+                dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Title);
+            }
             var post = dto.ToEntity();
             post.CreatedDate = DateTime.Now;
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
-            
-            // Re-fetch category for ToDTO to work correctly
-            await _context.Entry(post).Reference(p => p.Category).LoadAsync();
-            
+
+            await _context.Entry(post)
+                .Reference(p => p.Category)
+                .LoadAsync();
+
             return post.ToDTO();
         }
 
@@ -64,7 +90,8 @@ namespace Flower.Backend.Services
             if (id != dto.Id)
                 return false;
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
                 return false;
 

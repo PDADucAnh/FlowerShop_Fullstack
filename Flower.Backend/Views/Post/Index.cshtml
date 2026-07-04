@@ -1,18 +1,18 @@
 @model IEnumerable<PostDTO>
 @{
-    ViewData["Title"] = "Blog Posts";
+    ViewData["Title"] = "Bài viết";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Content Management</h3>
-            <p class="serif text-3xl font-bold">Editorial Stories</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Quản lý nội dung</h3>
+            <p class="serif text-3xl font-bold">Bài viết</p>
         </div>
         <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
             <span class="material-symbols-outlined text-lg">add</span>
-            Create New Post
+            Thêm bài viết
         </a>
     </div>
 
@@ -21,22 +21,24 @@
         {
             <div class="bg-surface-container-lowest border border-outline-variant overflow-hidden group hover:border-primary transition-all flex flex-col">
                 <div class="aspect-video overflow-hidden">
-                    <img src="@item.ImageUrl" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" alt="Thumbnail">
+                    <img src="@item.ImageUrl" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-700" alt="Ảnh">
                 </div>
                 <div class="p-lg flex-1 flex flex-col space-y-md">
                     <div class="flex justify-between items-start">
                         <span class="text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 border border-outline text-secondary">@item.CategoryName</span>
-                        <span class="text-label-sm text-secondary">@item.CreatedDate.ToString("MMM dd, yyyy")</span>
+                        <span class="text-label-sm text-secondary">@item.CreatedDate.ToString("dd/MM/yyyy")</span>
                     </div>
                     <h4 class="serif text-xl font-bold leading-tight">@item.Title</h4>
                     <p class="text-body-sm text-secondary text-outline italic text-ellipsis overflow-hidden whitespace-nowrap">@(item.Summary ?? "")</p>
                     <div class="flex gap-md pt-4 border-t border-outline-variant">
-                        <a asp-action="Details" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-1">Details</a>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Edit</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error ml-auto" onclick="return confirm('Delete this post?')">Delete</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-1">Chi tiết</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error ml-auto" onclick="return confirm('Xóa bài viết này?')">Xóa</a>
                     </div>
                 </div>
             </div>
         }
     </div>
+
+    <partial name="_Pagination" />
 </div>

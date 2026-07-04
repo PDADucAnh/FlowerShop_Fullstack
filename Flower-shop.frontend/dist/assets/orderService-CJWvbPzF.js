@@ -1,0 +1,1 @@
+import{t as e}from"./axiosClient-D5oNpba9.js";var t={submitOrder:async t=>{try{return await e.post(`/Orders`,t)}catch(e){throw console.error(`Error submitting order:`,e),e}},getMyOrders:async()=>await e.get(`/Orders`),getOrderById:async t=>await e.get(`/Orders/${t}`),cancelOrder:async t=>{await e.put(`/Orders/${t}/cancel`)}};export{t};

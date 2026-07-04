@@ -1,18 +1,18 @@
 @model IEnumerable<CustomerDTO>
 @{
-    ViewData["Title"] = "Customers";
+    ViewData["Title"] = "Khách hàng";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Relationship Management</h3>
-            <p class="serif text-3xl font-bold">Distinguished Clientele</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Quản lý khách hàng</h3>
+            <p class="serif text-3xl font-bold">Khách hàng</p>
         </div>
         <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
             <span class="material-symbols-outlined text-lg">person_add</span>
-            Register Client
+            Thêm khách hàng
         </a>
     </div>
 
@@ -21,10 +21,10 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-outline-variant text-label-sm uppercase text-secondary tracking-widest bg-surface-container-low">
-                        <th class="px-lg py-4">Client</th>
-                        <th class="px-lg py-4">Contact Insight</th>
-                        <th class="px-lg py-4">Location</th>
-                        <th class="px-lg py-4 text-right">Actions</th>
+                        <th class="px-lg py-4">Khách hàng</th>
+                        <th class="px-lg py-4">Liên hệ</th>
+                        <th class="px-lg py-4">Địa chỉ</th>
+                        <th class="px-lg py-4 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant">
@@ -47,8 +47,8 @@
                             </td>
                             <td class="px-lg py-5 text-body-md text-on-surface-variant">@(c.Address ?? "N/A")</td>
                             <td class="px-lg py-5 text-right space-x-4">
-                                <a asp-action="Edit" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Edit</a>
-                                <a asp-action="Delete" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Delete customer?')">Delete</a>
+                                <a asp-action="Edit" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa khách hàng này?')">Xóa</a>
                             </td>
                         </tr>
                     }
@@ -56,4 +56,6 @@
             </table>
         </div>
     </div>
+
+    <partial name="_Pagination" />
 </div>

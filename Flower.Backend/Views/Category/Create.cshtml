@@ -1,40 +1,45 @@
 @model CreateCategoryDTO
 @{
-    ViewData["Title"] = "New Editorial Pillar";
+    ViewData["Title"] = "Thêm danh mục blog";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg max-w-2xl mx-auto">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Taxonomy Definition</h3>
-            <p class="serif text-3xl font-bold">New Blog Category</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Tạo danh mục</h3>
+            <p class="serif text-3xl font-bold">Thêm danh mục blog</p>
         </div>
         <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Pillars
+            Quay lại
         </a>
     </div>
 
     <form asp-action="Create" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Pillar Nomenclature</label>
-            <input asp-for="Name" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="E.g. Haute Couture..." required />
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tên danh mục</label>
+            <input asp-for="Name" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="Ví dụ: Hoa sinh nhật..." required />
             <span asp-validation-for="Name" class="text-error text-xs uppercase tracking-widest"></span>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Intent</label>
-            <textarea asp-for="Description" rows="4" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant" placeholder="Define the narrative scope of this pillar..."></textarea>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Slug</label>
+            <input asp-for="Slug" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3" placeholder="hoa-sinh-nhat" />
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mô tả</label>
+            <textarea asp-for="Description" rows="4" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant" placeholder="Mô tả phạm vi nội dung..."></textarea>
             <span asp-validation-for="Description" class="text-error text-xs uppercase tracking-widest"></span>
         </div>
 
         <div class="pt-lg border-t border-outline-variant flex gap-md">
             <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
-                Establish Pillar
+                Tạo danh mục
             </button>
             <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
-                Cancel
+                Hủy
             </a>
         </div>
     </form>

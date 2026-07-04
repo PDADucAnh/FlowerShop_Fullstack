@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts } from '../hooks/useProducts';
 import { getImageUrl } from '../utils/apiUtils';
+import { formatCurrency } from '../utils/currency';
 
 const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   const [query, setQuery] = useState('');
@@ -39,11 +40,11 @@ const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     >
       <div className="max-w-[1000px] mx-auto w-full px-6 pt-16 md:pt-24">
         <div className="flex items-center justify-between mb-8 md:mb-12">
-          <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary">Search</span>
+          <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary">Tìm kiếm</span>
           <button
             onClick={onClose}
             className="bg-transparent border-0 text-primary hover:text-secondary transition-colors btn-ghost-luxury"
-            aria-label="Close search"
+            aria-label="Đóng tìm kiếm"
           >
             <span className="material-symbols-outlined text-2xl">close</span>
           </button>
@@ -55,14 +56,14 @@ const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="What are you looking for?"
+            placeholder="Bạn đang tìm gì?"
             className="flex-1 bg-transparent border-none text-display-xl-mobile md:text-headline-lg serif text-primary placeholder:text-outline focus:ring-0 p-0 font-display-xl outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               className="bg-transparent border-0 text-outline hover:text-primary transition-colors"
-              aria-label="Clear search"
+              aria-label="Xóa tìm kiếm"
             >
               <span className="material-symbols-outlined">close</span>
             </button>
@@ -74,7 +75,7 @@ const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="flex-1 overflow-y-auto mt-6">
           <div className="max-w-[1000px] mx-auto w-full px-6">
             <p className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-secondary mb-6">
-              {results.length} {results.length === 1 ? 'Result' : 'Results'}
+              {results.length} kết quả
             </p>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 pb-16">
               {results.map((product: any) => (
@@ -89,11 +90,12 @@ const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                       src={getImageUrl(product.imageUrl)}
                       alt={product.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                      loading="lazy"
                     />
                   </div>
                   <h4 className="font-body-md text-body-md text-primary mb-0.5 truncate">{product.name}</h4>
                   <p className="font-label-sm text-label-sm text-secondary">
-                    {(product.discountPrice || product.price).toLocaleString()} ₫
+                    {formatCurrency(product.discountPrice || product.price)}
                   </p>
                 </Link>
               ))}
@@ -106,8 +108,8 @@ const SearchOverlay: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <span className="material-symbols-outlined text-5xl text-outline mb-4 block">search_off</span>
-            <p className="font-body-md text-body-md text-secondary">No results for &ldquo;{query}&rdquo;</p>
-            <p className="font-label-sm text-label-sm text-outline uppercase tracking-widest mt-2">Try a different search term</p>
+            <p className="font-body-md text-body-md text-secondary">Không có kết quả cho &ldquo;{query}&rdquo;</p>
+            <p className="font-label-sm text-label-sm text-outline uppercase tracking-widest mt-2">Thử từ khóa khác</p>
           </div>
         </div>
       )}

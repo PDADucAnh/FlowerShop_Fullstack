@@ -1,16 +1,24 @@
 import React from 'react';
 import HeroBanner from './HeroBanner';
-import FeaturedCollections from './FeaturedCollections';
-import FloristNote from './FloristNote';
+import BestSellingProducts from './BestSellingProducts';
+import ProductGrid from './ProductGrid';
+import LatestBlog from './LatestBlog';
+import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 
-const Home: React.FC = () => {
-  return (
-    <div className="flex flex-col">
-      <HeroBanner />
-      <FeaturedCollections />
-      <FloristNote />
-    </div>
-  );
-};
+function Home() {
+    useRealtimeUpdates();
+
+    return (
+        <div className="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-20">
+            <main className="flex-grow flex flex-col">
+                <HeroBanner />
+                <BestSellingProducts />
+                <ProductGrid categoryId={null} />
+                <LatestBlog />
+            </main>
+        </div>
+    );
+}
 
 export default Home;
+

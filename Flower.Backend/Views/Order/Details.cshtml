@@ -1,21 +1,22 @@
 @using Flower.Data.Entities
 @model OrderDTO
 @{
-    ViewData["Title"] = "Order Manifest";
+    ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Transaction Insight</h3>
-            <p class="serif text-4xl font-bold">Manifest #LX-ORD-@Model.Id</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Chi tiết giao dịch</h3>
+            <p class="serif text-4xl font-bold">Đơn hàng #ORD-@Model.Id</p>
+            <p class="text-sm text-on-surface-variant mt-1">Ngày đặt: @Model.OrderDate.ToString("dd/MM/yyyy HH:mm")</p>
         </div>
         <div class="flex gap-md">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Modify Order</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Sửa đơn hàng</a>
             <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
-                Back to Orders
+                Quay lại
             </a>
         </div>
     </div>
@@ -23,15 +24,23 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
         <div class="lg:col-span-2 space-y-lg">
             <div class="bg-surface-container-lowest border border-outline-variant p-lg">
-                <h4 class="text-headline-sm uppercase tracking-widest mb-lg border-b border-outline-variant pb-md">Acquisition Items</h4>
+                <div class="flex items-center justify-between mb-lg border-b border-outline-variant pb-md">
+                    <h4 class="text-headline-sm uppercase tracking-widest">Sản phẩm trong đơn</h4>
+                    <a asp-controller="OrderDetail" asp-action="Create" asp-route-orderId="@Model.Id" class="flex items-center gap-1 text-label-sm uppercase tracking-widest text-primary font-bold hover:underline">
+                        <span class="material-symbols-outlined text-lg">add</span>
+                        Thêm sản phẩm
+                    </a>
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead>
                             <tr class="text-[10px] uppercase text-secondary tracking-widest border-b border-outline-variant">
-                                <th class="py-4">Product Story</th>
-                                <th class="py-4 text-center">Quantity</th>
-                                <th class="py-4 text-right">Unit Value</th>
-                                <th class="py-4 text-right">Total</th>
+                                <th class="py-4" style="width:60px;">Ảnh</th>
+                                <th class="py-4">Sản phẩm</th>
+                                <th class="py-4 text-center">Số lượng</th>
+                                <th class="py-4 text-right">Đơn giá</th>
+                                <th class="py-4 text-right">Thành tiền</th>
+                                <th class="py-4 text-right">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-outline-variant">
@@ -41,13 +50,33 @@
                                 {
                                     <tr class="table-row-hover transition-colors">
                                         <td class="py-5">
+                                            @if (!string.IsNullOrEmpty(detail.ProductImageUrl))
+                                            {
+                                                <img src="@detail.ProductImageUrl" class="w-12 h-12 object-cover rounded-lg border border-outline-variant/20" />
+                                            }
+                                            else
+                                            {
+                                                <div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+                                                    <span class="material-symbols-outlined text-lg text-outline">inventory_2</span>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="py-5">
                                             <span class="text-body-md font-bold uppercase tracking-widest">@(detail.ProductName ?? "N/A")</span>
                                         </td>
                                         <td class="py-5 text-center text-body-md">@detail.Quantity</td>
-                                        <td class="py-5 text-right text-body-md">@detail.UnitPrice.ToString("N0") đ</td>
-                                        <td class="py-5 text-right font-bold">@((detail.Quantity * detail.UnitPrice).ToString("N0")) đ</td>
+                                        <td class="py-5 text-right text-body-md">@detail.UnitPrice.ToString("N0")₫</td>
+                                        <td class="py-5 text-right font-bold">@((detail.Quantity * detail.UnitPrice).ToString("N0"))₫</td>
+                                        <td class="py-5 text-right">
+                                            <a asp-controller="OrderDetail" asp-action="Edit" asp-route-id="@detail.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary no-underline">Sửa</a>
+                                        </td>
                                     </tr>
                                 }
+                                <tr class="border-t-2 border-outline-variant bg-surface-container-low/30">
+                                    <td colspan="4" class="py-5 text-right font-bold uppercase tracking-widest text-body-md">Tổng cộng</td>
+                                    <td class="py-5 text-right font-bold text-lg text-primary">@(Model.OrderDetails.Sum(d => d.Quantity * d.UnitPrice).ToString("N0"))₫</td>
+                                    <td></td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -57,30 +86,129 @@
 
         <div class="space-y-lg">
             <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
-                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Client Profile</h4>
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Thông tin khách hàng</h4>
                 <div class="space-y-xs">
-                    <p class="text-label-sm text-secondary uppercase tracking-widest">Name</p>
-                    <p class="text-body-lg font-bold">@(Model.CustomerName ?? "Unknown Client")</p>
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Tên</p>
+                    <p class="text-body-lg font-bold">@(Model.CustomerName ?? "Không xác định")</p>
                 </div>
                 <div class="space-y-xs">
-                    <p class="text-label-sm text-secondary uppercase tracking-widest">Email Insight</p>
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Email</p>
                     <p class="text-body-md">@(Model.CustomerEmail ?? "N/A")</p>
                 </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">SĐT</p>
+                    <p class="text-body-md">@(Model.CustomerPhone ?? "N/A")</p>
+                </div>
                 <div class="space-y-xs pt-4 border-t border-outline-variant">
-                    <p class="text-label-sm text-secondary uppercase tracking-widest">Status</p>
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Trạng thái</p>
                     @switch (Model.Status)
                     {
-                        case OrderStatus.Pending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline bg-surface-container-low text-secondary">Processing</span> break;
-                        case OrderStatus.Shipping: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Shipped</span> break;
-                        case OrderStatus.Completed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Completed</span> break;
+                        case OrderStatus.Pending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline bg-surface-container-low text-secondary">Chờ xử lý</span> break;
+                        case OrderStatus.PendingVerification: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-warning bg-warning/10 text-warning">Chờ xác minh</span> break;
+                        case OrderStatus.Confirmed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-info bg-info/10 text-info">Đã xác nhận</span> break;
+                        case OrderStatus.Preparing: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-secondary text-secondary">Đang cắm hoa</span> break;
+                        case OrderStatus.Shipping: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Đang giao</span> break;
+                        case OrderStatus.Completed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Đã giao</span> break;
+                        case OrderStatus.Cancelled: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Đã hủy</span> break;
                     }
+                </div>
+                @if (Model.Status == OrderStatus.PendingVerification)
+                {
+                    <div class="pt-4 border-t border-outline-variant">
+                        <form asp-action="ConfirmCOD" asp-route-id="@Model.Id" method="post">
+                            <button type="submit" class="w-full bg-primary text-on-primary text-center py-2 text-[11px] uppercase tracking-widest font-bold hover:bg-neutral-800 transition-all">
+                                Đã gọi điện - Xác nhận đơn
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+
+            <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Giao hàng</h4>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Ngày nhận</p>
+                    <p class="text-body-md">@(Model.DeliveryDate?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Khung giờ</p>
+                    <p class="text-body-md">@(Model.DeliveryTimeSlot ?? "Chưa cập nhật")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Quận/Huyện</p>
+                    <p class="text-body-md">@(Model.DeliveryDistrict ?? "Chưa cập nhật")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Địa chỉ</p>
+                    <p class="text-body-md">@(Model.DeliveryAddress ?? "Chưa cập nhật")</p>
                 </div>
             </div>
 
             <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
-                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Narrative Notes</h4>
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Thanh toán</h4>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Phương thức</p>
+                    <p class="text-body-md">@(Model.PaymentMethod == PaymentMethod.COD ? "COD (tiền mặt)" : "Chuyển khoản / Online")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Trạng thái</p>
+                    @switch (Model.PaymentStatus)
+                    {
+                        case PaymentStatus.Pending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-warning bg-warning/10 text-warning">Chờ thanh toán</span> break;
+                        case PaymentStatus.Completed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Đã thanh toán</span> break;
+                        case PaymentStatus.Failed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Thất bại</span> break;
+                        case PaymentStatus.Refunded: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Đã hoàn tiền</span> break;
+                        case PaymentStatus.PartialRefund: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Hoàn tiền một phần</span> break;
+                    }
+                </div>
+                @if (!string.IsNullOrEmpty(Model.PaymentTransactionId))
+                {
+                    <div class="space-y-xs">
+                        <p class="text-label-sm text-secondary uppercase tracking-widest">Mã giao dịch</p>
+                        <p class="text-body-md">@Model.PaymentTransactionId</p>
+                    </div>
+                }
+                @if (Model.PaymentPaidAt.HasValue)
+                {
+                    <div class="space-y-xs">
+                        <p class="text-label-sm text-secondary uppercase tracking-widest">Thanh toán lúc</p>
+                        <p class="text-body-md">@Model.PaymentPaidAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                }
+                @if (Model.RefundAmount > 0)
+                {
+                    <div class="space-y-xs">
+                        <p class="text-label-sm text-secondary uppercase tracking-widest">Tiền hoàn</p>
+                        <p class="text-body-md">@Model.RefundAmount.ToString("C2")</p>
+                    </div>
+                }
+            </div>
+
+            @if (Model.Status == OrderStatus.Cancelled)
+            {
+                <div class="bg-surface-container-lowest border border-error/30 p-lg space-y-md">
+                    <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-error/30 pb-md text-error">Thông tin hủy</h4>
+                    @if (Model.CancelledAt.HasValue)
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Hủy lúc</p>
+                            <p class="text-body-md">@Model.CancelledAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.CancellationReason))
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Lý do</p>
+                            <p class="text-body-md">@Model.CancellationReason</p>
+                        </div>
+                    }
+                </div>
+            }
+
+            <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
+                <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Ghi chú</h4>
                 <p class="text-body-md text-on-surface-variant italic leading-relaxed">
-                    @(string.IsNullOrEmpty(Model.Notes) ? "No acquisition notes provided." : Model.Notes)
+                    @(string.IsNullOrEmpty(Model.Notes) ? "Không có ghi chú." : Model.Notes)
                 </p>
             </div>
         </div>

@@ -1,0 +1,94 @@
+@model IEnumerable<AdvertisementDTO>
+@{
+    ViewData["Title"] = "Quảng cáo";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-stack-lg">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="font-display-lg text-display-lg text-on-background mb-2">Quảng cáo</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Quản lý banner quảng cáo hiển thị trên trang chủ.</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Thêm banner
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-outline-variant/20">
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Thứ tự</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Hình ảnh</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Tiêu đề</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Liên kết</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Trạng thái</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
+                        <td class="px-4 py-4 font-headline-sm text-headline-sm text-on-surface">#@item.SortOrder</td>
+                        <td class="px-4 py-4">
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl" class="w-24 h-16 object-cover rounded-lg border border-outline-variant/20" />
+                            }
+                            else
+                            {
+                                <div class="w-24 h-16 bg-surface-variant rounded-lg flex items-center justify-center text-outline">
+                                    <span class="material-symbols-outlined">image</span>
+                                </div>
+                            }
+                        </td>
+                        <td class="px-4 py-4">
+                            <p class="font-body-md text-body-md text-on-surface font-semibold">@item.Title</p>
+                            @if (!string.IsNullOrEmpty(item.Subtitle))
+                            {
+                                <p class="font-label-sm text-label-sm text-on-surface-variant">@item.Subtitle</p>
+                            }
+                        </td>
+                        <td class="px-4 py-4 font-label-sm text-label-sm text-primary">@(item.LinkUrl ?? "-")</td>
+                        <td class="px-4 py-4">
+                            @if (item.IsActive)
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-[#E8F5E9] text-[#2E7D32] rounded-full font-label-sm text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#2E7D32]"></span>
+                                    Đang hoạt động
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full font-label-sm text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+                                    Tạm ẩn
+                                </span>
+                            }
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            <div class="flex gap-2 justify-end">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa banner này?')">Xóa</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="px-4 py-12 text-center">
+                            <span class="material-symbols-outlined text-4xl text-outline mb-2 block">campaign</span>
+                            <p class="font-body-md text-body-md text-on-surface-variant">Chưa có banner nào. Tạo banner đầu tiên ngay!</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

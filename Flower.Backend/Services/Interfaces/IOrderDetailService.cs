@@ -7,6 +7,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface IOrderDetailService
     {
         Task<IEnumerable<OrderDetailDTO>> GetAll();
+        Task<PagedResult<OrderDetailDTO>> GetPaged(int page, int pageSize);
         Task<OrderDetailDTO?> GetById(int id);
         Task<OrderDetailDTO> Create(OrderDetailDTO dto);
         Task<bool> Update(int id, OrderDetailDTO dto);

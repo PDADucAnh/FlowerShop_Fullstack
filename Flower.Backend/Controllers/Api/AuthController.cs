@@ -11,7 +11,6 @@ using System.Text;
 
 namespace Flower.Backend.Controllers.Api
 {
-    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
@@ -29,6 +28,7 @@ namespace Flower.Backend.Controllers.Api
         {
             new Claim(ClaimTypes.Name, result.Username),
             new Claim(ClaimTypes.Role, result.Role),
+            new Claim("Id", result.Id.ToString()),
             new Claim("FullName", result.FullName ?? ""),
             new Claim("Email", result.Email ?? ""),
             new Claim("Phone", result.Phone ?? ""),
@@ -37,6 +37,7 @@ namespace Flower.Backend.Controllers.Api
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest login)
         {
@@ -52,9 +53,12 @@ namespace Flower.Backend.Controllers.Api
 
                 var jwtKey = _configuration["Jwt:SecretKey"]
                     ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
-                var issuer = _configuration["Jwt:Issuer"];
-                var audience = _configuration["Jwt:Audience"];
-                var expiryMinutes = int.Parse(_configuration["Jwt:ExpiryMinutes"] ?? "60");
+                var issuer = _configuration["Jwt:Issuer"]
+                    ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+                var audience = _configuration["Jwt:Audience"]
+                    ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+                if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
+                    expiryMinutes = 60;
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var key = Encoding.UTF8.GetBytes(jwtKey);
@@ -76,6 +80,7 @@ namespace Flower.Backend.Controllers.Api
                 {
                     token = tokenString,
                     expiresAt = expiration.ToString("o"),
+                    id = result.Id,
                     username = result.Username,
                     fullName = result.FullName,
                     email = result.Email,
@@ -115,15 +120,113 @@ namespace Flower.Backend.Controllers.Api
             });
         }
 
+        [Authorize]
+        [HttpPut("profile")]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+        {
+            var username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(new { message = "Invalid token" });
+
+            var authType = User.FindFirst("AuthType")?.Value ?? "User";
+
+            var (success, message, result) = await _authService.UpdateProfile(username, authType, request.FullName, request.Phone, request.Address);
+            if (!success || result == null)
+                return BadRequest(new { message });
+
+            // Generate a new JWT token to update claims
+            var jwtKey = _configuration["Jwt:SecretKey"]
+                ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
+            var issuer = _configuration["Jwt:Issuer"]
+                ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+            var audience = _configuration["Jwt:Audience"]
+                ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+            if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
+                expiryMinutes = 60;
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.UTF8.GetBytes(jwtKey);
+            var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(BuildUserClaims(result)),
+                Expires = expiration,
+                Issuer = issuer,
+                Audience = audience,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256)
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            return Ok(new
+            {
+                token = tokenString,
+                user = new
+                {
+                    id = result.Id,
+                    username = result.Username,
+                    fullName = result.FullName,
+                    email = result.Email,
+                    phone = result.Phone,
+                    address = result.Address,
+                    role = result.Role
+                },
+                message
+            });
+        }
+
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequest register)
         {
             var (success, message) = await _authService.Register(
-                register.Username, register.Password, register.FullName,
+                register.Password, register.FullName,
                 register.Email, register.Phone, register.Address);
 
             if (!success)
                 return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [Authorize]
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            var username = User.Identity?.Name;
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(new { message = "Invalid token" });
+
+            var authType = User.FindFirst("AuthType")?.Value ?? "User";
+
+            var (success, message) = await _authService.ChangePassword(username, authType, request.CurrentPassword, request.NewPassword);
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            var clientUrl = _configuration["ClientUrl"] ?? "http://localhost:3000";
+
+            var (success, message) = await _authService.ForgotPassword(request.Email, clientUrl);
+            return Ok(new { message });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var (success, message) = await _authService.ResetPassword(request.Token, request.NewPassword);
+            if (!success)
+            {
+                return BadRequest(new { message });
+            }
 
             return Ok(new { message });
         }

@@ -2,77 +2,192 @@
     Layout = null;
 }
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login - FlowerShop Admin</title>
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Đăng nhập — PDA.Flower Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script>
         tailwind.config = {
+            darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        primary: "#ab2c5d",
-                        "primary-container": "#ffd9e1",
-                        "on-primary": "#ffffff",
-                        "surface-container-low": "#f6f3f2",
                         "outline-variant": "#ddbfc5",
+                        "surface-container-highest": "#e4e2e1",
+                        "secondary": "#6b5a60",
+                        "surface-tint": "#ab2c5d",
+                        "on-primary-container": "#5e002b",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#ffb1c5",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-fixed": "#f4dce4",
+                        "surface-bright": "#fbf9f8",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#524249",
+                        "surface-variant": "#e4e2e1",
+                        "surface": "#fbf9f8",
+                        "primary-fixed-dim": "#ffb1c5",
+                        "surface-container-high": "#eae8e7",
+                        "on-error": "#ffffff",
+                        "primary": "#ab2c5d",
                         "on-surface-variant": "#574146",
+                        "secondary-container": "#f4dce4",
+                        "error-container": "#ffdad6",
+                        "primary-container": "#f06292",
+                        "secondary-fixed-dim": "#d7c1c8",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#716066",
+                        "background": "#fbf9f8",
+                        "surface-container": "#f0eded",
+                        "outline": "#8a7176",
+                        "on-background": "#1b1c1c",
+                        "on-surface": "#1b1c1c"
                     },
                     fontFamily: {
-                        display: ["Playfair Display"],
-                        body: ["Plus Jakarta Sans"],
+                        "display-lg": ["Playfair Display"],
+                        "headline-md": ["Playfair Display"],
+                        "headline-sm": ["Playfair Display"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"]
+                    },
+                    fontSize: {
+                        "display-lg": ["48px", { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "headline-md": ["32px", { lineHeight: "1.3", fontWeight: "600" }],
+                        "headline-sm": ["24px", { lineHeight: "1.3", fontWeight: "600" }],
+                        "body-md": ["16px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "body-lg": ["18px", { lineHeight: "1.6", fontWeight: "400" }],
+                        "label-md": ["14px", { lineHeight: "1.4", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "label-sm": ["12px", { lineHeight: "1.4", fontWeight: "500" }]
+                    },
+                    spacing: {
+                        "stack-lg": "48px",
+                        "stack-md": "24px",
+                        "stack-sm": "12px",
+                        "gutter": "24px",
+                        "base": "8px"
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ambient-bg {
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% -20%, rgba(171,44,93,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(244,220,228,0.5) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 20% 80%, rgba(255,217,225,0.3) 0%, transparent 50%);
+        }
+        .petal-shadow-1 {
+            box-shadow: 0 4px 24px rgba(171,44,93,0.06);
+        }
+        .petal-shadow-2 {
+            box-shadow: 0 8px 40px rgba(171,44,93,0.10);
+        }
+        @@keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @@keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-12px); }
+        }
+        .animate-in { animation: fadeSlideUp 0.6s ease-out both; }
+        .animate-in-delay-1 { animation-delay: 0.1s; }
+        .animate-in-delay-2 { animation-delay: 0.25s; }
+        .animate-in-delay-3 { animation-delay: 0.4s; }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+        input:-webkit-autofill,
+        input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 100px #f6f3f2 inset;
+            -webkit-text-fill-color: #1b1c1c;
+            transition: background-color 9999s ease-out;
+        }
         .serif { font-family: 'Playfair Display', serif; }
     </style>
 </head>
-<body class="bg-[#fbf9f8] flex items-center justify-center min-h-screen p-4">
-    <div class="w-full max-w-md space-y-8">
-        <div class="text-center space-y-4">
-            <div class="inline-flex w-16 h-16 rounded-full bg-[#ab2c5d] items-center justify-center">
-                <span class="material-symbols-outlined text-white" style="font-variation-settings: 'FILL' 1;">local_florist</span>
-            </div>
-            <h1 class="serif text-4xl font-bold text-[#1b1c1c]">FlowerShop</h1>
-            <p class="text-xs text-[#574146] uppercase tracking-[0.3em] font-bold">Secure Administrative Access</p>
-        </div>
+<body class="bg-background text-on-background ambient-bg flex items-center justify-center min-h-screen p-4">
 
-        <form asp-action="Login" method="post" class="bg-white rounded-xl p-6 space-y-6 shadow-petal border border-[#ddbfc5]/30">
-            <div class="space-y-2">
-                <label class="text-xs uppercase tracking-widest text-[#574146] font-bold">Username</label>
-                <input type="text" name="username" class="w-full bg-[#f6f3f2] border border-[#ddbfc5]/30 rounded-lg focus:ring-1 focus:ring-[#ab2c5d] focus:border-[#ab2c5d] px-4 py-3.5 text-sm font-semibold tracking-wider uppercase placeholder:text-[#574146]/40" placeholder="Your username" required />
-            </div>
+    <div class="w-full max-w-sm mx-auto">
 
-            <div class="space-y-2">
-                <label class="text-xs uppercase tracking-widest text-[#574146] font-bold">Password</label>
-                <input type="password" name="password" class="w-full bg-[#f6f3f2] border border-[#ddbfc5]/30 rounded-lg focus:ring-1 focus:ring-[#ab2c5d] focus:border-[#ab2c5d] px-4 py-3.5 text-sm tracking-wider placeholder:text-[#574146]/40" placeholder="Your password" required />
-            </div>
-
-            @if (ViewBag.Error != null)
-            {
-                <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-xs uppercase tracking-widest font-bold text-center">
-                    @ViewBag.Error
+        <!-- Decorative petal accent -->
+        <div class="text-center mb-6 animate-in animate-in-delay-1">
+            <div class="relative inline-flex">
+                <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center animate-float">
+                    <div class="w-14 h-14 rounded-full bg-primary flex items-center justify-center petal-shadow-2">
+                        <span class="material-symbols-outlined text-on-primary text-[32px]" style="font-variation-settings:'FILL' 1;">local_florist</span>
+                    </div>
                 </div>
-            }
-
-            <button type="submit" class="w-full bg-[#ab2c5d] text-white py-3.5 rounded-lg text-xs font-bold uppercase tracking-[0.2em] hover:bg-[#8b0e45] transition-all active:scale-95 shadow-petal">
-                Authenticate
-            </button>
-        </form>
-
-        <div class="text-center">
-            <p class="text-xs text-[#574146]/60 uppercase tracking-widest">© 2026 FlowerShop. All Rights Reserved.</p>
+            </div>
         </div>
+
+        <!-- Brand -->
+        <div class="text-center mb-8 animate-in animate-in-delay-1">
+            <h1 class="font-display-lg text-display-lg text-primary tracking-tight leading-none">PDA.Flower</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant/70 mt-3">Đăng nhập quản trị</p>
+        </div>
+
+        <!-- Login card -->
+        <div class="animate-in animate-in-delay-2">
+            <form asp-action="Login" method="post" class="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-8 py-8 space-y-6 petal-shadow-2">
+
+                <!-- Username -->
+                <div class="space-y-2">
+                    <label for="username" class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-outline">person</span>
+                        Tên đăng nhập
+                    </label>
+                    <input id="username" type="text" name="username"
+                           class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3.5 font-body-md text-body-md text-on-surface placeholder:text-outline/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                           placeholder="Nhập tên đăng nhập" required autocomplete="username" />
+                </div>
+
+                <!-- Password -->
+                <div class="space-y-2">
+                    <label for="password" class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-outline">lock</span>
+                        Mật khẩu
+                    </label>
+                    <input id="password" type="password" name="password"
+                           class="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3.5 font-body-md text-body-md text-on-surface placeholder:text-outline/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                           placeholder="Nhập mật khẩu" required autocomplete="current-password" />
+                </div>
+
+                <!-- Error -->
+                @if (ViewBag.Error != null)
+                {
+                    <div class="p-4 bg-error-container border border-error/20 text-error font-label-sm text-label-sm rounded-xl flex items-center gap-3 animate-in">
+                        <span class="material-symbols-outlined text-[20px]">error</span>
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <!-- Submit -->
+                <button type="submit"
+                        class="w-full bg-primary text-on-primary py-3.5 rounded-xl font-label-md text-label-md hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 petal-shadow-1 focus:ring-2 focus:ring-offset-2 focus:ring-primary cursor-pointer border-0 flex items-center justify-center gap-2">
+                    <span>Đăng nhập</span>
+                    <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+                </button>
+
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-8 animate-in animate-in-delay-3">
+            <p class="font-label-sm text-label-sm text-on-surface-variant/40">
+                &copy; @DateTime.Now.Year PDA.Flower. Đã đăng ký bản quyền.
+            </p>
+        </div>
+
     </div>
+
 </body>
 </html>

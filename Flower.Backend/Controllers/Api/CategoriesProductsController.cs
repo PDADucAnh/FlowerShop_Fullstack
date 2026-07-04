@@ -24,19 +24,8 @@ namespace Flower.Backend.Controllers.Api
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            try
-            {
-                var categories = await _categoryProductService.GetAll();
-                return Ok(categories);
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Lỗi kết nối cơ sở dữ liệu hệ thống",
-                    detail = ex.InnerException?.Message ?? ex.Message
-                });
-            }
+            var categories = await _categoryProductService.GetAll();
+            return Ok(categories);
         }
 
         [AllowAnonymous]
@@ -51,7 +40,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateCategoryProductDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreateCategoryProductDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -75,6 +64,7 @@ namespace Flower.Backend.Controllers.Api
             if (!updated)
                 return NotFound();
 
+            await _notificationService.NotifyEntityChanged("CategoryProduct");
             return NoContent();
         }
 
@@ -86,6 +76,7 @@ namespace Flower.Backend.Controllers.Api
             if (!deleted)
                 return NotFound();
 
+            await _notificationService.NotifyEntityChanged("CategoryProduct");
             return NoContent();
         }
     }

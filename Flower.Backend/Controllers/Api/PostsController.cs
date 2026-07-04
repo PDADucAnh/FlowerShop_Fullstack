@@ -21,6 +21,14 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [AllowAnonymous]
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 6)
+        {
+            var result = await _postService.GetPaged(page, pageSize);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -51,7 +59,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreatePostDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreatePostDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -62,7 +70,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdatePostDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePostDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();

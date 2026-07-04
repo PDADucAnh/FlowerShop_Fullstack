@@ -1,4 +1,5 @@
 using Flower.Data;
+using Flower.Data.Entities;
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +24,25 @@ namespace Flower.Backend.Services
             return categories.Select(c => c.ToDTO());
         }
 
+        public async Task<PagedResult<CategoryDTO>> GetPaged(int page, int pageSize)
+        {
+            var query = _context.Categories.OrderByDescending(c => c.Id);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<CategoryDTO>
+            {
+                Items = items.Select(c => c.ToDTO()).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<CategoryDTO?> GetById(int id)
         {
             var category = await _context.Categories
@@ -33,6 +53,10 @@ namespace Flower.Backend.Services
 
         public async Task<CategoryDTO> Create(CreateCategoryDTO dto)
         {
+            if (string.IsNullOrEmpty(dto.Slug))
+            {
+                dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Name);
+            }
             var category = dto.ToEntity();
             _context.Categories.Add(category);
             await _context.SaveChangesAsync();

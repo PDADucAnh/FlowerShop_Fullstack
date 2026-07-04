@@ -1,0 +1,111 @@
+@model CreateAdvertisementDTO
+@{
+    ViewData["Title"] = "Thêm banner";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Quảng cáo</h3>
+            <p class="serif text-3xl font-bold">Banner mới</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" enctype="multipart/form-data" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tiêu đề</label>
+            <input asp-for="Title" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="Bộ sưu tập hè 2026..." required />
+            <span asp-validation-for="Title" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Phụ đề</label>
+            <input asp-for="Subtitle" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 placeholder:text-outline-variant" placeholder="Khám phá những sản phẩm mới..." />
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Hình ảnh</label>
+                <div class="border-2 border-dashed border-outline-variant/40 rounded-lg p-lg text-center hover:border-primary/50 transition-colors cursor-pointer" id="drop-zone">
+                    <input type="file" name="imageFile" accept="image/jpeg,image/png,image/webp" class="hidden" id="image-input" />
+                    <div id="upload-placeholder">
+                        <span class="material-symbols-outlined text-4xl text-outline mb-2">add_photo_alternate</span>
+                        <p class="font-label-sm text-label-sm text-on-surface-variant">Nhấp để tải ảnh lên</p>
+                        <p class="text-[10px] text-outline mt-1">1920 x 819 px khuyến nghị · JPG, PNG, WEBP</p>
+                    </div>
+                    <div id="upload-preview" class="hidden">
+                        <img id="preview-img" class="w-full h-auto max-h-48 object-contain rounded-lg" />
+                        <p class="font-label-sm text-label-sm text-primary mt-2 cursor-pointer" id="change-image-btn">Đổi ảnh</p>
+                    </div>
+                </div>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Đường dẫn</label>
+                <input asp-for="LinkUrl" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 placeholder:text-outline-variant" placeholder="/shop hoặc https://..." />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Thứ tự</label>
+                <input asp-for="SortOrder" type="number" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold" value="0" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Trạng thái</label>
+                <div class="flex items-center gap-3 h-full pt-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input asp-for="IsActive" type="checkbox" class="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary/20" checked />
+                        <span class="font-body-md text-body-md text-on-surface">Đang hoạt động</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
+                Tạo banner
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
+                Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        (function() {
+            const dropZone = document.getElementById('drop-zone');
+            const fileInput = document.getElementById('image-input');
+            const placeholder = document.getElementById('upload-placeholder');
+            const preview = document.getElementById('upload-preview');
+            const previewImg = document.getElementById('preview-img');
+            const changeBtn = document.getElementById('change-image-btn');
+
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            changeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    placeholder.classList.add('hidden');
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            });
+        })();
+    </script>
+}

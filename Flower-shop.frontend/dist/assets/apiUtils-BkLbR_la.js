@@ -1,0 +1,1 @@
+var e={API_BASE_URL:`https://localhost:7224`,IMAGE_BASE_URL:`https://localhost:7224`,TIMEOUT:1e4},t=e.API_BASE_URL,n=t=>t?t.startsWith(`http`)?t:`${e.IMAGE_BASE_URL}${t.startsWith(`/`)?``:`/`}${t}`:`https://via.placeholder.com/400x400?text=No+Image`;export{n,t};

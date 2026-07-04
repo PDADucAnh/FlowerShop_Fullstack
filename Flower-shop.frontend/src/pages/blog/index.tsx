@@ -1,27 +1,32 @@
 import React, { useState } from 'react';
 import BlogSidebar from './BlogSidebar';
 import PostCard from '../../components/PostCard';
-import { usePosts } from '../../hooks/usePosts';
+import Pagination from '../../components/Pagination';
+import { usePostsPaged } from '../../hooks/usePosts';
 import type { Post } from '../../types/post';
 
 const BlogPage: React.FC = () => {
-  const { data: posts = [], isLoading, error } = usePosts();
+  const [page, setPage] = useState(1);
+  const pageSize = 6;
+  const { data: paged, isLoading, error } = usePostsPaged(page, pageSize);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
+  const posts = paged?.items ?? [];
   const filteredPosts = selectedCategoryId
     ? posts.filter((p: Post) => p.categoryId === selectedCategoryId)
     : posts;
 
   const handleCategoryChange = (id: number | null) => {
     setSelectedCategoryId(id);
+    setPage(1);
   };
 
   return (
-    <div className="bg-surface text-on-surface font-body-md antialiased">
-      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
-        <header className="mb-stack-lg text-center space-y-md">
-            <h3 className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary">Editorial Narrative</h3>
-            <h2 className="font-headline-md text-headline-md text-on-surface uppercase tracking-tighter">The Journal</h2>
+    <div className="bg-background text-on-background font-body-md antialiased pt-20">
+      <main className="max-w-[1440px] mx-auto px-margin py-xl">
+        <header className="mb-xl text-center space-y-md">
+            <h3 className="text-label-sm uppercase tracking-[0.3em] text-secondary">Bài viết</h3>
+            <h2 className="font-display-xl text-display-xl uppercase tracking-tighter text-primary">Bài viết thời trang</h2>
             <div className="w-12 h-0.5 bg-primary mx-auto"></div>
         </header>
 
@@ -31,22 +36,31 @@ const BlogPage: React.FC = () => {
               <div className="text-center py-20">
                 <div className="animate-pulse flex flex-col items-center">
                     <div className="size-12 bg-surface-container rounded-full mb-md"></div>
-                    <p className="font-label-sm uppercase tracking-widest text-secondary">Retrieving Narratives...</p>
+                    <p className="text-label-sm uppercase tracking-widest text-secondary">Đang tải...</p>
                 </div>
               </div>
             ) : error ? (
-              <div className="p-lg bg-error-container text-error font-label-sm text-label-sm uppercase tracking-widest font-bold text-center border border-error">Unable to retrieve editorial stories at this time.</div>
+              <div className="p-lg bg-error-container text-error text-label-sm uppercase tracking-widest font-bold text-center border border-error">Không thể tải bài viết vào lúc này.</div>
             ) : filteredPosts.length === 0 ? (
               <div className="text-center py-20 bg-surface-container-low border border-dashed border-outline-variant">
                 <span className="material-symbols-outlined text-4xl text-outline mb-md">article</span>
-                <p className="font-label-sm text-label-sm uppercase tracking-widest text-secondary">No editorial stories found in this pillar.</p>
+                <p className="text-label-sm uppercase tracking-widest text-secondary">Không tìm thấy bài viết trong danh mục này.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-xl">
-                {filteredPosts.map((post: any) => (
-                    <PostCard key={post.id} post={post} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-xl">
+                  {filteredPosts.map((post: any) => (
+                      <PostCard key={post.id} post={post} />
+                  ))}
+                </div>
+                {!selectedCategoryId && paged && paged.totalPages > 1 && (
+                  <Pagination
+                    page={paged.page}
+                    totalPages={paged.totalPages}
+                    onPageChange={setPage}
+                  />
+                )}
+              </>
             )}
           </div>
 

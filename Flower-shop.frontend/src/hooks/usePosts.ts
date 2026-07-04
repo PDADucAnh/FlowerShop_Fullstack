@@ -1,8 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import postService from '../services/postService';
+import type { PagedResult } from '../types/pagination';
 
 export const usePosts = () =>
   useQuery({ queryKey: ['posts'], queryFn: () => postService.getAllPosts() });
+
+export const usePostsPaged = (page: number, pageSize: number) => {
+  return useQuery<PagedResult<any>>({
+    queryKey: ['posts', 'paged', page, pageSize],
+    queryFn: () => postService.getPostsPaged(page, pageSize),
+    placeholderData: (prev) => prev,
+  });
+};
 
 export const usePost = (id: string | number) =>
   useQuery({ queryKey: ['posts', id], queryFn: () => postService.getPostById(id), enabled: !!id });

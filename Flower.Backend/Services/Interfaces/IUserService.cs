@@ -8,6 +8,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface IUserService
     {
         Task<IEnumerable<UserDTO>> GetAll();
+        Task<PagedResult<UserDTO>> GetPaged(int page, int pageSize);
         Task<UserDTO?> GetById(int id);
         Task<UserDTO> Create(CreateUserDTO dto);
         Task<bool> Update(int id, UpdateUserDTO dto);

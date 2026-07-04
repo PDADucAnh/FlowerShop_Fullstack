@@ -2,79 +2,91 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useWishlist } from '../../context/WishlistContext';
 import { getImageUrl } from '../../utils/apiUtils';
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-};
+import { formatCurrency } from '../../utils/currency';
+import { AccountSidebar } from '../../components/OrderComponents';
+import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const WishlistPage: React.FC = () => {
   const { favorites, removeFavorite } = useWishlist();
+  const { ref, isVisible } = useScrollReveal({ threshold: 0 });
 
   return (
-    <div className="bg-surface text-on-surface font-body-md antialiased min-h-screen">
-      <main className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
-        <div className="mb-stack-lg pb-8 border-b border-primary">
-          <h1 className="font-headline-md text-headline-md text-on-surface uppercase text-center md:text-left">
-            Wishlist
-          </h1>
-          <p className="font-label-sm text-label-sm text-secondary uppercase tracking-[0.2em] text-center md:text-left mt-4">
-            {favorites.length} {favorites.length === 1 ? 'Saved Item' : 'Saved Items'}
-          </p>
-        </div>
+    <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col md:flex-row gap-stack-lg">
+          <AccountSidebar />
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter">
-          <aside className="md:col-span-3 border-r border-primary pr-8 hidden md:block">
-            <ul className="space-y-6">
-              <li>
-                <Link to="/profile" className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-secondary hover:text-primary transition-colors pl-4 block text-decoration-none">
-                  General Info
-                </Link>
-              </li>
-              <li>
-                <Link to="/my-orders" className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-secondary hover:text-primary transition-colors pl-4 block text-decoration-none">
-                  Order History
-                </Link>
-              </li>
-              <li>
-                <span className="font-label-sm text-label-sm uppercase tracking-[0.2em] text-primary font-bold border-l-2 border-primary pl-4 block cursor-default">
-                  Wishlist
-                </span>
-              </li>
-            </ul>
-          </aside>
-
-          <div className="md:col-span-9 md:pl-12">
+          <section
+            ref={ref}
+            className="flex-grow transition-all duration-700"
+            style={{
+              opacity: isVisible ? 1 : 0,
+              transform: isVisible ? 'translateY(0)' : 'translateY(16px)',
+              transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+            }}
+          >
             {favorites.length === 0 ? (
-              <div className="text-center py-xl border border-dashed border-outline-variant rounded-xl">
-                <span className="material-symbols-outlined text-6xl text-outline mb-md">favorite</span>
-                <h2 className="font-headline-sm text-headline-sm text-secondary uppercase mb-sm">Your wishlist is empty</h2>
-                <p className="font-body-md text-body-md text-secondary">Save your favorite pieces for later.</p>
-                <Link to="/shop" className="inline-block mt-md bg-primary text-on-primary px-8 py-3 font-label-md text-label-md uppercase tracking-widest border border-primary rounded-lg btn-luxury btn-primary-luxury text-decoration-none">
-                  Explore Collection
+              <div className="bg-surface-container-lowest p-stack-lg rounded-xl petal-shadow text-center py-12 max-w-md mx-auto">
+                <span className="material-symbols-outlined text-5xl text-outline mb-md">favorite</span>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface mb-sm">Chưa có sản phẩm yêu thích</h2>
+                <p className="text-on-surface-variant font-body-md mb-lg">Lưu các sản phẩm yêu thích của bạn — chúng sẽ ở đây chờ bạn.</p>
+                <Link
+                  to="/shop"
+                  className="group inline-flex items-center gap-3 bg-primary text-on-primary px-10 py-4 font-label-sm text-label-sm uppercase tracking-[0.3em] font-bold text-decoration-none rounded-lg btn-luxury btn-primary-luxury"
+                >
+                  Xem sản phẩm
+                  <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-[1px] transition-transform duration-300">
+                    <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  </span>
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                {favorites.map((product) => (
-                  <div key={product.id} className="group">
-                    <Link to={`/product/${product.id}`} className="text-decoration-none block">
-                      <div className="aspect-[4/5] bg-surface-container relative overflow-hidden mb-4 rounded-xl">
-                        <img src={getImageUrl(product.imageUrl)} alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                        <button onClick={(e) => { e.preventDefault(); removeFavorite(product.id); }}
-                          className="absolute top-3 right-3 w-9 h-9 bg-surface/80 backdrop-blur-sm border-0 flex items-center justify-center hover:bg-surface transition-colors rounded-full"
-                          aria-label="Remove from wishlist">
-                          <span className="material-symbols-outlined text-lg text-error fill">favorite</span>
+              <div>
+                <h2 className="font-headline-sm text-headline-sm text-on-surface mb-stack-lg">
+                  Yêu thích
+                  <span className="text-on-surface-variant font-body-md text-body-md font-normal ml-2">({favorites.length} sản phẩm)</span>
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-gutter">
+                  {favorites.map((product: any) => (
+                    <div
+                      key={product.id}
+                      className="bg-surface-container-lowest rounded-xl petal-shadow group overflow-hidden border border-transparent hover:border-outline-variant transition-all duration-300"
+                    >
+                      <div className="aspect-[4/5] relative overflow-hidden">
+                        <Link to={`/product/${product.id}`} className="block w-full h-full">
+                          <img
+                            src={getImageUrl(product.imageUrl)}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            loading="lazy"
+                          />
+                        </Link>
+                        <button
+                          onClick={() => removeFavorite(product.id)}
+                          className="absolute top-3 right-3 bg-white/80 backdrop-blur text-primary p-1.5 rounded-full shadow-sm border-0 cursor-pointer hover:bg-white transition-colors"
+                          aria-label="Xóa khỏi yêu thích"
+                        >
+                          <span className="material-symbols-outlined" style={{ fontVariationSettings: '"FILL" 1' }}>favorite</span>
                         </button>
                       </div>
-                    </Link>
-                    <h3 className="font-label-md text-label-md text-on-surface mb-1 truncate">{product.name}</h3>
-                    <p className="font-body-md text-body-md text-primary font-semibold">{formatCurrency(product.discountPrice || product.price)}</p>
-                  </div>
-                ))}
+                      <div className="p-stack-sm text-center">
+                        <Link to={`/product/${product.id}`} className="text-decoration-none">
+                          <h3 className="font-headline-sm text-[18px] text-on-surface leading-tight mb-1">{product.name}</h3>
+                        </Link>
+                        <p className="text-primary font-bold">{formatCurrency(product.discountPrice || product.price)}</p>
+                        <Link
+                          to={`/product/${product.id}`}
+                          className="mt-base w-full py-1.5 border border-primary text-primary rounded-lg text-sm font-label-md hover:bg-primary hover:text-white transition-colors block text-decoration-none"
+                        >
+                          Thêm vào giỏ
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
+          </section>
         </div>
       </main>
     </div>

@@ -1,18 +1,18 @@
 @model IEnumerable<CategoryDTO>
 @{
-    ViewData["Title"] = "Blog Categories";
+    ViewData["Title"] = "Danh mục blog";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Taxonomy Management</h3>
-            <p class="serif text-3xl font-bold">Editorial Pillars</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Quản lý danh mục</h3>
+            <p class="serif text-3xl font-bold">Danh mục blog</p>
         </div>
         <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
             <span class="material-symbols-outlined text-lg">add</span>
-            New Category
+            Thêm danh mục
         </a>
     </div>
 
@@ -22,9 +22,9 @@
                 <thead>
                     <tr class="border-b border-outline-variant text-label-sm uppercase text-secondary tracking-widest bg-surface-container-low">
                         <th class="px-lg py-4">ID</th>
-                        <th class="px-lg py-4">Title</th>
-                        <th class="px-lg py-4">Narrative Description</th>
-                        <th class="px-lg py-4 text-right">Actions</th>
+                        <th class="px-lg py-4">Tiêu đề</th>
+                        <th class="px-lg py-4">Mô tả</th>
+                        <th class="px-lg py-4 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant">
@@ -32,12 +32,12 @@
                     {
                         <tr class="table-row-hover transition-colors">
                             <td class="px-lg py-5 serif font-bold">#@item.Id</td>
-                            <td class="px-lg py-5 text-body-md font-bold uppercase tracking-widest">@item.Name</td>
-                            <td class="px-lg py-5 text-body-md text-on-surface-variant italic">@(item.Description ?? "No description provided")</td>
+                            <td class="px-lg py-5 text-body-md font-bold tracking-widest">@item.Name</td>
+                            <td class="px-lg py-5 text-body-md text-on-surface-variant italic">@(item.Description ?? "Không có mô tả")</td>
                             <td class="px-lg py-5 text-right space-x-4">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-0.5">Details</a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Modify</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Delete this category?')">Delete</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-0.5">Chi tiết</a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa danh mục này?')">Xóa</a>
                             </td>
                         </tr>
                     }
@@ -45,4 +45,6 @@
             </table>
         </div>
     </div>
+
+    <partial name="_Pagination" />
 </div>

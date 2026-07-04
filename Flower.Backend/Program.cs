@@ -18,10 +18,18 @@ using Flower.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Globalization;
+
+var cultureInfo = new CultureInfo("vi-VN");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,9 +39,9 @@ var secretKey = jwtSettings["SecretKey"]
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultScheme = "AnhCMS.Auth";
+    options.DefaultScheme = "Flower.Auth";
 })
-.AddPolicyScheme("AnhCMS.Auth", "Bearer or Cookie", options =>
+.AddPolicyScheme("Flower.Auth", "Bearer or Cookie", options =>
 {
     options.ForwardDefaultSelector = context =>
     {
@@ -46,6 +54,8 @@ builder.Services.AddAuthentication(options =>
 {
     cookieOptions.LoginPath = "/Account/Login";
     cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+    cookieOptions.Cookie.IsEssential = true;
+    cookieOptions.SlidingExpiration = false;
 })
 .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, jwtOptions =>
 {
@@ -86,10 +96,20 @@ builder.Services.AddAuthentication(options =>
         }
     };
 });
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
 
 // Swagger
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -109,6 +129,19 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerService, 
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderService, Flower.Backend.Services.OrderService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderDetailService, Flower.Backend.Services.OrderDetailService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.INotificationService, Flower.Backend.Services.NotificationService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdvertisementService, Flower.Backend.Services.AdvertisementService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IDeliverySlotService, Flower.Backend.Services.DeliverySlotService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPaymentService, Flower.Backend.Services.PaymentService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IFraudDetectionService, Flower.Backend.Services.FraudDetectionService>();
+builder.Services.Configure<Flower.Backend.Models.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSettings>() ?? new TimeSettings();
+builder.Services.AddSingleton(timeSettings);
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IEmailService, Flower.Backend.Services.EmailService>();
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<Flower.Backend.Services.StockLockService>();
+builder.Services.AddHostedService<Flower.Backend.Services.OrderExpiryBackgroundService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
 
 // ---- CẤU HÌNH CORS (THÊM VÀO TRƯỚC builder.Build()) ----
@@ -133,6 +166,26 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+// Auto-apply pending migrations (creates DB if not exists, applies all migrations)
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await context.Database.MigrateAsync();
+
+    // Seed admin account
+    if (!context.Users.Any(u => u.Username == "admin"))
+    {
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
+        context.Users.Add(new Flower.Data.Entities.User
+        {
+            Username = "admin",
+            PasswordHash = hasher.HashPassword(null!, "123456"),
+            FullName = "Administrator",
+            Role = "Admin"
+        });
+        context.SaveChanges();
+    }
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -181,6 +234,7 @@ app.Use(async (context, next) =>
 });
 
 app.UseAuthentication();
+app.UseMiddleware<Flower.Backend.Middleware.SessionValidationMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();
@@ -190,82 +244,5 @@ app.MapHub<Flower.Backend.Hubs.NotificationHub>("/hubs/notifications");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ApplicationDbContext>();
-    if (!context.Users.Any())
-    {
-        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
-        context.Users.Add(new Flower.Data.Entities.User
-        {
-            Username = "admin",
-            PasswordHash = "",
-            FullName = "Administrator",
-            Role = "Admin"
-        });
-        context.SaveChanges();
-        var admin = context.Users.First(u => u.Username == "admin");
-        admin.PasswordHash = hasher.HashPassword(admin, "admin123");
-        context.SaveChanges();
-    }
-
-    if (!context.CategoriesProducts.Any())
-    {
-        context.CategoriesProducts.AddRange(
-            new Flower.Data.Entities.CategoryProduct { Name = "Hoa hồng", Description = "Bộ sưu tập hoa hồng cao cấp" },
-            new Flower.Data.Entities.CategoryProduct { Name = "Hoa cúc", Description = "Hoa cúc tươi thắm" },
-            new Flower.Data.Entities.CategoryProduct { Name = "Hoa lan", Description = "Lan nhiệt đới sang trọng" },
-            new Flower.Data.Entities.CategoryProduct { Name = "Hoa mùa xuân", Description = "Sắc xuân rực rỡ" },
-            new Flower.Data.Entities.CategoryProduct { Name = "Bó hoa cưới", Description = "Bó hoa cô dâu" }
-        );
-        context.SaveChanges();
-    }
-
-    if (!context.Products.Any())
-    {
-        var hoaHong = context.CategoriesProducts.First(c => c.Name == "Hoa hồng").Id;
-        var hoaCuc = context.CategoriesProducts.First(c => c.Name == "Hoa cúc").Id;
-        var hoaLan = context.CategoriesProducts.First(c => c.Name == "Hoa lan").Id;
-        var muaXuan = context.CategoriesProducts.First(c => c.Name == "Hoa mùa xuân").Id;
-        var cuoi = context.CategoriesProducts.First(c => c.Name == "Bó hoa cưới").Id;
-
-        context.Products.AddRange(
-            new Flower.Data.Entities.Product { Name = "Hoa hồng đỏ tình yêu", Price = 350000, StockQuantity = 50, CategoryProductId = hoaHong, ImageUrl = "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=600", Description = "Hoa hồng đỏ nhập khẩu, tươi lâu." },
-            new Flower.Data.Entities.Product { Name = "Hoa hồng phấn pastel", Price = 280000, StockQuantity = 30, CategoryProductId = hoaHong, ImageUrl = "https://images.unsplash.com/photo-1518621736915-f3b1c41bfd00?w=600", Description = "Sắc hồng phấn nhẹ nhàng, lãng mạn." },
-            new Flower.Data.Entities.Product { Name = "Cúc họa mi trắng", Price = 180000, StockQuantity = 0, CategoryProductId = hoaCuc, ImageUrl = "https://images.unsplash.com/photo-1496062031456-07b8f162a322?w=600", Description = "Cúc họa mi trắng tinh khôi." },
-            new Flower.Data.Entities.Product { Name = "Lan hồ điệp tím", Price = 550000, StockQuantity = 20, CategoryProductId = hoaLan, ImageUrl = "https://images.unsplash.com/photo-1567095761054-7a02e69e5c43?w=600", Description = "Lan hồ điệp tím cao cấp trong chậu gốm." },
-            new Flower.Data.Entities.Product { Name = "Bó hoa xuân rực rỡ", Price = 420000, StockQuantity = 15, CategoryProductId = muaXuan, ImageUrl = "https://images.unsplash.com/photo-1463648067503-3e0e1e48b3c0?w=600", Description = "Hoa xuân tươi thắm nhiều sắc màu." },
-            new Flower.Data.Entities.Product { Name = "Bó hoa cưới cổ điển", Price = 890000, StockQuantity = 10, CategoryProductId = cuoi, ImageUrl = "https://images.unsplash.com/photo-1519378058457-4c29c1e4c76c?w=600", Description = "Bó hoa cưới hồng - trắng thanh lịch." },
-            new Flower.Data.Entities.Product { Name = "Hoa hồng xanh dương", Price = 450000, StockQuantity = 25, CategoryProductId = hoaHong, ImageUrl = "https://images.unsplash.com/photo-1597733336794-12d05021d510?w=600", Description = "Hoa hồng xanh dương độc đáo." },
-            new Flower.Data.Entities.Product { Name = "Lan vũ nữ vàng", Price = 380000, StockQuantity = 12, CategoryProductId = hoaLan, ImageUrl = "https://images.unsplash.com/photo-1567427017947-545c5f8d16ad?w=600", Description = "Lan vũ nữ vàng rực rỡ." }
-        );
-        context.SaveChanges();
-    }
-
-    if (!context.Categories.Any())
-    {
-        context.Categories.AddRange(
-            new Flower.Data.Entities.Category { Name = "Chia sẻ", Description = "Chia sẻ kinh nghiệm và câu chuyện hoa" },
-            new Flower.Data.Entities.Category { Name = "Mẹo & Thủ thuật", Description = "Mẹo chăm hoa tươi lâu" },
-            new Flower.Data.Entities.Category { Name = "Sự kiện", Description = "Sự kiện và chương trình đặc biệt" }
-        );
-        context.SaveChanges();
-    }
-
-    if (!context.Posts.Any())
-    {
-        var share = context.Categories.First(c => c.Name == "Chia sẻ").Id;
-        var tips = context.Categories.First(c => c.Name == "Mẹo & Thủ thuật").Id;
-
-        context.Posts.AddRange(
-            new Flower.Data.Entities.Post { Title = "Nghệ thuật cắm hoa Nhật Bản – Ikebana", Content = "<p>Ikebana là nghệ thuật cắm hoa truyền thống của Nhật Bản, nơi mỗi cành hoa đều mang một ý nghĩa riêng.</p><p>Bài viết này sẽ giúp bạn hiểu thêm về triết lý đằng sau những tác phẩm Ikebana tinh tế.</p>", Summary = "Khám phá triết lý và kỹ thuật của nghệ thuật cắm hoa Ikebana.", ImageUrl = "https://images.unsplash.com/photo-1567696917-6ba0c5d0b761?w=800", CategoryId = share, CreatedDate = DateTime.Parse("2026-06-15") },
-            new Flower.Data.Entities.Post { Title = "Mẹo giữ hoa tươi lâu đến 2 tuần", Content = "<p>Bạn có biết chỉ cần thay nước mỗi ngày và cắt gốc chéo 45 độ là hoa có thể tươi đến 2 tuần?</p><p>Hãy cùng tìm hiểu thêm nhiều mẹo hay khác trong bài viết này!</p>", Summary = "Bí quyết đơn giản giúp hoa luôn tươi thắm.", ImageUrl = "https://images.unsplash.com/photo-1508610030471-5eba6c0a15a5?w=800", CategoryId = tips, CreatedDate = DateTime.Parse("2026-06-10") },
-            new Flower.Data.Entities.Post { Title = "Ý nghĩa các loài hoa trong văn hóa Việt", Content = "<p>Mỗi loài hoa đều gắn liền với những câu chuyện và biểu tượng riêng trong văn hóa Việt Nam.</p><p>Từ hoa sen tượng trưng cho sự thanh cao đến hoa đào báo hiệu mùa xuân.</p>", Summary = "Tìm hiểu ý nghĩa đặc biệt của các loài hoa trong văn hóa người Việt.", ImageUrl = "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800", CategoryId = share, CreatedDate = DateTime.Parse("2026-06-05") }
-        );
-        context.SaveChanges();
-    }
-}
 
 app.Run();

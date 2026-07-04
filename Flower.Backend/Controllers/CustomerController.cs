@@ -16,10 +16,14 @@ namespace Flower.Backend.Controllers
             _customerService = customerService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
         {
-            var customers = await _customerService.GetAll();
-            return View(customers);
+            var paged = await _customerService.GetPaged(page, pageSize);
+            ViewData["TotalPages"] = paged.TotalPages;
+            ViewData["CurrentPage"] = paged.Page;
+            ViewData["TotalCount"] = paged.TotalCount;
+            ViewData["PageSize"] = paged.PageSize;
+            return View(paged.Items);
         }
 
         [HttpGet]
@@ -35,12 +39,14 @@ namespace Flower.Backend.Controllers
                 return View(model);
 
             await _customerService.Create(model);
+            TempData["Success"] = "Khách hàng đã được tạo thành công.";
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Delete(int id)
         {
             await _customerService.Delete(id);
+            TempData["Success"] = "Khách hàng đã được xóa.";
             return RedirectToAction("Index");
         }
 
@@ -69,6 +75,7 @@ namespace Flower.Backend.Controllers
                 return View(model);
 
             await _customerService.Update(model.Id, model);
+            TempData["Success"] = "Khách hàng đã được cập nhật.";
             return RedirectToAction("Index");
         }
     }

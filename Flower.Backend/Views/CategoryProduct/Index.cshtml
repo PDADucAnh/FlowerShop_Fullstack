@@ -1,18 +1,18 @@
 @model IEnumerable<CategoryProductDTO>
 @{
-    ViewData["Title"] = "Product Categories";
+    ViewData["Title"] = "Danh mục sản phẩm";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Shop Structure</h3>
-            <p class="serif text-3xl font-bold">Luxury Divisions</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Cấu trúc cửa hàng</h3>
+            <p class="serif text-3xl font-bold">Danh mục sản phẩm</p>
         </div>
         <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
             <span class="material-symbols-outlined text-lg">add</span>
-            New Division
+            Thêm danh mục
         </a>
     </div>
 
@@ -21,15 +21,17 @@
         {
             <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md group hover:border-primary transition-all">
                 <div class="flex justify-between items-start">
-                    <h4 class="serif text-2xl font-bold uppercase tracking-tighter">@cat.Name</h4>
+                    <h4 class="serif text-2xl font-bold tracking-tighter">@cat.Name</h4>
                     <span class="text-label-sm text-secondary">#@cat.Id</span>
                 </div>
-                <p class="text-body-md text-on-surface-variant line-clamp-2">@(cat.Description ?? "Curated collection division.")</p>
+                <p class="text-body-md text-on-surface-variant line-clamp-2">@(cat.Description ?? "Danh mục sản phẩm.")</p>
                 <div class="flex gap-md pt-4 border-t border-outline-variant">
-                    <a asp-action="Edit" asp-route-id="@cat.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@cat.Id" class="text-label-sm uppercase tracking-widest font-bold text-error ml-auto" onclick="return confirm('Delete this division?')">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@cat.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
+                    <a asp-action="Delete" asp-route-id="@cat.Id" class="text-label-sm uppercase tracking-widest font-bold text-error ml-auto" onclick="return confirm('Xóa danh mục này?')">Xóa</a>
                 </div>
             </div>
         }
     </div>
+
+    <partial name="_Pagination" />
 </div>

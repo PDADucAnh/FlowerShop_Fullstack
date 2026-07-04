@@ -1,64 +1,74 @@
 @model CreateProductDTO
 @{
-    ViewData["Title"] = "Acquire Item";
+    ViewData["Title"] = "Thêm sản phẩm";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg max-w-4xl mx-auto">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Inventory Acquisition</h3>
-            <p class="serif text-3xl font-bold">New Luxury Product</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Thêm sản phẩm</h3>
+            <p class="serif text-3xl font-bold">Thêm sản phẩm mới</p>
         </div>
         <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Collection
+            Quay lại
         </a>
     </div>
 
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
-        <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Item Nomenclature</label>
-            <input asp-for="Name" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="Enter product name..." required />
-            <span asp-validation-for="Name" class="text-error text-xs uppercase tracking-widest"></span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">SKU</label>
+                <input asp-for="Sku" id="field-sku" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-xl font-bold placeholder:text-outline-variant font-mono" placeholder="Tự động tạo" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tên sản phẩm</label>
+                <input asp-for="Name" id="field-name" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="Tên sản phẩm..." required />
+                <span asp-validation-for="Name" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Slug</label>
+                <input asp-for="Slug" id="field-slug" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-mono" placeholder="ten-san-pham" />
+            </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Collection Division</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Danh mục</label>
                 <select asp-for="CategoryProductId" asp-items="ViewBag.CategoryProductList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest"></select>
             </div>
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Visual Representation</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Hình ảnh</label>
                 <input type="file" name="uploadImage" class="w-full text-label-sm uppercase tracking-widest file:mr-lg file:py-2 file:px-lg file:border-0 file:bg-primary file:text-on-primary hover:file:bg-neutral-800" />
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Acquisition Value (VNĐ)</label>
-                <input asp-for="Price" type="number" step="1000" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold serif text-xl" required />
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Giá (VND)</label>
+                <input asp-for="Price" id="field-price" type="text" inputmode="numeric" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold serif text-xl" required />
                 <span asp-validation-for="Price" class="text-error text-xs uppercase tracking-widest"></span>
             </div>
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Inventory Manifest Quantity</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Số lượng tồn kho</label>
                 <input asp-for="StockQuantity" type="number" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 font-bold serif text-xl" required />
                 <span asp-validation-for="StockQuantity" class="text-error text-xs uppercase tracking-widest"></span>
             </div>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Description</label>
-            <textarea asp-for="Description" rows="6" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg leading-relaxed italic serif placeholder:text-outline-variant" placeholder="Describe the item's luxury essence..."></textarea>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mô tả</label>
+            <textarea asp-for="Description" rows="6" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg leading-relaxed italic serif placeholder:text-outline-variant" placeholder="Mô tả sản phẩm..."></textarea>
             <span asp-validation-for="Description" class="text-error text-xs uppercase tracking-widest"></span>
         </div>
 
         <div class="pt-lg border-t border-outline-variant flex gap-md">
             <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
-                Acquire to Collection
+                Thêm sản phẩm
             </button>
             <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
-                Cancel
+                Hủy
             </a>
         </div>
     </form>
@@ -66,4 +76,80 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        function generateSlug(text) {
+            const map = {
+                'à':'a','á':'a','ạ':'a','ả':'a','ã':'a',
+                'â':'a','ầ':'a','ấ':'a','ậ':'a','ẩ':'a','ẫ':'a',
+                'ă':'a','ằ':'a','ắ':'a','ặ':'a','ẳ':'a','ẵ':'a',
+                'è':'e','é':'e','ẹ':'e','ẻ':'e','ẽ':'e',
+                'ê':'e','ề':'e','ế':'e','ệ':'e','ể':'e','ễ':'e',
+                'ì':'i','í':'i','ị':'i','ỉ':'i','ĩ':'i',
+                'ò':'o','ó':'o','ọ':'o','ỏ':'o','õ':'o',
+                'ô':'o','ồ':'o','ố':'o','ộ':'o','ổ':'o','ỗ':'o',
+                'ơ':'o','ờ':'o','ớ':'o','ợ':'o','ở':'o','ỡ':'o',
+                'ù':'u','ú':'u','ụ':'u','ủ':'u','ũ':'u',
+                'ư':'u','ừ':'u','ứ':'u','ự':'u','ử':'u','ữ':'u',
+                'ỳ':'y','ý':'y','ỵ':'y','ỷ':'y','ỹ':'y',
+                'đ':'d','Đ':'d'
+            };
+            let result = '';
+            for (const ch of text) result += map[ch] || ch;
+            return result.toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, '')
+                .replace(/\s+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        }
+
+        function generateSku(name) {
+            if (!name) return '';
+            const words = name.trim().split(/\s+/);
+            const prefix = words.map(w => w.charAt(0).toUpperCase()).join('');
+            const suffix = String(Date.now()).slice(-4);
+            return prefix + '-' + suffix;
+        }
+
+        function formatPriceInput(input) {
+            let val = input.value.replace(/\s/g, '');
+            if (val) {
+                input.value = val.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            }
+        }
+
+        let skuManuallyEdited = false;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const nameInput = document.getElementById('field-name');
+            const skuInput = document.getElementById('field-sku');
+            const slugInput = document.getElementById('field-slug');
+            const priceInput = document.getElementById('field-price');
+
+            nameInput.addEventListener('input', function () {
+                const val = this.value;
+                if (!skuManuallyEdited && val) {
+                    skuInput.value = generateSku(val);
+                }
+                if (slugInput.value === generateSlug(this.dataset?.lastVal || '')) {
+                    slugInput.value = generateSlug(val);
+                }
+                this.dataset.lastVal = val;
+            });
+
+            nameInput.dataset.lastVal = nameInput.value;
+
+            skuInput.addEventListener('input', function () {
+                skuManuallyEdited = true;
+            });
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function () {
+                    formatPriceInput(this);
+                });
+                priceInput.closest('form').addEventListener('submit', function () {
+                    priceInput.value = priceInput.value.replace(/\s/g, '');
+                });
+            }
+        });
+    </script>
 }

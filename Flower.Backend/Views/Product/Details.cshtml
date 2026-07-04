@@ -1,20 +1,20 @@
 @model ProductDTO
 @{
-    ViewData["Title"] = "Product Details";
+    ViewData["Title"] = "Chi tiết sản phẩm";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Inventory Insight</h3>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Thông tin sản phẩm</h3>
             <p class="serif text-4xl font-bold">@Model.Name</p>
         </div>
         <div class="flex gap-md">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Edit Product</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Sửa sản phẩm</a>
             <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
-                Back to Collection
+                Quay lại danh sách
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
         <div class="aspect-[3/4] overflow-hidden bg-surface-container-low border border-outline-variant">
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
-                <img src="@Model.ImageUrl" class="w-full h-full object-cover grayscale" />
+                <img src="@Model.ImageUrl" class="w-full h-full object-cover" />
             }
             else
             {
@@ -34,31 +34,31 @@
         </div>
         <div class="space-y-xl">
             <div class="space-y-md">
-                <p class="text-[10px] text-secondary uppercase tracking-[0.4em] font-bold">Product Specification</p>
+                <p class="text-[10px] text-secondary uppercase tracking-[0.4em] font-bold">Thông số sản phẩm</p>
                 <div class="grid grid-cols-2 gap-lg border-y border-outline-variant py-lg">
                     <div class="space-y-1">
-                        <span class="text-label-sm text-secondary uppercase tracking-widest">Acquisition Value</span>
-                        <p class="text-3xl font-bold serif">@Model.Price.ToString("N0") đ</p>
+                        <span class="text-label-sm text-secondary uppercase tracking-widest">Giá bán</span>
+                        <p class="text-3xl font-bold serif">@Model.Price.ToString("C2")</p>
                     </div>
                     <div class="space-y-1">
-                        <span class="text-label-sm text-secondary uppercase tracking-widest">Inventory Status</span>
-                        <p class="text-3xl font-bold serif">@Model.StockQuantity units</p>
+                        <span class="text-label-sm text-secondary uppercase tracking-widest">Tồn kho</span>
+                        <p class="text-3xl font-bold serif">@Model.StockQuantity sản phẩm</p>
                     </div>
                 </div>
             </div>
 
             <div class="space-y-md">
-                <p class="text-label-sm text-secondary uppercase tracking-widest">Narrative Description</p>
+                <p class="text-label-sm text-secondary uppercase tracking-widest">Mô tả</p>
                 <p class="text-body-lg text-on-surface-variant leading-relaxed italic serif">
-                    @(string.IsNullOrEmpty(Model.Description) ? "No narrative provided for this item." : Model.Description)
+                    @(string.IsNullOrEmpty(Model.Description) ? "Không có mô tả cho sản phẩm này." : Model.Description)
                 </p>
             </div>
 
             <div class="pt-xl space-y-md">
-                <p class="text-label-sm text-secondary uppercase tracking-widest">Taxonomy Information</p>
+                <p class="text-label-sm text-secondary uppercase tracking-widest">Thông tin danh mục</p>
                 <div class="flex gap-md">
-                    <span class="px-lg py-2 border border-outline text-label-sm uppercase tracking-widest">Division: @(Model.CategoryProductName ?? "General")</span>
-                    <span class="px-lg py-2 border border-outline text-label-sm uppercase tracking-widest">ID: #LX-PRD-@Model.Id</span>
+                    <span class="px-lg py-2 border border-outline text-label-sm uppercase tracking-widest">Danh mục: @(Model.CategoryProductName ?? "Chung")</span>
+                    <span class="px-lg py-2 border border-outline text-label-sm uppercase tracking-widest">ID: #PRD-@Model.Id</span>
                 </div>
             </div>
         </div>

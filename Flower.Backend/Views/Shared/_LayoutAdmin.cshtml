@@ -1,15 +1,17 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - FlowerShop Admin</title>
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <!-- Material Symbols -->
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
@@ -81,10 +83,10 @@
                         "stack-sm": "12px",
                         "gutter": "24px",
                         "base": "8px",
-                        "lg": "2rem",
                         "xl": "4rem",
-                        "sm": "1rem",
+                        "lg": "2rem",
                         "md": "1.5rem",
+                        "sm": "1rem",
                         "xs": "0.5rem",
                         "margin": "2rem"
                     },
@@ -113,167 +115,293 @@
         }
     </script>
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        .petal-shadow-1 {
+            box-shadow: 0 4px 20px rgba(171, 44, 93, 0.04);
         }
-        .shadow-petal {
-            box-shadow: 0 4px 20px -2px rgba(171, 44, 93, 0.05);
+        .petal-shadow-2 {
+            box-shadow: 0 8px 30px rgba(171, 44, 93, 0.08);
+        }
+        .ambient-bg {
+            background-image: radial-gradient(circle at top right, rgba(255, 217, 225, 0.3) 0%, transparent 40%),
+                              radial-gradient(circle at bottom left, rgba(244, 220, 228, 0.4) 0%, transparent 50%);
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .field-validation-error { color: #ba1a1a; font-size: 0.875rem; }
         .input-validation-error { border-color: #ba1a1a !important; }
+        .serif { font-family: 'Playfair Display', serif; }
     </style>
 </head>
-<body class="bg-surface text-on-surface h-screen w-full overflow-hidden flex selection:bg-primary-container selection:text-on-primary-container">
-    <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 h-full flex flex-col p-stack-sm border-r border-outline-variant/20 bg-surface-container-low w-64 z-20">
-        <!-- Header -->
-        <div class="px-4 py-stack-md flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-primary overflow-hidden">
-                <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_florist</span>
+<body class="bg-background text-on-background font-body-md text-body-md ambient-bg min-h-screen flex">
+    <!-- Sidebar Navigation -->
+    <nav class="fixed left-0 top-0 h-full flex flex-col p-stack-sm border-r border-outline-variant/20 bg-surface-container-low h-screen w-64 z-20">
+        <div class="px-base py-stack-md flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary text-lg font-bold">
+                <span class="material-symbols-outlined">local_florist</span>
             </div>
             <div>
-                <h1 class="font-headline-sm text-headline-sm text-primary tracking-tight">Admin Panel</h1>
-                <p class="font-label-sm text-label-sm text-on-surface-variant">Management Suite</p>
+                <h1 class="font-headline-sm text-headline-sm text-primary tracking-tight leading-tight">Admin</h1>
+                <p class="font-label-sm text-label-sm text-on-surface-variant">Quản trị</p>
             </div>
         </div>
-        <!-- CTA -->
-        <div class="px-2 mb-stack-md">
-            <a asp-controller="Product" asp-action="Create" class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-md shadow-petal hover:shadow-md transition-all active:scale-95 flex items-center justify-center gap-2">
-                <span class="material-symbols-outlined text-[18px]">add</span>
-                Add New Arrangement
+
+        <div class="px-base mb-stack-md">
+            <a asp-controller="Product" asp-action="Create" class="w-full flex items-center justify-center gap-2 bg-primary text-on-primary py-3 rounded-lg font-label-md text-label-md petal-shadow-1 hover:bg-primary/90 transition-colors no-underline">
+                <span class="material-symbols-outlined text-[20px]">add</span>
+                Tạo nhanh
             </a>
         </div>
-        <!-- Main Nav -->
-        <nav class="flex-1 space-y-1 px-2 overflow-y-auto no-scrollbar">
-            <!-- Dashboard -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+
+        <div class="flex-1 overflow-y-auto space-y-1 px-base no-scrollbar">
+            @{
+                var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+            }
+
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-2 pb-1">Bảng điều khiển</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Home" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="Home" asp-action="Index">
-                <span class="material-symbols-outlined @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "" : "group-hover:scale-110") transition-transform" @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "style=font-variation-settings:'FILL' 1" : "")>dashboard</span>
-                <span class="font-label-md text-label-md">Dashboard</span>
+                <span class="material-symbols-outlined @(controller == "Home" ? "text-primary" : "")">dashboard</span>
+                Bảng điều khiển
             </a>
 
-            <div class="px-4 pt-4 pb-1">
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-bold">Shop</p>
-            </div>
-            <!-- Inventory (Products) -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Product" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Danh mục sản phẩm</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Product" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="Product" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">local_florist</span>
-                <span class="font-label-md text-label-md">Inventory</span>
+                <span class="material-symbols-outlined @(controller == "Product" ? "text-primary" : "")">local_florist</span>
+                Sản phẩm
             </a>
-            <!-- Product Categories -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "CategoryProduct" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "CategoryProduct" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="CategoryProduct" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">category</span>
-                <span class="font-label-md text-label-md">Collections</span>
+                <span class="material-symbols-outlined @(controller == "CategoryProduct" ? "text-primary" : "")">category</span>
+                Danh mục sản phẩm
             </a>
-            <!-- Orders -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Order" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Bán hàng</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Order" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="Order" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shopping_cart</span>
-                <span class="font-label-md text-label-md">Orders</span>
+                <span class="material-symbols-outlined @(controller == "Order" ? "" : "")" style="@(controller == "Order" ? "font-variation-settings: 'FILL' 1;" : "")">shopping_cart</span>
+                Đơn hàng
             </a>
-            <!-- Order Details -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "OrderDetail" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "OrderDetail" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="OrderDetail" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">receipt_long</span>
-                <span class="font-label-md text-label-md">Order Details</span>
+                <span class="material-symbols-outlined @(controller == "OrderDetail" ? "text-primary" : "")">receipt_long</span>
+                Chi tiết đơn hàng
             </a>
-            <!-- Customers -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Customer" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Customer" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="Customer" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">group</span>
-                <span class="font-label-md text-label-md">Customers</span>
+                <span class="material-symbols-outlined @(controller == "Customer" ? "text-primary" : "")">group</span>
+                Khách hàng
             </a>
 
-            <div class="px-4 pt-4 pb-1">
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-bold">Blog</p>
-            </div>
-            <!-- Blog Categories -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Category" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
-               asp-controller="Category" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">grid_view</span>
-                <span class="font-label-md text-label-md">Blog Categories</span>
-            </a>
-            <!-- Posts -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "Post" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Nội dung</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Post" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                asp-controller="Post" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">article</span>
-                <span class="font-label-md text-label-md">Posts</span>
+                <span class="material-symbols-outlined @(controller == "Post" ? "text-primary" : "")">article</span>
+                Bài viết
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Category" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Category" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Category" ? "text-primary" : "")">grid_view</span>
+                Danh mục blog
             </a>
 
-            <div class="px-4 pt-4 pb-1">
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-bold">System</p>
-            </div>
-            <!-- Admin Users -->
-            <a class="flex items-center gap-3 px-4 py-3 @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "text-primary bg-secondary-container rounded-lg" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 rounded-lg group"
-               asp-controller="User" asp-action="Index">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">manage_accounts</span>
-                <span class="font-label-md text-label-md">Admin Users</span>
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Tiếp thị</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Advertisement" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Advertisement" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Advertisement" ? "text-primary" : "")">campaign</span>
+                Quảng cáo
             </a>
-        </nav>
-        <!-- Sidebar Footer -->
-        <div class="mt-auto px-2 pb-4 space-y-1 border-t border-outline-variant/20 pt-4">
-            <a class="flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:text-primary hover:bg-primary-container/20 transition-all duration-200 rounded-lg" href="#">
+
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Hệ thống</p>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "User" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="User" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "User" ? "text-primary" : "")">manage_accounts</span>
+                Người dùng
+            </a>
+        </div>
+
+        <div class="mt-auto px-base pt-stack-md border-t border-outline-variant/20 space-y-1">
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-primary hover:bg-primary-container/20 transition-all duration-200 no-underline" href="#">
                 <span class="material-symbols-outlined">help</span>
-                <span class="font-label-md text-label-md">Help Center</span>
+                Trợ giúp
             </a>
             @if (User.Identity.IsAuthenticated)
             {
-                <a asp-controller="Account" asp-action="Logout" class="flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container transition-all duration-200 rounded-lg">
+                <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-primary hover:bg-primary-container/20 transition-all duration-200 no-underline" asp-controller="Account" asp-action="Logout">
                     <span class="material-symbols-outlined">logout</span>
-                    <span class="font-label-md text-label-md">Log Out</span>
+                    Đăng xuất
                 </a>
             }
         </div>
-    </aside>
+    </nav>
 
-    <!-- Main Area -->
-    <div class="ml-64 flex-1 flex flex-col h-screen overflow-hidden bg-surface">
-        <!-- Top Nav -->
-        <header class="flex justify-between items-center px-margin-desktop w-full border-b border-outline-variant/30 bg-surface h-16 shadow-sm z-10 shrink-0">
-            <div class="flex items-center flex-1">
-                <div class="relative w-64">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-                    <input class="w-full bg-surface-container-low border border-outline-variant/30 rounded-full py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors text-on-surface placeholder:text-on-surface-variant/70" placeholder="Search orders, customers..." type="text" />
+    <!-- Main Content Canvas -->
+    <main class="ml-64 flex-1 flex flex-col min-h-screen">
+        <!-- Top Header -->
+        <header class="flex justify-between items-center px-margin-desktop w-full h-16 shadow-sm bg-surface">
+            <div class="md:hidden font-headline-sm text-headline-sm text-primary">FlowerShop Admin</div>
+            <div class="hidden md:block"></div>
+
+            <div class="hidden md:flex flex-1 max-w-md mx-8">
+                <div class="relative w-full">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                    <input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-full focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface transition-colors placeholder:text-on-surface-variant/70" placeholder="Tìm đơn hàng..." type="text" />
                 </div>
             </div>
-            <div class="font-headline-sm text-headline-sm text-primary hidden lg:block">
-                FlowerShop Admin
-            </div>
-            <div class="flex items-center gap-4 flex-1 justify-end">
-                <button class="p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full relative cursor-pointer active:opacity-80">
+
+            <div class="flex items-center gap-4">
+                <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer">
                     <span class="material-symbols-outlined">notifications</span>
-                    <span class="absolute top-1 right-2 w-2 h-2 bg-error rounded-full"></span>
                 </button>
-                <button class="p-2 text-on-surface-variant hover:bg-surface-container-low transition-colors rounded-full cursor-pointer active:opacity-80">
+                <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer">
                     <span class="material-symbols-outlined">settings</span>
                 </button>
-                <div class="h-8 w-px bg-outline-variant/50 mx-2"></div>
+                <div class="w-px h-6 bg-outline-variant/30 mx-2"></div>
                 @if (User.Identity.IsAuthenticated)
                 {
-                    <div class="flex items-center gap-2 p-1 pr-3 rounded-full">
-                        <div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-primary font-bold text-sm">
-                            @(User.FindFirst("FullName")?.Value?.Substring(0, 1).ToUpper() ?? "A")
+                    <div class="flex items-center gap-2 hover:bg-surface-container-low p-1 pr-3 rounded-full transition-colors border border-outline-variant/20">
+                        <div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-primary font-headline-sm text-sm font-bold">
+                            @(User.FindFirst("FullName")?.Value?.Length >= 2 ? User.FindFirst("FullName")?.Value?.Substring(0, 2).ToUpper() : "AD")
                         </div>
-                        <span class="font-label-sm text-on-surface">@(User.FindFirst("FullName")?.Value ?? "Admin")</span>
+                        <span class="font-label-md text-label-md text-on-surface hidden sm:block">@User.FindFirst("FullName")?.Value</span>
                     </div>
                 }
             </div>
         </header>
 
-        <!-- Content Area -->
-        <main class="flex-1 overflow-y-auto p-margin-desktop bg-surface-bright/50">
+        <!-- Page Content -->
+        <div class="p-margin-desktop flex-1 max-w-container-max mx-auto w-full">
+            @if (TempData["Success"] != null)
+            {
+                <div class="mb-stack-md p-4 bg-[#E8F5E9] border border-[#A5D6A7]/50 text-[#2E7D32] font-label-md text-label-md rounded-lg flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg">check_circle</span>
+                    @TempData["Success"]
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="mb-stack-md p-4 bg-error-container border border-error/20 text-error font-label-md text-label-md rounded-lg flex items-center gap-3">
+                    <span class="material-symbols-outlined text-lg">error</span>
+                    @TempData["Error"]
+                </div>
+            }
             @RenderBody()
-        </main>
+        </div>
+
+        <!-- Footer -->
+        <footer class="border-t border-outline-variant/20 flex flex-col md:flex-row justify-between items-center px-margin-desktop py-6 gap-4 bg-surface-container-lowest">
+            <p class="font-label-sm text-label-sm text-on-surface-variant">&copy; @DateTime.Now.Year FlowerShop. Đã đăng ký bản quyền.</p>
+            <div class="flex gap-6">
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors no-underline" href="#">Tài liệu</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors no-underline" href="#">Hỗ trợ</a>
+                <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors no-underline" href="#">Điều khoản dịch vụ</a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- Idle Timeout Modal -->
+    <div id="idle-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div class="bg-surface rounded-2xl petal-shadow-2 p-8 max-w-sm w-full mx-4 text-center animate-in" style="animation: fadeInUp 0.3s ease-out;">
+            <div class="w-14 h-14 rounded-full bg-error-container flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-error text-3xl">timer_off</span>
+            </div>
+            <h3 class="font-headline-sm text-headline-sm text-on-surface mb-2">Phiên sắp hết hạn</h3>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-1">
+                Phiên làm việc của bạn sắp hết hạn do không hoạt động.
+            </p>
+            <p class="font-body-md text-body-md text-on-surface-variant mb-6">
+                Bạn sẽ bị đăng xuất sau <strong id="idle-countdown" class="text-error">60</strong> giây.
+            </p>
+            <div class="flex gap-3 justify-center">
+                <button id="idle-stay-btn"
+                        class="px-6 py-2.5 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors border-0 cursor-pointer">
+                    Giữ phiên đăng nhập
+                </button>
+                <a id="idle-logout-btn"
+                   class="px-6 py-2.5 bg-transparent text-on-surface-variant rounded-lg font-label-md text-label-md border border-outline-variant hover:bg-surface-container-low transition-colors no-underline"
+                   asp-controller="Account" asp-action="Logout">
+                    Đăng xuất ngay
+                </a>
+            </div>
+        </div>
     </div>
 
-    <!-- Scripts -->
+    <style>
+        @@keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-in { animation: fadeInUp 0.3s ease-out; }
+    </style>
+
+    <script>
+        (function() {
+            // === CONFIG ===
+            const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+            const COUNTDOWN_SECONDS = 60;
+
+            let idleTimer = null;
+            let countdownTimer = null;
+            let secondsRemaining = COUNTDOWN_SECONDS;
+
+            const modal = document.getElementById('idle-modal');
+            const countdownEl = document.getElementById('idle-countdown');
+            const stayBtn = document.getElementById('idle-stay-btn');
+            const logoutBtn = document.getElementById('idle-logout-btn');
+
+            function resetIdleTimer() {
+                if (idleTimer) clearTimeout(idleTimer);
+                if (modal.classList.contains('hidden')) {
+                    idleTimer = setTimeout(showWarning, IDLE_TIMEOUT_MS);
+                }
+            }
+
+            function showWarning() {
+                modal.classList.remove('hidden');
+                secondsRemaining = COUNTDOWN_SECONDS;
+                countdownEl.textContent = secondsRemaining;
+                countdownTimer = setInterval(function() {
+                    secondsRemaining--;
+                    countdownEl.textContent = secondsRemaining;
+                    if (secondsRemaining <= 0) {
+                        clearInterval(countdownTimer);
+                        window.location.href = logoutBtn.getAttribute('href');
+                    }
+                }, 1000);
+            }
+
+            function stayLoggedIn() {
+                if (countdownTimer) clearInterval(countdownTimer);
+                modal.classList.add('hidden');
+                resetIdleTimer();
+            }
+
+            stayBtn.addEventListener('click', stayLoggedIn);
+
+            ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(function(ev) {
+                document.addEventListener(ev, resetIdleTimer, { passive: true });
+            });
+
+            resetIdleTimer();
+        })();
+    </script>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('textarea[data-rich-editor]').forEach(function (el) {
+                var type = el.getAttribute('data-rich-editor');
+                var toolbar;
+                if (type === 'full') {
+                    toolbar = ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'insertTable', '|', 'undo', 'redo', 'imageUpload'];
+                } else {
+                    toolbar = ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', '|', 'undo', 'redo'];
+                }
+                ClassicEditor.create(el, { toolbar: toolbar }).catch(console.error);
+            });
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

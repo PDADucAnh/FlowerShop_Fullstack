@@ -24,9 +24,7 @@ namespace Flower.Backend.Controllers.Api
         public async Task<IActionResult> CreateOrder([FromBody] OrderInputDTO input)
         {
             if (input == null)
-            {
                 return BadRequest(new { message = "Dữ liệu đơn hàng không hợp lệ" });
-            }
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -39,18 +37,44 @@ namespace Flower.Backend.Controllers.Api
             }).ToList() ?? new List<OrderItemInput>();
 
             var (success, message, orderId) = await _orderService.CreateOrder(
-                input.CustomerId, input.Notes, items);
+                input.CustomerId, input.Notes, items,
+                paymentMethod: input.PaymentMethod,
+                deliveryDate: input.DeliveryDate,
+                deliveryTimeSlot: input.DeliveryTimeSlot,
+                deliveryDistrict: input.DeliveryDistrict,
+                deliveryAddress: input.DeliveryAddress);
 
             if (!success)
-            {
-                return StatusCode(500, new { message, detail = message });
-            }
+                return BadRequest(new { message });
 
-            return StatusCode(201, new
+            return StatusCode(201, new { message, orderId });
+        }
+
+        [HttpPost("checkout")]
+        public async Task<IActionResult> Checkout([FromBody] CheckoutRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var items = request.Items?.Select(i => new OrderItemInput
             {
-                message,
-                orderId
-            });
+                ProductId = i.ProductId,
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList() ?? new List<OrderItemInput>();
+
+            var (success, message, orderId) = await _orderService.CreateOrder(
+                request.CustomerId, request.Notes, items,
+                paymentMethod: request.PaymentMethod,
+                deliveryDate: request.DeliveryDate,
+                deliveryTimeSlot: request.DeliveryTimeSlot,
+                deliveryDistrict: request.DeliveryDistrict,
+                deliveryAddress: request.DeliveryAddress);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return StatusCode(201, new { message, orderId });
         }
 
         [HttpGet]
@@ -64,7 +88,6 @@ namespace Flower.Backend.Controllers.Api
         public async Task<IActionResult> GetDetail(int id)
         {
             var order = await _orderService.GetDetail(id);
-
             if (order == null)
                 return NotFound();
 
@@ -81,7 +104,6 @@ namespace Flower.Backend.Controllers.Api
                 return BadRequest(ModelState);
 
             var updated = await _orderService.Update(id, dto);
-
             if (!updated)
                 return NotFound();
 
@@ -92,11 +114,30 @@ namespace Flower.Backend.Controllers.Api
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _orderService.Delete(id);
-
             if (!deleted)
                 return NotFound();
 
             return NoContent();
+        }
+
+        [HttpPut("{id}/cancel")]
+        public async Task<IActionResult> Cancel(int id, [FromBody] CancelOrderRequest? request)
+        {
+            var (success, message) = await _orderService.CancelWithPolicy(id, request?.Reason);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [HttpGet("check-blacklist")]
+        [AllowAnonymous]
+        public async Task<IActionResult> CheckBlacklist([FromQuery] string phone)
+        {
+            if (string.IsNullOrEmpty(phone)) return BadRequest("SĐT không hợp lệ");
+            var isBlacklisted = await _orderService.IsPhoneBlacklisted(phone);
+            return Ok(new { isBlacklisted });
         }
     }
 }

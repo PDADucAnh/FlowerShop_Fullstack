@@ -1,13 +1,34 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 18
-VisualStudioVersion = 18.8.11912.234
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flower.Data", "Flower.Data\Flower.Data.csproj", "{71E7BB91-7817-4FEB-99D5-6EBAD68D6C65}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flower.Backend", "Flower.Backend\Flower.Backend.csproj", "{5F889B30-5F4F-4432-AB32-0DFA7DB71A61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CMS.Tests", "CMS.Tests\CMS.Tests.csproj", "{4DECCDF7-58AA-4261-9E90-A18B11167063}"
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "Flower-shop.frontend", "Flower-shop.frontend\", "{BFC96697-7D92-84DD-AB7A-313652811C56}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_56633"
+		Debug.AspNetCompiler.PhysicalPath = "Flower-shop.frontend\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56633\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_56633"
+		Release.AspNetCompiler.PhysicalPath = "Flower-shop.frontend\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_56633\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "56633"
+		SlnRelativePath = "Flower-shop.frontend\"
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Flower.Tests", "Flower.Tests\Flower.Tests.csproj", "{4DECCDF7-58AA-4261-9E90-A18B11167063}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +64,18 @@ Global
 		{5F889B30-5F4F-4432-AB32-0DFA7DB71A61}.Release|x64.Build.0 = Release|Any CPU
 		{5F889B30-5F4F-4432-AB32-0DFA7DB71A61}.Release|x86.ActiveCfg = Release|Any CPU
 		{5F889B30-5F4F-4432-AB32-0DFA7DB71A61}.Release|x86.Build.0 = Release|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|x64.Build.0 = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Debug|x86.Build.0 = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|x64.ActiveCfg = Release|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|x64.Build.0 = Release|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|x86.ActiveCfg = Release|Any CPU
+		{BFC96697-7D92-84DD-AB7A-313652811C56}.Release|x86.Build.0 = Release|Any CPU
 		{4DECCDF7-58AA-4261-9E90-A18B11167063}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4DECCDF7-58AA-4261-9E90-A18B11167063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DECCDF7-58AA-4261-9E90-A18B11167063}.Debug|x64.ActiveCfg = Debug|Any CPU

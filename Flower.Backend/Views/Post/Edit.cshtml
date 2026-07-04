@@ -1,18 +1,18 @@
 @model UpdatePostDTO
 @{
-    ViewData["Title"] = "Refine Narrative";
+    ViewData["Title"] = "Sửa bài viết";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg max-w-4xl mx-auto">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Content Refinement</h3>
-            <p class="serif text-3xl font-bold">Edit Editorial Story</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Chỉnh sửa nội dung</h3>
+            <p class="serif text-3xl font-bold">Sửa bài viết</p>
         </div>
         <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Stories
+            Quay lại
         </a>
     </div>
 
@@ -20,52 +20,87 @@
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="ImageUrl" />
 
-        <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Story Title</label>
-            <input asp-for="Title" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" required />
-            <span asp-validation-for="Title" class="text-error text-xs uppercase tracking-widest"></span>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tiêu đề</label>
+                <input asp-for="Title" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold" required />
+                <span asp-validation-for="Title" class="text-error text-xs uppercase tracking-widest"></span>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Slug</label>
+                <input asp-for="Slug" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3" placeholder="tieu-de-bai-viet" />
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Editorial Category</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Danh mục</label>
                 <select asp-for="CategoryId" asp-items="ViewBag.CategoryList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest"></select>
             </div>
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Update Visual Asset</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Cập nhật hình ảnh</label>
                 @if (!string.IsNullOrEmpty(Model.ImageUrl))
                 {
                     <div class="mb-2">
-                        <img src="@Model.ImageUrl" class="h-20 w-auto border border-outline-variant object-cover grayscale" />
+                        <img src="@Model.ImageUrl" class="h-20 w-auto border border-outline-variant object-cover" />
                     </div>
                 }
                 <input type="file" name="uploadImage" class="w-full text-label-sm uppercase tracking-widest file:mr-lg file:py-2 file:px-lg file:border-0 file:bg-primary file:text-on-primary hover:file:bg-neutral-800" />
-                <p class="text-[10px] text-outline uppercase tracking-widest italic">Leave empty to preserve existing visual asset.</p>
+                <p class="text-[10px] text-outline uppercase tracking-widest italic">Để trống nếu muốn giữ ảnh hiện tại.</p>
             </div>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Content</label>
-            <textarea asp-for="Content" rows="12" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg leading-relaxed italic serif placeholder:text-outline-variant"></textarea>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Nội dung</label>
+            <textarea asp-for="Content" id="editor" rows="12" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-lg leading-relaxed italic serif"></textarea>
             <span asp-validation-for="Content" class="text-error text-xs uppercase tracking-widest"></span>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Summary <span class="text-outline italic normal-case font-normal text-xs">(auto-generated from content if left empty)</span></label>
-            <textarea asp-for="Summary" rows="3" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md leading-relaxed placeholder:text-outline-variant" placeholder="Brief excerpt for preview cards..."></textarea>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tóm tắt <span class="text-outline italic normal-case font-normal text-xs">(tự động tạo từ nội dung nếu bỏ trống)</span></label>
+            <textarea asp-for="Summary" rows="3" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md leading-relaxed" placeholder="Mô tả ngắn cho thẻ xem trước..."></textarea>
         </div>
 
         <div class="pt-lg border-t border-outline-variant flex gap-md">
             <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
-                Save Refinements
+                Lưu thay đổi
             </button>
             <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
-                Discard Changes
+                Hủy
             </a>
         </div>
     </form>
 </div>
 
 @section Scripts {
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+    <script>
+        class UploadAdapter {
+            constructor(loader) { this.loader = loader; }
+            upload() {
+                return this.loader.file.then(file => new Promise((resolve, reject) => {
+                    const data = new FormData();
+                    data.append('upload', file);
+                    fetch('/Post/UploadImage', { method: 'POST', body: data })
+                        .then(r => r.json())
+                        .then(r => { if (r.uploaded) resolve({ default: r.url }); else reject(r.error?.message || 'Upload failed'); })
+                        .catch(reject);
+                }));
+            }
+            abort() {}
+        }
+        function UploadAdapterPlugin(editor) {
+            editor.plugins.get('FileRepository').createUploadAdapter = loader => new UploadAdapter(loader);
+        }
+        const el = document.querySelector('#editor');
+        if (el) {
+            ClassicEditor
+                .create(el, {
+                    extraPlugins: [UploadAdapterPlugin],
+                    toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|', 'blockQuote', 'insertTable', '|', 'undo', 'redo', 'imageUpload'],
+                })
+                .catch(console.error);
+        }
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

@@ -10,8 +10,8 @@ const LoadingOrEmpty = ({ isLoading, message }: LoadingOrEmptyProps) => {
     return (
       <div className="w-full text-center py-20">
         <div className="animate-pulse flex flex-col items-center">
-            <div className="size-12 bg-surface-container rounded-full mb-md"></div>
-            <p className="text-label-sm uppercase tracking-widest text-secondary">Curating Content...</p>
+            <div className="size-12 bg-surface-container rounded-full mb-stack-sm"></div>
+            <p className="font-label-sm text-label-sm text-on-surface-variant">Đang tải...</p>
         </div>
       </div>
     );
@@ -19,8 +19,8 @@ const LoadingOrEmpty = ({ isLoading, message }: LoadingOrEmptyProps) => {
 
   return (
     <div className="w-full text-center py-20 bg-surface-container-low border border-dashed border-outline-variant">
-      <span className="material-symbols-outlined text-4xl text-outline mb-md">inventory_2</span>
-      <p className="text-label-sm uppercase tracking-widest text-secondary">{message || 'No distinctive pieces found.'}</p>
+      <span className="material-symbols-outlined text-4xl text-outline mb-stack-sm inline-block">inventory_2</span>
+      <p className="font-label-sm text-label-sm text-on-surface-variant">{message || 'Không tìm thấy sản phẩm phù hợp.'}</p>
     </div>
   );
 };

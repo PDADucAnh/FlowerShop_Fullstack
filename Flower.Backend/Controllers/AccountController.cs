@@ -1,17 +1,14 @@
-/* Họ tên: Phạm Đức Anh
- * Mã SV: 2123110135
- * Lớp: CCQ2311D
- * Ngày tạo: 05/06/2026
- * Mô tả: Thiết kế giao diện đăng nhập và xử lý xác thực người dùng trong AccountController
- */
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Flower.Backend.Services.Interfaces;
 using System.Collections.Generic;
+using System;
 
+[AllowAnonymous]
 public class AccountController : Controller
 {
     private readonly IAuthService _authService;
@@ -30,24 +27,35 @@ public class AccountController : Controller
     [HttpPost]
     public async Task<IActionResult> Login(string username, string password)
     {
-        // 1. Kiểm tra tài khoản trong Database thông qua AuthService (hỗ trợ mật khẩu đã băm)
         var user = await _authService.Login(username, password);
 
         if (user != null)
         {
-            // 2. Thiết lập danh tính (Claims)
             var claims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
-                new Claim(ClaimTypes.Role, user.Role), // Lưu vai trò: Admin/Editor
-                new Claim("FullName", user.FullName)
+                new Claim(ClaimTypes.Role, user.Role),
+                new Claim("FullName", user.FullName),
+                new Claim("LoginTime", DateTime.UtcNow.ToString("o"))
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            // 3. Đăng nhập và lưu Cookie vào trình duyệt
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
+
+            var rawToken = await _authService.CreateRefreshTokenAsync(user.Id,
+                HttpContext.Connection.RemoteIpAddress?.ToString());
+
+            Response.Cookies.Append("X-Refresh-Token", rawToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                Path = "/"
+            });
 
             return RedirectToAction("Index", "Home");
         }
@@ -56,9 +64,21 @@ public class AccountController : Controller
         return View();
     }
 
-    // Hàm đăng xuất
     public async Task<IActionResult> Logout()
     {
+        var refreshTokenCookie = Request.Cookies["X-Refresh-Token"];
+        if (!string.IsNullOrEmpty(refreshTokenCookie))
+        {
+            await _authService.RevokeTokenAsync(refreshTokenCookie);
+        }
+
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+        {
+            await _authService.RevokeUserTokensAsync(userId);
+        }
+
+        Response.Cookies.Delete("X-Refresh-Token");
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Login");
     }

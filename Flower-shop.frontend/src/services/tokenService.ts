@@ -1,4 +1,4 @@
-const TOKEN_KEY = 'anhcms_token';
+const TOKEN_KEY = 'pda_flower_token';
 
 const tokenService = {
     getToken: () => localStorage.getItem(TOKEN_KEY),

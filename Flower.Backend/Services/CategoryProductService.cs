@@ -1,4 +1,5 @@
 using Flower.Data;
+using Flower.Data.Entities;
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +24,38 @@ namespace Flower.Backend.Services
             return list.Select(c => c.ToDTO());
         }
 
+        public async Task<PagedResult<CategoryProductDTO>> GetPaged(int page, int pageSize)
+        {
+            var query = _context.CategoriesProducts.OrderByDescending(cp => cp.Id);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<CategoryProductDTO>
+            {
+                Items = items.Select(cp => cp.ToDTO()).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<CategoryProductDTO?> GetById(int id)
         {
-            var category = await _context.CategoriesProducts.FindAsync(id);
+            var category = await _context.CategoriesProducts
+                .FirstOrDefaultAsync(cp => cp.Id == id);
             return category?.ToDTO();
         }
 
         public async Task<CategoryProductDTO> Create(CreateCategoryProductDTO dto)
         {
+            if (string.IsNullOrEmpty(dto.Slug))
+            {
+                dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Name);
+            }
             var category = dto.ToEntity();
             _context.CategoriesProducts.Add(category);
             await _context.SaveChangesAsync();

@@ -1,74 +1,128 @@
 @using Flower.Data.Entities
 @model IEnumerable<OrderDTO>
 @{
-    ViewData["Title"] = "Orders";
+    ViewData["Title"] = "Đơn hàng";
     Layout = "_LayoutAdmin";
+
+    string OrderStatusClass(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "bg-surface-variant text-on-surface-variant border-outline-variant/30 dot-tertiary",
+        OrderStatus.PendingVerification => "bg-warning/10 text-warning border-warning/30 dot-warning",
+        OrderStatus.Confirmed => "bg-info/10 text-info border-info/30 dot-info",
+        OrderStatus.Preparing => "bg-secondary/10 text-secondary border-secondary/30 dot-secondary",
+        OrderStatus.Shipping => "bg-[#E3F2FD] text-[#1565C0] border-[#90CAF9]/50 dot-[#1E88E5]",
+        OrderStatus.Completed => "bg-[#E8F5E9] text-[#2E7D32] border-[#A5D6A7]/50 dot-[#43A047]",
+        OrderStatus.Cancelled => "bg-[#FFEBEE] text-[#C62828] border-[#EF9A9A]/50 dot-[#E53935]",
+        _ => "bg-surface-variant text-on-surface-variant border-outline-variant/30 dot-tertiary"
+    };
+
+    string OrderStatusLabel(OrderStatus s) => s switch
+    {
+        OrderStatus.Pending => "Chờ xử lý",
+        OrderStatus.PendingVerification => "Chờ xác minh",
+        OrderStatus.Confirmed => "Đã xác nhận",
+        OrderStatus.Preparing => "Đang cắm hoa",
+        OrderStatus.Shipping => "Đang giao",
+        OrderStatus.Completed => "Đã giao",
+        OrderStatus.Cancelled => "Đã hủy",
+        _ => "Không xác định"
+    };
 }
 
-<div class="space-y-lg">
-    <div class="flex justify-between items-center">
+<div class="space-y-stack-lg">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Sales Management</h3>
-            <p class="serif text-3xl font-bold">Recent Acquisitions</p>
+            <h2 class="font-display-lg text-display-lg text-on-background mb-2">Tổng quan đơn hàng</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Quản lý và theo dõi tất cả đơn hàng, giao dịch và yêu cầu của khách hàng.</p>
         </div>
-        <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
-            <span class="material-symbols-outlined text-lg">add</span>
-            Manual Order
-        </a>
+        <div class="flex gap-3">
+            <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Đơn hàng mới
+            </a>
+            <button class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg text-primary font-label-md text-label-md hover:bg-primary-container/10 transition-colors bg-surface">
+                <span class="material-symbols-outlined text-[18px]">download</span>
+                Xuất CSV
+            </button>
+        </div>
     </div>
 
-    <div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
+    <!-- Orders Table -->
+    <div class="bg-surface rounded-xl border border-outline-variant/30 petal-shadow-1 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full text-left">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="border-b border-outline-variant text-label-sm uppercase text-secondary tracking-widest bg-surface-container-low">
-                        <th class="px-lg py-4">Order ID</th>
-                        <th class="px-lg py-4">Customer</th>
-                        <th class="px-lg py-4">Date</th>
-                        <th class="px-lg py-4">Status</th>
-                        <th class="px-lg py-4 text-right">Actions</th>
+                    <tr class="border-b border-outline-variant/20 bg-surface-container-lowest">
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Sản phẩm</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Mã đơn</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Khách hàng</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Ngày</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Tổng tiền</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Thanh toán</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium">Trạng thái</th>
+                        <th class="py-4 px-6 font-label-md text-label-md text-on-surface-variant font-medium text-right">Thao tác</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-outline-variant">
+                <tbody class="divide-y divide-outline-variant/10">
                     @foreach (var order in Model)
                     {
-                        <tr class="table-row-hover transition-colors">
-                             <td class="px-lg py-5 font-bold serif">#LX-ORD-@order.Id</td>
-                             <td class="px-lg py-5">
-                                 <div class="flex items-center gap-3">
-                                     <div class="size-8 bg-surface-container-highest flex items-center justify-center font-bold text-[10px]">
-                                         @(order.CustomerName?.Length >= 2 ? order.CustomerName.Substring(0, 2).ToUpper() : "??")
-                                     </div>
-                                     <span class="text-body-md font-semibold">@(order.CustomerName ?? "Unknown")</span>
-                                 </div>
-                             </td>
-                            <td class="px-lg py-5 text-label-sm text-secondary uppercase">@order.OrderDate.ToString("dd MMM yyyy HH:mm")</td>
-                            <td class="px-lg py-5">
-                                @switch (order.Status)
+                        var preview = order.OrderDetails?.FirstOrDefault();
+                        var total = order.OrderDetails?.Sum(d => d.Quantity * d.UnitPrice) ?? 0;
+                        <tr class="hover:bg-surface-container-low/50 transition-colors group">
+                            <td class="py-4 px-6">
+                                @if (preview != null && !string.IsNullOrEmpty(preview.ProductImageUrl))
                                 {
-                                    case OrderStatus.Pending:
-                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline bg-surface-container-low text-secondary">Processing</span>
-                                        break;
-                                    case OrderStatus.Shipping:
-                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Shipped</span>
-                                        break;
-                                    case OrderStatus.Completed:
-                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Completed</span>
-                                        break;
-                                    default:
-                                        <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-outline text-secondary">Unknown</span>
-                                        break;
+                                    <img src="@preview.ProductImageUrl" class="w-12 h-12 object-cover rounded-lg border border-outline-variant/20" />
+                                }
+                                else
+                                {
+                                    <div class="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center border border-outline-variant/20">
+                                        <span class="material-symbols-outlined text-lg text-outline">inventory_2</span>
+                                    </div>
                                 }
                             </td>
-                            <td class="px-lg py-5 text-right space-x-4">
-                                <a asp-action="Details" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-0.5">Details</a>
-                                <a asp-action="Edit" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary">Edit</a>
-                                <a asp-action="Delete" asp-route-id="@order.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Delete this order?')">Delete</a>
+                            <td class="py-4 px-6 font-label-md text-label-md text-primary font-bold">#ORD-@order.Id</td>
+                            <td class="py-4 px-6">
+                                <div class="flex flex-col">
+                                    <span class="font-body-md text-body-md font-medium text-on-surface">@(order.CustomerName ?? "Không xác định")</span>
+                                    <span class="text-xs text-on-surface-variant">@(order.CustomerEmail ?? "")</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6 font-body-md text-body-md text-on-surface-variant">@order.OrderDate.ToString("dd/MM/yyyy")</td>
+                            <td class="py-4 px-6 font-semibold text-primary">@total.ToString("N0")₫</td>
+                            <td class="py-4 px-6">
+                                <span class="text-xs font-bold uppercase tracking-wider">@(order.PaymentMethod == PaymentMethod.COD ? "COD" : "Online")</span>
+                            </td>
+                            <td class="py-4 px-6">
+                                @{
+                                    var cls = OrderStatusClass(order.Status);
+                                    var parts = cls.Split(' ');
+                                    var bg = string.Join(" ", parts.Take(4));
+                                    var dot = parts.LastOrDefault() ?? "dot-tertiary";
+                                }
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-label-sm text-label-sm border @bg">
+                                    <span class="w-1.5 h-1.5 rounded-full @dot"></span>
+                                    @OrderStatusLabel(order.Status)
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a asp-action="Details" asp-route-id="@order.Id" class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-primary-container/10 no-underline">
+                                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@order.Id" class="text-on-surface-variant hover:text-primary transition-colors p-2 rounded-full hover:bg-primary-container/10 no-underline">
+                                        <span class="material-symbols-outlined text-[20px]">edit</span>
+                                    </a>
+                                    <a asp-action="Delete" asp-route-id="@order.Id" class="text-on-surface-variant hover:text-error transition-colors p-2 rounded-full hover:bg-error-container/30 no-underline" onclick="return confirm('Xóa đơn hàng này?')">
+                                        <span class="material-symbols-outlined text-[20px]">delete</span>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
+        <partial name="_Pagination" />
     </div>
 </div>

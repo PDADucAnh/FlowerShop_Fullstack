@@ -1,53 +1,87 @@
 @model CreateOrderDTO
 @{
-    ViewData["Title"] = "Manual Acquisition";
+    ViewData["Title"] = "Thêm đơn hàng";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg max-w-2xl mx-auto">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Transaction Initiation</h3>
-            <p class="serif text-3xl font-bold">New Order Record</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Thêm đơn hàng</h3>
+            <p class="serif text-3xl font-bold">Đơn hàng mới</p>
         </div>
         <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
-            Back to Orders
+            Quay lại
         </a>
     </div>
 
     <form asp-action="Create" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Acquisition Timestamp</label>
-                <input asp-for="OrderDate" type="datetime-local" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" value="@DateTime.Now.ToString("yyyy-MM-ddTHH:mm")" />
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Ngày đặt hàng</label>
+                <input asp-for="OrderDate" type="datetime-local" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" />
             </div>
             <div class="space-y-md">
-                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Client Entity</label>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Khách hàng</label>
                 <select asp-for="CustomerId" asp-items="ViewBag.CustomerList" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold"></select>
             </div>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Manifest Status</label>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Trạng thái</label>
             <select asp-for="Status" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold">
-                <option value="0">Processing</option>
-                <option value="1">Shipped</option>
-                <option value="2">Completed</option>
+                <option value="0">Chờ xử lý</option>
+                <option value="4">Chờ xác minh</option>
+                <option value="5">Đã xác nhận</option>
+                <option value="6">Đang cắm hoa</option>
+                <option value="1">Đang giao</option>
+                <option value="2">Đã giao</option>
+                <option value="3">Đã hủy</option>
             </select>
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Narrative Ghi chú (Notes)</label>
-            <textarea asp-for="Notes" rows="4" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant" placeholder="Enter transaction details..."></textarea>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Phương thức thanh toán</label>
+            <select asp-for="PaymentMethod" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold">
+                <option value="1">COD (tiền mặt)</option>
+                <option value="0">Chuyển khoản / Online</option>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Ngày nhận</label>
+                <input asp-for="DeliveryDate" type="date" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Khung giờ giao</label>
+                <input asp-for="DeliveryTimeSlot" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="VD: 08:00-10:00" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Quận/Huyện</label>
+                <input asp-for="DeliveryDistrict" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="VD: Quận 1" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Địa chỉ</label>
+                <input asp-for="DeliveryAddress" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="VD: 123 Nguyễn Huệ" />
+            </div>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Ghi chú</label>
+            <textarea asp-for="Notes" rows="4" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant" placeholder="Nhập ghi chú đơn hàng..."></textarea>
         </div>
 
         <div class="pt-lg border-t border-outline-variant flex gap-md">
             <button type="submit" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1">
-                Finalize Record
+                Thêm đơn hàng
             </button>
             <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all">
-                Cancel
+                Hủy
             </a>
         </div>
     </form>

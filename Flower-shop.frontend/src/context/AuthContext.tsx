@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
                 setUser({
+                    id: payload.Id ? Number(payload.Id) : undefined,
                     username: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name,
                     fullName: payload.FullName || '',
                     email: payload.Email || '',
@@ -34,6 +35,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (response.token) {
             tokenService.setToken(response.token);
             setUser({
+                id: response.id,
                 username: response.username,
                 fullName: response.fullName,
                 email: response.email,
@@ -56,14 +58,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (profile) {
                 setUser((prev) => prev ? { ...prev, ...profile } : profile);
             }
-        } catch {
-            // silently fail
+        } catch (error: any) {
+            console.warn('refreshProfile failed, token may be expired:', error);
+            if (error?.response?.status === 401) {
+                tokenService.removeToken();
+                setUser(null);
+            }
         }
+    }, []);
+
+    const updateProfile = useCallback(async (fullName: string, phone: string, address: string) => {
+        const response = await authService.updateProfile({ fullName, phone, address });
+        if (response.token) {
+            tokenService.setToken(response.token);
+        }
+        if (response.user) {
+            setUser(response.user);
+        }
+        return response;
+    }, []);
+
+    const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
+        const response = await authService.changePassword({ currentPassword, newPassword });
+        return response;
     }, []);
 
     const isAuthenticated = !!user;
 
-    const value: AuthContextType = { user, login, logout, refreshProfile, isAuthenticated, loading, token: tokenService.getToken() };
+    const value: AuthContextType = { user, login, logout, refreshProfile, updateProfile, changePassword, isAuthenticated, loading, token: tokenService.getToken() };
 
     return (
         <AuthContext.Provider value={value}>

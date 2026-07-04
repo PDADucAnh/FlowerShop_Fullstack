@@ -7,6 +7,9 @@ namespace Flower.Backend.Models.DTOs
         public int Id { get; set; }
         public string Username { get; set; }
         public string FullName { get; set; }
+        public string? Email { get; set; }
+        public string? Phone { get; set; }
+        public string? Address { get; set; }
         public string Role { get; set; }
     }
 
@@ -31,10 +34,16 @@ namespace Flower.Backend.Models.DTOs
         [Required]
         [MaxLength(50)]
         public string Username { get; set; }
-        public string? Password { get; set; } // Optional password update
+        public string? Password { get; set; }
         [Required]
         [MaxLength(200)]
         public string FullName { get; set; }
+        [MaxLength(200)]
+        public string? Email { get; set; }
+        [MaxLength(20)]
+        public string? Phone { get; set; }
+        [MaxLength(500)]
+        public string? Address { get; set; }
         [Required]
         public string Role { get; set; }
     }

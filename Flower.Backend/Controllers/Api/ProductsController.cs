@@ -21,6 +21,27 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [AllowAnonymous]
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1, 
+            [FromQuery] int pageSize = 8,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] int? categoryProductId = null)
+        {
+            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId);
+            return Ok(result);
+        }
+
+        [AllowAnonymous]
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
+        {
+            var results = await _productService.Search(query);
+            return Ok(results);
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -37,6 +58,14 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [AllowAnonymous]
+        [HttpGet("trending")]
+        public async Task<IActionResult> GetTrending([FromQuery] int count = 10)
+        {
+            var products = await _productService.GetTrending(count);
+            return Ok(products);
+        }
+
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDetail(int id)
         {
@@ -47,11 +76,13 @@ namespace Flower.Backend.Controllers.Api
                 return NotFound(new { message = "Không tìm thấy sản phẩm này trong hệ thống" });
             }
 
+            await _productService.TrackView(id);
+
             return Ok(product);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateProductDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreateProductDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -62,7 +93,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateProductDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProductDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();
@@ -77,6 +108,14 @@ namespace Flower.Backend.Controllers.Api
 
             await _notificationService.NotifyEntityChanged("Product");
             return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("{id}/track-add-to-cart")]
+        public async Task<IActionResult> TrackAddToCart(int id)
+        {
+            await _productService.TrackAddToCart(id);
+            return Ok(new { success = true });
         }
 
         [HttpDelete("{id}")]

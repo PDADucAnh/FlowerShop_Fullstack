@@ -2,6 +2,19 @@
 import axiosClient from '../api/axiosClient';
 
 const postService = {
+    getPostsPaged: async (page: number, pageSize: number) => {
+        try {
+            const searchParams = new URLSearchParams();
+            searchParams.set('page', page.toString());
+            searchParams.set('pageSize', pageSize.toString());
+            const response = await axiosClient.get(`/Posts/paged?${searchParams.toString()}`);
+            return response.data || response;
+        } catch (error) {
+            console.error("API getPostsPaged error:", error);
+            throw error;
+        }
+    },
+
     /**
      * 1. Lấy danh sách toàn bộ bài viết tin tức từ Backend
      * API Endpoint: GET https://localhost:xxxx/api/Posts (hoặc /api/Blogs tùy cấu hình Backend)
@@ -15,7 +28,7 @@ const postService = {
             return response.data || response;
         } catch (error) {
             console.error("Lỗi API getAllBlogs:", error);
-            throw error; // Đẩy lỗi ra ngoài để Component nhận biết và xử lý UI (như tắt loading, hiện thông báo lỗi)
+            throw error;
         }
     },
 

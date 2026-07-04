@@ -7,7 +7,6 @@ namespace Flower.Backend.Models.DTOs
 {
     public static class MappingExtensions
     {
-        // === User Mapping ===
         public static UserDTO ToDTO(this User user)
         {
             if (user == null) return null;
@@ -16,6 +15,9 @@ namespace Flower.Backend.Models.DTOs
                 Id = user.Id,
                 Username = user.Username,
                 FullName = user.FullName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
                 Role = user.Role
             };
         }
@@ -31,15 +33,15 @@ namespace Flower.Backend.Models.DTOs
             };
         }
 
-        // === Category Mapping ===
         public static CategoryDTO ToDTO(this Category category)
         {
             if (category == null) return null;
             return new CategoryDTO
             {
                 Id = category.Id,
-                Name = category.Name,
+                Name = category.Name ?? "",
                 Description = category.Description,
+                Slug = category.Slug,
                 Posts = category.Posts?.Select(p => p.ToDTO()).ToList()
             };
         }
@@ -50,7 +52,8 @@ namespace Flower.Backend.Models.DTOs
             return new Category
             {
                 Name = dto.Name,
-                Description = dto.Description
+                Description = dto.Description,
+                Slug = dto.Slug
             };
         }
 
@@ -59,17 +62,18 @@ namespace Flower.Backend.Models.DTOs
             if (dto == null || entity == null) return;
             entity.Name = dto.Name;
             entity.Description = dto.Description;
+            entity.Slug = dto.Slug;
         }
 
-        // === CategoryProduct Mapping ===
         public static CategoryProductDTO ToDTO(this CategoryProduct categoryProduct)
         {
             if (categoryProduct == null) return null;
             return new CategoryProductDTO
             {
                 Id = categoryProduct.Id,
-                Name = categoryProduct.Name,
-                Description = categoryProduct.Description
+                Name = categoryProduct.Name ?? "",
+                Description = categoryProduct.Description,
+                Slug = categoryProduct.Slug
             };
         }
 
@@ -79,7 +83,8 @@ namespace Flower.Backend.Models.DTOs
             return new CategoryProduct
             {
                 Name = dto.Name,
-                Description = dto.Description
+                Description = dto.Description,
+                Slug = dto.Slug
             };
         }
 
@@ -88,22 +93,27 @@ namespace Flower.Backend.Models.DTOs
             if (dto == null || entity == null) return;
             entity.Name = dto.Name;
             entity.Description = dto.Description;
+            entity.Slug = dto.Slug;
         }
 
-        // === Product Mapping ===
         public static ProductDTO ToDTO(this Product product)
         {
             if (product == null) return null;
             return new ProductDTO
             {
                 Id = product.Id,
-                Name = product.Name,
+                Sku = product.Sku,
+                Name = product.Name ?? "",
                 Description = product.Description,
+                Slug = product.Slug,
                 Price = product.Price,
+                DiscountPrice = product.DiscountPrice,
                 StockQuantity = product.StockQuantity,
                 ImageUrl = product.ImageUrl,
                 CategoryProductId = product.CategoryProductId,
-                CategoryProductName = product.CategoryProduct?.Name
+                CategoryProductName = product.CategoryProduct?.Name,
+                ViewCount = product.ViewCount,
+                AddToCartCount = product.AddToCartCount
             };
         }
 
@@ -112,8 +122,10 @@ namespace Flower.Backend.Models.DTOs
             if (dto == null) return null;
             return new Product
             {
+                Sku = dto.Sku,
                 Name = dto.Name,
                 Description = dto.Description,
+                Slug = dto.Slug,
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 ImageUrl = dto.ImageUrl,
@@ -124,15 +136,16 @@ namespace Flower.Backend.Models.DTOs
         public static void UpdateEntity(this UpdateProductDTO dto, Product entity)
         {
             if (dto == null || entity == null) return;
+            entity.Sku = dto.Sku;
             entity.Name = dto.Name;
             entity.Description = dto.Description;
+            entity.Slug = dto.Slug;
             entity.Price = dto.Price;
             entity.StockQuantity = dto.StockQuantity;
             entity.ImageUrl = dto.ImageUrl;
             entity.CategoryProductId = dto.CategoryProductId;
         }
 
-        // === Customer Mapping ===
         public static CustomerDTO ToDTO(this Customer customer)
         {
             if (customer == null) return null;
@@ -142,7 +155,12 @@ namespace Flower.Backend.Models.DTOs
                 FullName = customer.FullName,
                 Email = customer.Email,
                 Phone = customer.Phone,
-                Address = customer.Address
+                Address = customer.Address,
+                TotalOrders = customer.TotalOrders,
+                SuccessfulDeliveries = customer.SuccessfulDeliveries,
+                FailedDeliveries = customer.FailedDeliveries,
+                IsBlacklisted = customer.IsBlacklisted,
+                FraudScore = customer.FraudScore
             };
         }
 
@@ -172,7 +190,6 @@ namespace Flower.Backend.Models.DTOs
             }
         }
 
-        // === Order Mapping ===
         public static OrderDTO ToDTO(this Order order)
         {
             if (order == null) return null;
@@ -193,9 +210,22 @@ namespace Flower.Backend.Models.DTOs
                 CustomerId = order.CustomerId,
                 CustomerName = order.Customer?.FullName,
                 CustomerEmail = order.Customer?.Email,
+                CustomerPhone = order.Customer?.Phone,
                 Status = order.Status,
                 Notes = order.Notes,
-                OrderDetails = details
+                OrderDetails = details,
+                PaymentMethod = order.PaymentMethod,
+                PaymentStatus = order.PaymentStatus,
+                PaymentTransactionId = order.PaymentTransactionId,
+                PaymentPaidAt = order.PaymentPaidAt,
+                DeliveryDate = order.DeliveryDate,
+                DeliveryTimeSlot = order.DeliveryTimeSlot,
+                DeliveryDistrict = order.DeliveryDistrict,
+                DeliveryAddress = order.DeliveryAddress,
+                CancelledAt = order.CancelledAt,
+                CancellationReason = order.CancellationReason,
+                IsVerified = order.IsVerified,
+                RefundAmount = order.RefundAmount
             };
         }
 
@@ -207,7 +237,7 @@ namespace Flower.Backend.Models.DTOs
                 Id = detail.Id,
                 OrderId = detail.OrderId,
                 ProductId = detail.ProductId,
-                ProductName = detail.Product?.Name,
+                ProductName = detail.Product?.Name ?? $"Sản phẩm #{detail.ProductId}",
                 ProductImageUrl = detail.Product?.ImageUrl,
                 CustomerName = detail.Order?.Customer?.FullName,
                 Quantity = detail.Quantity,
@@ -222,23 +252,95 @@ namespace Flower.Backend.Models.DTOs
             entity.OrderDate = dto.OrderDate;
             entity.Status = dto.Status;
             entity.Notes = dto.Notes;
+            entity.DeliveryDate = dto.DeliveryDate;
+            entity.DeliveryTimeSlot = dto.DeliveryTimeSlot;
+            entity.DeliveryDistrict = dto.DeliveryDistrict;
+            entity.DeliveryAddress = dto.DeliveryAddress;
         }
 
-        // === Post Mapping ===
+        public static PaymentDTO ToDTO(this Payment payment)
+        {
+            if (payment == null) return null;
+            return new PaymentDTO
+            {
+                Id = payment.Id,
+                OrderId = payment.OrderId,
+                Amount = payment.Amount,
+                Method = payment.Method,
+                Status = payment.Status,
+                TransactionId = payment.TransactionId,
+                PaidAt = payment.PaidAt,
+                RefundedAt = payment.RefundedAt,
+                Notes = payment.Notes
+            };
+        }
+
+        public static DeliverySlotDTO ToDTO(this DeliverySlot slot)
+        {
+            if (slot == null) return null;
+            return new DeliverySlotDTO
+            {
+                Id = slot.Id,
+                ProductId = slot.ProductId,
+                DeliveryDate = slot.DeliveryDate,
+                TimeSlot = slot.TimeSlot,
+                MaxCapacity = slot.MaxCapacity,
+                CurrentBooked = slot.CurrentBooked
+            };
+        }
+
+        public static AdvertisementDTO ToDTO(this Advertisement ad)
+        {
+            if (ad == null) return null;
+            return new AdvertisementDTO
+            {
+                Id = ad.Id,
+                Title = ad.Title,
+                Subtitle = ad.Subtitle,
+                ImageUrl = ad.ImageUrl,
+                LinkUrl = ad.LinkUrl,
+                SortOrder = ad.SortOrder,
+                IsActive = ad.IsActive,
+                CreatedDate = ad.CreatedDate
+            };
+        }
+
         public static PostDTO ToDTO(this Post post)
         {
             if (post == null) return null;
             return new PostDTO
             {
                 Id = post.Id,
-                Title = post.Title,
-                Content = post.Content,
-                Summary = post.Summary,
+                Title = post.Title ?? "",
+                Content = post.Content ?? "",
+                Summary = TruncateSummary(post.Summary, post.Content),
+                Slug = post.Slug,
                 ImageUrl = post.ImageUrl,
                 CreatedDate = post.CreatedDate,
                 CategoryId = post.CategoryId,
                 CategoryName = post.Category?.Name
             };
+        }
+
+        private static string StripHtml(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return "";
+            var clean = System.Text.RegularExpressions.Regex.Replace(input, "<.*?>", string.Empty);
+            clean = clean.Replace("&nbsp;", " ")
+                         .Replace("&amp;", "&")
+                         .Replace("&lt;", "<")
+                         .Replace("&gt;", ">");
+            return clean.Trim();
+        }
+
+        private static string? TruncateSummary(string? summary, string? content)
+        {
+            const int maxLength = 500;
+            var text = !string.IsNullOrWhiteSpace(summary)
+                ? summary
+                : StripHtml(content ?? "");
+                
+            return text?.Length > maxLength ? text.Substring(0, maxLength) : text;
         }
 
         public static Post ToEntity(this CreatePostDTO dto)
@@ -248,9 +350,8 @@ namespace Flower.Backend.Models.DTOs
             {
                 Title = dto.Title,
                 Content = dto.Content,
-                Summary = !string.IsNullOrWhiteSpace(dto.Summary)
-                    ? dto.Summary
-                    : (dto.Content?.Length > 100 ? dto.Content.Substring(0, 100) : dto.Content),
+                Summary = TruncateSummary(dto.Summary, dto.Content),
+                Slug = dto.Slug,
                 ImageUrl = dto.ImageUrl,
                 CategoryId = dto.CategoryId
             };
@@ -261,9 +362,8 @@ namespace Flower.Backend.Models.DTOs
             if (dto == null || entity == null) return;
             entity.Title = dto.Title;
             entity.Content = dto.Content;
-            entity.Summary = !string.IsNullOrWhiteSpace(dto.Summary)
-                ? dto.Summary
-                : (dto.Content?.Length > 100 ? dto.Content.Substring(0, 100) : dto.Content);
+            entity.Summary = TruncateSummary(dto.Summary, dto.Content);
+            entity.Slug = dto.Slug;
             entity.ImageUrl = dto.ImageUrl;
             entity.CategoryId = dto.CategoryId;
         }

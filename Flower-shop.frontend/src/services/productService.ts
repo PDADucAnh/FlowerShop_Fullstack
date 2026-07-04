@@ -1,52 +1,86 @@
-// Import cấu hình axiosClient dùng chung từ thư mục api
 import axiosClient from '../api/axiosClient';
 
 const productService = {
-    /**
-     * 1. Lấy danh sách toàn bộ sản phẩm thời trang (hoặc theo bộ lọc)
-     * API Endpoint: GET https://localhost:xxxx/api/Products
-     */
-    getAllProducts: async () => {
+    getProductsPaged: async (
+        page: number, 
+        pageSize: number, 
+        minPrice?: number | null, 
+        maxPrice?: number | null, 
+        categoryProductId?: number | null
+    ) => {
         try {
-            // Thực hiện gọi API GET để lấy danh sách sản phẩm
-            const response = await axiosClient.get('/Products');
-
-            // Trả về mảng dữ liệu sản phẩm
+            const searchParams = new URLSearchParams();
+            searchParams.set('page', page.toString());
+            searchParams.set('pageSize', pageSize.toString());
+            if (minPrice !== undefined && minPrice !== null) searchParams.set('minPrice', minPrice.toString());
+            if (maxPrice !== undefined && maxPrice !== null) searchParams.set('maxPrice', maxPrice.toString());
+            if (categoryProductId !== undefined && categoryProductId !== null) searchParams.set('categoryProductId', categoryProductId.toString());
+            
+            const response = await axiosClient.get(`/Products/paged?${searchParams.toString()}`);
             return response.data || response;
         } catch (error) {
-            console.error("Lỗi API getAllProducts:", error);
-            throw error; // Đẩy lỗi ra ngoài để component ProductGrid bắt được và xử lý giao diện
+            console.error('API getProductsPaged error:', error);
+            throw error;
         }
     },
 
-    /**
-     * 2. Lấy thông tin chi tiết của một sản phẩm theo ID
-     * API Endpoint: GET https://localhost:xxxx/api/Products/{id}
-     */
+    getAllProducts: async () => {
+        try {
+            const response = await axiosClient.get('/Products');
+            return response.data || response;
+        } catch (error) {
+            console.error('API getAllProducts error:', error);
+            throw error;
+        }
+    },
+
     getProductById: async (id: string | number) => {
         try {
             const response = await axiosClient.get(`/Products/${id}`);
             return response.data || response;
         } catch (error) {
-            console.error(`Lỗi API getProductById với ID ${id}:`, error);
+            console.error(`API getProductById error for ID ${id}:`, error);
             throw error;
         }
     },
 
-    /**
-     * 3. Lấy danh sách sản phẩm theo danh mục sản phẩm
-     * API Endpoint: GET https://localhost:xxxx/api/Products/categoryproduct/{categoryProductId}
-     */
     getProductsByCategory: async (categoryProductId: number | null) => {
         try {
             const response = await axiosClient.get(`/Products/categoryproduct/${categoryProductId}`);
             return response.data || response;
         } catch (error) {
-            console.error(`Lỗi API getProductsByCategory với ID ${categoryProductId}:`, error);
+            console.error(`API getProductsByCategory error for ID ${categoryProductId}:`, error);
             throw error;
+        }
+    },
+
+    searchProducts: async (query: string) => {
+        try {
+            const response = await axiosClient.get(`/Products/search?query=${encodeURIComponent(query)}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('API searchProducts error:', error);
+            throw error;
+        }
+    },
+
+    getTrendingProducts: async (count: number = 10) => {
+        try {
+            const response = await axiosClient.get(`/Products/trending?count=${count}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('API getTrendingProducts error:', error);
+            throw error;
+        }
+    },
+
+    trackAddToCart: async (productId: number) => {
+        try {
+            await axiosClient.post(`/Products/${productId}/track-add-to-cart`);
+        } catch (error) {
+            console.error('API trackAddToCart error:', error);
         }
     }
 };
 
-// CRITICAL: Xuất mặc định đối tượng này để file ProductGrid.jsx import vào không bị lỗi 'default was not found'
 export default productService;

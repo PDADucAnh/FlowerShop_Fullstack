@@ -38,7 +38,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateCategoryDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,7 +48,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateCategoryDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();

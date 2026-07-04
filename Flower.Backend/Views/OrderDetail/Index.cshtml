@@ -1,18 +1,18 @@
 @model IEnumerable<OrderDetailDTO>
 @{
-    ViewData["Title"] = "Order Details";
+    ViewData["Title"] = "Chi tiết đơn hàng";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Logistics Insights</h3>
-            <p class="serif text-3xl font-bold">Acquisition Manifests</p>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Chi tiết đơn hàng</h3>
+            <p class="serif text-3xl font-bold">Sản phẩm trong đơn hàng</p>
         </div>
         <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
             <span class="material-symbols-outlined text-lg">add</span>
-            Add Detail Record
+            Thêm sản phẩm
         </a>
     </div>
 
@@ -21,31 +21,31 @@
             <table class="w-full text-left">
                 <thead>
                     <tr class="border-b border-outline-variant text-label-sm uppercase text-secondary tracking-widest bg-surface-container-low">
-                        <th class="px-lg py-4">Manifest ID</th>
-                        <th class="px-lg py-4">Order Reference</th>
-                        <th class="px-lg py-4">Product Story</th>
-                        <th class="px-lg py-4">Quantity</th>
-                        <th class="px-lg py-4 text-right">Acquisition Value</th>
-                        <th class="px-lg py-4 text-right">Actions</th>
+                        <th class="px-lg py-4">Mã chi tiết</th>
+                        <th class="px-lg py-4">Đơn hàng</th>
+                        <th class="px-lg py-4">Sản phẩm</th>
+                        <th class="px-lg py-4">Số lượng</th>
+                        <th class="px-lg py-4 text-right">Đơn giá</th>
+                        <th class="px-lg py-4 text-right">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant">
                     @foreach (var od in Model)
                     {
                         <tr class="table-row-hover transition-colors">
-                            <td class="px-lg py-5 serif font-bold">#MANIFEST-@od.Id</td>
-                            <td class="px-lg py-5 text-label-sm tracking-widest uppercase">#LX-ORD-@od.OrderId</td>
+                            <td class="px-lg py-5 serif font-bold">#DT-@od.Id</td>
+                            <td class="px-lg py-5 text-label-sm tracking-widest uppercase">#ORD-@od.OrderId</td>
                             <td class="px-lg py-5">
                                 <div class="flex flex-col">
                                     <span class="text-body-md font-bold">@(od.ProductName ?? "N/A")</span>
-                                    <span class="text-[10px] text-secondary uppercase tracking-widest">Client: @(od.CustomerName ?? "N/A")</span>
+                                    <span class="text-[10px] text-secondary uppercase tracking-widest">Khách hàng: @(od.CustomerName ?? "N/A")</span>
                                 </div>
                             </td>
-                            <td class="px-lg py-5 text-body-md">@od.Quantity units</td>
-                            <td class="px-lg py-5 text-right font-bold">@od.UnitPrice.ToString("N0") đ</td>
+                            <td class="px-lg py-5 text-body-md">@od.Quantity</td>
+                            <td class="px-lg py-5 text-right font-bold">@od.UnitPrice.ToString("C2")</td>
                             <td class="px-lg py-5 text-right space-x-4">
-                                <a asp-action="Edit" asp-route-id="@od.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary">Modify</a>
-                                <a asp-action="Delete" asp-route-id="@od.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Remove manifest record?')">Remove</a>
+                                <a asp-action="Edit" asp-route-id="@od.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@od.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa bản ghi này?')">Xóa</a>
                             </td>
                         </tr>
                     }
@@ -53,4 +53,6 @@
             </table>
         </div>
     </div>
+
+    <partial name="_Pagination" />
 </div>

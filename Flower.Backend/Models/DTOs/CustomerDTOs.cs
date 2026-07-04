@@ -10,6 +10,11 @@ namespace Flower.Backend.Models.DTOs
         public string Email { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        public int TotalOrders { get; set; }
+        public int SuccessfulDeliveries { get; set; }
+        public int FailedDeliveries { get; set; }
+        public bool IsBlacklisted { get; set; }
+        public int FraudScore { get; set; }
     }
 
     public class CreateCustomerDTO

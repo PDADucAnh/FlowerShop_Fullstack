@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { getImageUrl } from '../../utils/apiUtils';
+import { formatCurrency } from '../../utils/currency';
 import type { CartItem } from '../../context/CartContext';
 
 interface CartTableProps {
@@ -8,66 +9,118 @@ interface CartTableProps {
   onRemove: (id: number) => void;
 }
 
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
-};
-
 const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
+  const [inputValues, setInputValues] = useState<Record<number, string>>({});
+
+  const handleInputChange = (id: number, value: string) => {
+    setInputValues((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleInputBlur = (id: number, stockQuantity: number) => {
+    const raw = inputValues[id];
+    const parsed = parseInt(raw, 10);
+    if (isNaN(parsed) || parsed < 1) {
+      onUpdateQuantity(id, 1);
+      setInputValues((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+      return;
+    }
+    const clamped = Math.min(parsed, stockQuantity);
+    onUpdateQuantity(id, clamped);
+    setInputValues((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  const handleInputKeyDown = (e: React.KeyboardEvent, id: number, stockQuantity: number) => {
+    if (e.key === 'Enter') {
+      (e.target as HTMLInputElement).blur();
+    }
+  };
   return (
-    <div className="bg-surface-container-lowest border border-outline-variant overflow-hidden rounded-xl">
-      <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-outline-variant font-label-sm text-label-sm uppercase text-secondary tracking-[0.2em] bg-surface-container-low font-bold">
-              <th className="px-lg py-4">Item</th>
-              <th className="px-lg py-4 text-center">Price</th>
-              <th className="px-lg py-4 text-center">Quantity</th>
-              <th className="px-lg py-4 text-right">Total</th>
-              <th className="px-lg py-4"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-outline-variant">
-            {items.map((item) => {
-              const imageUrl = getImageUrl(item.imageUrl);
-              return (
-                <tr key={item.id} className="transition-colors hover:bg-surface-container-low">
-                  <td className="px-lg py-6">
-                    <div className="flex items-center gap-lg">
-                      <div className="size-20 flex-shrink-0 bg-surface-container overflow-hidden border border-outline-variant rounded-lg">
-                        <img src={imageUrl} alt={item.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="space-y-1">
-                        <span className="font-label-md text-label-md text-on-surface font-bold block">{item.name}</span>
-                        <span className="font-label-sm text-label-sm text-outline block">ID: #FLW-{item.id}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-lg py-6 text-center font-body-md text-primary font-semibold">{formatCurrency(item.discountPrice || item.price)}</td>
-                  <td className="px-lg py-6">
-                    <div className="flex items-center justify-center gap-md">
-                      <button className="size-8 flex items-center justify-center border border-outline-variant bg-transparent text-secondary outline-none btn-luxury rounded"
-                        onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}>
-                        <span className="material-symbols-outlined text-sm">remove</span>
-                      </button>
-                      <span className="font-bold text-sm w-4 text-center">{item.quantity}</span>
-                      <button className="size-8 flex items-center justify-center border border-outline-variant bg-transparent text-secondary outline-none btn-luxury rounded"
-                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}>
-                        <span className="material-symbols-outlined text-sm">add</span>
-                      </button>
-                    </div>
-                  </td>
-                  <td className="px-lg py-6 text-right font-bold text-on-surface">{formatCurrency((item.discountPrice || item.price) * item.quantity)}</td>
-                  <td className="px-lg py-6 text-right">
-                    <button className="bg-transparent border-0 text-error p-2 outline-none btn-ghost-luxury" onClick={() => onRemove(item.id)}>
-                      <span className="material-symbols-outlined">delete_outline</span>
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+    <div className="bg-surface rounded-xl overflow-hidden">
+      {/* Table Header */}
+      <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-outline-variant bg-surface-container-low text-on-surface-variant font-label-md">
+        <div className="col-span-6 uppercase">Sản phẩm</div>
+        <div className="col-span-2 text-center uppercase">Giá</div>
+        <div className="col-span-2 text-center uppercase">Số lượng</div>
+        <div className="col-span-2 text-right uppercase">Tổng cộng</div>
       </div>
+
+      {items.map((item) => {
+        const imageUrl = getImageUrl(item.imageUrl);
+        return (
+          <div
+            key={item.id}
+            className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-8 items-center border-b border-outline-variant hover:bg-surface-container-lowest transition-colors duration-300 group"
+          >
+            <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
+              <div className="w-24 h-32 rounded-lg bg-surface-variant flex-shrink-0 overflow-hidden petal-shadow">
+                <img
+                  className="w-full h-full object-cover"
+                  src={imageUrl}
+                  alt={item.name}
+                  loading="lazy"
+                />
+              </div>
+              <div>
+                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-1">{item.name}</h3>
+                <p className="font-body-md text-on-surface-variant text-sm">
+                  {item.description ? item.description.substring(0, 50) + (item.description.length > 50 ? '...' : '') : 'Sắp xếp hoa cao cấp'}
+                </p>
+                <button
+                  onClick={() => onRemove(item.id)}
+                  className="mt-2 text-primary font-label-sm flex items-center hover:underline bg-transparent border-0 cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[16px] mr-1">delete</span> Xóa
+                </button>
+              </div>
+            </div>
+
+            <div className="col-span-1 md:col-span-2 text-center font-body-md text-on-surface">
+              <span className="md:hidden font-label-md text-on-surface-variant">Giá: </span>
+              {formatCurrency(item.discountPrice || item.price)}
+            </div>
+
+            <div className="col-span-1 md:col-span-2 flex justify-center">
+              <div className="flex items-center border border-outline-variant rounded-lg overflow-hidden h-10 bg-surface-container-lowest">
+                <button
+                  onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                  className="px-3 hover:bg-secondary-container transition-colors text-primary bg-transparent border-0 cursor-pointer h-full"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  min={1}
+                  max={item.stockQuantity}
+                  value={inputValues[item.id] ?? item.quantity}
+                  onChange={(e) => handleInputChange(item.id, e.target.value)}
+                  onBlur={() => handleInputBlur(item.id, item.stockQuantity)}
+                  onKeyDown={(e) => handleInputKeyDown(e, item.id, item.stockQuantity)}
+                  className="w-14 text-center font-label-md border-0 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <button
+                  onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                  className="px-3 hover:bg-secondary-container transition-colors text-primary bg-transparent border-0 cursor-pointer h-full"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="col-span-1 md:col-span-2 text-right font-headline-sm text-primary text-[20px]">
+              <span className="md:hidden font-label-md text-on-surface-variant">Tổng: </span>
+              {formatCurrency((item.discountPrice || item.price) * item.quantity)}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

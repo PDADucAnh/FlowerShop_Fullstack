@@ -1,20 +1,20 @@
 @model PostDTO
 @{
-    ViewData["Title"] = "Editorial Insight";
+    ViewData["Title"] = "Chi tiết bài viết";
     Layout = "_LayoutAdmin";
 }
 
 <div class="space-y-lg max-w-5xl mx-auto">
     <div class="flex justify-between items-center">
         <div>
-            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Editorial Narrative</h3>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Bài viết</h3>
             <p class="serif text-4xl font-bold">@Model.Title</p>
         </div>
         <div class="flex gap-md">
-            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Refine Story</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="border border-primary px-lg py-3 text-label-sm uppercase tracking-widest hover:bg-primary hover:text-on-primary transition-all">Sửa bài viết</a>
             <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
-                Back to Stories
+                Quay lại danh sách
             </a>
         </div>
     </div>
@@ -23,7 +23,7 @@
         <div class="aspect-video w-full overflow-hidden bg-surface-container-low border-b border-outline-variant">
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
-                <img src="@Model.ImageUrl" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-1000" alt="Cover Image">
+                <img src="@Model.ImageUrl" class="w-full h-full object-cover" alt="Ảnh bìa">
             }
             else
             {
@@ -40,8 +40,8 @@
                         @(Model.CategoryName?.Substring(0, 1) ?? "E")
                     </div>
                     <div>
-                        <p class="text-label-sm font-bold uppercase tracking-widest">@(Model.CategoryName ?? "Editorial")</p>
-                        <p class="text-[10px] text-secondary uppercase tracking-[0.2em]">Published on @Model.CreatedDate.ToString("MMM dd, yyyy")</p>
+                        <p class="text-label-sm font-bold uppercase tracking-widest">@(Model.CategoryName ?? "Bài viết")</p>
+                        <p class="text-[10px] text-secondary uppercase tracking-[0.2em]">Ngày đăng: @Model.CreatedDate.ToString("dd/MM/yyyy")</p>
                     </div>
                 </div>
                 <div class="flex gap-md">
@@ -57,7 +57,7 @@
             </div>
 
             <div class="pt-xl border-t border-outline-variant flex justify-between items-center">
-                <p class="text-[10px] text-outline uppercase tracking-[0.4em] font-bold">End of Narrative</p>
+                <p class="text-[10px] text-outline uppercase tracking-[0.4em] font-bold">Kết thúc</p>
                 <div class="flex -space-x-2">
                     <div class="size-8 rounded-full border-2 border-white bg-neutral-300"></div>
                     <div class="size-8 rounded-full border-2 border-white bg-neutral-400"></div>

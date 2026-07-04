@@ -19,20 +19,27 @@ namespace Flower.Backend.Controllers
             _productService = productService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
         {
-            var orderDetails = await _orderDetailService.GetAll();
-            return View(orderDetails);
+            var paged = await _orderDetailService.GetPaged(page, pageSize);
+            ViewData["TotalPages"] = paged.TotalPages;
+            ViewData["CurrentPage"] = paged.Page;
+            ViewData["TotalCount"] = paged.TotalCount;
+            ViewData["PageSize"] = paged.PageSize;
+            return View(paged.Items);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(int? orderId)
         {
             var orders = await _orderService.GetAll();
             var products = await _productService.GetAll();
-            ViewBag.OrderList = new SelectList(orders, "Id", "Id");
+            ViewBag.OrderList = new SelectList(orders, "Id", "Id", orderId);
             ViewBag.ProductList = new SelectList(products, "Id", "Name");
-            return View();
+            var model = new OrderDetailDTO();
+            if (orderId.HasValue)
+                model.OrderId = orderId.Value;
+            return View(model);
         }
 
         [HttpPost]
@@ -48,12 +55,14 @@ namespace Flower.Backend.Controllers
             }
 
             await _orderDetailService.Create(model);
+            TempData["Success"] = "Chi tiết đơn hàng đã được tạo thành công.";
             return RedirectToAction("Index");
         }
 
         public async Task<IActionResult> Delete(int id)
         {
             await _orderDetailService.Delete(id);
+            TempData["Success"] = "Chi tiết đơn hàng đã được xóa.";
             return RedirectToAction("Index");
         }
 
@@ -84,6 +93,7 @@ namespace Flower.Backend.Controllers
             }
 
             await _orderDetailService.Update(model.Id, model);
+            TempData["Success"] = "Chi tiết đơn hàng đã được cập nhật.";
             return RedirectToAction("Index");
         }
     }

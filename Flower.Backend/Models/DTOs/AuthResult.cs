@@ -9,7 +9,6 @@ namespace Flower.Backend.Models.DTOs
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string Role { get; set; } = string.Empty;
-        public string PasswordHash { get; set; } = string.Empty;
         public string AuthType { get; set; } = string.Empty;
     }
 }
