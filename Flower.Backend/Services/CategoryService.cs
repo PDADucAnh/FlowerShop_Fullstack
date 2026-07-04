@@ -20,7 +20,7 @@ namespace Flower.Backend.Services
 
         public async Task<IEnumerable<CategoryDTO>> GetAll()
         {
-            var categories = await _context.Categories.ToListAsync();
+            var categories = await _context.Categories.Include(c => c.Posts).ToListAsync();
             return categories.Select(c => c.ToDTO());
         }
 
@@ -30,6 +30,7 @@ namespace Flower.Backend.Services
 
             var totalCount = await query.CountAsync();
             var items = await query
+                .Include(c => c.Posts)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();

@@ -36,14 +36,14 @@
 - **Đã khắc phục:** 05/07/2026 — Sinh OTP trong `OrderService.CreateOrder`, gửi email qua `EmailService.SendOtpEmailAsync`, verify trong `PaymentController.VerifyCOD`.
 
 ### C04 — Fire-and-forget Task trong forgot-password
-- [ ] **File:** `Flower.Backend/Services/AuthService.cs:233`
+- [x] **File:** `Flower.Backend/Services/AuthService.cs:233`
 - **Mô tả:** `_ = Task.Run(async () => { ... catch {} })` — silent swallow exception.
 - **Hậu quả:** Email không gửi được nhưng user vẫn thấy thành công. App pool recycle giữa chừng → email mất.
 - **Khắc phục:** Dùng `IHostedService` + Channel/Queue pattern.
 - **Ưu tiên:** #4
 
 ### C05 — Cascade Delete trên tất cả Foreign Keys
-- [ ] **File:** `Flower.Data/ApplicationDbContext.cs`
+- [x] **File:** `Flower.Data/ApplicationDbContext.cs`
 - **Mô tả:** EF Core convention cascade delete trên required relationships.
 - **Hậu quả:** Xóa Category → xóa Post. Xóa Customer → xóa Order.
 - **Khắc phục:** `OnDelete(DeleteBehavior.Restrict)` cho business-critical FKs (Category→Post, Customer→Order, Product→OrderDetail).
@@ -59,7 +59,7 @@
 - **Khắc phục:** Tách `IOrderCancellationService` interface riêng.
 
 ### H02 — N+1 Query Categories → Posts
-- [ ] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs:45`
+- [x] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs:45`
 - **Mô tả:** `category.Posts?.Select(p => p.ToDTO())` gây N+1 khi Category không được Include Posts.
 - **Khắc phục:** `.Include(c => c.Posts)` hoặc tạo DTO projection riêng.
 
@@ -167,8 +167,8 @@
 
 | Mức độ | Số lượng | Đã khắc phục | Còn lại |
 |--------|----------|--------------|---------|
-| 🔴 Critical | 5 | 3 | 2 |
-| 🟠 High | 8 | 0 | 8 |
-| 🟡 Medium | 10 | 4 | 6 |
+| 🔴 Critical | 5 | 5 | 0 |
+| 🟠 High | 8 | 1 | 7 |
+| 🟡 Medium | 10 | 5 | 5 |
 | 🟢 Low | 5 | 0 | 5 |
-| **Total** | **28** | **7** | **21** |
+| **Total** | **28** | **11** | **17** |

@@ -34,6 +34,30 @@ namespace Flower.Data
                 .HasIndex(p => p.Sku)
                 .IsUnique()
                 .HasFilter("[Sku] IS NOT NULL");
+
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.Category)
+                .WithMany(c => c.Posts)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Product>()
+                .HasOne(p => p.CategoryProduct)
+                .WithMany(cp => cp.Products)
+                .HasForeignKey(p => p.CategoryProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Customer)
+                .WithMany(c => c.Orders)
+                .HasForeignKey(o => o.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OrderDetail>()
+                .HasOne(od => od.Product)
+                .WithMany()
+                .HasForeignKey(od => od.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

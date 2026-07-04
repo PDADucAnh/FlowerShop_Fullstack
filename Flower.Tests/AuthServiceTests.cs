@@ -7,6 +7,7 @@ using Flower.Data;
 using Flower.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -15,6 +16,7 @@ namespace Flower.Tests
     public class AuthServiceTests
     {
         private readonly Mock<IEmailService> _emailServiceMock = new();
+        private readonly Mock<ILogger<AuthService>> _loggerMock = new();
 
         private ApplicationDbContext CreateInMemoryDbContext()
         {
@@ -30,7 +32,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
 
             // Act
             var result = await authService.Register("Password123!", "Test User", "test@example.com", "0123456789", "123 Street");
@@ -51,7 +53,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             
             // Seed existing customer
             await authService.Register("Password123!", "Test User", "test@example.com", null, null);
@@ -69,7 +71,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             await authService.Register("Password123!", "Login User", "login@example.com", null, null);
 
             // Act
@@ -89,7 +91,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             await authService.Register("Password123!", "Login User", "login@example.com", null, null);
 
             // Act
@@ -104,7 +106,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
 
             // Act
             var result = await authService.Login("nonexistent@example.com", "Password123!");
@@ -118,7 +120,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
 
             // Seed an admin User directly in the database
             var admin = new User
@@ -147,7 +149,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
 
             // Act
             var result = await authService.ForgotPassword("nonexistent@example.com", "http://client.com");
@@ -163,7 +165,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             await authService.Register("Password123!", "Test User", "test@example.com", null, null);
 
             var emailSentTcs = new TaskCompletionSource<string>();
@@ -211,7 +213,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
 
             // Act
             var result = await authService.ResetPassword("invalid-token", "NewPassword123!");
@@ -226,7 +228,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             
             var customer = new Customer
             {
@@ -252,7 +254,7 @@ namespace Flower.Tests
         {
             // Arrange
             using var context = CreateInMemoryDbContext();
-            var authService = new AuthService(context, _emailServiceMock.Object);
+            var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             
             var customer = new Customer
             {

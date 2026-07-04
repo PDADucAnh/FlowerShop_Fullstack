@@ -4,6 +4,7 @@ using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Cryptography;
 
@@ -15,11 +16,13 @@ namespace Flower.Backend.Services
         private readonly PasswordHasher<User> _userPasswordHasher;
         private readonly PasswordHasher<Customer> _customerPasswordHasher;
         private readonly IEmailService _emailService;
+        private readonly ILogger<AuthService> _logger;
 
-        public AuthService(IApplicationDbContext context, IEmailService emailService)
+        public AuthService(IApplicationDbContext context, IEmailService emailService, ILogger<AuthService> logger)
         {
             _context = context;
             _emailService = emailService;
+            _logger = logger;
             _userPasswordHasher = new PasswordHasher<User>();
             _customerPasswordHasher = new PasswordHasher<Customer>();
         }
@@ -238,7 +241,7 @@ namespace Flower.Backend.Services
                 }
                 catch (Exception ex)
                 {
-                    // Log exception without bubbling it to the HTTP response
+                    _logger.LogWarning(ex, "Failed to send reset password email to {Email}", customer.Email);
                 }
             });
 
