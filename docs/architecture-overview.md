@@ -1,7 +1,7 @@
-# Kiến trúc & Workflow Chi tiết - AnhCMS_Solution
+# Kiến trúc & Workflow Chi tiết — PDA FlowerShop
 
 > **Phiên bản:** 1.0 | **Cập nhật:** 07/2026  
-> **Mô tả:** Tài liệu kiến trúc tổng thể, sơ đồ luồng dữ liệu, và workflow chi tiết từng chức năng của hệ thống CMS Thương mại điện tử PDA FLOWER.
+> **Mô tả:** Tài liệu kiến trúc tổng thể, sơ đồ luồng dữ liệu, và workflow chi tiết từng chức năng của hệ thống thương mại điện tử PDA FlowerShop.
 
 ---
 
@@ -27,7 +27,7 @@
 
 ## 1. Tổng quan kiến trúc
 
-Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện tử kết hợp Hệ thống Quản trị Nội dung (CMS) dành cho cửa hàng hoa tươi **PDA FLOWER**, được xây dựng theo mô hình **Hybrid Architecture**:
+Hệ thống **PDA FlowerShop** là một nền tảng Thương mại điện tử kết hợp Hệ thống Quản trị Nội dung (CMS) dành cho cửa hàng hoa tươi **PDA FLOWER**, được xây dựng theo mô hình **Hybrid Architecture**:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -45,7 +45,7 @@ Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện t
          │ REST API (JSON)            │ Cookie Auth
          ▼                            ▼
 ┌────────────────────────────────────────────────────────┐
-│              CMS.Backend (ASP.NET Core 8.0)            │
+              │  Flower.Backend (ASP.NET Core 8.0)           │
 │  ┌─────────────┐  ┌──────────────┐  ┌───────────────┐ │
 │  │ API Ctrl    │  │ MVC Ctrl     │  │ SignalR Hub   │ │
 │  │ /api/*      │  │ /Admin/*     │  │ /hubs/notify  │ │
@@ -57,7 +57,7 @@ Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện t
 │  └──────┬──────────────────────────────────────────┘ │
 │         │                                            │
 │  ┌──────┴──────────────────────────────────────────┐ │
-│  │         CMS.Data (EF Core DbContext)             │ │
+│  │         Flower.Data (EF Core DbContext)           │ │
 │  └──────┬──────────────────────────────────────────┘ │
 └─────────┼────────────────────────────────────────────┘
           │
@@ -65,7 +65,7 @@ Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện t
 ┌──────────────────┐
 │  SQL Server      │
 │  LocalDB         │
-│  AnhCMS_DB       │
+│  FlowerShop_DB   │
 └──────────────────┘
 ```
 
@@ -87,17 +87,17 @@ Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện t
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   CMS.Tests                         │
+│                  Flower.Tests                       │
 │           (xUnit + InMemory Database)               │
 ├─────────────────────────────────────────────────────┤
-│                  cms.frontend                       │
-│  React 19 + TypeScript + Tailwind + TanStack Query │
+│              Flower-shop.frontend                   │
+│  React 19 + TypeScript + Custom CSS + TanStack Query│
 │  ┌──────────┬──────────┬──────────┬──────────────┐ │
 │  │ Pages    │ Context  │ Hooks    │ Services     │ │
 │  │ (17)     │ (3)      │ (6)      │ (4)          │ │
 │  └──────────┴──────────┴──────────┴──────────────┘ │
 ├─────────────────────────────────────────────────────┤
-│                  CMS.Backend                        │
+│                 Flower.Backend                      │
 │  ┌───────────────────────────────────────────────┐ │
 │  │ Controllers (MVC: 17 + API: 12)              │ │
 │  ├───────────────────────────────────────────────┤ │
@@ -106,7 +106,7 @@ Hệ thống **AnhCMS_Solution** là một nền tảng Thương mại điện t
 │  │ Middleware / Hubs / Utils                     │ │
 │  └───────────────────────────────────────────────┘ │
 ├─────────────────────────────────────────────────────┤
-│                  CMS.Data                          │
+│                 Flower.Data                        │
 │  ┌───────────────────────────────────────────────┐ │
 │  │ ApplicationDbContext + 13 Entity classes      │ │
 │  │ + 5 Migrations                                │ │
@@ -337,7 +337,7 @@ Pending (0) ──► PendingVerification (4) ──► Confirmed (5) ──► 
                        │
                        ▼
             ┌─────────────────────┐
-            │ AnhCMS.Auth Policy  │
+             │ FlowerShop.Auth Policy│
             │ (PolicyScheme)      │
             └────────┬────────────┘
                      │
@@ -1015,4 +1015,4 @@ StockLockService class:
 
 ---
 
-<p align="center"><i>&copy; 2026 AnhCMS_Solution - Full-Stack ASP.NET Core &amp; React Architecture Documentation</i></p>
+<p align="center"><i>&copy; 2026 PDA FlowerShop — Full-Stack ASP.NET Core &amp; React Architecture Documentation</i></p>
