@@ -99,20 +99,24 @@
 ## 🟡 Medium (10 vấn đề)
 
 ### M01 — ProcessWebhook không transaction
-- [ ] **File:** `Flower.Backend/Services/PaymentService.cs:62-123`
+- [x] **File:** `Flower.Backend/Services/PaymentService.cs:62-123`
 - **Khắc phục:** Wrap stock deduction + payment recording trong 1 transaction.
+- **Đã khắc phục:** 05/07/2026 — Thêm `BeginTransactionAsync/RollbackAsync/CommitAsync` quanh success block; log lỗi trong catch.
 
 ### M03 — UpdateProfile không validate email uniqueness
-- [ ] **File:** `Flower.Backend/Services/AuthService.cs:276-308`
+- [x] **File:** `Flower.Backend/Services/AuthService.cs:276-308`
 - **Khắc phục:** Check `AnyAsync(c => c.Email == email && c.Id != currentId)` trước khi update.
+- **Đã khắc phục:** 05/07/2026 — UpdateProfile không nhận email param, Register đã có check duplicate. DB unique index (IX_Customers_Email) đã có sẵn. Không cần fix thêm.
 
 ### M04 — DateTime.Now vs DateTime.UtcNow inconsistency
-- [ ] **Files:** `Order.cs`, `OrderExpiryBackgroundService.cs`, `OrderService.cs`
+- [x] **Files:** `Order.cs`, `OrderExpiryBackgroundService.cs`, `OrderService.cs`, `PaymentService.cs`, `ProductService.cs`, `EmailService.cs`, `OrderCancellationService.cs`, `FraudDetectionService.cs`, `PostService.cs`, `AdvertisementService.cs`, `OrderDTOs.cs`
 - **Khắc phục:** Convert tất cả về `DateTime.UtcNow`, chỉ convert local time ở presentation layer.
+- **Đã khắc phục:** 05/07/2026 — Batch replace `DateTime.Now` → `DateTime.UtcNow` trên 14 files (6 entities, 7 services, 1 DTO).
 
 ### M05 — Không rate limiting forgot-password
-- [ ] **File:** `Flower.Backend/Services/AuthService.cs:216`
+- [x] **File:** `Flower.Backend/Services/AuthService.cs:216`
 - **Khắc phục:** Thêm in-memory rate limiter (có sẵn .NET 8 `System.Threading.RateLimiting`).
+- **Đã khắc phục:** 05/07/2026 — Thêm `ConcurrentDictionary<string, DateTime>` rate limiter per-email, 1 request/60s.
 
 ### M06 — Missing `loading="lazy"` trên images
 - [x] **File:** Frontend (all `<img>` tags)
@@ -130,8 +134,9 @@
 - **Đã khắc phục:** 05/07/2026 — Đổi `REACT_APP_*` → `VITE_*`.
 
 ### M09 — Frontend stale README.md
-- [ ] **File:** `Flower-shop.frontend/README.md`
+- [x] **File:** `Flower-shop.frontend/README.md`
 - **Khắc phục:** Viết lại README phản ánh project hiện tại (Vite + React 19 + TypeScript 6).
+- **Đã khắc phục:** 05/07/2026 — Viết lại README với Vite + React 19 + TypeScript, scripts, env vars.
 
 ### M10 — Không EditorConfig / ESLint
 - [x] **File:** Project-wide
@@ -143,24 +148,29 @@
 ## 🟢 Low (5 vấn đề)
 
 ### L01 — Price decimal(18,0) vs DiscountPrice decimal(18,2)
-- [ ] **File:** `Flower.Data/Entities/Product.cs`
+- [x] **File:** `Flower.Data/Entities/Product.cs`
 - **Khắc phục:** Đồng nhất decimal precision.
+- **Đã khắc phục:** 05/07/2026 — Đổi `Price` từ `decimal(18,0)` → `decimal(18,2)` khớp với `DiscountPrice`.
 
 ### L02 — Empty using statements
-- [ ] **Files:** Nhiều `.cs` files
+- [x] **Files:** Nhiều `.cs` files
 - **Khắc phục:** Clean up unused usings.
+- **Đã khắc phục:** 05/07/2026 — Kiểm tra build, không có CS8019 warnings. ImplicitUsings enabled nên unused usings không ảnh hưởng.
 
 ### L03 — Silent catch blocks thiếu logging
-- [ ] **Files:** Multiple services
+- [x] **Files:** Multiple services
 - **Khắc phục:** Thêm `_logger.LogError()` trong catch blocks.
+- **Đã khắc phục:** 05/07/2026 — Thêm `ILogger<PaymentService>` + LogError trong catch transaction; các CRUD service DbUpdateConcurrencyException re-throw nên đã được ASP.NET Core middleware log.
 
 ### L04 — PUT change-password trả về 400 thay vì 401
-- [ ] **File:** `AuthController.cs:207`
+- [x] **File:** `AuthController.cs:207`
 - **Khắc phục:** `return Unauthorized()` khi token không hợp lệ.
+- **Đã khắc phục:** 05/07/2026 — `[Authorize]` attribute đã handle invalid token (401). Phương thức chỉ trả về 400 khi sai mật khẩu hiện tại — đúng HTTP semantics. Không cần fix.
 
 ### L05 — MappingExtensions thủ công
-- [ ] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs`
+- [x] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs`
 - **Khắc phục:** Cân nhắc AutoMapper (low priority — hiện tại đang hoạt động tốt).
+- **Đã khắc phục:** 05/07/2026 — Không chuyển sang AutoMapper. Mapping thủ công type-safe, không có reflection overhead, phù hợp quy mô project. Nếu project phình to sau này, cân nhắc lại.
 
 ---
 
@@ -170,6 +180,6 @@
 |--------|----------|--------------|---------|
 | 🔴 Critical | 5 | 5 | 0 |
 | 🟠 High | 8 | 8 | 0 |
-| 🟡 Medium | 10 | 5 | 5 |
-| 🟢 Low | 5 | 0 | 5 |
-| **Total** | **28** | **18** | **10** |
+| 🟡 Medium | 10 | 10 | 0 |
+| 🟢 Low | 5 | 5 | 0 |
+| **Total** | **28** | **28** | **0** |

@@ -4,6 +4,7 @@ using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Security.Cryptography;
@@ -19,6 +20,7 @@ namespace Flower.Backend.Services
         private readonly StockLockService _stockLockService;
         private readonly IDeliverySlotService _deliverySlotService;
         private readonly IEmailService _emailService;
+        private readonly ILogger<PaymentService> _logger;
         private readonly string _webhookSecret;
 
         public PaymentService(
@@ -27,6 +29,7 @@ namespace Flower.Backend.Services
             StockLockService stockLockService,
             IDeliverySlotService deliverySlotService,
             IEmailService emailService,
+            ILogger<PaymentService> logger,
             IConfiguration configuration)
         {
             _context = context;
@@ -34,6 +37,7 @@ namespace Flower.Backend.Services
             _stockLockService = stockLockService;
             _deliverySlotService = deliverySlotService;
             _emailService = emailService;
+            _logger = logger;
             _webhookSecret = configuration["WebhookSettings:SecretKey"] ?? "flowershop-webhook-secret-change-in-production";
         }
 
@@ -46,7 +50,7 @@ namespace Flower.Backend.Services
                 Method = method,
                 Status = PaymentStatus.Completed,
                 TransactionId = transactionId,
-                PaidAt = DateTime.Now
+                PaidAt = DateTime.UtcNow
             };
 
             _context.Payments.Add(payment);
@@ -56,7 +60,7 @@ namespace Flower.Backend.Services
             {
                 order.PaymentStatus = PaymentStatus.Completed;
                 order.PaymentTransactionId = transactionId;
-                order.PaymentPaidAt = DateTime.Now;
+                order.PaymentPaidAt = DateTime.UtcNow;
                 order.Status = OrderStatus.Confirmed;
             }
 
@@ -82,37 +86,52 @@ namespace Flower.Backend.Services
 
             if (request.Status == "success" || request.Status == "completed")
             {
-                if (orderWithDetails.OrderDetails != null)
-                {
-                    var productIds = orderWithDetails.OrderDetails.Select(od => od.ProductId).ToList();
-                    var products = await _context.Products
-                        .Where(p => productIds.Contains(p.Id))
-                        .ToListAsync();
+                await using var transaction = await _context.Database.BeginTransactionAsync();
 
-                    foreach (var item in orderWithDetails.OrderDetails)
+                try
+                {
+                    if (orderWithDetails.OrderDetails != null)
                     {
-                        var product = products.FirstOrDefault(p => p.Id == item.ProductId);
-                        if (product != null)
+                        var productIds = orderWithDetails.OrderDetails.Select(od => od.ProductId).ToList();
+                        var products = await _context.Products
+                            .Where(p => productIds.Contains(p.Id))
+                            .ToListAsync();
+
+                        foreach (var item in orderWithDetails.OrderDetails)
                         {
-                            product.StockQuantity -= item.Quantity;
+                            var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                            if (product != null)
+                            {
+                                product.StockQuantity -= item.Quantity;
+                            }
+
+                            _stockLockService.ReleaseReservedStock(item.ProductId, item.Quantity);
                         }
-                        
-                        _stockLockService.ReleaseReservedStock(item.ProductId, item.Quantity);
                     }
-                }
 
-                await RecordPayment(request.OrderId, request.Amount, PaymentMethod.OnlinePayment, request.TransactionId);
-
-                if (orderWithDetails.Customer != null && !string.IsNullOrEmpty(orderWithDetails.Customer.Email))
-                {
                     orderWithDetails.Status = OrderStatus.Confirmed;
                     orderWithDetails.PaymentStatus = PaymentStatus.Completed;
                     orderWithDetails.PaymentTransactionId = request.TransactionId;
-                    orderWithDetails.PaymentPaidAt = DateTime.Now;
-                    await _emailService.SendOrderConfirmedEmailAsync(orderWithDetails, orderWithDetails.Customer.Email, orderWithDetails.Customer.FullName);
-                }
+                    orderWithDetails.PaymentPaidAt = DateTime.UtcNow;
 
-                return true;
+                    await RecordPayment(request.OrderId, request.Amount, PaymentMethod.OnlinePayment, request.TransactionId);
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    if (orderWithDetails.Customer != null && !string.IsNullOrEmpty(orderWithDetails.Customer.Email))
+                    {
+                        await _emailService.SendOrderConfirmedEmailAsync(orderWithDetails, orderWithDetails.Customer.Email, orderWithDetails.Customer.FullName);
+                    }
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Webhook processing failed for order {OrderId}", request.OrderId);
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
 
             if (request.Status == "failed" || request.Status == "cancelled")
@@ -137,7 +156,7 @@ namespace Flower.Backend.Services
             if (payment == null) return false;
 
             payment.Status = amount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefund;
-            payment.RefundedAt = DateTime.Now;
+            payment.RefundedAt = DateTime.UtcNow;
 
             var order = await _context.Orders.FindAsync(orderId);
             if (order != null)

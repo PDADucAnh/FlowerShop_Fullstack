@@ -74,7 +74,7 @@ namespace Flower.Backend.Services
                 dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Title);
             }
             var post = dto.ToEntity();
-            post.CreatedDate = DateTime.Now;
+            post.CreatedDate = DateTime.UtcNow;
             _context.Posts.Add(post);
             await _context.SaveChangesAsync();
 

@@ -34,7 +34,7 @@ namespace Flower.Backend.Services
             if (order.Status == OrderStatus.Cancelled) return true;
 
             order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.Now;
+            order.CancelledAt = DateTime.UtcNow;
             order.CancellationReason = reason;
 
             bool wasDeducted = order.PaymentMethod == PaymentMethod.COD

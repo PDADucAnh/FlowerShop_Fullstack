@@ -101,7 +101,7 @@ namespace Flower.Backend.Services
             var orderShippingTime = "Chờ giao hàng";
             if (order.Status == OrderStatus.Shipping)
             {
-                orderShippingTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                orderShippingTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
             else if (order.Status == OrderStatus.Completed)
             {
@@ -113,7 +113,7 @@ namespace Flower.Backend.Services
             var orderCompletedTime = "Chờ hoàn thành";
             if (order.Status == OrderStatus.Completed)
             {
-                orderCompletedTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                orderCompletedTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
 
             var buyer = WebUtility.HtmlEncode(parsedNotes.Buyer);
@@ -314,7 +314,7 @@ namespace Flower.Backend.Services
             var orderShippingTime = "Chờ giao hàng";
             if (order.Status == OrderStatus.Shipping)
             {
-                orderShippingTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                orderShippingTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
             else if (order.Status == OrderStatus.Completed)
             {
@@ -326,7 +326,7 @@ namespace Flower.Backend.Services
             var orderCompletedTime = "Chờ hoàn thành";
             if (order.Status == OrderStatus.Completed)
             {
-                orderCompletedTime = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
+                orderCompletedTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
 
             var buyer = WebUtility.HtmlEncode(parsedNotes.Buyer);

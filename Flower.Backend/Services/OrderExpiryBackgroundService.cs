@@ -52,7 +52,7 @@ namespace Flower.Backend.Services
                 var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
                 var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
 
-                var now = DateTime.Now;
+                var now = DateTime.UtcNow;
                 var codCutoff = now.AddMinutes(-30);
                 var onlineCutoff = now.AddMinutes(-15);
 

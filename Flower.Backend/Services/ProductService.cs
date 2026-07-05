@@ -187,8 +187,8 @@ namespace Flower.Backend.Services
 
         public async Task<IEnumerable<ProductDTO>> GetTrending(int count = 10)
         {
-            var sevenDaysAgo = DateTime.Now.AddDays(-7);
-            var thirtyDaysAgo = DateTime.Now.AddDays(-30);
+            var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
+            var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
 
             var sales7d = await _context.OrderDetails
                 .Where(od => od.Order != null && od.Order.OrderDate >= sevenDaysAgo)

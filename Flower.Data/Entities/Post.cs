@@ -26,7 +26,7 @@ namespace Flower.Data.Entities
         [MaxLength(1000)]
         public string? ImageUrl { get; set; }
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
         public int CategoryId { get; set; }
 

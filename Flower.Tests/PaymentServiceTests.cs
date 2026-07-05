@@ -6,7 +6,9 @@ using Flower.Backend.Services.Interfaces;
 using Flower.Data;
 using Flower.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -46,6 +48,7 @@ namespace Flower.Tests
                 new StockLockService(_memoryCache),
                 _deliverySlotMock.Object,
                 _emailServiceMock.Object,
+                Mock.Of<ILogger<PaymentService>>(),
                 CreateConfig());
         }
 

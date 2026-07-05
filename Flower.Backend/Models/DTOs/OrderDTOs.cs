@@ -54,7 +54,7 @@ namespace Flower.Backend.Models.DTOs
         }
 
         public TimeSpan? TimeUntilDelivery => DeliveryDate.HasValue
-            ? DeliveryDate.Value - DateTime.Now
+            ? DeliveryDate.Value - DateTime.UtcNow
             : null;
     }
 
@@ -105,7 +105,7 @@ namespace Flower.Backend.Models.DTOs
 
     public class CreateOrderDTO
     {
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         [Required]
         [Range(1, int.MaxValue)]
         public int CustomerId { get; set; }

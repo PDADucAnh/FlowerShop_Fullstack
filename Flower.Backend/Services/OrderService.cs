@@ -228,7 +228,7 @@ namespace Flower.Backend.Services
 
                 var newOrder = new Order
                 {
-                    OrderDate = orderDate ?? DateTime.Now,
+                    OrderDate = orderDate ?? DateTime.UtcNow,
                     CustomerId = customerId,
                     Status = initialStatus,
                     Notes = notes,
@@ -306,7 +306,7 @@ namespace Flower.Backend.Services
                 {
                     newOrder.Status = OrderStatus.Confirmed;
                     newOrder.IsVerified = true;
-                    newOrder.VerifiedAt = DateTime.Now;
+                    newOrder.VerifiedAt = DateTime.UtcNow;
                     customer.TotalOrders++;
                     await _context.SaveChangesAsync();
                 }
@@ -434,7 +434,7 @@ namespace Flower.Backend.Services
                 return false;
 
             order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.Now;
+            order.CancelledAt = DateTime.UtcNow;
 
             if (order.OrderDetails != null)
             {
@@ -483,7 +483,7 @@ namespace Flower.Backend.Services
                 return (false, "Đơn hàng đang trong quá trình sản xuất/giao hàng, không thể hủy");
 
             var delta = order.DeliveryDate.HasValue
-                ? (order.DeliveryDate.Value - DateTime.Now).TotalHours
+                ? (order.DeliveryDate.Value - DateTime.UtcNow).TotalHours
                 : 999;
 
             if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.PendingVerification && delta <= 4)
@@ -507,7 +507,7 @@ namespace Flower.Backend.Services
             var refundAmount = totalAmount * refundPercent;
 
             order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.Now;
+            order.CancelledAt = DateTime.UtcNow;
             order.CancellationReason = reason ?? "Hủy theo yêu cầu";
             order.RefundAmount = refundAmount;
 
@@ -570,7 +570,7 @@ namespace Flower.Backend.Services
 
                 order.Status = OrderStatus.Confirmed;
                 order.IsVerified = true;
-                order.VerifiedAt = DateTime.Now;
+                order.VerifiedAt = DateTime.UtcNow;
                 order.Customer.TotalOrders++;
                 await _context.SaveChangesAsync();
 
@@ -592,7 +592,7 @@ namespace Flower.Backend.Services
 
         public async Task<bool> AutoCancelUnverifiedOrders(int timeoutMinutes = 30)
         {
-            var cutoff = DateTime.Now.AddMinutes(-timeoutMinutes);
+            var cutoff = DateTime.UtcNow.AddMinutes(-timeoutMinutes);
 
             var expiredOrders = await _context.Orders
                 .Include(o => o.OrderDetails)
@@ -603,7 +603,7 @@ namespace Flower.Backend.Services
             foreach (var order in expiredOrders)
             {
                 order.Status = OrderStatus.Cancelled;
-                order.CancelledAt = DateTime.Now;
+                order.CancelledAt = DateTime.UtcNow;
                 order.CancellationReason = "Tự động hủy do quá thời gian xác minh";
 
                 if (order.OrderDetails != null)

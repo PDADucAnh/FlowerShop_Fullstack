@@ -23,6 +23,6 @@ namespace Flower.Data.Entities
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedDate { get; set; } = DateTime.Now;
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     }
 }

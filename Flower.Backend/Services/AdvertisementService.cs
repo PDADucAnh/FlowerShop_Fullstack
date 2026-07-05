@@ -55,7 +55,7 @@ namespace Flower.Backend.Services
                 LinkUrl = dto.LinkUrl,
                 SortOrder = dto.SortOrder,
                 IsActive = dto.IsActive,
-                CreatedDate = System.DateTime.Now
+                CreatedDate = System.DateTime.UtcNow
             };
 
             _context.Advertisements.Add(entity);

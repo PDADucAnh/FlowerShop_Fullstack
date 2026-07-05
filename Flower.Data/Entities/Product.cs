@@ -11,7 +11,7 @@ namespace Flower.Data.Entities
         [MaxLength(50)]
         public string? Sku { get; set; }
 
-        [Required(ErrorMessage = "Tên s?n ph?m không du?c d? tr?ng")]
+        [Required(ErrorMessage = "Tï¿½n s?n ph?m khï¿½ng du?c d? tr?ng")]
         [MaxLength(200)]
         public string Name { get; set; }
 
@@ -21,7 +21,7 @@ namespace Flower.Data.Entities
         public string? Slug { get; set; }
 
         [Range(0, double.MaxValue)]
-        [Column(TypeName = "decimal(18,0)")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
 
         public decimal? DiscountPrice { get; set; }

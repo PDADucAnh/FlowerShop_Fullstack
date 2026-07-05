@@ -53,7 +53,7 @@ namespace Flower.Backend.Services
             {
                 order.Status = OrderStatus.Confirmed;
                 order.IsVerified = true;
-                order.VerifiedAt = DateTime.Now;
+                order.VerifiedAt = DateTime.UtcNow;
 
                 if (order.Customer != null)
                 {
@@ -90,7 +90,7 @@ namespace Flower.Backend.Services
             {
                 PhoneNumber = phoneNumber,
                 Reason = reason,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 IsActive = true
             });
 

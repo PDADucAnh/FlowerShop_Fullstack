@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Security.Cryptography;
+using System.Threading.RateLimiting;
 
 namespace Flower.Backend.Services
 {
@@ -216,8 +217,20 @@ namespace Flower.Backend.Services
             return null;
         }
 
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, DateTime> _forgotPasswordTimestamps = new();
+
         public async Task<(bool Success, string Message)> ForgotPassword(string email, string clientUrl)
         {
+            var now = DateTime.UtcNow;
+            var lastSent = _forgotPasswordTimestamps.GetValueOrDefault(email);
+
+            if (lastSent != default && (now - lastSent).TotalSeconds < 60)
+            {
+                return (true, "Nếu email tồn tại trên hệ thống, một liên kết đặt lại mật khẩu đã được gửi đi. Vui lòng kiểm tra hộp thư.");
+            }
+
+            _forgotPasswordTimestamps[email] = now;
+
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
             if (customer == null)
             {

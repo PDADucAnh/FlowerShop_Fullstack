@@ -36,7 +36,7 @@ namespace Flower.Data.Entities
         [Key]
         public int Id { get; set; }
 
-        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
         public int CustomerId { get; set; }
 
