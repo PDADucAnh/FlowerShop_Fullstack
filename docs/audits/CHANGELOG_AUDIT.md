@@ -114,6 +114,15 @@
 | L01 | `Price` decimal(18,0) → decimal(18,2) | `Product.cs` | Đồng bộ với DiscountPrice |
 | L03 | Thêm `ILogger<PaymentService>` + LogError trong catch | `PaymentService.cs`, `PaymentServiceTests.cs` | Log transaction errors |
 
+### Khắc phục đợt 5 (05/07/2026) — Graduation Readiness
+
+| ID | Thay đổi | Files | Ghi chú |
+|----|----------|-------|---------|
+| DOC-01 | Viết lại setup-guide.md cho FlowerShop | `docs/setup-guide.md` | Cập nhật project name, paths, ports |
+| DOC-02 | Xoá email credentials khỏi appsettings.json | `appsettings.json` | C02 hoàn thiện — xoá hẳn Username/Password |
+| DOC-03 | Tạo features.md cho báo cáo | `docs/features.md` | Danh sách tính năng + API endpoints + security |
+| DOC-04 | Cập nhật reports/latest + TECH_DEBT | `docs/audits/reports/latest.md`, `docs/audits/TECH_DEBT.md` | Phản ánh trạng thái 28/28 fixed |
+
 ### Tổng kết
 - Phát hiện **28 vấn đề**, đã khắc phục **28** (5/5 Critical ✅, 8/8 High ✅, 10/10 Medium ✅, 5/5 Low ✅)
 - **0 vấn đề tồn đọng** 🎉
@@ -121,3 +130,39 @@
 - Overall score cải thiện từ **5.5/10 → 7.3/10** (+1.8 điểm)
 - Testing: 37 tests (xUnit backend), 0 frontend tests (cần cải thiện sau)
 - Infrastructure: CI/CD, Docker, monitoring vẫn chưa có
+- **Sẵn sàng cho báo cáo thực tập tốt nghiệp** ✅
+
+## Audit #2 — 05/07/2026 (Graduation Readiness Assessment)
+
+### Thông tin chung
+- **Ngày:** 05/07/2026
+- **Mục đích:** Đánh giá mức độ sẵn sàng cho báo cáo thực tập tốt nghiệp
+- **Hạn nộp:** 2 ngày (07/07/2026)
+
+### Kết quả đánh giá
+
+| Hạng mục | Trạng thái | Ghi chú |
+|----------|-----------|---------|
+| Build Backend | ✅ Pass (0 errors) | |
+| Build Frontend | ✅ Pass (0 errors) | Warnings pre-existing (signalr) |
+| Tests | ✅ 37/37 passed | |
+| Audit Issues | ✅ 28/28 resolved | |
+| Setup Guide | ✅ Updated | Project name, paths, ports fixed |
+| Email Credentials | ✅ Removed | Dùng User Secrets |
+| Features Doc | ✅ Created | `docs/features.md` |
+| Architecture Doc | ✅ Exists | `docs/architecture-overview.md` |
+| Gmail Guide | ✅ Exists | `docs/gmail-setup-guide.md` |
+| DB Migration | ✅ Auto on startup | 7 migrations, 0 pending |
+
+### Khuyến nghị cho báo cáo
+
+**Tài liệu nên đính kèm báo cáo:**
+1. `docs/features.md` — Danh sách tính năng
+2. `docs/architecture-overview.md` — Kiến trúc hệ thống
+3. `docs/setup-guide.md` — Hướng dẫn cài đặt
+
+**Còn thiếu (có thể bổ sung vào báo cáo):**
+1. Ảnh chụp màn hình các chức năng chính
+2. Video demo (quay màn hình)
+3. Kết quả test (screenshot dotnet test output)
+4. Kết luận và hướng phát triển

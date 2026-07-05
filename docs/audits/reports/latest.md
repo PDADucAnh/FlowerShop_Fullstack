@@ -333,3 +333,46 @@ Frontend (Vite + React 19 SPA) ──API──▶ Backend (ASP.NET Core 8.0 MVC 
 - E2E tests (Playwright)
 - Payment gateway thật
 - Multi-language support
+
+---
+
+## 13. Đánh Giá Sẵn Sàng Cho Báo Cáo Thực Tập
+
+> **Hạn nộp:** 2 ngày (07/07/2026)
+
+### ✅ Sẵn sàng
+
+| Mục | Chi tiết |
+|-----|----------|
+| Build | Backend 0 lỗi, Frontend 0 lỗi |
+| Tests | 37/37 passed |
+| Audit | 28/28 issues resolved |
+| Setup Guide | Đã cập nhật cho FlowerShop |
+| AppSettings | Email credentials đã xoá |
+| Features | `docs/features.md` — đầy đủ tính năng + API + security |
+| Architecture | `docs/architecture-overview.md` — sẵn có |
+| Source code | `dev/audit-fixes` branch, sạch |
+
+### 📋 Checklist cho báo cáo
+
+| Việc cần làm | Gợi ý |
+|-------------|-------|
+| Ảnh chụp màn hình | Chụp: trang chủ, shop, checkout, admin dashboard |
+| Video demo | Quay 3-5 phút luồng: đăng nhập → mua hàng → admin |
+| Kết quả test | Screenshot `dotnet test` output (37/37 passed) |
+| Kiến trúc | Dùng diagram từ `docs/architecture-overview.md` |
+| Tính năng | Dùng `docs/features.md` làm cơ sở |
+
+### 🚀 Cách chạy demo nhanh
+
+```powershell
+# Terminal 1: Backend
+cd Flower.Backend
+dotnet run --launch-profile https
+
+# Terminal 2: Frontend
+cd Flower-shop.frontend
+npm run dev
+```
+
+Mở `http://localhost:3000` → Đăng nhập `admin` / `123456`
