@@ -1,1 +1,0 @@
-var e=e=>new Intl.NumberFormat(`vi-VN`).format(Math.round(e/1e3)*1e3)+` đ`;export{e as t};
