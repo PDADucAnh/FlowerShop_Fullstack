@@ -17,6 +17,15 @@ namespace Flower.Data.Entities
         [Column(TypeName = "decimal(18,0)")]
         public decimal UnitPrice { get; set; }
 
+        [MaxLength(200)]
+        public string? ProductName { get; set; }
+
+        [MaxLength(1000)]
+        public string? ProductImage { get; set; }
+
+        [MaxLength(50)]
+        public string? SizeVariant { get; set; }
+
         [ForeignKey("OrderId")]
         public virtual Order? Order { get; set; }
 

@@ -16,7 +16,8 @@ namespace Flower.Backend.Services.Interfaces
             DateTime? orderDate = null, OrderStatus? status = null,
             PaymentMethod? paymentMethod = null, DateTime? deliveryDate = null,
             string? deliveryTimeSlot = null, string? deliveryDistrict = null,
-            string? deliveryAddress = null);
+            string? deliveryAddress = null,
+            string? recipientName = null, string? recipientPhone = null);
         Task<bool> Update(int id, UpdateOrderDTO dto);
         Task<bool> Delete(int id);
         Task<bool> Cancel(int id);

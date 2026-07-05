@@ -222,6 +222,8 @@ namespace Flower.Backend.Models.DTOs
                 DeliveryTimeSlot = order.DeliveryTimeSlot,
                 DeliveryDistrict = order.DeliveryDistrict,
                 DeliveryAddress = order.DeliveryAddress,
+                RecipientName = order.RecipientName,
+                RecipientPhone = order.RecipientPhone,
                 CancelledAt = order.CancelledAt,
                 CancellationReason = order.CancellationReason,
                 IsVerified = order.IsVerified,
@@ -237,8 +239,9 @@ namespace Flower.Backend.Models.DTOs
                 Id = detail.Id,
                 OrderId = detail.OrderId,
                 ProductId = detail.ProductId,
-                ProductName = detail.Product?.Name ?? $"Sản phẩm #{detail.ProductId}",
-                ProductImageUrl = detail.Product?.ImageUrl,
+                ProductName = detail.ProductName ?? detail.Product?.Name ?? $"Sản phẩm #{detail.ProductId}",
+                ProductImageUrl = detail.ProductImage ?? detail.Product?.ImageUrl,
+                SizeVariant = detail.SizeVariant,
                 CustomerName = detail.Order?.Customer?.FullName,
                 Quantity = detail.Quantity,
                 UnitPrice = detail.UnitPrice
@@ -256,6 +259,8 @@ namespace Flower.Backend.Models.DTOs
             entity.DeliveryTimeSlot = dto.DeliveryTimeSlot;
             entity.DeliveryDistrict = dto.DeliveryDistrict;
             entity.DeliveryAddress = dto.DeliveryAddress;
+            entity.RecipientName = dto.RecipientName;
+            entity.RecipientPhone = dto.RecipientPhone;
         }
 
         public static PaymentDTO ToDTO(this Payment payment)

@@ -14,5 +14,7 @@ namespace Flower.Backend.Models.DTOs
         public string? DeliveryTimeSlot { get; set; }
         public string? DeliveryDistrict { get; set; }
         public string? DeliveryAddress { get; set; }
+        public string? RecipientName { get; set; }
+        public string? RecipientPhone { get; set; }
     }
 }

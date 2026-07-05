@@ -6,6 +6,7 @@ export interface OrderDetail {
   productId: number;
   productName?: string;
   productImageUrl?: string;
+  sizeVariant?: string;
   quantity: number;
   unitPrice: number;
   customerName?: string;
@@ -20,6 +21,8 @@ export interface Order {
   orderDate: string;
   status: OrderStatus;
   notes?: string;
+  recipientName?: string;
+  recipientPhone?: string;
   orderDetails?: OrderDetail[];
   paymentMethod: number;
   paymentStatus: number;

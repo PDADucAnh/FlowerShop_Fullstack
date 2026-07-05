@@ -145,7 +145,8 @@ namespace Flower.Backend.Services
             int customerId, string? notes, List<OrderItemInput> items, DateTime? orderDate = null,
             OrderStatus? status = null, PaymentMethod? paymentMethod = null,
             DateTime? deliveryDate = null, string? deliveryTimeSlot = null,
-            string? deliveryDistrict = null, string? deliveryAddress = null)
+            string? deliveryDistrict = null, string? deliveryAddress = null,
+            string? recipientName = null, string? recipientPhone = null)
         {
             try
             {
@@ -238,6 +239,8 @@ namespace Flower.Backend.Services
                     DeliveryTimeSlot = deliveryTimeSlot,
                     DeliveryDistrict = deliveryDistrict,
                     DeliveryAddress = deliveryAddress,
+                    RecipientName = recipientName,
+                    RecipientPhone = recipientPhone,
                     TargetFinishedTime = targetFinishedTime
                 };
 
@@ -263,11 +266,14 @@ namespace Flower.Backend.Services
 
                     newOrder.OrderDetails = items.Select(item =>
                 {
+                    var product = productDict[item.ProductId];
                     return new OrderDetail
                     {
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice
+                        UnitPrice = item.UnitPrice,
+                        ProductName = product.Name,
+                        ProductImage = product.ImageUrl
                     };
                 }).ToList();
 

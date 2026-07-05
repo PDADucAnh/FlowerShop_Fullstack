@@ -42,7 +42,9 @@ namespace Flower.Backend.Controllers.Api
                 deliveryDate: input.DeliveryDate,
                 deliveryTimeSlot: input.DeliveryTimeSlot,
                 deliveryDistrict: input.DeliveryDistrict,
-                deliveryAddress: input.DeliveryAddress);
+                deliveryAddress: input.DeliveryAddress,
+                recipientName: input.RecipientName,
+                recipientPhone: input.RecipientPhone);
 
             if (!success)
                 return BadRequest(new { message });
@@ -69,7 +71,9 @@ namespace Flower.Backend.Controllers.Api
                 deliveryDate: request.DeliveryDate,
                 deliveryTimeSlot: request.DeliveryTimeSlot,
                 deliveryDistrict: request.DeliveryDistrict,
-                deliveryAddress: request.DeliveryAddress);
+                deliveryAddress: request.DeliveryAddress,
+                recipientName: request.RecipientName,
+                recipientPhone: request.RecipientPhone);
 
             if (!success)
                 return BadRequest(new { message });

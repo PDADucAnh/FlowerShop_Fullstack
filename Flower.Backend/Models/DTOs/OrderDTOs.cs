@@ -24,6 +24,8 @@ namespace Flower.Backend.Models.DTOs
         public string? DeliveryTimeSlot { get; set; }
         public string? DeliveryDistrict { get; set; }
         public string? DeliveryAddress { get; set; }
+        public string? RecipientName { get; set; }
+        public string? RecipientPhone { get; set; }
         public DateTime? CancelledAt { get; set; }
         public string? CancellationReason { get; set; }
         public bool IsVerified { get; set; }
@@ -66,6 +68,7 @@ namespace Flower.Backend.Models.DTOs
         public int ProductId { get; set; }
         public string? ProductName { get; set; }
         public string? ProductImageUrl { get; set; }
+        public string? SizeVariant { get; set; }
         public string? CustomerName { get; set; }
         [Required]
         [Range(1, 10000)]
@@ -88,6 +91,10 @@ namespace Flower.Backend.Models.DTOs
         public string? DeliveryTimeSlot { get; set; }
         public string? DeliveryDistrict { get; set; }
         public string? DeliveryAddress { get; set; }
+        [MaxLength(200)]
+        public string? RecipientName { get; set; }
+        [MaxLength(20)]
+        public string? RecipientPhone { get; set; }
     }
 
     public class OrderItemInput
@@ -119,6 +126,10 @@ namespace Flower.Backend.Models.DTOs
         public string? DeliveryDistrict { get; set; }
         [MaxLength(500)]
         public string? DeliveryAddress { get; set; }
+        [MaxLength(200)]
+        public string? RecipientName { get; set; }
+        [MaxLength(20)]
+        public string? RecipientPhone { get; set; }
     }
 
     public class CancelOrderRequest
@@ -152,6 +163,12 @@ namespace Flower.Backend.Models.DTOs
         [Required]
         [MaxLength(500)]
         public string? DeliveryAddress { get; set; }
+
+        [MaxLength(200)]
+        public string? RecipientName { get; set; }
+
+        [MaxLength(20)]
+        public string? RecipientPhone { get; set; }
     }
 
     public class DeliverySlotDTO

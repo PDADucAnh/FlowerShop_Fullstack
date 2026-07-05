@@ -49,7 +49,9 @@ namespace Flower.Backend.Controllers
 
             var (success, message, orderId) = await _orderService.CreateOrder(
                 model.CustomerId, model.Notes, new List<OrderItemInput>(),
-                model.OrderDate, model.Status);
+                model.OrderDate, model.Status,
+                recipientName: model.RecipientName,
+                recipientPhone: model.RecipientPhone);
 
             TempData["Success"] = "Đơn hàng đã được tạo thành công.";
             return RedirectToAction("Index");
@@ -81,7 +83,9 @@ namespace Flower.Backend.Controllers
                 DeliveryDate = order.DeliveryDate,
                 DeliveryTimeSlot = order.DeliveryTimeSlot,
                 DeliveryDistrict = order.DeliveryDistrict,
-                DeliveryAddress = order.DeliveryAddress
+                DeliveryAddress = order.DeliveryAddress,
+                RecipientName = order.RecipientName,
+                RecipientPhone = order.RecipientPhone
             };
 
             return View(model);

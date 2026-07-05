@@ -23,6 +23,7 @@ namespace Flower.Data
         DbSet<DeliverySlot> DeliverySlots { get; set; }
         DbSet<Payment> Payments { get; set; }
         DbSet<PhoneBlacklist> PhoneBlacklists { get; set; }
+        DbSet<ProductVariant> ProductVariants { get; set; }
 
         EntityEntry Entry(object entity);
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

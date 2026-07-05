@@ -21,6 +21,7 @@ namespace Flower.Data
         public DbSet<DeliverySlot> DeliverySlots { get; set; }
         public DbSet<Payment> Payments { get; set; }
         public DbSet<PhoneBlacklist> PhoneBlacklists { get; set; }
+        public DbSet<ProductVariant> ProductVariants { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -67,6 +68,12 @@ namespace Flower.Data
             modelBuilder.Entity<Order>()
                 .HasIndex(o => new { o.Status, o.OrderDate })
                 .HasDatabaseName("IX_Orders_Status_OrderDate");
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasOne(pv => pv.Product)
+                .WithMany()
+                .HasForeignKey(pv => pv.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

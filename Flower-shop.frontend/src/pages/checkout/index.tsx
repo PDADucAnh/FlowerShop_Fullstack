@@ -122,16 +122,9 @@ const CheckoutPage: React.FC = () => {
   const onSubmit = async (formData: CheckoutFormData) => {
     if (cartItems.length === 0) return;
 
-    const formattedNotes = [
-      `Người mua: ${formData.fullname} (SĐT: ${formData.phone}, Email: ${formData.email})`,
-      `Người nhận: ${formData.recipientName} (SĐT: ${formData.recipientPhone})`,
-      `Lời chúc: ${formData.greetingCard || 'Không có'}`,
-      formData.notes ? `Ghi chú thêm: ${formData.notes}` : ''
-    ].filter(Boolean).join(' | ');
-
     const orderPayload = {
       customerId: user?.id || 0,
-      notes: formattedNotes,
+      notes: formData.notes || '',
       items: cartItems.map(item => ({
         productId: item.id,
         quantity: item.quantity,
@@ -141,6 +134,8 @@ const CheckoutPage: React.FC = () => {
       deliveryDate: formData.deliveryDate,
       deliveryTimeSlot: formData.deliveryTimeSlot,
       deliveryAddress: formData.deliveryAddress,
+      recipientName: formData.recipientName,
+      recipientPhone: formData.recipientPhone,
     };
 
     try {

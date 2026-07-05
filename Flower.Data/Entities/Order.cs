@@ -69,6 +69,12 @@ namespace Flower.Data.Entities
         [MaxLength(500)]
         public string? DeliveryAddress { get; set; }
 
+        [MaxLength(200)]
+        public string? RecipientName { get; set; }
+
+        [MaxLength(20)]
+        public string? RecipientPhone { get; set; }
+
         public DateTime? CancelledAt { get; set; }
 
         [MaxLength(500)]
