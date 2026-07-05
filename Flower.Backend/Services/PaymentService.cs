@@ -3,9 +3,11 @@ using Flower.Data.Entities;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Flower.Backend.Services
@@ -13,23 +15,26 @@ namespace Flower.Backend.Services
     public class PaymentService : IPaymentService
     {
         private readonly IApplicationDbContext _context;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IOrderCancellationService _orderCancellationService;
         private readonly StockLockService _stockLockService;
         private readonly IDeliverySlotService _deliverySlotService;
         private readonly IEmailService _emailService;
+        private readonly string _webhookSecret;
 
         public PaymentService(
             IApplicationDbContext context, 
-            IServiceProvider serviceProvider,
+            IOrderCancellationService orderCancellationService,
             StockLockService stockLockService,
             IDeliverySlotService deliverySlotService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IConfiguration configuration)
         {
             _context = context;
-            _serviceProvider = serviceProvider;
+            _orderCancellationService = orderCancellationService;
             _stockLockService = stockLockService;
             _deliverySlotService = deliverySlotService;
             _emailService = emailService;
+            _webhookSecret = configuration["WebhookSettings:SecretKey"] ?? "flowershop-webhook-secret-change-in-production";
         }
 
         public async Task<PaymentDTO> RecordPayment(int orderId, decimal amount, PaymentMethod method, string? transactionId = null)
@@ -61,6 +66,9 @@ namespace Flower.Backend.Services
 
         public async Task<bool> ProcessWebhook(PaymentWebhookRequest request)
         {
+            if (!VerifyWebhookSignature(request))
+                return false;
+
             var orderWithDetails = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
@@ -112,9 +120,8 @@ namespace Flower.Backend.Services
                 orderWithDetails.PaymentStatus = PaymentStatus.Failed;
                 await _context.SaveChangesAsync();
 
-                // OrderService.CancelWithReason handles both cache/lock releasing and slot releasing centrally
-                var orderService = _serviceProvider.GetRequiredService<IOrderService>();
-                await orderService.CancelWithReason(request.OrderId, "Thanh toán thất bại");
+                // OrderCancellationService handles both cache/lock releasing and slot releasing centrally
+                await _orderCancellationService.CancelWithReason(request.OrderId, "Thanh toán thất bại");
 
                 return true;
             }
@@ -148,6 +155,22 @@ namespace Flower.Backend.Services
             var payment = await _context.Payments
                 .FirstOrDefaultAsync(p => p.OrderId == orderId);
             return payment?.ToDTO();
+        }
+
+        private bool VerifyWebhookSignature(PaymentWebhookRequest request)
+        {
+            if (string.IsNullOrEmpty(request.Signature))
+                return false;
+
+            var payload = $"{request.TransactionId}|{request.OrderId}|{request.Amount}|{request.Status}";
+            var computedHash = HMACSHA256.HashData(
+                Encoding.UTF8.GetBytes(_webhookSecret),
+                Encoding.UTF8.GetBytes(payload));
+            var computedSignature = Convert.ToBase64String(computedHash);
+
+            return CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(computedSignature),
+                Encoding.UTF8.GetBytes(request.Signature));
         }
     }
 }

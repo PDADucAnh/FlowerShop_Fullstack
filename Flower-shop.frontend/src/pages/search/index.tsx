@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSearchProducts } from '../../hooks/useProducts';
+import SEO from '../../components/SEO';
 import ProductCard from '../../components/ProductCard';
 
 const SearchPage: React.FC = () => {
@@ -11,6 +12,7 @@ const SearchPage: React.FC = () => {
 
   return (
     <div className="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
+      <SEO title="Tìm kiếm" description="Kết quả tìm kiếm" />
       <div className="mb-stack-lg">
         <h1 className="font-headline-lg text-headline-lg text-on-surface mb-2">Kết quả tìm kiếm</h1>
         <p className="font-body-md text-body-md text-on-surface-variant">

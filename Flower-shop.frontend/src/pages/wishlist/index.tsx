@@ -4,6 +4,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { getImageUrl } from '../../utils/apiUtils';
 import { formatCurrency } from '../../utils/currency';
 import { AccountSidebar } from '../../components/OrderComponents';
+import SEO from '../../components/SEO';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 
 const WishlistPage: React.FC = () => {
@@ -12,6 +13,7 @@ const WishlistPage: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <SEO title="Yêu thích" description="Danh sách yêu thích" />
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
         <div className="flex flex-col md:flex-row gap-stack-lg">
           <AccountSidebar />

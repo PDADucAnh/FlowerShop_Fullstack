@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import authService from '../../services/authService';
 import toast from 'react-hot-toast';
+import SEO from '../../components/SEO';
 import { registerSchema, type RegisterFormData } from '../../schemas/registerSchema';
 
 const RegisterPage: React.FC = () => {
@@ -41,6 +42,7 @@ const RegisterPage: React.FC = () => {
 
     return (
         <div className="ambient-bg text-on-background font-body-md antialiased flex flex-col min-h-screen">
+            <SEO title="Đăng ký" description="Đăng ký tài khoản mới" />
             <main className="flex-1 flex items-center justify-center p-4 py-12">
                 <div className="w-full max-w-md mx-auto">
 

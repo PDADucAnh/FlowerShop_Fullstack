@@ -1,9 +1,11 @@
+import SEO from '../../components/SEO';
 import React from 'react';
 import { Link } from 'react-router-dom';
 
 const ContactPage: React.FC = () => {
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <SEO title="Liên hệ" description="Liên hệ với chúng tôi" />
       <main className="max-w-[1440px] mx-auto px-margin py-xl">
         <header className="mb-xl text-center space-y-md">
           <h3 className="text-label-sm uppercase tracking-[0.3em] text-secondary">Liên hệ</h3>

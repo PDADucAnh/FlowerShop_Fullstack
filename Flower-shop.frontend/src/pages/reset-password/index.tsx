@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import SEO from '../../components/SEO';
 import authService from '../../services/authService';
 
 export default function ResetPassword() {
@@ -12,6 +13,8 @@ export default function ResetPassword() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [manualToken, setManualToken] = useState('');
+    const resolvedToken = token || manualToken;
 
     useEffect(() => {
         if (!token) {
@@ -21,7 +24,7 @@ export default function ResetPassword() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!token) {
+        if (!resolvedToken) {
             setError('Không tìm thấy token đặt lại mật khẩu hợp lệ.');
             return;
         }
@@ -38,7 +41,7 @@ export default function ResetPassword() {
         setMessage('');
         setError('');
         try {
-            const res = await authService.resetPassword({ token, newPassword: password });
+            const res = await authService.resetPassword({ token: resolvedToken, newPassword: password });
             setMessage(res.message || 'Mật khẩu của bạn đã được đặt lại thành công. Đang chuyển hướng...');
             setTimeout(() => {
                 navigate('/login');
@@ -52,6 +55,7 @@ export default function ResetPassword() {
 
     return (
         <div className="ambient-bg text-on-background font-body-md antialiased flex flex-col min-h-screen">
+            <SEO title="Đặt lại mật khẩu" description="Đặt lại mật khẩu mới" />
             <main className="flex-1 flex items-center justify-center p-4">
                 <div className="w-full max-w-sm mx-auto">
                     {/* Logo */}
@@ -79,8 +83,26 @@ export default function ResetPassword() {
                           style={{ boxShadow: '0 8px 40px rgba(171,44,93,0.10)' }}>
                         
                         <p className="text-center text-sm text-on-surface-variant/80 font-body-md leading-relaxed">
-                            Vui lòng nhập mật khẩu mới của bạn bên dưới.
+                            Vui lòng nhập mã token từ email và mật khẩu mới của bạn bên dưới.
                         </p>
+
+                        {/* Token */}
+                        <div className="space-y-2">
+                            <label htmlFor="token" className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[16px] text-outline">vpn_key</span>
+                                Mã xác thực
+                            </label>
+                            <input
+                                id="token"
+                                name="token"
+                                type="text"
+                                value={manualToken}
+                                onChange={(e) => setManualToken(e.target.value)}
+                                placeholder={token ? 'Đã có mã từ liên kết' : 'Nhập mã xác thực từ email'}
+                                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-3.5 font-body-md text-body-md text-on-surface placeholder:text-outline/60 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200"
+                                readOnly={!!token}
+                            />
+                        </div>
 
                         {/* Password */}
                         <div className="space-y-2">
@@ -135,7 +157,7 @@ export default function ResetPassword() {
                         )}
 
                         {/* Submit */}
-                        <button type="submit" disabled={loading || !token}
+                        <button type="submit" disabled={loading || !resolvedToken}
                                 className="w-full bg-primary text-on-primary py-3.5 rounded-xl font-label-md text-label-md hover:bg-primary/90 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 cursor-pointer border-0 flex items-center justify-center gap-2"
                                 style={{ boxShadow: '0 4px 24px rgba(171,44,93,0.06)' }}>
                             <span>{loading ? 'Đang thực hiện...' : 'Đặt lại mật khẩu'}</span>

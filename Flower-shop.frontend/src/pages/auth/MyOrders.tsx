@@ -4,6 +4,7 @@ import { useMyOrders, useCancelOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
 import { CancelModal, OrderSkeleton, AccountSidebar } from '../../components/OrderComponents';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
+import SEO from '../../components/SEO';
 import { getImageUrl } from '../../utils/apiUtils';
 
 const statusStyles: Record<string, string> = {
@@ -66,6 +67,7 @@ const MyOrders: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <SEO title="Đơn hàng của tôi" description="Danh sách đơn hàng" />
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
         <div className="flex flex-col md:flex-row gap-stack-lg">
           <AccountSidebar />

@@ -9,7 +9,7 @@ namespace Flower.Backend.Services.Interfaces
         Task SendOrderConfirmedEmailAsync(Order order, string customerEmail, string customerName);
         Task SendOrderShippingEmailAsync(Order order, string customerEmail, string customerName);
         Task SendOrderCompletedEmailAsync(Order order, string customerEmail, string customerName);
-        Task SendResetPasswordEmailAsync(string email, string name, string resetLink);
+        Task SendResetPasswordEmailAsync(string email, string name, string resetLink, string? rawToken = null);
         Task SendOtpEmailAsync(string email, string name, string otp);
     }
 }

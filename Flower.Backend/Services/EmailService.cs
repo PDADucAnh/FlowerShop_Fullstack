@@ -451,7 +451,7 @@ namespace Flower.Backend.Services
             return result;
         }
 
-        public async Task SendResetPasswordEmailAsync(string email, string name, string resetLink)
+        public async Task SendResetPasswordEmailAsync(string email, string name, string resetLink, string? rawToken = null)
         {
             try
             {
@@ -469,7 +469,19 @@ namespace Flower.Backend.Services
                 sb.AppendLine("<div class='header'><h1>FlowerShop</h1></div>");
                 sb.AppendLine("<div class='content'>");
                 sb.AppendLine($"<p>Xin chào <strong>{WebUtility.HtmlEncode(name)}</strong>,</p>");
-                sb.AppendLine("<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình tại FlowerShop. Vui lòng bấm vào nút bên dưới để tiến hành thiết lập mật khẩu mới (liên kết có giá trị trong vòng 15 phút):</p>");
+                sb.AppendLine("<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình tại FlowerShop.</p>");
+
+                if (!string.IsNullOrEmpty(rawToken))
+                {
+                    sb.AppendLine("<p>Vui lòng sử dụng mã dưới đây để đặt lại mật khẩu (mã có giá trị 15 phút):</p>");
+                    sb.AppendLine($"<div style='background:#f5f2ed;padding:16px;font-family:monospace;font-size:18px;letter-spacing:4px;font-weight:bold;margin:16px 0'>{WebUtility.HtmlEncode(rawToken)}</div>");
+                    sb.AppendLine($"<p>Hoặc bấm vào nút bên dưới để mở trang đặt lại mật khẩu:</p>");
+                }
+                else
+                {
+                    sb.AppendLine("<p>Vui lòng bấm vào nút bên dưới để tiến hành thiết lập mật khẩu mới (liên kết có giá trị trong vòng 15 phút):</p>");
+                }
+
                 sb.AppendLine($"<a class='btn' href='{resetLink}'>ĐẶT LẠI MẬT KHẨU</a>");
                 sb.AppendLine("<p style='color: #888; font-size: 12px;'>Nếu bạn không yêu cầu hành động này, vui lòng bỏ qua email.</p>");
                 sb.AppendLine("</div>");

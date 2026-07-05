@@ -54,9 +54,10 @@
 ## 🟠 High (8 vấn đề)
 
 ### H01 — Circular DI / Service Locator
-- [ ] **File:** `Flower.Backend/Services/PaymentService.cs:116`
+- [x] **File:** `Flower.Backend/Services/PaymentService.cs:116`
 - **Mô tả:** `PaymentService` dùng `IServiceProvider` để resolve `IOrderService`.
 - **Khắc phục:** Tách `IOrderCancellationService` interface riêng.
+- **Đã khắc phục:** 05/07/2026 — Tạo `IOrderCancellationService` + `OrderCancellationService`, inject trực tiếp vào `PaymentService`, xoá `IServiceProvider`.
 
 ### H02 — N+1 Query Categories → Posts
 - [x] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs:45`
@@ -64,32 +65,32 @@
 - **Khắc phục:** `.Include(c => c.Posts)` hoặc tạo DTO projection riêng.
 
 ### H03 — Token Reset Password trong URL
-- [ ] **File:** `Flower.Backend/Services/AuthService.cs:231`
+- [x] **File:** `Flower.Backend/Services/AuthService.cs:231`
 - **Mô tả:** Token query parameter → lộ qua server logs, browser history, referrer.
 - **Khắc phục:** Gửi token trong POST body, user nhập thủ công (hoặc 2-step flow).
 
 ### H04 — Webhook không signature validation
-- [ ] **File:** `Flower.Backend/Services/PaymentService.cs`
+- [x] **File:** `Flower.Backend/Services/PaymentService.cs`
 - **Mô tả:** `PaymentWebhookRequest.Signature?` field tồn tại nhưng không được validate.
 - **Khắc phục:** Implement HMAC signature verification.
 
 ### H05 — Không dynamic SEO metadata
-- [ ] **File:** Frontend (all pages)
+- [x] **File:** Frontend (all pages)
 - **Mô tả:** Mọi page dùng chung title "PDA FLOWER".
 - **Khắc phục:** Thêm `react-helmet-async`.
 
 ### H06 — Thiếu index trên Order.Status
-- [ ] **File:** Database migration
+- [x] **File:** Database migration
 - **Mô tả:** BackgroundService query `WHERE Status = ...` mỗi phút → full table scan.
 - **Khắc phục:** Migration mới: `CREATE INDEX IX_Orders_Status ON Orders (Status) INCLUDE (OrderDate, PaymentMethod)`.
 
 ### H07 — Thiếu composite index (Status, OrderDate)
-- [ ] **File:** Database migration
+- [x] **File:** Database migration
 - **Mô tả:** Query `WHERE Status = ... AND OrderDate <= ...` cần composite index.
 - **Khắc phục:** `CREATE INDEX IX_Orders_Status_OrderDate ON Orders (Status, OrderDate)`.
 
 ### H08 — 0 frontend tests / Chỉ 2 backend test files
-- [ ] **File:** Project-wide
+- [x] **File:** Project-wide
 - **Mô tả:** 27 tests cho AuthService + UserService. Frontend: 0.
 - **Khắc phục:** Thêm React Testing Library + MSW cho frontend tests. Thêm backend tests cho OrderService, ProductService, PaymentService.
 
@@ -168,7 +169,7 @@
 | Mức độ | Số lượng | Đã khắc phục | Còn lại |
 |--------|----------|--------------|---------|
 | 🔴 Critical | 5 | 5 | 0 |
-| 🟠 High | 8 | 1 | 7 |
+| 🟠 High | 8 | 8 | 0 |
 | 🟡 Medium | 10 | 5 | 5 |
 | 🟢 Low | 5 | 0 | 5 |
-| **Total** | **28** | **11** | **17** |
+| **Total** | **28** | **18** | **10** |

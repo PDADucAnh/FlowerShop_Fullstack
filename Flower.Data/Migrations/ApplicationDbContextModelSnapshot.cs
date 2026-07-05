@@ -275,6 +275,14 @@ namespace Flower.Data.Migrations
 
                     b.HasIndex("CustomerId");
 
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Orders_Status");
+
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status"), new[] { "OrderDate", "PaymentMethod" });
+
+                    b.HasIndex("Status", "OrderDate")
+                        .HasDatabaseName("IX_Orders_Status_OrderDate");
+
                     b.ToTable("Orders");
                 });
 

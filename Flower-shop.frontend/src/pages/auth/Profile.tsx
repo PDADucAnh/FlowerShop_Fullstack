@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AccountSidebar } from '../../components/OrderComponents';
+import SEO from '../../components/SEO';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import toast from 'react-hot-toast';
 
@@ -118,6 +119,7 @@ const Profile: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <SEO title="Thông tin cá nhân" description="Quản lý thông tin cá nhân" />
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
         <div className="flex flex-col md:flex-row gap-stack-lg">
           <AccountSidebar />

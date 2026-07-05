@@ -27,6 +27,7 @@ namespace Flower.Backend.Services
         private readonly IEmailService _emailService;
         private readonly TimeSettings _timeSettings;
         private readonly IMemoryCache _memoryCache;
+        private readonly IOrderCancellationService _orderCancellationService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -38,7 +39,8 @@ namespace Flower.Backend.Services
             StockLockService stockLockService,
             IEmailService emailService,
             TimeSettings timeSettings,
-            IMemoryCache memoryCache)
+            IMemoryCache memoryCache,
+            IOrderCancellationService orderCancellationService)
         {
             _context = context;
             _logger = logger;
@@ -50,6 +52,7 @@ namespace Flower.Backend.Services
             _emailService = emailService;
             _timeSettings = timeSettings;
             _memoryCache = memoryCache;
+            _orderCancellationService = orderCancellationService;
         }
 
         private async Task<int?> GetCurrentCustomerId()
@@ -457,45 +460,7 @@ namespace Flower.Backend.Services
 
         public async Task<bool> CancelWithReason(int id, string? reason)
         {
-            var order = await _context.Orders
-                .Include(o => o.OrderDetails)
-                .FirstOrDefaultAsync(o => o.Id == id);
-            if (order == null) return false;
-
-            if (order.Status == OrderStatus.Cancelled) return true;
-
-            order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.Now;
-            order.CancellationReason = reason;
-
-            bool wasDeducted = order.PaymentMethod == PaymentMethod.COD 
-                || (order.PaymentMethod == PaymentMethod.OnlinePayment && order.PaymentStatus == PaymentStatus.Completed);
-
-            if (order.OrderDetails != null)
-            {
-                var productIds = order.OrderDetails.Select(od => od.ProductId).ToList();
-                var products = await _context.Products
-                    .Where(p => productIds.Contains(p.Id))
-                    .ToListAsync();
-
-                foreach (var detail in order.OrderDetails)
-                {
-                    if (wasDeducted)
-                    {
-                        var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
-                        if (product != null)
-                            product.StockQuantity += detail.Quantity;
-                    }
-
-                    if (!string.IsNullOrEmpty(order.DeliveryTimeSlot) && order.DeliveryDate.HasValue)
-                        await _deliverySlotService.ReleaseSlot(detail.ProductId, order.DeliveryDate.Value, order.DeliveryTimeSlot);
-
-                    _stockLockService.ReleaseReservedStock(detail.ProductId, detail.Quantity);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
+            return await _orderCancellationService.CancelWithReason(id, reason);
         }
 
         public async Task<(bool Success, string Message)> CancelWithPolicy(int id, string? reason = null)

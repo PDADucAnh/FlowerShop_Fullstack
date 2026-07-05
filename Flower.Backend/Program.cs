@@ -127,6 +127,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IUserService, Flow
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAuthService, Flower.Backend.Services.AuthService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerService, Flower.Backend.Services.CustomerService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderService, Flower.Backend.Services.OrderService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderCancellationService, Flower.Backend.Services.OrderCancellationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderDetailService, Flower.Backend.Services.OrderDetailService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.INotificationService, Flower.Backend.Services.NotificationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdvertisementService, Flower.Backend.Services.AdvertisementService>();

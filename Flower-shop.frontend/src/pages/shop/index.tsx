@@ -3,6 +3,7 @@ import ShopSidebar from './ShopSidebar';
 import ShopHeader from './ShopHeader';
 import ProductList from './ProductList';
 import Pagination from '../../components/Pagination';
+import SEO from '../../components/SEO';
 import { useProductsPaged } from '../../hooks/useProducts';
 
 const ShopPage: React.FC = () => {
@@ -44,6 +45,7 @@ const ShopPage: React.FC = () => {
 
   return (
     <div className="flex-grow w-full max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col md:flex-row gap-gutter">
+      <SEO title="Cửa hàng" description="Danh sách sản phẩm hoa tươi" />
       <aside className="w-full md:w-64 flex-shrink-0">
         <ShopSidebar 
           onCategoryChange={handleCategoryChange} 

@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
 import CartTable from './CartTable';
+import SEO from '../../components/SEO';
 import { formatCurrency } from '../../utils/currency';
 
 const ShoppingCartPage: React.FC = () => {
@@ -27,6 +28,7 @@ const ShoppingCartPage: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased min-h-screen pt-20">
+      <SEO title="Giỏ hàng" description="Giỏ hàng của bạn" />
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg">
         {/* Title */}
         <div className="mb-stack-lg">

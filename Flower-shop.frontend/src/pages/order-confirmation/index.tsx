@@ -1,3 +1,4 @@
+import SEO from '../../components/SEO';
 import React from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
@@ -7,6 +8,7 @@ const OrderConfirmationPage: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-[calc(100vh-200px)] flex items-center justify-center py-xl px-margin">
+      <SEO title="Xác nhận đơn hàng" description="Xác nhận đơn hàng thành công" />
       <div className="w-full max-w-2xl bg-surface-container-lowest rounded-xl p-8 md:p-12 text-center relative overflow-hidden border border-outline-variant/30 shadow-sm">
         
         {/* Floating decorative circles */}

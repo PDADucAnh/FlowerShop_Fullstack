@@ -3,6 +3,7 @@ import BlogSidebar from './BlogSidebar';
 import PostCard from '../../components/PostCard';
 import Pagination from '../../components/Pagination';
 import { usePostsPaged } from '../../hooks/usePosts';
+import SEO from '../../components/SEO';
 import type { Post } from '../../types/post';
 
 const BlogPage: React.FC = () => {
@@ -23,6 +24,7 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20">
+      <SEO title="Bài viết" description="Tin tức và bài viết về hoa tươi" />
       <main className="max-w-[1440px] mx-auto px-margin py-xl">
         <header className="mb-xl text-center space-y-md">
             <h3 className="text-label-sm uppercase tracking-[0.3em] text-secondary">Bài viết</h3>

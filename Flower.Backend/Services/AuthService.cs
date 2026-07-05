@@ -231,13 +231,13 @@ namespace Flower.Backend.Services
 
             await _context.SaveChangesAsync();
 
-            var resetLink = $"{clientUrl.TrimEnd('/')}/reset-password?token={rawToken}";
+            var resetLink = $"{clientUrl.TrimEnd('/')}/reset-password";
             
             _ = Task.Run(async () =>
             {
                 try
                 {
-                    await _emailService.SendResetPasswordEmailAsync(customer.Email, customer.FullName, resetLink);
+                    await _emailService.SendResetPasswordEmailAsync(customer.Email, customer.FullName, resetLink, rawToken);
                 }
                 catch (Exception ex)
                 {

@@ -6,6 +6,7 @@ import { useCart } from '../../context/CartContext';
 import DOMPurify from 'dompurify';
 import { getImageUrl, API_BASE_URL } from '../../utils/apiUtils';
 import { formatCurrency } from '../../utils/currency';
+import SEO from '../../components/SEO';
 import type { Product } from '../../types/product';
 
 const BlogDetail: React.FC = () => {
@@ -68,6 +69,7 @@ const BlogDetail: React.FC = () => {
 
     return (
         <div className="bg-background text-on-background antialiased selection:bg-primary selection:text-on-primary font-body-md pt-20">
+            <SEO title="Chi tiết bài viết" description="Chi tiết bài viết" />
             <main>
                 <section className="w-full relative h-[614px] md:h-[819px] flex items-end pb-xl px-margin bg-surface-variant overflow-hidden">
                     <img

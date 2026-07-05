@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import SEO from '../../components/SEO';
 import authService from '../../services/authService';
 
 export default function ForgotPassword() {
@@ -25,6 +26,7 @@ export default function ForgotPassword() {
 
     return (
         <div className="ambient-bg text-on-background font-body-md antialiased flex flex-col min-h-screen">
+            <SEO title="Quên mật khẩu" description="Đặt lại mật khẩu" />
             <main className="flex-1 flex items-center justify-center p-4">
                 <div className="w-full max-w-sm mx-auto">
                     {/* Logo */}

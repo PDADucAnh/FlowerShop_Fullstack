@@ -157,7 +157,7 @@ namespace Flower.Tests
             // Assert
             Assert.True(result.Success);
             Assert.Contains("Nếu email tồn tại trên hệ thống", result.Message);
-            _emailServiceMock.Verify(e => e.SendResetPasswordEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            _emailServiceMock.Verify(e => e.SendResetPasswordEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Never);
         }
 
         [Fact]
@@ -168,10 +168,10 @@ namespace Flower.Tests
             var authService = new AuthService(context, _emailServiceMock.Object, _loggerMock.Object);
             await authService.Register("Password123!", "Test User", "test@example.com", null, null);
 
-            var emailSentTcs = new TaskCompletionSource<string>();
+            var emailSentTcs = new TaskCompletionSource<(string link, string? token)>();
             _emailServiceMock
-                .Setup(e => e.SendResetPasswordEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                .Callback<string, string, string>((email, name, link) => emailSentTcs.TrySetResult(link))
+                .Setup(e => e.SendResetPasswordEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
+                .Callback<string, string, string, string?>((email, name, link, token) => emailSentTcs.TrySetResult((link, token)))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -185,7 +185,7 @@ namespace Flower.Tests
             var completedTask = await Task.WhenAny(emailSentTcs.Task, Task.Delay(2000));
             Assert.Same(emailSentTcs.Task, completedTask);
 
-            var resetLink = await emailSentTcs.Task;
+            var (resetLink, rawToken) = await emailSentTcs.Task;
 
             var customer = await context.Customers.FirstOrDefaultAsync(c => c.Email == "test@example.com");
             Assert.NotNull(customer);
@@ -193,11 +193,10 @@ namespace Flower.Tests
             Assert.NotNull(customer.ResetTokenExpiry);
             Assert.True(customer.ResetTokenExpiry > DateTime.UtcNow);
 
-            // Verify resetLink format and that it contains a valid rawToken
-            Assert.StartsWith("http://client.com/reset-password?token=", resetLink);
-            var tokenIndex = resetLink.IndexOf("token=");
-            Assert.True(tokenIndex >= 0);
-            var rawToken = resetLink.Substring(tokenIndex + 6);
+            // Verify resetLink no longer contains the token in the URL (security fix)
+            Assert.Equal("http://client.com/reset-password", resetLink);
+
+            // Verify rawToken is provided as a separate parameter
             Assert.False(string.IsNullOrEmpty(rawToken));
 
             // Verify that the hashed token in database matches the hashed rawToken

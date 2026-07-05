@@ -1,3 +1,4 @@
+import SEO from '../../components/SEO';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProduct, useProductsPaged } from '../../hooks/useProducts';
@@ -129,6 +130,7 @@ const ProductDetailPage = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden pt-20">
+      <SEO title="Chi tiết sản phẩm" description="Chi tiết sản phẩm hoa tươi" />
       <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-screen">
         {/* Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="flex text-label-sm font-label-sm text-on-surface-variant mb-stack-md">

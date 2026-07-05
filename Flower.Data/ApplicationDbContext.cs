@@ -58,6 +58,15 @@ namespace Flower.Data
                 .WithMany()
                 .HasForeignKey(od => od.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.Status)
+                .HasDatabaseName("IX_Orders_Status")
+                .IncludeProperties(o => new { o.OrderDate, o.PaymentMethod });
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => new { o.Status, o.OrderDate })
+                .HasDatabaseName("IX_Orders_Status_OrderDate");
         }
     }
 }

@@ -12,6 +12,7 @@ import ErrorFallback from './components/ErrorFallback';
 import { Toaster } from 'react-hot-toast';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/queryClient';
+import { HelmetProvider } from './components/SEO';
 
 const Home = lazy(() => import('./pages/home/index'));
 const Shop = lazy(() => import('./pages/shop/index'));
@@ -68,6 +69,7 @@ const NotFound: React.FC = () => (
 
 const App: React.FC = () => {
   return (
+    <HelmetProvider>
     <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <CartProvider>
@@ -124,6 +126,7 @@ const App: React.FC = () => {
       </CartProvider>
     </AuthProvider>
     </QueryClientProvider>
+    </HelmetProvider>
   );
 };
 

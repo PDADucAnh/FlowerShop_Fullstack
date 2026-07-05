@@ -1,3 +1,4 @@
+import SEO from '../../components/SEO';
 import React, { useEffect } from 'react';
 
 const About: React.FC = () => {
@@ -7,6 +8,7 @@ const About: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+      <SEO title="Giới thiệu" description="Về PDA Flower" />
       <main className="w-full max-w-[1440px] mx-auto px-margin-mobile md:px-margin-desktop py-16 md:py-20">
         <div className="max-w-3xl mx-auto text-center mb-20 md:mb-28">
           <span className="font-label-sm text-label-sm uppercase tracking-[0.3em] text-secondary block mb-6">Thương hiệu hoa tươi</span>

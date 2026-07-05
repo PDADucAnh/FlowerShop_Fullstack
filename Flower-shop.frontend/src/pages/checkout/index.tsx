@@ -9,6 +9,7 @@ import { formatCurrency } from '../../utils/currency';
 import { getImageUrl } from '../../utils/apiUtils';
 import { checkoutSchema, type CheckoutFormData } from '../../schemas/checkoutSchema';
 import axiosClient from '../../api/axiosClient';
+import SEO from '../../components/SEO';
 import toast from 'react-hot-toast';
 
 const getVietnamTodayString = () => {
@@ -176,6 +177,7 @@ const CheckoutPage: React.FC = () => {
 
   return (
     <div className="bg-background text-on-background font-body-lg min-h-screen flex flex-col antialiased pt-20">
+      <SEO title="Thanh toán" description="Thanh toán đơn hàng" />
       <main className="flex-grow pt-stack-lg pb-stack-lg px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full">
         {/* Header */}
         <div className="mb-stack-lg text-center md:text-left border-b border-outline-variant pb-stack-md flex justify-between items-end">

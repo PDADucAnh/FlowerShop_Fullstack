@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../context/AuthContext';
+import SEO from '../../components/SEO';
 import { loginSchema, type LoginFormData } from '../../schemas/loginSchema';
 
 const LoginPage: React.FC = () => {
@@ -30,6 +31,7 @@ const LoginPage: React.FC = () => {
 
     return (
         <div className="ambient-bg text-on-background font-body-md antialiased flex flex-col min-h-screen">
+            <SEO title="Đăng nhập" description="Đăng nhập tài khoản" />
             <main className="flex-1 flex items-center justify-center p-4">
                 <div className="w-full max-w-sm mx-auto">
 
