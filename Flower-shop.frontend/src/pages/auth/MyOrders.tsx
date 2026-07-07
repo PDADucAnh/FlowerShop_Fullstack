@@ -1,27 +1,35 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useMyOrders, useCancelOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
-import { CancelModal, OrderSkeleton, AccountSidebar } from '../../components/OrderComponents';
+import { CancelModal, OrderSkeleton, AccountSidebar, statusStyles, statusConfig } from '../../components/OrderComponents';
+import type { Order } from '../../types/order';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import SEO from '../../components/SEO';
 import { getImageUrl } from '../../utils/apiUtils';
-
-const statusStyles: Record<string, string> = {
-  Pending: 'bg-tertiary-fixed/40 text-tertiary',
-  PendingVerification: 'bg-warning/10 text-warning',
-  Confirmed: 'bg-info/10 text-info',
-  Preparing: 'bg-secondary/10 text-secondary',
-  Shipping: 'bg-blue-100 text-blue-700',
-  Completed: 'bg-green-100 text-green-700',
-  Cancelled: 'bg-red-100 text-red-600',
-};
+import axiosClient from '../../api/axiosClient';
 
 const MyOrders: React.FC = () => {
   const { data: orders, isLoading, isError } = useMyOrders();
   const cancelOrder = useCancelOrder(() => setCancelTarget(null));
   const [cancelTarget, setCancelTarget] = useState<number | null>(null);
+  const [retryingId, setRetryingId] = useState<number | null>(null);
   const { ref, isVisible } = useScrollReveal({ threshold: 0 });
+  const navigate = useNavigate();
+
+  const handleRetryPayment = async (orderId: number) => {
+    setRetryingId(orderId);
+    try {
+      const res: any = await axiosClient.post(`/Payment/retry/${orderId}`);
+      if (res?.url) {
+        window.location.href = res.url;
+      }
+    } catch {
+      navigate(`/my-orders/${orderId}`);
+    } finally {
+      setRetryingId(null);
+    }
+  };
 
   const handleCancel = () => {
     if (cancelTarget !== null) {
@@ -113,9 +121,9 @@ const MyOrders: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/30">
-                    {orders.map((order: any) => {
+                    {orders.map((order: Order) => {
                       const preview = order.orderDetails?.[0];
-                      const total = order.orderDetails?.reduce((sum: number, item: any) => sum + item.unitPrice * item.quantity, 0) ?? 0;
+                      const total = order.orderDetails?.reduce((sum: number, item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
                       const statusClass = statusStyles[order.status] || statusStyles.Pending;
 
                       return (
@@ -143,7 +151,7 @@ const MyOrders: React.FC = () => {
                           <td className="py-stack-md px-base font-semibold text-primary">{formatCurrency(total)}</td>
                           <td className="py-stack-md px-base">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusClass}`}>
-                              {order.status === 'Completed' ? 'Hoàn thành' : order.status === 'Shipping' ? 'Đang giao' : order.status === 'Pending' ? 'Chờ xử lý' : order.status === 'PendingVerification' ? 'Chờ xác minh' : order.status === 'Confirmed' ? 'Đã xác nhận' : order.status === 'Preparing' ? 'Đang cắm hoa' : order.status === 'Cancelled' ? 'Đã hủy' : order.status}
+                              {statusConfig[order.status]?.label || order.status}
                             </span>
                           </td>
                           <td className="py-stack-md px-base text-right whitespace-nowrap">
@@ -153,7 +161,19 @@ const MyOrders: React.FC = () => {
                             >
                               Chi tiết
                             </Link>
-                            {(order.status === 'Pending' || order.status === 'PendingVerification' || order.status === 'Confirmed') && (
+                            {order.status === 'PendingPayment' && (
+                              <>
+                                <span className="text-outline mx-2">|</span>
+                                <button
+                                  onClick={() => handleRetryPayment(order.id)}
+                                  disabled={retryingId === order.id}
+                                  className="text-primary hover:underline font-label-md bg-transparent border-0 cursor-pointer disabled:opacity-50"
+                                >
+                                  {retryingId === order.id ? 'Đang xử lý...' : 'Thanh toán lại'}
+                                </button>
+                              </>
+                            )}
+                            {(order.status === 'Pending' || order.status === 'PendingVerification' || order.status === 'Confirmed' || order.status === 'PendingPayment') && (
                               <>
                                 <span className="text-outline mx-2">|</span>
                                 <button

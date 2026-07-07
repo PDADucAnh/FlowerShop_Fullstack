@@ -7,7 +7,7 @@ function LatestBlog() {
 
     if (isLoading) return null;
 
-    const topThreePosts = [...posts].sort((a: any, b: any) => b.id - a.id).slice(0, 3);
+    const topThreePosts = [...posts].sort((a: any, b: any) => new Date(b.createdDate || b.publishedAt || 0).getTime() - new Date(a.createdDate || a.publishedAt || 0).getTime()).slice(0, 3);
 
     return (
         <section className="py-stack-lg md:py-[100px] bg-surface-container-low border-y border-outline-variant/30">

@@ -51,8 +51,8 @@ public class AccountController : Controller
             Response.Cookies.Append("X-Refresh-Token", rawToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false,
-                SameSite = SameSiteMode.Strict,
+                Secure = true,
+                SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddDays(30),
                 Path = "/"
             });

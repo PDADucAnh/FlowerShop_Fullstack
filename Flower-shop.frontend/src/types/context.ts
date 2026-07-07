@@ -22,6 +22,4 @@ export interface AuthContextType {
   changePassword: (currentPassword: string, newPassword: string) => Promise<any>;
 }
 
-export interface CartItem extends Product {
-  quantity: number;
-}
+

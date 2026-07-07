@@ -189,7 +189,7 @@ namespace Flower.Backend.Services
             sb.AppendLine("</tbody></table>");
             var total = order.OrderDetails?.Sum(d => d.Quantity * d.UnitPrice) ?? 0;
             sb.AppendLine($"<div class='total'>Tổng cộng: {total:N0}₫</div>");
-            var methodStr = order.PaymentMethod == PaymentMethod.COD ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến (MoMo)";
+            var methodStr = order.PaymentMethod == PaymentMethod.COD ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến (VNPAY)";
             sb.AppendLine($"<p><strong>Phương thức thanh toán:</strong> {methodStr}</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");
@@ -404,7 +404,7 @@ namespace Flower.Backend.Services
             sb.AppendLine("</tbody></table>");
             var total = order.OrderDetails?.Sum(d => d.Quantity * d.UnitPrice) ?? 0;
             sb.AppendLine($"<div class='total'>Tổng cộng: {total:N0}₫</div>");
-            var methodStr = order.PaymentMethod == PaymentMethod.COD ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến (MoMo)";
+            var methodStr = order.PaymentMethod == PaymentMethod.COD ? "Thanh toán khi nhận hàng (COD)" : "Thanh toán trực tuyến (VNPAY)";
             sb.AppendLine($"<p><strong>Phương thức thanh toán:</strong> {methodStr}</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");

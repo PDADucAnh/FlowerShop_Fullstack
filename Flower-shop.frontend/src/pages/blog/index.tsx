@@ -12,10 +12,10 @@ const BlogPage: React.FC = () => {
   const { data: paged, isLoading, error } = usePostsPaged(page, pageSize);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
 
-  const posts = paged?.items ?? [];
+  const allPosts = paged?.items ?? [];
   const filteredPosts = selectedCategoryId
-    ? posts.filter((p: Post) => p.categoryId === selectedCategoryId)
-    : posts;
+    ? allPosts.filter((p: Post) => p.categoryId === selectedCategoryId)
+    : allPosts;
 
   const handleCategoryChange = (id: number | null) => {
     setSelectedCategoryId(id);
@@ -55,7 +55,7 @@ const BlogPage: React.FC = () => {
                       <PostCard key={post.id} post={post} />
                   ))}
                 </div>
-                {!selectedCategoryId && paged && paged.totalPages > 1 && (
+                {paged && paged.totalPages > 1 && (
                   <Pagination
                     page={paged.page}
                     totalPages={paged.totalPages}

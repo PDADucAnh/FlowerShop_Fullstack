@@ -306,7 +306,7 @@ namespace Flower.Backend.Models.DTOs
                 LinkUrl = ad.LinkUrl,
                 SortOrder = ad.SortOrder,
                 IsActive = ad.IsActive,
-                CreatedDate = ad.CreatedDate
+                CreatedAt = ad.CreatedAt
             };
         }
 

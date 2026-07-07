@@ -49,21 +49,6 @@ namespace Flower.Backend.Services
             var order = await _context.Orders.FindAsync(orderId);
             if (order == null) return false;
 
-            if (otp == "000000")
-            {
-                order.Status = OrderStatus.Confirmed;
-                order.IsVerified = true;
-                order.VerifiedAt = DateTime.UtcNow;
-
-                if (order.Customer != null)
-                {
-                    order.Customer.TotalOrders++;
-                }
-
-                await _context.SaveChangesAsync();
-                return true;
-            }
-
             return false;
         }
 

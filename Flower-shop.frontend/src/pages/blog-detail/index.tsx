@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { usePost } from '../../hooks/usePosts';
-import { useProducts } from '../../hooks/useProducts';
+import { useBestSellingProducts } from '../../hooks/useProducts';
 import { useCart } from '../../context/CartContext';
 import DOMPurify from 'dompurify';
 import { getImageUrl, API_BASE_URL } from '../../utils/apiUtils';
@@ -13,7 +13,7 @@ const BlogDetail: React.FC = () => {
     const { id } = useParams();
     const { addToCart } = useCart();
     const { data: post, isLoading } = usePost(id as string);
-    const { data: allProducts = [] } = useProducts();
+    const { data: recommendedProducts = [] } = useBestSellingProducts(4);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -43,7 +43,7 @@ const BlogDetail: React.FC = () => {
         return DOMPurify.sanitize(withAbsoluteUrls);
     };
 
-    const products = allProducts.slice(0, 4);
+    const products = Array.isArray(recommendedProducts) ? recommendedProducts : [];
 
     if (isLoading) {
         return (

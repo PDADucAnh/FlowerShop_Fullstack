@@ -14,7 +14,7 @@ namespace Flower.Data.Entities
         [MaxLength(50)]
         public string Name { get; set; } = string.Empty;
 
-        [Column(TypeName = "decimal(18,0)")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal PriceAdjustment { get; set; }
 
         public bool IsDefault { get; set; }

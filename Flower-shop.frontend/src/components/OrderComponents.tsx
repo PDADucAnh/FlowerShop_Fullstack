@@ -2,14 +2,32 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
+export const statusStyles: Record<string, string> = {
+  Pending: 'bg-tertiary-fixed/40 text-tertiary',
+  PendingPayment: 'bg-amber-100 text-amber-700',
+  PendingVerification: 'bg-warning/10 text-warning',
+  Confirmed: 'bg-info/10 text-info',
+  Paid: 'bg-teal-100 text-teal-700',
+  Preparing: 'bg-secondary/10 text-secondary',
+  Shipping: 'bg-blue-100 text-blue-700',
+  ReadyForDelivery: 'bg-indigo-100 text-indigo-700',
+  Completed: 'bg-green-100 text-green-700',
+  Cancelled: 'bg-red-100 text-red-600',
+  Refunded: 'bg-purple-100 text-purple-700',
+};
+
 export const statusConfig: Record<string, { label: string; dot: string; bg: string; border: string }> = {
   Pending: { label: 'Chờ xử lý', dot: 'bg-tertiary', bg: 'bg-surface-variant text-on-surface-variant', border: 'border-outline-variant/30' },
+  PendingPayment: { label: 'Chờ thanh toán', dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700', border: 'border-amber-300/50' },
   PendingVerification: { label: 'Chờ xác minh', dot: 'bg-warning', bg: 'bg-warning/10 text-warning', border: 'border-warning/30' },
   Confirmed: { label: 'Đã xác nhận', dot: 'bg-info', bg: 'bg-info/10 text-info', border: 'border-info/30' },
+  Paid: { label: 'Đã thanh toán', dot: 'bg-teal-500', bg: 'bg-teal-50 text-teal-700', border: 'border-teal-300/50' },
   Preparing: { label: 'Đang cắm hoa', dot: 'bg-secondary', bg: 'bg-secondary/10 text-secondary', border: 'border-secondary/30' },
   Shipping: { label: 'Đang giao', dot: 'bg-[#1E88E5]', bg: 'bg-[#E3F2FD] text-[#1565C0]', border: 'border-[#90CAF9]/50' },
+  ReadyForDelivery: { label: 'Sẵn sàng giao', dot: 'bg-indigo-500', bg: 'bg-indigo-50 text-indigo-700', border: 'border-indigo-300/50' },
   Completed: { label: 'Hoàn thành', dot: 'bg-[#43A047]', bg: 'bg-[#E8F5E9] text-[#2E7D32]', border: 'border-[#A5D6A7]/50' },
   Cancelled: { label: 'Đã hủy', dot: 'bg-[#E53935]', bg: 'bg-[#FFEBEE] text-[#C62828]', border: 'border-[#EF9A9A]/50' },
+  Refunded: { label: 'Đã hoàn tiền', dot: 'bg-purple-500', bg: 'bg-purple-50 text-purple-700', border: 'border-purple-300/50' },
 };
 
 export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {

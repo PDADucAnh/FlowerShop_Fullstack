@@ -1,6 +1,7 @@
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 
 namespace Flower.Backend.Middleware
@@ -8,13 +9,14 @@ namespace Flower.Backend.Middleware
     public class SessionValidationMiddleware
     {
         private readonly RequestDelegate _next;
+        private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(5);
 
         public SessionValidationMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, IAuthService authService)
+        public async Task InvokeAsync(HttpContext context, IAuthService authService, IMemoryCache cache)
         {
             if (context.User.Identity?.IsAuthenticated == true)
             {
@@ -39,13 +41,19 @@ namespace Flower.Backend.Middleware
                 var rawToken = context.Request.Cookies["X-Refresh-Token"];
                 if (!string.IsNullOrEmpty(rawToken))
                 {
-                    var userId = await authService.ValidateRefreshTokenAsync(rawToken);
-                    if (userId == null)
+                    var cacheKey = $"session_valid_{rawToken}";
+                    if (!cache.TryGetValue(cacheKey, out int? _))
                     {
-                        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                        context.Response.Cookies.Delete("X-Refresh-Token");
-                        context.Response.Redirect("/Account/Login");
-                        return;
+                        var userId = await authService.ValidateRefreshTokenAsync(rawToken);
+                        if (userId == null)
+                        {
+                            await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                            context.Response.Cookies.Delete("X-Refresh-Token");
+                            context.Response.Redirect("/Account/Login");
+                            return;
+                        }
+
+                        cache.Set(cacheKey, userId.Value, _cacheDuration);
                     }
                 }
             }

@@ -9,7 +9,6 @@ export interface Product {
   imageUrl?: string;
   stockQuantity: number;
   categoryProductName?: string;
-  createdDate?: string;
   categoryProductId?: number;
   viewCount?: number;
   addToCartCount?: number;

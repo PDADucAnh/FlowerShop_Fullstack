@@ -78,7 +78,13 @@ namespace Flower.Backend.Services
 
             if (customer != null)
             {
+                var hashPreview = customer.PasswordHash?.Length > 20 ? customer.PasswordHash[..20] : customer.PasswordHash;
+                _logger.LogInformation("Customer found: Email={Email}, PasswordHash={Hash}, PasswordLength={Len}",
+                    customer.Email, hashPreview, customer.PasswordHash?.Length);
+
                 var verificationResult = _customerPasswordHasher.VerifyHashedPassword(customer, customer.PasswordHash, password);
+                _logger.LogInformation("Verification result: {Result}", verificationResult);
+
                 if (verificationResult == PasswordVerificationResult.Failed)
                     return null;
 
@@ -222,14 +228,20 @@ namespace Flower.Backend.Services
         public async Task<(bool Success, string Message)> ForgotPassword(string email, string clientUrl)
         {
             var now = DateTime.UtcNow;
-            var lastSent = _forgotPasswordTimestamps.GetValueOrDefault(email);
+            var lastSent = _forgotPasswordTimestamps.AddOrUpdate(
+                email,
+                now,
+                (_, existing) =>
+                {
+                    if (existing != default && (now - existing).TotalSeconds < 60)
+                        return existing;
+                    return now;
+                });
 
-            if (lastSent != default && (now - lastSent).TotalSeconds < 60)
+            if (lastSent != now)
             {
                 return (true, "Nếu email tồn tại trên hệ thống, một liên kết đặt lại mật khẩu đã được gửi đi. Vui lòng kiểm tra hộp thư.");
             }
-
-            _forgotPasswordTimestamps[email] = now;
 
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Email == email);
             if (customer == null)
@@ -245,18 +257,15 @@ namespace Flower.Backend.Services
             await _context.SaveChangesAsync();
 
             var resetLink = $"{clientUrl.TrimEnd('/')}/reset-password";
-            
-            _ = Task.Run(async () =>
+
+            try
             {
-                try
-                {
-                    await _emailService.SendResetPasswordEmailAsync(customer.Email, customer.FullName, resetLink, rawToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Failed to send reset password email to {Email}", customer.Email);
-                }
-            });
+                await _emailService.SendResetPasswordEmailAsync(customer.Email, customer.FullName, resetLink, rawToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send reset password email to {Email}", customer.Email);
+            }
 
             return (true, "Yêu cầu đặt lại mật khẩu đã được gửi đi thành công.");
         }

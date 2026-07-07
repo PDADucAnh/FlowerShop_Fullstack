@@ -148,6 +148,9 @@ namespace Flower.Backend.Services
             string? deliveryDistrict = null, string? deliveryAddress = null,
             string? recipientName = null, string? recipientPhone = null)
         {
+            if (items == null || items.Count == 0)
+                return (false, "Giỏ hàng trống, vui lòng chọn sản phẩm", 0);
+
             try
             {
                 var customerExists = await _context.Customers.AnyAsync(c => c.Id == customerId);
@@ -159,7 +162,7 @@ namespace Flower.Backend.Services
                 using var transaction = await _context.Database.BeginTransactionAsync();
 
                 var method = paymentMethod ?? PaymentMethod.COD;
-                var initialStatus = status ?? (method == PaymentMethod.COD ? OrderStatus.PendingVerification : OrderStatus.Pending);
+                var initialStatus = status ?? (method == PaymentMethod.COD ? OrderStatus.PendingVerification : OrderStatus.PendingPayment);
 
                 if (method == PaymentMethod.COD)
                 {
@@ -182,22 +185,22 @@ namespace Flower.Backend.Services
                         return (false, "Số điện thoại này đã bị chặn thanh toán COD do lịch sử bùng đơn hàng. Vui lòng thanh toán online.", 0);
                 }
 
-                var vnNow = DateTimeUtils.GetVietnamTime();
+                var utcNow = DateTime.UtcNow;
                 if (deliveryDate.HasValue)
                 {
-                    if (deliveryDate.Value.Date < vnNow.Date)
+                    if (deliveryDate.Value.Date < utcNow.Date)
                     {
                         return (false, "Ngày giao hàng không hợp lệ", 0);
                     }
 
-                    if (deliveryDate.Value.Date == vnNow.Date)
+                    if (deliveryDate.Value.Date == utcNow.Date)
                     {
                         if (!string.IsNullOrEmpty(deliveryTimeSlot))
                         {
                             var parts = deliveryTimeSlot.Split('-');
                             if (parts.Length > 0 && TimeSpan.TryParse(parts[0], out var slotStartTime))
                             {
-                                var minAllowedTime = vnNow.TimeOfDay.Add(TimeSpan.FromHours(_timeSettings.LeadTimeHours));
+                                var minAllowedTime = utcNow.TimeOfDay.Add(TimeSpan.FromHours(_timeSettings.LeadTimeHours));
                                 if (slotStartTime < minAllowedTime)
                                 {
                                     return (false, "Khung giờ chọn không khả dụng, vui lòng chọn khung giờ khác.", 0);
@@ -305,6 +308,11 @@ namespace Flower.Backend.Services
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
+            if (customer != null)
+            {
+                customer.TotalOrders++;
+            }
+
             if (method == PaymentMethod.COD && customer != null)
             {
                 var requiresVerification = await _fraudDetectionService.RequiresVerification(customer);
@@ -313,7 +321,6 @@ namespace Flower.Backend.Services
                     newOrder.Status = OrderStatus.Confirmed;
                     newOrder.IsVerified = true;
                     newOrder.VerifiedAt = DateTime.UtcNow;
-                    customer.TotalOrders++;
                     await _context.SaveChangesAsync();
                 }
                 else
@@ -323,18 +330,14 @@ namespace Flower.Backend.Services
 
                     if (!string.IsNullOrEmpty(customer.Email))
                     {
-                        _ = Task.Run(async () =>
+                        try
                         {
-                            try
-                            {
-                                var emailService = _emailService;
-                                await emailService.SendOtpEmailAsync(customer.Email, customer.FullName, otp);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogWarning(ex, "Failed to send OTP email for order {OrderId}", newOrder.Id);
-                            }
-                        });
+                            await _emailService.SendOtpEmailAsync(customer.Email, customer.FullName, otp);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to send OTP email for order {OrderId}", newOrder.Id);
+                        }
                     }
                 }
             }
@@ -427,41 +430,8 @@ namespace Flower.Backend.Services
 
         public async Task<bool> Cancel(int id)
         {
-            IQueryable<Order> query = _context.Orders
-                .Include(o => o.OrderDetails)
-                .Where(o => o.Id == id);
-
-            query = ApplyOwnershipFilter(query);
-
-            var order = await query.FirstOrDefaultAsync();
-            if (order == null) return false;
-
-            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.PendingVerification && order.Status != OrderStatus.Confirmed)
-                return false;
-
-            order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.UtcNow;
-
-            if (order.OrderDetails != null)
-            {
-                var productIds = order.OrderDetails.Select(od => od.ProductId).ToList();
-                var products = await _context.Products
-                    .Where(p => productIds.Contains(p.Id))
-                    .ToListAsync();
-
-                foreach (var detail in order.OrderDetails)
-                {
-                    var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
-                    if (product != null)
-                        product.StockQuantity += detail.Quantity;
-
-                    if (!string.IsNullOrEmpty(order.DeliveryTimeSlot) && order.DeliveryDate.HasValue)
-                        await _deliverySlotService.ReleaseSlot(detail.ProductId, order.DeliveryDate.Value, order.DeliveryTimeSlot);
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
+            var (success, _) = await CancelWithPolicy(id);
+            return success;
         }
 
         public async Task<bool> CancelWithReason(int id, string? reason)
@@ -572,69 +542,39 @@ namespace Flower.Backend.Services
 
             if (order.Customer != null)
             {
-                var requiresVerification = await _fraudDetectionService.RequiresVerification(order.Customer);
-
-                order.Status = OrderStatus.Confirmed;
-                order.IsVerified = true;
-                order.VerifiedAt = DateTime.UtcNow;
-                order.Customer.TotalOrders++;
-                await _context.SaveChangesAsync();
-
-                if (!string.IsNullOrEmpty(order.Customer.Email))
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
                 {
-                    await _emailService.SendOrderConfirmedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
-                }
+                    var requiresVerification = await _fraudDetectionService.RequiresVerification(order.Customer);
 
-                if (!requiresVerification)
+                    order.Status = OrderStatus.Confirmed;
+                    order.IsVerified = true;
+                    order.VerifiedAt = DateTime.UtcNow;
+                    order.Customer.TotalOrders++;
+                    await _context.SaveChangesAsync();
+
+                    await transaction.CommitAsync();
+
+                    if (!string.IsNullOrEmpty(order.Customer.Email))
+                    {
+                        await _emailService.SendOrderConfirmedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
+                    }
+
+                    if (!requiresVerification)
+                    {
+                        return (true, "Đơn hàng đã được xác nhận tự động");
+                    }
+
+                    return (true, "Đơn hàng đã được xác nhận qua xác minh thủ công");
+                }
+                catch
                 {
-                    return (true, "Đơn hàng đã được xác nhận tự động");
+                    await transaction.RollbackAsync();
+                    throw;
                 }
-
-                return (true, "Đơn hàng đã được xác nhận qua xác minh thủ công");
             }
 
             return (false, "Không tìm thấy thông tin khách hàng");
-        }
-
-        public async Task<bool> AutoCancelUnverifiedOrders(int timeoutMinutes = 30)
-        {
-            var cutoff = DateTime.UtcNow.AddMinutes(-timeoutMinutes);
-
-            var expiredOrders = await _context.Orders
-                .Include(o => o.OrderDetails)
-                .Where(o => o.Status == OrderStatus.PendingVerification
-                    && o.OrderDate <= cutoff)
-                .ToListAsync();
-
-            foreach (var order in expiredOrders)
-            {
-                order.Status = OrderStatus.Cancelled;
-                order.CancelledAt = DateTime.UtcNow;
-                order.CancellationReason = "Tự động hủy do quá thời gian xác minh";
-
-                if (order.OrderDetails != null)
-                {
-                    var productIds = order.OrderDetails.Select(od => od.ProductId).ToList();
-                    var products = await _context.Products
-                        .Where(p => productIds.Contains(p.Id))
-                        .ToListAsync();
-
-                    foreach (var detail in order.OrderDetails)
-                    {
-                        var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
-                        if (product != null)
-                            product.StockQuantity += detail.Quantity;
-
-                        if (!string.IsNullOrEmpty(order.DeliveryTimeSlot) && order.DeliveryDate.HasValue)
-                            await _deliverySlotService.ReleaseSlot(detail.ProductId, order.DeliveryDate.Value, order.DeliveryTimeSlot);
-                    }
-                }
-            }
-
-            if (expiredOrders.Any())
-                await _context.SaveChangesAsync();
-
-            return expiredOrders.Any();
         }
 
         public async Task<bool> IsPhoneBlacklisted(string phone)

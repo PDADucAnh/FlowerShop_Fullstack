@@ -8,6 +8,7 @@ export const useCreateOrder = () => {
     mutationFn: (data: any) => orderService.submitOrder(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error: any) => {
       const msg = error?.response?.data?.message || 'Lỗi kết nối, vui lòng thử lại.';

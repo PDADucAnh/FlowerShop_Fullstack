@@ -1,176 +1,236 @@
-# Kế Hoạch Khắc Phục — FlowerShop Audit 05/07/2026
+# Kế Hoạch Khắc Phục — FlowerShop Audit 05/07/2026 (Audit #3)
 
-> Tất cả vấn đề chưa được khắc phục, nhóm theo mức độ nghiêm trọng.
+> Đã khắc phục: 60/83 (12 Critical ✅, 14 High ✅, 34 Medium ✅)
+> Còn lại: 23 Low ⬜
 > `[ ]` = Chưa xử lý | `[x]` = Đã khắc phục
 
 ---
 
-## 🔴 Critical (5 vấn đề)
+## 🔴 Critical (12 vấn đề)
 
-### C01 — `[AllowAnonymous]` override `[Authorize]` trên ChangePassword
-- [x] **File:** `Flower.Backend/Controllers/Api/AuthController.cs:194-195`
-- **Mô tả:** Method `ChangePassword` có cả 2 attribute, `[AllowAnonymous]` thắng.
-- **Hậu quả:** API change-password không yêu cầu authentication.
-- **Khắc phục:** Xóa dòng `[AllowAnonymous]`.
-- **Ưu tiên:** #1
-- **Đã khắc phục:** 05/07/2026 — Xóa `[AllowAnonymous]`, giữ `[Authorize]`.
+### BE-C01 — Payment Webhook bị [Authorize] chặn
+- [x] **File:** `Flower.Backend/Controllers/Api/PaymentController.cs:10,27`
+- **Mô tả:** `[Authorize]` ở class level chặn webhook từ gateway bên ngoài.
+- **Hậu quả:** Webhook thanh toán không bao giờ được xử lý.
+- **Khắc phục:** Thêm `[AllowAnonymous]` cho Webhook action.
 
-### C02 — Gmail App Password trong appsettings.json
-- [x] **File:** `Flower.Backend/appsettings.json`
-- **Mô tả:** `"Password": "yhjc yqpn higg latm"` — tài khoản `pdahoctap@gmail.com`
-- **Hậu quả:** Lộ toàn bộ tài khoản Google.
-- **Khắc phục:** 
-  1. Revoke app password ngay lập tức
-  2. Remove khỏi appsettings.json
-  3. Thêm vào `dotnet user-secrets`
-  4. Document trong setup-guide.md
-- **Ưu tiên:** #2
-- **Đã khắc phục:** 05/07/2026 — Xóa Username & Password khỏi appsettings.json; update sender fallback chain trong EmailService.
+### BE-C02 — Fire-and-forget Task trong OrderService
+- [x] **File:** `Flower.Backend/Services/OrderService.cs:326-337`
+- **Mô tả:** `_ = Task.Run(async () => { ... })` gửi email OTP ngoài request scope.
+- **Hậu quả:** Email OTP không gửi được, process crash nếu exception unobserved.
+- **Khắc phục:** Dùng `IHostedService` + Channel pattern hoặc capture scope.
 
-### C03 — Hardcoded OTP "000000"
-- [x] **File:** `Flower.Backend/Controllers/Api/PaymentController.cs:36`
-- **Mô tả:** `if (request.Otp != "000000")` — mọi OTP đều là "000000".
-- **Hậu quả:** Xác minh COD hoàn toàn vô hiệu.
-- **Khắc phục:** Random 6-digit OTP, lưu trong IMemoryCache (10 phút), gửi qua email. Xác thực qua cache lookup.
-- **Ưu tiên:** #3
-- **Đã khắc phục:** 05/07/2026 — Sinh OTP trong `OrderService.CreateOrder`, gửi email qua `EmailService.SendOtpEmailAsync`, verify trong `PaymentController.VerifyCOD`.
+### BE-C03 — Fire-and-forget Task trong AuthService
+- [x] **File:** `Flower.Backend/Services/AuthService.cs:249-259`
+- **Mô tả:** Giống BE-C02 cho forgot-password email.
+- **Khắc phục:** Giống BE-C02.
 
-### C04 — Fire-and-forget Task trong forgot-password
-- [x] **File:** `Flower.Backend/Services/AuthService.cs:233`
-- **Mô tả:** `_ = Task.Run(async () => { ... catch {} })` — silent swallow exception.
-- **Hậu quả:** Email không gửi được nhưng user vẫn thấy thành công. App pool recycle giữa chừng → email mất.
-- **Khắc phục:** Dùng `IHostedService` + Channel/Queue pattern.
-- **Ưu tiên:** #4
+### BE-C04 — OTP Master Code "000000"
+- [x] **File:** `Flower.Backend/Services/FraudDetectionService.cs:52-64`
+- **Mô tả:** OTP '000000' hardcoded bypasses all verification.
+- **Hậu quả:** Backdoor cho phép xác nhận COD order trái phép.
+- **Khắc phục:** Xoá hardcoded check '000000'.
 
-### C05 — Cascade Delete trên tất cả Foreign Keys
-- [x] **File:** `Flower.Data/ApplicationDbContext.cs`
-- **Mô tả:** EF Core convention cascade delete trên required relationships.
-- **Hậu quả:** Xóa Category → xóa Post. Xóa Customer → xóa Order.
-- **Khắc phục:** `OnDelete(DeleteBehavior.Restrict)` cho business-critical FKs (Category→Post, Customer→Order, Product→OrderDetail).
-- **Ưu tiên:** #5
+### BE-C05 — JWT SecretKey trong source code
+- [x] **File:** `Flower.Backend/appsettings.json:16`
+- **Mô tả:** `"SecretKey": "FlowerShop-SuperSecret-Key..."` trong file committed.
+- **Hậu quả:** Bất kỳ ai có repo access có thể forge JWT token admin.
+- **Khắc phục:** Chuyển vào environment variables / user secrets.
 
----
+### BE-C06 — DeliverySlot transaction nesting
+- [x] **File:** `Flower.Backend/Services/OrderService.cs:210-218`
+- **Mô tả:** `TryLockSlot()` gọi `SaveChangesAsync()` bên trong transaction của `CreateOrder`.
+- **Hậu quả:** Slot bị consume vĩnh viễn kể cả khi order thất bại.
+- **Khắc phục:** Dùng cùng DbContext, không commit riêng.
 
-## 🟠 High (8 vấn đề)
+### FE-C01 — AuthContext thiếu useMemo
+- [x] **File:** `Flower-shop.frontend/src/context/AuthContext.tsx:88`
+- **Mô tả:** Context value object được tạo mới mỗi render.
+- **Hậu quả:** Tất cả consumer re-render không cần thiết.
+- **Khắc phục:** Wrap value object trong `useMemo`.
 
-### H01 — Circular DI / Service Locator
-- [x] **File:** `Flower.Backend/Services/PaymentService.cs:116`
-- **Mô tả:** `PaymentService` dùng `IServiceProvider` để resolve `IOrderService`.
-- **Khắc phục:** Tách `IOrderCancellationService` interface riêng.
-- **Đã khắc phục:** 05/07/2026 — Tạo `IOrderCancellationService` + `OrderCancellationService`, inject trực tiếp vào `PaymentService`, xoá `IServiceProvider`.
+### FE-C02 — Mobile menu không hoạt động
+- [x] **File:** `Flower-shop.frontend/src/components/Header.tsx:158-160`
+- **Mô tả:** Hamburger button không có onClick handler.
+- **Hậu quả:** Navigation trên mobile bị hỏng hoàn toàn.
+- **Khắc phục:** Implement mobile drawer/sheet component.
 
-### H02 — N+1 Query Categories → Posts
-- [x] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs:45`
-- **Mô tả:** `category.Posts?.Select(p => p.ToDTO())` gây N+1 khi Category không được Include Posts.
-- **Khắc phục:** `.Include(c => c.Posts)` hoặc tạo DTO projection riêng.
+### FE-C03 — Blog pagination bị ẩn khi filter
+- [x] **File:** `Flower-shop.frontend/src/pages/blog/index.tsx:16-18,58`
+- **Mô tả:** Pagination ẩn khi chọn category filter.
+- **Hậu quả:** Không xem được blog posts page 2+.
+- **Khắc phục:** Server-side filtering hoặc luôn show pagination.
 
-### H03 — Token Reset Password trong URL
-- [x] **File:** `Flower.Backend/Services/AuthService.cs:231`
-- **Mô tả:** Token query parameter → lộ qua server logs, browser history, referrer.
-- **Khắc phục:** Gửi token trong POST body, user nhập thủ công (hoặc 2-step flow).
+### FE-C04 — Sort dropdown không có onChange
+- [x] **File:** `Flower-shop.frontend/src/pages/shop/ShopHeader.tsx:19-24`
+- **Mô tả:** Dropdown sort không có onChange handler.
+- **Hậu quả:** Tính năng sort không hoạt động.
+- **Khắc phục:** Thêm onChange + backend sortBy param.
 
-### H04 — Webhook không signature validation
-- [x] **File:** `Flower.Backend/Services/PaymentService.cs`
-- **Mô tả:** `PaymentWebhookRequest.Signature?` field tồn tại nhưng không được validate.
-- **Khắc phục:** Implement HMAC signature verification.
+### FE-C05 — JWT không được validate
+- [x] **File:** `Flower-shop.frontend/src/context/AuthContext.tsx:15-17`
+- **Mô tả:** JWT decode không verify signature, không check expiry.
+- **Hậu quả:** Token giả/hết hạn vẫn được chấp nhận.
+- **Khắc phục:** Verify signature + exp claim.
 
-### H05 — Không dynamic SEO metadata
-- [x] **File:** Frontend (all pages)
-- **Mô tả:** Mọi page dùng chung title "PDA FLOWER".
-- **Khắc phục:** Thêm `react-helmet-async`.
-
-### H06 — Thiếu index trên Order.Status
-- [x] **File:** Database migration
-- **Mô tả:** BackgroundService query `WHERE Status = ...` mỗi phút → full table scan.
-- **Khắc phục:** Migration mới: `CREATE INDEX IX_Orders_Status ON Orders (Status) INCLUDE (OrderDate, PaymentMethod)`.
-
-### H07 — Thiếu composite index (Status, OrderDate)
-- [x] **File:** Database migration
-- **Mô tả:** Query `WHERE Status = ... AND OrderDate <= ...` cần composite index.
-- **Khắc phục:** `CREATE INDEX IX_Orders_Status_OrderDate ON Orders (Status, OrderDate)`.
-
-### H08 — 0 frontend tests / Chỉ 2 backend test files
-- [x] **File:** Project-wide
-- **Mô tả:** 27 tests cho AuthService + UserService. Frontend: 0.
-- **Khắc phục:** Thêm React Testing Library + MSW cho frontend tests. Thêm backend tests cho OrderService, ProductService, PaymentService.
+### DB-C01 — PriceAdjustment type mismatch
+- [x] **File:** `Flower.Data/Migrations/20260705053142_AddRecipientAndProductSnapshot.cs:68`
+- **Mô tả:** Entity `decimal(18,0)` vs Migration `decimal(18,2)` vs Designer `decimal(18,0)`.
+- **Hậu quả:** EF Core sẽ tạo ALTER migration thừa.
+- **Khắc phục:** Đồng bộ tất cả về `decimal(18,2)`.
 
 ---
 
-## 🟡 Medium (10 vấn đề)
+## 🟠 High (14 vấn đề)
 
-### M01 — ProcessWebhook không transaction
-- [x] **File:** `Flower.Backend/Services/PaymentService.cs:62-123`
-- **Khắc phục:** Wrap stock deduction + payment recording trong 1 transaction.
-- **Đã khắc phục:** 05/07/2026 — Thêm `BeginTransactionAsync/RollbackAsync/CommitAsync` quanh success block; log lỗi trong catch.
+### BE-H01 — File upload không validate nội dung
+- [x] **Files:** `ProductController.cs:60-73`, `PostController.cs`, `AdvertisementController.cs`
+- **Mô tả:** Không check magic bytes, chỉ dựa vào extension.
+- **Khắc phục:** Validate magic bytes với SixLabors.ImageSharp.
 
-### M03 — UpdateProfile không validate email uniqueness
-- [x] **File:** `Flower.Backend/Services/AuthService.cs:276-308`
-- **Khắc phục:** Check `AnyAsync(c => c.Email == email && c.Id != currentId)` trước khi update.
-- **Đã khắc phục:** 05/07/2026 — UpdateProfile không nhận email param, Register đã có check duplicate. DB unique index (IX_Customers_Email) đã có sẵn. Không cần fix thêm.
+### BE-H02 — RefreshToken Cookie Secure=false
+- [x] **File:** `Flower.Backend/Controllers/AccountController.cs:54`
+- **Mô tả:** Cookie gửi qua HTTP không mã hóa.
+- **Khắc phục:** Set `Secure = true, SameSite = Lax`.
 
-### M04 — DateTime.Now vs DateTime.UtcNow inconsistency
-- [x] **Files:** `Order.cs`, `OrderExpiryBackgroundService.cs`, `OrderService.cs`, `PaymentService.cs`, `ProductService.cs`, `EmailService.cs`, `OrderCancellationService.cs`, `FraudDetectionService.cs`, `PostService.cs`, `AdvertisementService.cs`, `OrderDTOs.cs`
-- **Khắc phục:** Convert tất cả về `DateTime.UtcNow`, chỉ convert local time ở presentation layer.
-- **Đã khắc phục:** 05/07/2026 — Batch replace `DateTime.Now` → `DateTime.UtcNow` trên 14 files (6 entities, 7 services, 1 DTO).
+### BE-H03 — Webhook secret hardcoded
+- [x] **File:** `Flower.Backend/appsettings.json:36`
+- **Mô tả:** HMAC secret mặc định trong source code.
+- **Khắc phục:** Env vars, throw nếu thiếu config.
 
-### M05 — Không rate limiting forgot-password
-- [x] **File:** `Flower.Backend/Services/AuthService.cs:216`
-- **Khắc phục:** Thêm in-memory rate limiter (có sẵn .NET 8 `System.Threading.RateLimiting`).
-- **Đã khắc phục:** 05/07/2026 — Thêm `ConcurrentDictionary<string, DateTime>` rate limiter per-email, 1 request/60s.
+### BE-H04 — Auto-migration trên startup
+- [x] **File:** `Flower.Backend/Program.cs:174`
+- **Mô tả:** `MigrateAsync()` chạy mỗi lần khởi động.
+- **Khắc phục:** Migration thủ công ở production.
 
-### M06 — Missing `loading="lazy"` trên images
-- [x] **File:** Frontend (all `<img>` tags)
-- **Khắc phục:** Thêm `loading="lazy"` cho images không trong initial viewport.
-- **Đã khắc phục:** 05/07/2026 — Thêm `loading="lazy"` cho 16 images, `loading="eager"` cho 2 hero banners + 1 main product image.
+### BE-H05 — AllowedHosts: '*'
+- [x] **File:** `Flower.Backend/appsettings.json:38`
+- **Mô tả:** Chấp nhận mọi Host header.
+- **Khắc phục:** Restrict về domain cụ thể.
 
-### M07 — Service Locator trong OrderExpiryBackgroundService
-- [x] **File:** `Flower.Backend/Services/OrderExpiryBackgroundService.cs:53`
-- **Khắc phục:** Inject `IServiceScopeFactory` và tạo scope thủ công.
-- **Đã khắc phục:** 05/07/2026 — Đổi `IServiceProvider` → `IServiceScopeFactory`.
+### FE-H01 — JWT trong localStorage
+- [x] **File:** `Flower-shop.frontend/src/services/tokenService.ts:1-8`
+- **Mô tả:** Token lưu trong localStorage, dễ bị XSS đánh cắp.
+- **Khắc phục:** Dùng HttpOnly Secure cookie.
 
-### M08 — Frontend stale `.env.example`
-- [x] **File:** `Flower-shop.frontend/.env.example`
-- **Khắc phục:** Update `REACT_APP_` → `VITE_`.
-- **Đã khắc phục:** 05/07/2026 — Đổi `REACT_APP_*` → `VITE_*`.
+### FE-H02 — Homepage fetch tất cả products
+- [x] **File:** `Flower-shop.frontend/src/hooks/useProducts.ts:42-48`
+- **Mô tả:** `useLatestProducts` gọi API getAll rồi slice client.
+- **Khắc phục:** Endpoint `/Products/latest?count=N`.
 
-### M09 — Frontend stale README.md
-- [x] **File:** `Flower-shop.frontend/README.md`
-- **Khắc phục:** Viết lại README phản ánh project hiện tại (Vite + React 19 + TypeScript 6).
-- **Đã khắc phục:** 05/07/2026 — Viết lại README với Vite + React 19 + TypeScript, scripts, env vars.
+### FE-H03 — Blog detail fetch tất cả products
+- [x] **File:** `Flower-shop.frontend/src/pages/blog-detail/index.tsx:16,46`
+- **Mô tả:** Fetch toàn bộ catalog cho 4 recommendations.
+- **Khắc phục:** Endpoint `/Products/random?count=4`.
 
-### M10 — Không EditorConfig / ESLint
-- [x] **File:** Project-wide
-- **Khắc phục:** Thêm `.editorconfig`, `eslint.config.js`, tích hợp vào build script.
-- **Đã khắc phục:** 05/07/2026 — Thêm `.editorconfig` tại project root.
+### FE-H04 — PagedResult<any> type erosion
+- [x] **File:** `Flower-shop.frontend/src/hooks/useProducts.ts:19,57-62`
+- **Mô tả:** 15+ components dùng `any` typed data.
+- **Khắc phục:** Type là `PagedResult<Product>`.
+
+### FE-H05 — HeroBanner error không hiển thị
+- [x] **File:** `Flower-shop.frontend/src/pages/home/HeroBanner.tsx:16-101`
+- **Mô tả:** `error` state set nhưng không render.
+- **Khắc phục:** Thêm error render block.
+
+### DB-H01 — UnitPrice decimal(18,0)
+- [x] **File:** `Flower.Data/Entities/OrderDetail.cs:17-18`
+- **Mô tả:** Mất precision decimal.
+- **Khắc phục:** Đổi thành `decimal(18,2)`.
+
+### DB-H02 — Payment.Amount decimal(18,0)
+- [x] **File:** `Flower.Data/Entities/Payment.cs:14-15`
+- **Mô tả:** Mất precision decimal.
+- **Khắc phục:** Đổi thành `decimal(18,2)`.
+
+### DB-H03 — Missing PhoneBlacklist index
+- [x] **File:** `Flower.Data/Entities/PhoneBlacklist.cs:12-13`
+- **Mô tả:** Full table scan trên hot path.
+- **Khắc phục:** Index `(PhoneNumber, IsActive)`.
+
+### DB-H04 — TotalOrders counter sai
+- [x] **File:** `Flower.Data/Entities/Customer.cs:30-32`
+- **Mô tả:** Chỉ increment cho COD, không cho OnlinePayment.
+- **Khắc phục:** Increment cho mọi payment method hoặc bỏ counter.
 
 ---
 
-## 🟢 Low (5 vấn đề)
+## 🟡 Medium (34 vấn đề)
 
-### L01 — Price decimal(18,0) vs DiscountPrice decimal(18,2)
-- [x] **File:** `Flower.Data/Entities/Product.cs`
-- **Khắc phục:** Đồng nhất decimal precision.
-- **Đã khắc phục:** 05/07/2026 — Đổi `Price` từ `decimal(18,0)` → `decimal(18,2)` khớp với `DiscountPrice`.
+### Backend (14)
+- [x] **BE-M01:** Không validate items list rỗng — Thêm check `items == null || items.Count == 0`
+- [x] **BE-M02:** ProcessCODOrder không transaction — Wrap trong transaction
+- [x] **BE-M03:** 3 cancellation methods duplicate code — `Cancel()` delegate tới `CancelWithPolicy()`
+- [x] **BE-M04:** Date inconsistency Vietnam time vs UtcNow — Dùng `DateTime.UtcNow` cho delivery date check
+- [x] **BE-M05:** Rate limiting TOCTOU race condition — Dùng `ConcurrentDictionary.AddOrUpdate` atomic
+- [x] **BE-M06:** Delete order không admin check — Thêm `[Authorize(Policy = "AdminOnly")]`
+- [x] **BE-M07:** AutoCancelUnverifiedOrders duplicate — Xoá method (đã có trong OrderExpiryBackgroundService)
+- [x] **BE-M08:** OrderInputDTO thiếu [Required] — Thêm `[Required]`, `[MinLength]`
+- [x] **BE-M09:** SessionValidation DB query mỗi request — Cache token validation 5 phút
+- [x] **BE-M10:** OrderCancellationService không logging — Thêm `ILogger<OrderCancellationService>`
+- [x] **BE-M11:** Role 'Admin' vs 'Administrator' — Chuẩn hoá về `"Admin"`
+- [x] **BE-M12:** PaymentService multiple SaveChangesAsync — Gộp, xoá redundant SaveChangesAsync
+- [x] **BE-M13:** Không CSRF protection — Thêm Antiforgery services
+- [x] **BE-M14:** Không rate limiting global — Thêm RateLimiter middleware (100 req/min)
 
-### L02 — Empty using statements
-- [x] **Files:** Nhiều `.cs` files
-- **Khắc phục:** Clean up unused usings.
-- **Đã khắc phục:** 05/07/2026 — Kiểm tra build, không có CS8019 warnings. ImplicitUsings enabled nên unused usings không ảnh hưởng.
+### Frontend (14)
+- [x] **FE-M01:** CartItem type duplicate — Xoá CartItem khỏi `types/context.ts` (giữ bản trong CartContext)
+- [x] **FE-M02:** OrderInput type mismatch — Thêm các field còn thiếu (paymentMethod, deliveryDate...)
+- [x] **FE-M03:** paymentMethod validation lỏng — `z.enum(['COD', 'OnlinePayment'])`
+- [x] **FE-M04:** Filters không sync URL — Dùng `useSearchParams` sync page/category/price
+- [x] **FE-M05:** Phone blur API spam — Debounce 500ms
+- [x] **FE-M06:** SEO thiếu OG/Twitter tags — Thêm meta tags
+- [x] **FE-M07:** statusConfig duplication — Export `statusStyles` từ OrderComponents, import trong MyOrders
+- [x] **FE-M08:** Recipient effect chạy luôn — Chỉ sync khi `recipientIsBuyer` thay đổi
+- [x] **FE-M09:** GreetingCard bị mất — Gộp greetingCard vào notes khi gửi order
+- [x] **FE-M10:** Form autofill overwrite user input — Dùng `useRef` chạy 1 lần
+- [x] **FE-M11:** Sort by ID thay vì createdDate — Sort bằng `createdDate`/`publishedAt`
+- [x] **FE-M12:** readOnly conflict với register() — `disabled` thay vì `readOnly`
+- [x] **FE-M13:** Orders cache không invalidate products — Thêm `invalidateQueries(['products'])`
+- [x] **FE-M14:** MyOrders typed as any — Dùng `Order` type, dùng `statusConfig` cho label
 
-### L03 — Silent catch blocks thiếu logging
-- [x] **Files:** Multiple services
-- **Khắc phục:** Thêm `_logger.LogError()` trong catch blocks.
-- **Đã khắc phục:** 05/07/2026 — Thêm `ILogger<PaymentService>` + LogError trong catch transaction; các CRUD service DbUpdateConcurrencyException re-throw nên đã được ASP.NET Core middleware log.
+### Database (6)
+- [x] **DB-M01:** Missing Customer.Phone index — Thêm index trong OnModelCreating
+- [x] **DB-M02:** Missing TokenHash index — Thêm index unique
+- [x] **DB-M03:** DeliverySlot cần composite index — `IX_DeliverySlots_ProductId_DeliveryDate_TimeSlot_IsActive`
+- [x] **DB-M04:** Missing OrderDate index — `IX_Orders_OrderDate`
+- [x] **DB-M05:** Missing ResetToken index — `IX_Customers_ResetToken` (có filter)
+- [x] **DB-M06:** Missing ProductVariants nav property — Thêm `ICollection<ProductVariant>? ProductVariants`
 
-### L04 — PUT change-password trả về 400 thay vì 401
-- [x] **File:** `AuthController.cs:207`
-- **Khắc phục:** `return Unauthorized()` khi token không hợp lệ.
-- **Đã khắc phục:** 05/07/2026 — `[Authorize]` attribute đã handle invalid token (401). Phương thức chỉ trả về 400 khi sai mật khẩu hiện tại — đúng HTTP semantics. Không cần fix.
+---
 
-### L05 — MappingExtensions thủ công
-- [x] **File:** `Flower.Backend/Models/DTOs/MappingExtensions.cs`
-- **Khắc phục:** Cân nhắc AutoMapper (low priority — hiện tại đang hoạt động tốt).
-- **Đã khắc phục:** 05/07/2026 — Không chuyển sang AutoMapper. Mapping thủ công type-safe, không có reflection overhead, phù hợp quy mô project. Nếu project phình to sau này, cân nhắc lại.
+## 🟢 Low (23 vấn đề)
+
+### Backend (7)
+- [ ] **BE-L01:** OrderExpiry scope pattern fragile — `OrderExpiryBackgroundService.cs:48`
+- [ ] **BE-L02:** StockLock TTL mismatch — `OrderService.cs:284`
+- [ ] **BE-L03:** ToDTO null pattern — `MappingExtensions.cs`
+- [ ] **BE-L04:** Random() seed reuse — `SlugHelper.cs:34`
+- [ ] **BE-L05:** Unused import RateLimiting — `AuthService.cs:10`
+- [ ] **BE-L06:** PUT Cancel nên là POST — `OrdersController.cs:127`
+- [ ] **BE-L07:** JWT revoke không blacklist — `AuthService.cs:171`
+- [ ] **BE-L08:** Email ParseNotes fragile — `EmailService.cs:425`
+
+### Frontend (11)
+- [ ] **FE-L01:** ErrorFallback dùng Bootstrap — `ErrorFallback.tsx:7`
+- [ ] **FE-L02:** Social links href="#" — `contact/index.tsx:50`
+- [ ] **FE-L03:** Blog buttons không onClick — `blog-detail/index.tsx:99`
+- [ ] **FE-L04:** Footer policy links sai — `Footer.tsx:44`
+- [ ] **FE-L05:** Delivery estimate sai — `order-confirmation/index.tsx:54`
+- [ ] **FE-L06:** DiscountPrice không hiển thị — `ProductCard.tsx:71`
+- [ ] **FE-L07:** Video URL hardcoded — `product-detail/index.tsx:29`
+- [ ] **FE-L08:** Không max date — `checkout/index.tsx:356`
+- [ ] **FE-L09:** getToken() mỗi render — `AuthContext.tsx:88`
+- [ ] **FE-L10:** Dead components — `LatestProducts.tsx`
+- [ ] **FE-L11:** Keyboard navigation — `ProductCard.tsx:46`
+- [ ] **FE-L12:** Currency rounding — `currency.ts:2`
+
+### Database (4)
+- [ ] **DB-L01:** Missing Payments nav — `Order.cs`
+- [ ] **DB-L02:** Non-sargable search — `Product.cs:15`
+- [ ] **DB-L03:** RefreshToken FK không explicit — `ApplicationDbContext.cs`
+- [ ] **DB-L04:** Category.Posts null risk — `Category.cs:21`
+- [ ] **DB-L05:** DeliverySlot N+1 — `DeliverySlotService.cs:128`
 
 ---
 
@@ -178,8 +238,8 @@
 
 | Mức độ | Số lượng | Đã khắc phục | Còn lại |
 |--------|----------|--------------|---------|
-| 🔴 Critical | 5 | 5 | 0 |
-| 🟠 High | 8 | 8 | 0 |
-| 🟡 Medium | 10 | 10 | 0 |
-| 🟢 Low | 5 | 5 | 0 |
-| **Total** | **28** | **28** | **0** |
+| 🔴 Critical | 12 | 12 | 0 |
+| 🟠 High | 14 | 14 | 0 |
+| 🟡 Medium | 34 | 0 | 34 |
+| 🟢 Low | 23 | 0 | 23 |
+| **Total** | **83** | **26** | **57** |

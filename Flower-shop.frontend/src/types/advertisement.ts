@@ -6,5 +6,6 @@ export interface Advertisement {
   linkUrl?: string;
   sortOrder: number;
   isActive: boolean;
-  createdDate: string;
+  createdAt: string;
+  updatedAt?: string;
 }

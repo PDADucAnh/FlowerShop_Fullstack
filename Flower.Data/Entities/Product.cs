@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -11,7 +13,7 @@ namespace Flower.Data.Entities
         [MaxLength(50)]
         public string? Sku { get; set; }
 
-        [Required(ErrorMessage = "T�n s?n ph?m kh�ng du?c d? tr?ng")]
+        [Required(ErrorMessage = "Tên sản phẩm không được để trống")]
         [MaxLength(200)]
         public string Name { get; set; }
 
@@ -38,5 +40,21 @@ namespace Flower.Data.Entities
         public int ViewCount { get; set; }
 
         public int AddToCartCount { get; set; }
+
+        public virtual ICollection<ProductVariant>? ProductVariants { get; set; }
+
+        public bool IsActive { get; set; } = true;
+
+        [MaxLength(500)]
+        public string? FlowerMeaning { get; set; }
+
+        [MaxLength(200)]
+        public string? Origin { get; set; }
+
+        public string? CareInstruction { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import ShopSidebar from './ShopSidebar';
 import ShopHeader from './ShopHeader';
 import ProductList from './ProductList';
@@ -7,13 +8,22 @@ import SEO from '../../components/SEO';
 import { useProductsPaged } from '../../hooks/useProducts';
 
 const ShopPage: React.FC = () => {
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
   const pageSize = 9;
 
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [page, setPage] = useState(() => parseInt(searchParams.get('page') || '1', 10));
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    () => {
+      const cat = searchParams.get('category');
+      return cat ? parseInt(cat, 10) : null;
+    }
+  );
   
   // Realtime UI state
-  const [priceRange, setPriceRange] = useState<{ min: number | null, max: number | null }>({ min: null, max: null });
+  const [priceRange, setPriceRange] = useState<{ min: number | null, max: number | null }>(() => ({
+    min: searchParams.get('min') ? parseInt(searchParams.get('min')!, 10) : null,
+    max: searchParams.get('max') ? parseInt(searchParams.get('max')!, 10) : null,
+  }));
   const [activePricePreset, setActivePricePreset] = useState<string | null>(null);
 
   // Debounced API state
@@ -29,6 +39,15 @@ const ShopPage: React.FC = () => {
 
     return () => clearTimeout(handler);
   }, [priceRange]);
+
+  useEffect(() => {
+    const params: Record<string, string> = {};
+    if (page > 1) params.page = String(page);
+    if (selectedCategoryId) params.category = String(selectedCategoryId);
+    if (priceRange.min) params.min = String(priceRange.min);
+    if (priceRange.max) params.max = String(priceRange.max);
+    setSearchParams(params, { replace: true });
+  }, [page, selectedCategoryId, priceRange, setSearchParams]);
 
   const { data: paged, isLoading, error } = useProductsPaged(page, pageSize, debouncedMin, debouncedMax, selectedCategoryId);
 

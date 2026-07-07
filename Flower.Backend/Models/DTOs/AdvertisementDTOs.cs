@@ -12,7 +12,7 @@ namespace Flower.Backend.Models.DTOs
         public string? LinkUrl { get; set; }
         public int SortOrder { get; set; }
         public bool IsActive { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class CreateAdvertisementDTO

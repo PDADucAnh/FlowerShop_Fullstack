@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback, type ReactNode } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import type { AuthUser, AuthContextType } from '../types/context';
@@ -14,6 +14,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (token) {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
+                const exp = payload.exp;
+                if (exp && Date.now() >= exp * 1000) {
+                    tokenService.removeToken();
+                    setLoading(false);
+                    return;
+                }
                 setUser({
                     id: payload.Id ? Number(payload.Id) : undefined,
                     username: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name,
@@ -85,7 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const isAuthenticated = !!user;
 
-    const value: AuthContextType = { user, login, logout, refreshProfile, updateProfile, changePassword, isAuthenticated, loading, token: tokenService.getToken() };
+    const value = useMemo<AuthContextType>(() => ({
+        user, login, logout, refreshProfile, updateProfile, changePassword, isAuthenticated, loading,
+        token: tokenService.getToken(),
+    }), [user, login, logout, refreshProfile, updateProfile, changePassword, isAuthenticated, loading]);
 
     return (
         <AuthContext.Provider value={value}>

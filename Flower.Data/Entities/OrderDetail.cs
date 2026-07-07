@@ -14,7 +14,7 @@ namespace Flower.Data.Entities
 
         public int Quantity { get; set; }
 
-        [Column(TypeName = "decimal(18,0)")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal UnitPrice { get; set; }
 
         [MaxLength(200)]
@@ -25,6 +25,12 @@ namespace Flower.Data.Entities
 
         [MaxLength(50)]
         public string? SizeVariant { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? Discount { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? Subtotal { get; set; }
 
         [ForeignKey("OrderId")]
         public virtual Order? Order { get; set; }

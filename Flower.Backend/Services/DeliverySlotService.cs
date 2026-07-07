@@ -91,7 +91,6 @@ namespace Flower.Backend.Services
                     return false;
 
                 slot.CurrentBooked++;
-                await _context.SaveChangesAsync();
                 return true;
             }
 
@@ -105,7 +104,6 @@ namespace Flower.Backend.Services
                 IsActive = true
             };
             _context.DeliverySlots.Add(newSlot);
-            await _context.SaveChangesAsync();
             return true;
         }
 

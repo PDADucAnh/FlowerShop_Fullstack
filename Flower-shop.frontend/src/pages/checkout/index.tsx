@@ -49,13 +49,14 @@ const CheckoutPage: React.FC = () => {
   const watchFullname = watch('fullname');
   const watchPhone = watch('phone');
 
-  // Auto-sync recipient if "recipientIsBuyer" is checked
+  // Auto-sync recipient only when "recipientIsBuyer" is toggled on
   useEffect(() => {
     if (recipientIsBuyer) {
       setValue('recipientName', watchFullname || '', { shouldValidate: true });
       setValue('recipientPhone', watchPhone || '', { shouldValidate: true });
     }
-  }, [recipientIsBuyer, watchFullname, watchPhone, setValue]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recipientIsBuyer]);
 
   const getFilteredSlots = () => {
     const todayStr = getVietnamTodayString();
@@ -86,29 +87,35 @@ const CheckoutPage: React.FC = () => {
     refreshProfile();
   }, [refreshProfile]);
 
+  const phoneBlurRef = React.useRef<NodeJS.Timeout>();
   const handlePhoneBlur = async (phoneVal: string) => {
     if (!phoneVal || phoneVal.length < 10) return;
-    setCheckingBlacklist(true);
-    try {
-      const res: any = await axiosClient.get('/Orders/check-blacklist', {
-        params: { phone: phoneVal }
-      });
-      if (res && res.isBlacklisted) {
-        setIsBlacklisted(true);
-        setValue('paymentMethod', 'OnlinePayment');
-        toast.error('Số điện thoại này có lịch sử bùng hàng. Bạn bắt buộc phải thanh toán Online.');
-      } else {
-        setIsBlacklisted(false);
+    if (phoneBlurRef.current) clearTimeout(phoneBlurRef.current);
+    phoneBlurRef.current = setTimeout(async () => {
+      setCheckingBlacklist(true);
+      try {
+        const res: any = await axiosClient.get('/Orders/check-blacklist', {
+          params: { phone: phoneVal }
+        });
+        if (res && res.isBlacklisted) {
+          setIsBlacklisted(true);
+          setValue('paymentMethod', 'OnlinePayment');
+          toast.error('Số điện thoại này có lịch sử bùng hàng. Bạn bắt buộc phải thanh toán Online.');
+        } else {
+          setIsBlacklisted(false);
+        }
+      } catch (err) {
+        console.error('Lỗi kiểm tra blacklist:', err);
+      } finally {
+        setCheckingBlacklist(false);
       }
-    } catch (err) {
-      console.error('Lỗi kiểm tra blacklist:', err);
-    } finally {
-      setCheckingBlacklist(false);
-    }
+    }, 500);
   };
 
+  const hasAutoFilled = React.useRef(false);
   useEffect(() => {
-    if (user) {
+    if (user && !hasAutoFilled.current) {
+      hasAutoFilled.current = true;
       if (user.fullName) setValue('fullname', user.fullName);
       if (user.email) setValue('email', user.email);
       if (user.phone) {
@@ -124,7 +131,7 @@ const CheckoutPage: React.FC = () => {
 
     const orderPayload = {
       customerId: user?.id || 0,
-      notes: formData.notes || '',
+      notes: [formData.notes, formData.greetingCard ? `Lời chúc: ${formData.greetingCard}` : ''].filter(Boolean).join(' | '),
       items: cartItems.map(item => ({
         productId: item.id,
         quantity: item.quantity,
@@ -142,7 +149,14 @@ const CheckoutPage: React.FC = () => {
       const result = await createOrder.mutateAsync(orderPayload);
       clearCart();
       if (formData.paymentMethod === 'OnlinePayment') {
-        navigate(`/momo-mock?orderId=${result.orderId}`);
+        const res: any = await axiosClient.post('/Payment/create-vnpay-url', {
+          orderId: result.orderId,
+          orderDescription: `Thanh toán đơn hàng #${result.orderId}`,
+          name: formData.fullname,
+        });
+        if (res?.url) {
+          window.location.href = res.url;
+        }
       } else {
         navigate(`/order-confirmation?orderId=${result.orderId}`);
       }
@@ -287,7 +301,7 @@ const CheckoutPage: React.FC = () => {
                   <input
                     type="text"
                     id="receiver-name"
-                    readOnly={recipientIsBuyer}
+                    disabled={recipientIsBuyer}
                     {...register('recipientName')}
                     className={`w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed' : ''}`}
                     placeholder="Nhập họ và tên người nhận"
@@ -301,7 +315,7 @@ const CheckoutPage: React.FC = () => {
                   <input
                     type="tel"
                     id="receiver-phone"
-                    readOnly={recipientIsBuyer}
+                    disabled={recipientIsBuyer}
                     {...register('recipientPhone')}
                     className={`w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed' : ''}`}
                     placeholder="Nhập số điện thoại người nhận"
@@ -428,7 +442,7 @@ const CheckoutPage: React.FC = () => {
                     <p className="font-body-md text-sm text-on-surface-variant mt-1">Thanh toán bằng tiền mặt khi nhận được hoa</p>
                   </div>
                 </label>
-                {/* Option 2: MoMo */}
+                {/* Option 2: VNPAY */}
                 <label className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors group/radio ${watchPaymentMethod === 'OnlinePayment' ? 'border-primary bg-surface-container-low' : 'border-outline-variant hover:bg-surface-container-low'}`}>
                   <div className="flex items-center h-6 mr-4">
                     <input
@@ -441,11 +455,11 @@ const CheckoutPage: React.FC = () => {
                   <div className="flex-grow">
                     <div className="flex items-center justify-between">
                       <span className="font-label-md text-label-md text-on-surface group-hover/radio:text-primary transition-colors">
-                        Chuyển khoản trực tuyến / MoMo
+                        Chuyển khoản trực tuyến (VNPAY)
                       </span>
                       <span className="material-symbols-outlined text-outline">account_balance_wallet</span>
                     </div>
-                    <p className="font-body-md text-sm text-on-surface-variant mt-1">Thanh toán an toàn qua cổng MoMo (giả lập)</p>
+                    <p className="font-body-md text-sm text-on-surface-variant mt-1">Thanh toán an toàn qua cổng VNPAY</p>
                   </div>
                 </label>
               </div>

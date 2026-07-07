@@ -13,7 +13,11 @@ namespace Flower.Data.Entities
         Cancelled = 3,
         PendingVerification = 4,
         Confirmed = 5,
-        Preparing = 6
+        Preparing = 6,
+        PendingPayment = 7,
+        Paid = 8,
+        ReadyForDelivery = 9,
+        Refunded = 10
     }
 
     public enum PaymentMethod
@@ -28,7 +32,9 @@ namespace Flower.Data.Entities
         Completed = 1,
         Failed = 2,
         Refunded = 3,
-        PartialRefund = 4
+        PartialRefund = 4,
+        Expired = 5,
+        Cancelled = 6
     }
 
     public class Order
@@ -63,6 +69,8 @@ namespace Flower.Data.Entities
         [MaxLength(50)]
         public string? DeliveryTimeSlot { get; set; }
 
+        public int? DeliverySlotId { get; set; }
+
         [MaxLength(100)]
         public string? DeliveryDistrict { get; set; }
 
@@ -74,6 +82,24 @@ namespace Flower.Data.Entities
 
         [MaxLength(20)]
         public string? RecipientPhone { get; set; }
+
+        [MaxLength(200)]
+        public string? DeliveryReceiverName { get; set; }
+
+        [MaxLength(20)]
+        public string? DeliveryReceiverPhone { get; set; }
+
+        [MaxLength(100)]
+        public string? DeliveryProvince { get; set; }
+
+        [MaxLength(100)]
+        public string? DeliveryWard { get; set; }
+
+        [MaxLength(500)]
+        public string? DeliveryAddressLine { get; set; }
+
+        [MaxLength(20)]
+        public string? DeliveryPostalCode { get; set; }
 
         public DateTime? CancelledAt { get; set; }
 
@@ -87,5 +113,9 @@ namespace Flower.Data.Entities
         public decimal RefundAmount { get; set; }
 
         public DateTime? TargetFinishedTime { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

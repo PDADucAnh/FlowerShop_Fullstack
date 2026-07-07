@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -10,11 +9,11 @@ namespace Flower.Data.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "Ti�u d? kh�ng du?c d? tr?ng")]
+        [Required(ErrorMessage = "Tiêu đề không được để trống")]
         [MaxLength(500)]
         public string Title { get; set; }
 
-        [Required(ErrorMessage = "N?i dung kh�ng du?c d? tr?ng")]
+        [Required(ErrorMessage = "Nội dung không được để trống")]
         public string Content { get; set; }
 
         [MaxLength(500)]
@@ -32,5 +31,7 @@ namespace Flower.Data.Entities
 
         [ForeignKey("CategoryId")]
         public virtual Category Category { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

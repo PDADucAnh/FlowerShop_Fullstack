@@ -20,7 +20,7 @@ export const checkoutSchema = z.object({
   notes: z.string().optional(),
 
   // Phương thức thanh toán
-  paymentMethod: z.string(),
+  paymentMethod: z.enum(['COD', 'OnlinePayment'], { errorMap: () => ({ message: 'Phương thức thanh toán không hợp lệ' }) }),
 });
 
 export type CheckoutFormData = z.infer<typeof checkoutSchema>;

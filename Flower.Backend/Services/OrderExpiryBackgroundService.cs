@@ -55,11 +55,14 @@ namespace Flower.Backend.Services
                 var now = DateTime.UtcNow;
                 var codCutoff = now.AddMinutes(-30);
                 var onlineCutoff = now.AddMinutes(-15);
+                var pendingCutoff = now.AddMinutes(-15);
 
                 var expiredOrders = await context.Orders
+                    .Include(o => o.OrderDetails)
                     .Where(o =>
                         (o.PaymentMethod == PaymentMethod.COD && o.Status == OrderStatus.PendingVerification && o.OrderDate <= codCutoff) ||
-                        (o.PaymentMethod == PaymentMethod.OnlinePayment && o.Status == OrderStatus.Pending && o.OrderDate <= onlineCutoff)
+                        (o.PaymentMethod == PaymentMethod.OnlinePayment && o.Status == OrderStatus.PendingPayment && o.OrderDate <= onlineCutoff) ||
+                        (o.PaymentMethod == PaymentMethod.OnlinePayment && o.Status == OrderStatus.Pending && o.OrderDate <= pendingCutoff)
                     )
                     .ToListAsync(stoppingToken);
 
@@ -69,9 +72,47 @@ namespace Flower.Backend.Services
 
                     foreach (var order in expiredOrders)
                     {
-                        string reason = order.PaymentMethod == PaymentMethod.COD
-                            ? "Tự động hủy đơn COD quá hạn 30 phút chưa xác minh"
-                            : "Tự động hủy đơn hàng quá hạn thanh toán 15 phút";
+                        string reason;
+                        if (order.PaymentMethod == PaymentMethod.COD)
+                        {
+                            reason = "Tự động hủy đơn COD quá hạn 30 phút chưa xác minh";
+                        }
+                        else if (order.Status == OrderStatus.PendingPayment)
+                        {
+                            reason = "Tự động hủy đơn hàng quá hạn thanh toán 15 phút";
+                        }
+                        else
+                        {
+                            reason = "Tự động hủy đơn hàng quá hạn thanh toán 15 phút";
+                        }
+
+                        if (order.PaymentMethod == PaymentMethod.OnlinePayment)
+                        {
+                            var pendingPayments = await context.Payments
+                                .Where(p => p.OrderId == order.Id && p.Status == PaymentStatus.Pending)
+                                .ToListAsync(stoppingToken);
+
+                            foreach (var payment in pendingPayments)
+                            {
+                                payment.Status = PaymentStatus.Expired;
+                            }
+
+                            if (order.OrderDetails != null)
+                            {
+                                foreach (var detail in order.OrderDetails)
+                                {
+                                    var product = await context.Products
+                                        .FirstOrDefaultAsync(p => p.Id == detail.ProductId, stoppingToken);
+                                    if (product != null)
+                                    {
+                                        var newStock = product.StockQuantity + detail.Quantity;
+                                        await context.Database.ExecuteSqlRawAsync(
+                                            "UPDATE Products SET StockQuantity = {0} WHERE Id = {1}",
+                                            newStock, detail.ProductId);
+                                    }
+                                }
+                            }
+                        }
 
                         await orderService.CancelWithReason(order.Id, reason);
                     }

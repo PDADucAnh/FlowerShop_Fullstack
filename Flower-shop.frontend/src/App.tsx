@@ -32,7 +32,6 @@ const About = lazy(() => import('./pages/about/index'));
 const Contact = lazy(() => import('./pages/contact/index'));
 const OrderConfirmation = lazy(() => import('./pages/order-confirmation/index'));
 const OrderDetail = lazy(() => import('./pages/auth/OrderDetail'));
-const MomoMock = lazy(() => import('./pages/checkout/MomoMock'));
 const Search = lazy(() => import('./pages/search/index'));
 
 
@@ -106,7 +105,6 @@ const App: React.FC = () => {
                     <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                    <Route path="/momo-mock" element={<ProtectedRoute><MomoMock /></ProtectedRoute>} />
                     <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
                     <Route path="/my-orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
                     <Route path="/wishlist" element={<Wishlist />} />

@@ -1,11 +1,13 @@
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
+using Flower.Backend.Utils;
 using Flower.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using SixLabors.ImageSharp;
 using System;
 using System.IO;
 using System.Linq;
@@ -61,6 +63,19 @@ namespace Flower.Backend.Controllers
             {
                 string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                try
+                {
+                    using var validateStream = uploadImage.OpenReadStream();
+                    using var _ = Image.Load(validateStream);
+                }
+                catch
+                {
+                    ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
+                    var categories = await _categoryProductService.GetAll();
+                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    return View(model);
+                }
 
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
                 string filePath = Path.Combine(folder, fileName);
@@ -135,6 +150,19 @@ namespace Flower.Backend.Controllers
             {
                 string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
                 if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+
+                try
+                {
+                    using var validateStream = uploadImage.OpenReadStream();
+                    using var _ = Image.Load(validateStream);
+                }
+                catch
+                {
+                    ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
+                    var categories = await _categoryProductService.GetAll();
+                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    return View(model);
+                }
 
                 string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
                 string filePath = Path.Combine(folder, fileName);

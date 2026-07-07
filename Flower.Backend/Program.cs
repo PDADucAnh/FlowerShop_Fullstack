@@ -26,6 +26,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 
 var cultureInfo = new CultureInfo("vi-VN");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
@@ -34,8 +36,15 @@ CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 var builder = WebApplication.CreateBuilder(args);
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
-var secretKey = jwtSettings["SecretKey"]
-    ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
+var secretKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+    ?? jwtSettings["SecretKey"];
+if (string.IsNullOrWhiteSpace(secretKey))
+    throw new InvalidOperationException("JWT SecretKey is not configured. Set JWT_SECRET_KEY environment variable or Jwt:SecretKey in user secrets.");
+
+var webhookSecret = Environment.GetEnvironmentVariable("WEBHOOK_SECRET_KEY")
+    ?? builder.Configuration["WebhookSettings:SecretKey"];
+if (string.IsNullOrWhiteSpace(webhookSecret))
+    throw new InvalidOperationException("Webhook SecretKey is not configured. Set WEBHOOK_SECRET_KEY environment variable.");
 
 builder.Services.AddAuthentication(options =>
 {
@@ -133,6 +142,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.INotificationServi
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdvertisementService, Flower.Backend.Services.AdvertisementService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IDeliverySlotService, Flower.Backend.Services.DeliverySlotService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPaymentService, Flower.Backend.Services.PaymentService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IVnPayService, Flower.Backend.Services.VnPayService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IFraudDetectionService, Flower.Backend.Services.FraudDetectionService>();
 builder.Services.Configure<Flower.Backend.Models.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSettings>() ?? new TimeSettings();
@@ -144,6 +154,24 @@ builder.Services.AddHostedService<Flower.Backend.Services.OrderExpiryBackgroundS
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient();
 builder.Services.AddSignalR();
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+    options.Cookie.Name = "X-CSRF-TOKEN";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("ApiGlobal", opt =>
+    {
+        opt.PermitLimit = 100;
+        opt.Window = TimeSpan.FromMinutes(1);
+        opt.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = 429;
+});
 
 // ---- CẤU HÌNH CORS (THÊM VÀO TRƯỚC builder.Build()) ----
 builder.Services.AddCors(options =>
@@ -160,18 +188,21 @@ builder.Services.AddCors(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("Admin", "Administrator"));
+        policy.RequireRole("Admin"));
     options.AddPolicy("StaffOnly", policy =>
-        policy.RequireRole("Admin", "Administrator", "Editor"));
+        policy.RequireRole("Admin", "Editor"));
 });
 
 var app = builder.Build();
 
-// Auto-apply pending migrations (creates DB if not exists, applies all migrations)
+// Auto-apply pending migrations (dev only) or run manually via update-database
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await context.Database.MigrateAsync();
+    if (app.Environment.IsDevelopment())
+    {
+        await context.Database.MigrateAsync();
+    }
 
     // Seed admin account
     if (!context.Users.Any(u => u.Username == "admin"))
@@ -204,6 +235,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseCors("AllowReactApp");
+app.UseRateLimiter();
 
 app.Use(async (context, next) =>
 {

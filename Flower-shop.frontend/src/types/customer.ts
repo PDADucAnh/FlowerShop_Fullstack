@@ -4,6 +4,11 @@ export interface Customer {
   email: string;
   phone?: string;
   address?: string;
+  totalOrders: number;
+  successfulDeliveries: number;
+  failedDeliveries: number;
+  isBlacklisted: boolean;
+  fraudScore: number;
 }
 
 export interface CustomerInput {

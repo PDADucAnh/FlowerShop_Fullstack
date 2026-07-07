@@ -62,10 +62,31 @@ namespace Flower.Backend.Services
                 order.PaymentTransactionId = transactionId;
                 order.PaymentPaidAt = DateTime.UtcNow;
                 order.Status = OrderStatus.Confirmed;
+                order.IsVerified = true;
+                order.VerifiedAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();
             return payment.ToDTO();
+        }
+
+        public async Task<int> CreatePendingPayment(int orderId, decimal amount, PaymentMethod method)
+        {
+            var payment = new Payment
+            {
+                OrderId = orderId,
+                Amount = amount,
+                Method = method,
+                Status = PaymentStatus.Pending
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Created Pending Payment: PaymentId={PaymentId}, OrderId={OrderId}, Amount={Amount}",
+                payment.Id, orderId, amount);
+
+            return payment.Id;
         }
 
         public async Task<bool> ProcessWebhook(PaymentWebhookRequest request)
@@ -110,12 +131,12 @@ namespace Flower.Backend.Services
                     }
 
                     orderWithDetails.Status = OrderStatus.Confirmed;
-                    orderWithDetails.PaymentStatus = PaymentStatus.Completed;
+                    orderWithDetails.IsVerified = true;
+                    orderWithDetails.VerifiedAt = DateTime.UtcNow;
                     orderWithDetails.PaymentTransactionId = request.TransactionId;
                     orderWithDetails.PaymentPaidAt = DateTime.UtcNow;
 
                     await RecordPayment(request.OrderId, request.Amount, PaymentMethod.OnlinePayment, request.TransactionId);
-                    await _context.SaveChangesAsync();
 
                     await transaction.CommitAsync();
 
@@ -148,6 +169,122 @@ namespace Flower.Backend.Services
             return false;
         }
 
+        public async Task<(bool Success, string Message)> ConfirmOnlinePayment(int orderId, string transactionId, decimal amount, string? ipAddress = null, string? userAgent = null, string? gatewayResponse = null)
+        {
+            var orderWithDetails = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.Customer)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (orderWithDetails == null)
+            {
+                _logger.LogWarning("ConfirmOnlinePayment: order not found, OrderId={OrderId}", orderId);
+                return (false, "Đơn hàng không tồn tại");
+            }
+
+            if (orderWithDetails.PaymentStatus == PaymentStatus.Completed)
+            {
+                _logger.LogInformation("ConfirmOnlinePayment: order already paid, OrderId={OrderId}", orderId);
+                return (true, "Đơn hàng đã được thanh toán trước đó");
+            }
+
+            if (orderWithDetails.PaymentMethod != PaymentMethod.OnlinePayment)
+            {
+                _logger.LogWarning("ConfirmOnlinePayment: not an online payment order, OrderId={OrderId}", orderId);
+                return (false, "Phương thức thanh toán không hợp lệ");
+            }
+
+            var pendingPayment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.Status == PaymentStatus.Pending);
+
+            if (pendingPayment == null)
+            {
+                _logger.LogWarning("ConfirmOnlinePayment: no pending payment found, OrderId={OrderId}", orderId);
+                return (false, "Không tìm thấy yêu cầu thanh toán");
+            }
+
+            var expectedTotal = orderWithDetails.OrderDetails?.Sum(od => od.Quantity * od.UnitPrice) ?? 0;
+            if (expectedTotal != amount)
+            {
+                _logger.LogWarning("ConfirmOnlinePayment: amount mismatch, OrderId={OrderId}, Expected={Expected}, Got={Got}",
+                    orderId, expectedTotal, amount);
+                return (false, "Số tiền thanh toán không khớp");
+            }
+
+            _logger.LogInformation("ConfirmOnlinePayment: starting, OrderId={OrderId}, TransactionId={TransactionId}, Amount={Amount}",
+                orderId, transactionId, amount);
+
+            var attemptCount = await _context.PaymentAttempts
+                .CountAsync(pa => pa.PaymentId == pendingPayment.Id);
+
+            await using var dbTransaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                pendingPayment.Status = PaymentStatus.Completed;
+                pendingPayment.TransactionId = transactionId;
+                pendingPayment.PaidAt = DateTime.UtcNow;
+
+                orderWithDetails.PaymentStatus = PaymentStatus.Completed;
+                orderWithDetails.Status = OrderStatus.Confirmed;
+                orderWithDetails.IsVerified = true;
+                orderWithDetails.VerifiedAt = DateTime.UtcNow;
+                orderWithDetails.PaymentTransactionId = transactionId;
+                orderWithDetails.PaymentPaidAt = DateTime.UtcNow;
+
+                _context.PaymentAttempts.Add(new PaymentAttempt
+                {
+                    PaymentId = pendingPayment.Id,
+                    AttemptNumber = attemptCount + 1,
+                    GatewayResponse = gatewayResponse ?? transactionId,
+                    IpAddress = ipAddress,
+                    UserAgent = userAgent
+                });
+
+                if (orderWithDetails.OrderDetails != null)
+                {
+                    var productIds = orderWithDetails.OrderDetails.Select(od => od.ProductId).ToList();
+                    var products = await _context.Products
+                        .Where(p => productIds.Contains(p.Id))
+                        .ToListAsync();
+
+                    foreach (var item in orderWithDetails.OrderDetails)
+                    {
+                        var product = products.FirstOrDefault(p => p.Id == item.ProductId);
+                        if (product != null)
+                            product.StockQuantity -= item.Quantity;
+
+                        _stockLockService.ReleaseReservedStock(item.ProductId, item.Quantity);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                await dbTransaction.CommitAsync();
+
+                _logger.LogInformation("Payment success: OrderId={OrderId}, TransactionId={TransactionId}, Amount={Amount}",
+                    orderId, transactionId, amount);
+
+                if (orderWithDetails.Customer != null && !string.IsNullOrEmpty(orderWithDetails.Customer.Email))
+                {
+                    try
+                    {
+                        await _emailService.SendOrderConfirmedEmailAsync(orderWithDetails, orderWithDetails.Customer.Email, orderWithDetails.Customer.FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to send confirmation email for order {OrderId}", orderId);
+                    }
+                }
+
+                return (true, "Thanh toán thành công");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "ConfirmOnlinePayment failed for order {OrderId}", orderId);
+                await dbTransaction.RollbackAsync();
+                return (false, "Lỗi hệ thống khi xử lý thanh toán");
+            }
+        }
+
         public async Task<bool> RefundPayment(int orderId, decimal amount)
         {
             var payment = await _context.Payments
@@ -167,6 +304,79 @@ namespace Flower.Backend.Services
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<(bool Success, string Message)> MarkPaymentFailed(int orderId, string? gatewayResponse = null, string? ipAddress = null, string? userAgent = null)
+        {
+            var pendingPayment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && p.Status == PaymentStatus.Pending);
+
+            if (pendingPayment == null)
+            {
+                _logger.LogWarning("MarkPaymentFailed: no pending payment found, OrderId={OrderId}", orderId);
+                return (false, "Không tìm thấy yêu cầu thanh toán");
+            }
+
+            pendingPayment.Status = PaymentStatus.Failed;
+            pendingPayment.GatewayResponseCode = gatewayResponse;
+
+            var attemptCount = await _context.PaymentAttempts
+                .CountAsync(pa => pa.PaymentId == pendingPayment.Id);
+
+            _context.PaymentAttempts.Add(new PaymentAttempt
+            {
+                PaymentId = pendingPayment.Id,
+                AttemptNumber = attemptCount + 1,
+                GatewayResponse = gatewayResponse,
+                IpAddress = ipAddress,
+                UserAgent = userAgent
+            });
+
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Payment marked as failed: OrderId={OrderId}, PaymentId={PaymentId}, ResponseCode={Code}",
+                orderId, pendingPayment.Id, gatewayResponse);
+
+            return (true, "Cập nhật trạng thái thanh toán thất bại");
+        }
+
+        public async Task<(bool Success, string Message, int PaymentId, string? PaymentUrl)> CreateRetryPayment(int orderId, PaymentMethod method)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                return (false, "Đơn hàng không tồn tại", 0, null);
+
+            if (order.PaymentMethod != PaymentMethod.OnlinePayment)
+                return (false, "Phương thức thanh toán không hợp lệ", 0, null);
+
+            if (order.Status == OrderStatus.Paid || order.Status == OrderStatus.Completed || order.Status == OrderStatus.Cancelled)
+                return (false, "Đơn hàng không thể thanh toán lại", 0, null);
+
+            if (order.Status != OrderStatus.PendingPayment)
+                return (false, "Đơn hàng không ở trạng thái chờ thanh toán", 0, null);
+
+            var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.UnitPrice) ?? 0;
+            if (totalAmount <= 0)
+                return (false, "Số tiền thanh toán không hợp lệ", 0, null);
+
+            var payment = new Payment
+            {
+                OrderId = orderId,
+                Amount = totalAmount,
+                Method = method,
+                Status = PaymentStatus.Pending
+            };
+
+            _context.Payments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Created retry Payment: PaymentId={PaymentId}, OrderId={OrderId}, Amount={Amount}",
+                payment.Id, orderId, totalAmount);
+
+            return (true, "Tạo yêu cầu thanh toán thành công", payment.Id, null);
         }
 
         public async Task<PaymentDTO?> GetByOrderId(int orderId)

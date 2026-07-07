@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -8,7 +9,7 @@ namespace Flower.Data.Entities
         [Key]
         public int Id { get; set; }
 
-        [Required(ErrorMessage = "T�n danh m?c kh�ng du?c d? tr?ng")]
+        [Required(ErrorMessage = "Tên danh mục không được để trống")]
         [MaxLength(200)]
         public string Name { get; set; }
 
@@ -19,5 +20,9 @@ namespace Flower.Data.Entities
         public string? Slug { get; set; }
 
         public virtual ICollection<Post> Posts { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

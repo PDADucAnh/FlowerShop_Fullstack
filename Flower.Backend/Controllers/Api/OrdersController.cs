@@ -115,6 +115,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             var deleted = await _orderService.Delete(id);

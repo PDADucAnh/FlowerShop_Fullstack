@@ -33,6 +33,8 @@ namespace Flower.Backend.Models.DTOs
 
         public string StatusDisplay => Status switch
         {
+            OrderStatus.PendingPayment => "Chờ thanh toán",
+            OrderStatus.Paid => "Đã thanh toán",
             OrderStatus.Pending => "Chờ xử lý",
             OrderStatus.PendingVerification => "Chờ xác minh",
             OrderStatus.Confirmed => "Đã xác nhận",
@@ -40,8 +42,12 @@ namespace Flower.Backend.Models.DTOs
             OrderStatus.Shipping => "Đang giao",
             OrderStatus.Completed => "Đã giao",
             OrderStatus.Cancelled => "Đã hủy",
+            OrderStatus.ReadyForDelivery => "Sẵn sàng giao",
+            OrderStatus.Refunded => "Đã hoàn tiền",
             _ => "Không xác định"
         };
+
+        public decimal TotalAmount => OrderDetails?.Sum(od => od.UnitPrice * od.Quantity) ?? 0;
 
         public bool CanCancel
         {
@@ -49,7 +55,7 @@ namespace Flower.Backend.Models.DTOs
             {
                 if (Status == OrderStatus.Cancelled || Status == OrderStatus.Completed)
                     return false;
-                if (Status == OrderStatus.Preparing || Status == OrderStatus.Shipping)
+                if (Status == OrderStatus.Preparing || Status == OrderStatus.Shipping || Status == OrderStatus.ReadyForDelivery)
                     return false;
                 return true;
             }

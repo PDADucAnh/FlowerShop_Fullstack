@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import productService from '../services/productService';
+import type { Product } from '../types/product';
 import type { PagedResult } from '../types/pagination';
 
 export const useProducts = () => {
@@ -16,7 +17,7 @@ export const useProductsPaged = (
   maxPrice?: number | null, 
   categoryProductId?: number | null
 ) => {
-  return useQuery<PagedResult<any>>({
+  return useQuery<PagedResult<Product>>({
     queryKey: ['products', 'paged', page, pageSize, minPrice, maxPrice, categoryProductId],
     queryFn: () => productService.getProductsPaged(page, pageSize, minPrice, maxPrice, categoryProductId),
     placeholderData: (prev) => prev,
@@ -40,11 +41,10 @@ export const useProductsByCategory = (categoryId: number | null) => {
 };
 
 export const useLatestProducts = (limit: number) => {
-  const query = useProducts();
-  return {
-    ...query,
-    data: query.data?.slice(0, limit) ?? [],
-  };
+  return useQuery({
+    queryKey: ['products', 'latest', limit],
+    queryFn: () => productService.getAllProducts().then(products => (products ?? []).slice(0, limit)),
+  });
 };
 
 export const useBestSellingProducts = (limit: number) => {
@@ -55,7 +55,7 @@ export const useBestSellingProducts = (limit: number) => {
 };
 
 export const useSearchProducts = (query: string) => {
-  return useQuery<any[]>({
+  return useQuery<Product[]>({
     queryKey: ['products', 'search', query],
     queryFn: () => productService.searchProducts(query),
     enabled: !!query,

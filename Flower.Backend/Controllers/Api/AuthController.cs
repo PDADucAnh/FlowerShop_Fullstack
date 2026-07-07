@@ -51,6 +51,7 @@ namespace Flower.Backend.Controllers.Api
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                     new ClaimsPrincipal(claimsIdentity));
 
+                // NOTE: Jwt:SecretKey must be >= 32 characters (256 bits) for HS256
                 var jwtKey = _configuration["Jwt:SecretKey"]
                     ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
                 var issuer = _configuration["Jwt:Issuer"]

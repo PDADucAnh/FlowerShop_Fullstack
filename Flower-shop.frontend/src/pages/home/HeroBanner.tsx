@@ -64,6 +64,17 @@ function HeroBanner() {
     );
   }
 
+  if (error) {
+    return (
+      <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl bg-surface-container-low flex items-center justify-center">
+        <div className="text-center px-margin">
+          <span className="material-symbols-outlined text-4xl text-error mb-md">error</span>
+          <p className="font-label-sm text-label-sm text-error uppercase tracking-widest">Không thể tải banner. Vui lòng thử lại sau.</p>
+        </div>
+      </section>
+    );
+  }
+
   if (slides.length === 0) {
     return (
       <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl group/slider">

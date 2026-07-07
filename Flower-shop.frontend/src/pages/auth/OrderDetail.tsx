@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useOrderDetail, useCancelOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
 import { StatusBadge, CancelModal, AccountSidebar } from '../../components/OrderComponents';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import SEO from '../../components/SEO';
 import { getImageUrl } from '../../utils/apiUtils';
+import axiosClient from '../../api/axiosClient';
 
 const shimmerStyle = {
   background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)',
@@ -19,7 +20,23 @@ const OrderDetailPage: React.FC = () => {
   const { data: order, isLoading, isError } = useOrderDetail(orderId);
   const cancelOrder = useCancelOrder(() => setShowCancel(false));
   const [showCancel, setShowCancel] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const { ref, isVisible } = useScrollReveal({ threshold: 0 });
+  const navigate = useNavigate();
+
+  const handleRetryPayment = async () => {
+    setRetrying(true);
+    try {
+      const res: any = await axiosClient.post(`/Payment/retry/${orderId}`);
+      if (res?.url) {
+        window.location.href = res.url;
+      }
+    } catch {
+      navigate(`/my-orders/${orderId}`);
+    } finally {
+      setRetrying(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -213,6 +230,18 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               )}
 
+              {order.status === 'PendingPayment' && (
+                <div className="pt-stack-lg border-t border-outline-variant/30 flex justify-end gap-md">
+                  <button
+                    onClick={handleRetryPayment}
+                    disabled={retrying}
+                    className="inline-flex items-center gap-2 bg-primary text-on-primary px-stack-md py-stack-sm text-label-sm uppercase tracking-[0.2em] font-bold rounded-lg hover:bg-primary/90 transition-all duration-300 border-0 cursor-pointer btn-luxury disabled:opacity-50"
+                  >
+                    {retrying ? 'Đang xử lý...' : 'Thanh toán lại'}
+                    <span className="material-symbols-outlined text-lg">payments</span>
+                  </button>
+                </div>
+              )}
               {order.canCancel && (
                 <div className="pt-stack-lg border-t border-outline-variant/30 flex justify-end">
                   <button

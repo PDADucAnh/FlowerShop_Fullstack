@@ -23,7 +23,7 @@ namespace Flower.Backend.Services
             var items = await _context.Advertisements
                 .Where(a => a.IsActive)
                 .OrderBy(a => a.SortOrder)
-                .ThenByDescending(a => a.CreatedDate)
+                .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync();
 
             return items.Select(a => a.ToDTO());
@@ -33,7 +33,7 @@ namespace Flower.Backend.Services
         {
             var items = await _context.Advertisements
                 .OrderBy(a => a.SortOrder)
-                .ThenByDescending(a => a.CreatedDate)
+                .ThenByDescending(a => a.CreatedAt)
                 .ToListAsync();
 
             return items.Select(a => a.ToDTO());
@@ -55,7 +55,7 @@ namespace Flower.Backend.Services
                 LinkUrl = dto.LinkUrl,
                 SortOrder = dto.SortOrder,
                 IsActive = dto.IsActive,
-                CreatedDate = System.DateTime.UtcNow
+                CreatedAt = System.DateTime.UtcNow
             };
 
             _context.Advertisements.Add(entity);

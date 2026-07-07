@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -28,5 +29,7 @@ namespace Flower.Data.Entities
 
         [ForeignKey("UserId")]
         public virtual User? User { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }
