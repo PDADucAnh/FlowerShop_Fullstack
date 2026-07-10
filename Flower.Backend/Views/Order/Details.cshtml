@@ -110,6 +110,10 @@
                         case OrderStatus.Shipping: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-primary text-primary">Đang giao</span> break;
                         case OrderStatus.Completed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-primary text-on-primary">Đã giao</span> break;
                         case OrderStatus.Cancelled: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Đã hủy</span> break;
+                        case OrderStatus.CancelledByCustomer: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Khách hủy</span> break;
+                        case OrderStatus.CancelledByShop: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Shop hủy</span> break;
+                        case OrderStatus.RefundPending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-warning bg-warning/10 text-warning">Chờ hoàn tiền</span> break;
+                        case OrderStatus.Refunded: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Đã hoàn tiền</span> break;
                     }
                 </div>
                 @if (Model.Status == OrderStatus.PendingVerification)
@@ -118,6 +122,26 @@
                         <form asp-action="ConfirmCOD" asp-route-id="@Model.Id" method="post">
                             <button type="submit" class="w-full bg-primary text-on-primary text-center py-2 text-[11px] uppercase tracking-widest font-bold hover:bg-neutral-800 transition-all">
                                 Đã gọi điện - Xác nhận đơn
+                            </button>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.CanCancel)
+                {
+                    <div class="pt-4 border-t border-outline-variant space-y-sm">
+                        <button type="button" onclick="openCancelModal()" class="w-full bg-error text-on-error text-center py-2 text-[11px] uppercase tracking-widest font-bold hover:bg-error/80 transition-all">
+                            Hủy đơn (Shop)
+                        </button>
+                    </div>
+                }
+
+                @if (Model.Status == OrderStatus.RefundPending)
+                {
+                    <div class="pt-4 border-t border-outline-variant">
+                        <form asp-action="ProcessRefund" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Xác nhận hoàn tiền thành công cho đơn hàng này?')">
+                            <button type="submit" class="w-full bg-success text-on-success text-center py-2 text-[11px] uppercase tracking-widest font-bold hover:bg-success/80 transition-all">
+                                Xác nhận hoàn tiền
                             </button>
                         </form>
                     </div>
@@ -142,6 +166,14 @@
                     <p class="text-label-sm text-secondary uppercase tracking-widest">Địa chỉ</p>
                     <p class="text-body-md">@(Model.DeliveryAddress ?? "Chưa cập nhật")</p>
                 </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">Người nhận</p>
+                    <p class="text-body-md">@(Model.RecipientName ?? "Không xác định")</p>
+                </div>
+                <div class="space-y-xs">
+                    <p class="text-label-sm text-secondary uppercase tracking-widest">SĐT người nhận</p>
+                    <p class="text-body-md">@(Model.RecipientPhone ?? "Chưa cập nhật")</p>
+                </div>
             </div>
 
             <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
@@ -159,6 +191,9 @@
                         case PaymentStatus.Failed: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-error text-on-error">Thất bại</span> break;
                         case PaymentStatus.Refunded: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Đã hoàn tiền</span> break;
                         case PaymentStatus.PartialRefund: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Hoàn tiền một phần</span> break;
+                        case PaymentStatus.RefundPending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-warning bg-warning/10 text-warning">Chờ hoàn tiền</span> break;
+                        case PaymentStatus.PartialRefundPending: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-warning bg-warning/10 text-warning">Chờ hoàn tiền một phần</span> break;
+                        case PaymentStatus.PartialRefunded: <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 bg-surface-container-low text-secondary">Đã hoàn tiền một phần</span> break;
                     }
                 </div>
                 @if (!string.IsNullOrEmpty(Model.PaymentTransactionId))
@@ -184,10 +219,17 @@
                 }
             </div>
 
-            @if (Model.Status == OrderStatus.Cancelled)
+            @if (Model.Status == OrderStatus.Cancelled || Model.Status == OrderStatus.CancelledByCustomer || Model.Status == OrderStatus.CancelledByShop || Model.Status == OrderStatus.RefundPending || Model.Status == OrderStatus.Refunded)
             {
                 <div class="bg-surface-container-lowest border border-error/30 p-lg space-y-md">
-                    <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-error/30 pb-md text-error">Thông tin hủy</h4>
+                    <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-error/30 pb-md text-error">Thông tin hủy / Hoàn tiền</h4>
+                    @if (!string.IsNullOrEmpty(Model.CancelledBy))
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Người hủy</p>
+                            <p class="text-body-md">@(Model.CancelledBy switch { "Shop" => "Cửa hàng", "Customer" => "Khách hàng", _ => Model.CancelledBy ?? "N/A" })</p>
+                        </div>
+                    }
                     @if (Model.CancelledAt.HasValue)
                     {
                         <div class="space-y-xs">
@@ -202,6 +244,27 @@
                             <p class="text-body-md">@Model.CancellationReason</p>
                         </div>
                     }
+                    @if (Model.CancellationFee > 0)
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Phí hủy</p>
+                            <p class="text-body-md">@Model.CancellationFee.ToString("N0")₫</p>
+                        </div>
+                    }
+                    @if (Model.RefundAmount > 0)
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Số tiền hoàn</p>
+                            <p class="text-body-md">@Model.RefundAmount.ToString("N0")₫</p>
+                        </div>
+                    }
+                    @if (Model.RefundCompletedAt.HasValue)
+                    {
+                        <div class="space-y-xs">
+                            <p class="text-label-sm text-secondary uppercase tracking-widest">Hoàn tiền lúc</p>
+                            <p class="text-body-md">@Model.RefundCompletedAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                        </div>
+                    }
                 </div>
             }
 
@@ -211,6 +274,59 @@
                     @(string.IsNullOrEmpty(Model.Notes) ? "Không có ghi chú." : Model.Notes)
                 </p>
             </div>
+
+            @{
+                var emailHistories = ViewData["EmailHistories"] as List<Flower.Data.Entities.EmailHistory>;
+                if (emailHistories != null && emailHistories.Count > 0)
+                {
+                    <div class="bg-surface-container-lowest border border-outline-variant p-lg space-y-md">
+                        <h4 class="text-headline-sm uppercase tracking-widest mb-md border-b border-outline-variant pb-md">Lịch sử email</h4>
+                        <div class="space-y-sm">
+                            @foreach (var email in emailHistories)
+                            {
+                                <div class="flex items-start gap-3 p-3 @(email.Status == "Sent" ? "bg-success/5" : "bg-error/5") rounded">
+                                    <span class="material-symbols-outlined text-lg mt-0.5 @(email.Status == "Sent" ? "text-success" : "text-error")">@(email.Status == "Sent" ? "check_circle" : "error")</span>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-label-sm font-bold truncate">@email.EmailType - @(email.Status == "Sent" ? "Đã gửi" : "Thất bại")</p>
+                                        <p class="text-xs text-on-surface-variant truncate">@email.Recipient</p>
+                                        @if (email.SentAt.HasValue)
+                                        {
+                                            <p class="text-xs text-on-surface-variant">@email.SentAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            }
         </div>
     </div>
 </div>
+
+<!-- Cancel Modal -->
+<div id="cancelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50" style="display:none;">
+    <div class="bg-surface rounded-xl max-w-md w-full mx-4 p-xl shadow-2xl">
+        <h3 class="text-headline-sm uppercase tracking-widest mb-md">Xác nhận hủy đơn</h3>
+        <p class="text-body-md text-on-surface-variant mb-lg">Vui lòng nhập lý do hủy đơn hàng #@Model.Id:</p>
+        <form asp-action="CancelByShop" asp-route-id="@Model.Id" method="post">
+            <textarea name="reason" rows="4" class="w-full bg-surface-container-low border border-outline-variant focus:ring-1 focus:ring-primary px-lg py-3 text-body-md mb-lg" placeholder="Nhập lý do hủy..." required></textarea>
+            <div class="flex gap-md justify-end">
+                <button type="button" onclick="closeCancelModal()" class="border border-outline px-lg py-3 text-label-sm uppercase tracking-widest font-bold hover:bg-surface-container transition-all">Hủy</button>
+                <button type="submit" class="bg-error text-on-error px-lg py-3 text-label-sm uppercase tracking-widest font-bold hover:bg-error/80 transition-all">Xác nhận hủy</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCancelModal() {
+        document.getElementById('cancelModal').style.display = 'flex';
+    }
+    function closeCancelModal() {
+        document.getElementById('cancelModal').style.display = 'none';
+    }
+    document.getElementById('cancelModal')?.addEventListener('click', function(e) {
+        if (e.target === this) closeCancelModal();
+    });
+</script>

@@ -26,6 +26,10 @@ namespace Flower.Data
         public DbSet<PaymentMethodDefinition> PaymentMethods { get; set; }
         public DbSet<CustomerPaymentPreference> CustomerPaymentPreferences { get; set; }
         public DbSet<PaymentAttempt> PaymentAttempts { get; set; }
+        public DbSet<CancellationPolicy> CancellationPolicies { get; set; }
+        public DbSet<Refund> Refunds { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<EmailHistory> EmailHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -156,6 +160,57 @@ namespace Flower.Data
             modelBuilder.Entity<DeliverySlot>()
                 .HasIndex(ds => new { ds.DeliveryDate, ds.TimeSlot, ds.IsActive })
                 .HasDatabaseName("IX_DeliverySlots_Date_TimeSlot_IsActive");
+
+            modelBuilder.Entity<Refund>()
+                .HasOne(r => r.Order)
+                .WithMany()
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Refund>()
+                .HasOne(r => r.Payment)
+                .WithMany()
+                .HasForeignKey(r => r.PaymentId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            modelBuilder.Entity<Refund>()
+                .HasIndex(r => r.OrderId)
+                .HasDatabaseName("IX_Refunds_OrderId");
+
+            modelBuilder.Entity<CancellationPolicy>()
+                .HasIndex(cp => cp.OrderStatus)
+                .IsUnique()
+                .HasDatabaseName("IX_CancellationPolicies_OrderStatus");
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.Customer)
+                .WithMany()
+                .HasForeignKey(n => n.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => n.CustomerId)
+                .HasDatabaseName("IX_Notifications_CustomerId");
+
+            modelBuilder.Entity<Notification>()
+                .HasIndex(n => new { n.CustomerId, n.IsRead })
+                .HasDatabaseName("IX_Notifications_CustomerId_IsRead");
+
+            modelBuilder.Entity<EmailHistory>()
+                .HasOne(e => e.Customer)
+                .WithMany()
+                .HasForeignKey(e => e.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired(false);
+
+            modelBuilder.Entity<EmailHistory>()
+                .HasIndex(e => e.OrderId)
+                .HasDatabaseName("IX_EmailHistories_OrderId");
+
+            modelBuilder.Entity<EmailHistory>()
+                .HasIndex(e => e.EmailType)
+                .HasDatabaseName("IX_EmailHistories_EmailType");
         }
     }
 }

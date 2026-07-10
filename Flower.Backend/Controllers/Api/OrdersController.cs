@@ -128,7 +128,19 @@ namespace Flower.Backend.Controllers.Api
         [HttpPut("{id}/cancel")]
         public async Task<IActionResult> Cancel(int id, [FromBody] CancelOrderRequest? request)
         {
-            var (success, message) = await _orderService.CancelWithPolicy(id, request?.Reason);
+            var (success, message) = await _orderService.CancelByCustomer(id, request?.Reason);
+
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [HttpPut("{id}/cancel-by-shop")]
+        [Authorize(Policy = "AdminOnly")]
+        public async Task<IActionResult> CancelByShop(int id, [FromBody] CancelOrderRequest? request)
+        {
+            var (success, message) = await _orderService.CancelByShop(id, request?.Reason);
 
             if (!success)
                 return BadRequest(new { message });

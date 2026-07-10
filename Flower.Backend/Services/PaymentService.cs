@@ -292,18 +292,100 @@ namespace Flower.Backend.Services
 
             if (payment == null) return false;
 
-            payment.Status = amount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefund;
+            payment.Status = amount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefunded;
             payment.RefundedAt = DateTime.UtcNow;
 
             var order = await _context.Orders.FindAsync(orderId);
             if (order != null)
             {
                 order.RefundAmount = amount;
-                order.PaymentStatus = amount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefund;
+                order.PaymentStatus = amount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefunded;
+                order.Status = OrderStatus.Refunded;
+                order.RefundCompletedAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<(bool Success, string Message)> ProcessRefund(int orderId, string? transactionId = null, string? responseCode = null, string? processedBy = null)
+        {
+            var order = await _context.Orders
+                .Include(o => o.OrderDetails)
+                .Include(o => o.Customer)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (order == null)
+                return (false, "Đơn hàng không tồn tại");
+
+            if (order.PaymentStatus != PaymentStatus.RefundPending && order.PaymentStatus != PaymentStatus.PartialRefundPending)
+                return (false, "Đơn hàng không ở trạng thái chờ hoàn tiền");
+
+            if (order.RefundAmount <= 0)
+                return (false, "Số tiền hoàn không hợp lệ");
+
+            var payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.OrderId == orderId && (p.Status == PaymentStatus.Completed || p.Status == PaymentStatus.RefundPending || p.Status == PaymentStatus.PartialRefundPending));
+
+            if (payment != null)
+            {
+                payment.Status = order.RefundAmount >= payment.Amount ? PaymentStatus.Refunded : PaymentStatus.PartialRefunded;
+                payment.RefundedAt = DateTime.UtcNow;
+                payment.RefundTransactionId = transactionId;
+                payment.RefundResponseCode = responseCode;
+                payment.RefundedBy = processedBy;
+            }
+
+            order.PaymentStatus = order.RefundAmount >= (payment?.Amount ?? 0) ? PaymentStatus.Refunded : PaymentStatus.PartialRefunded;
+            order.Status = OrderStatus.Refunded;
+            order.RefundCompletedAt = DateTime.UtcNow;
+
+            var refund = await _context.Refunds
+                .FirstOrDefaultAsync(r => r.OrderId == orderId && r.RefundStatus == 0);
+            if (refund != null)
+            {
+                refund.RefundStatus = 1;
+                refund.ApprovedBy = processedBy;
+                refund.GatewayRefundId = transactionId;
+                refund.ProcessedAt = DateTime.UtcNow;
+                refund.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            if (order.Customer != null && !string.IsNullOrEmpty(order.Customer.Email))
+            {
+                try
+                {
+                    var paymentMethod = order.PaymentMethod == PaymentMethod.COD ? "COD" : "VNPay";
+                    await _emailService.SendRefundCompletedEmailAsync(order, order.Customer.Email, order.Customer.FullName, order.RefundAmount, paymentMethod, transactionId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send refund email for order {OrderId}", orderId);
+                }
+            }
+
+            try
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    CustomerId = order.CustomerId,
+                    OrderId = order.Id,
+                    Title = $"Hoàn tiền đơn hàng #{order.Id} thành công",
+                    Content = $"Số tiền đã hoàn: {order.RefundAmount:N0} VNĐ.",
+                    Type = "RefundCompleted",
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to create refund notification for order {OrderId}", orderId);
+            }
+
+            return (true, "Hoàn tiền thành công");
         }
 
         public async Task<(bool Success, string Message)> MarkPaymentFailed(int orderId, string? gatewayResponse = null, string? ipAddress = null, string? userAgent = null)

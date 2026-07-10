@@ -1,4 +1,4 @@
-export type OrderStatus = 'Pending' | 'PendingVerification' | 'Confirmed' | 'Preparing' | 'Shipping' | 'Completed' | 'Cancelled' | 'PendingPayment' | 'Paid' | 'ReadyForDelivery' | 'Refunded';
+export type OrderStatus = 'Pending' | 'PendingVerification' | 'Confirmed' | 'Preparing' | 'Shipping' | 'Completed' | 'Cancelled' | 'CancelledByCustomer' | 'CancelledByShop' | 'PendingPayment' | 'Paid' | 'ReadyForDelivery' | 'RefundPending' | 'Refunded';
 
 export interface OrderDetail {
   id: number;
@@ -34,8 +34,12 @@ export interface Order {
   deliveryAddress?: string;
   cancelledAt?: string;
   cancellationReason?: string;
+  cancelledBy?: string;
+  cancellationFee: number;
   isVerified: boolean;
   refundAmount: number;
+  refundRequestedAt?: string;
+  refundCompletedAt?: string;
   canCancel: boolean;
 }
 

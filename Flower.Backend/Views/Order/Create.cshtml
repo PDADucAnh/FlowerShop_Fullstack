@@ -33,11 +33,16 @@
             <select asp-for="Status" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest font-bold">
                 <option value="0">Chờ xử lý</option>
                 <option value="4">Chờ xác minh</option>
+                <option value="7">Chờ thanh toán</option>
+                <option value="8">Đã thanh toán</option>
                 <option value="5">Đã xác nhận</option>
                 <option value="6">Đang cắm hoa</option>
+                <option value="9">Sẵn sàng giao</option>
                 <option value="1">Đang giao</option>
                 <option value="2">Đã giao</option>
                 <option value="3">Đã hủy</option>
+                <option value="13">Chờ hoàn tiền</option>
+                <option value="10">Đã hoàn tiền</option>
             </select>
         </div>
 
@@ -68,6 +73,17 @@
             <div class="space-y-md">
                 <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Địa chỉ</label>
                 <input asp-for="DeliveryAddress" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="VD: 123 Nguyễn Huệ" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Người nhận</label>
+                <input asp-for="RecipientName" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="Tên người nhận" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">SĐT người nhận</label>
+                <input asp-for="RecipientPhone" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-label-sm uppercase tracking-widest" placeholder="Số điện thoại" />
             </div>
         </div>
 

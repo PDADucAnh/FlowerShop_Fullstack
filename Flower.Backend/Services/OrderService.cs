@@ -428,99 +428,19 @@ namespace Flower.Backend.Services
             return true;
         }
 
-        public async Task<bool> Cancel(int id)
-        {
-            var (success, _) = await CancelWithPolicy(id);
-            return success;
-        }
-
         public async Task<bool> CancelWithReason(int id, string? reason)
         {
             return await _orderCancellationService.CancelWithReason(id, reason);
         }
 
-        public async Task<(bool Success, string Message)> CancelWithPolicy(int id, string? reason = null)
+        public async Task<(bool Success, string Message)> CancelByCustomer(int id, string? reason = null)
         {
-            IQueryable<Order> query = _context.Orders
-                .Include(o => o.OrderDetails)
-                .Include(o => o.Customer)
-                .Where(o => o.Id == id);
+            return await _orderCancellationService.CancelByCustomer(id, reason);
+        }
 
-            query = ApplyOwnershipFilter(query);
-
-            var order = await query.FirstOrDefaultAsync();
-            if (order == null)
-                return (false, "Đơn hàng không tồn tại");
-
-            if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Completed)
-                return (false, "Đơn hàng đã được xử lý trước đó");
-
-            if (order.Status == OrderStatus.Preparing || order.Status == OrderStatus.Shipping)
-                return (false, "Đơn hàng đang trong quá trình sản xuất/giao hàng, không thể hủy");
-
-            var delta = order.DeliveryDate.HasValue
-                ? (order.DeliveryDate.Value - DateTime.UtcNow).TotalHours
-                : 999;
-
-            if (order.Status != OrderStatus.Pending && order.Status != OrderStatus.PendingVerification && delta <= 4)
-                return (false, "Đơn hàng cách thời gian giao dưới 4 giờ, không thể hủy. Vui lòng liên hệ hotline để được hỗ trợ.");
-
-            decimal refundPercent;
-            string message;
-
-            if (delta > 24)
-            {
-                refundPercent = 1.0m;
-                message = "Hủy đơn thành công. Tiền sẽ được hoàn lại 100%.";
-            }
-            else
-            {
-                refundPercent = 0.5m;
-                message = "Hủy đơn thành công. Phí hủy 50% giá trị đơn hàng sẽ được khấu trừ do nguyên liệu hoa tươi đã được chuẩn bị.";
-            }
-
-            var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.UnitPrice) ?? 0;
-            var refundAmount = totalAmount * refundPercent;
-
-            order.Status = OrderStatus.Cancelled;
-            order.CancelledAt = DateTime.UtcNow;
-            order.CancellationReason = reason ?? "Hủy theo yêu cầu";
-            order.RefundAmount = refundAmount;
-
-            bool wasDeducted = order.PaymentMethod == PaymentMethod.COD 
-                || (order.PaymentMethod == PaymentMethod.OnlinePayment && order.PaymentStatus == PaymentStatus.Completed);
-
-            if (order.OrderDetails != null)
-            {
-                var productIds = order.OrderDetails.Select(od => od.ProductId).ToList();
-                var products = await _context.Products
-                    .Where(p => productIds.Contains(p.Id))
-                    .ToListAsync();
-
-                foreach (var detail in order.OrderDetails)
-                {
-                    if (wasDeducted)
-                    {
-                        var product = products.FirstOrDefault(p => p.Id == detail.ProductId);
-                        if (product != null)
-                            product.StockQuantity += detail.Quantity;
-                    }
-
-                    if (!string.IsNullOrEmpty(order.DeliveryTimeSlot) && order.DeliveryDate.HasValue)
-                        await _deliverySlotService.ReleaseSlot(detail.ProductId, order.DeliveryDate.Value, order.DeliveryTimeSlot);
-
-                    _stockLockService.ReleaseReservedStock(detail.ProductId, detail.Quantity);
-                }
-            }
-
-            if (order.PaymentStatus == PaymentStatus.Completed && refundAmount > 0)
-            {
-                await _paymentService.RefundPayment(id, refundAmount);
-                message += $" Số tiền hoàn: {refundAmount:N0} VND.";
-            }
-
-            await _context.SaveChangesAsync();
-            return (true, message);
+        public async Task<(bool Success, string Message)> CancelByShop(int id, string? reason = null)
+        {
+            return await _orderCancellationService.CancelByShop(id, reason);
         }
 
         public async Task<(bool Success, string Message)> ProcessCODOrder(int orderId)

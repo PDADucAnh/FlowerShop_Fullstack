@@ -14,6 +14,10 @@ namespace Flower.Backend.Models.DTOs
         public string? TransactionId { get; set; }
         public DateTime? PaidAt { get; set; }
         public DateTime? RefundedAt { get; set; }
+        public string? RefundTransactionId { get; set; }
+        public string? RefundResponseCode { get; set; }
+        public string? RefundedBy { get; set; }
+        public string? RefundNote { get; set; }
         public string? Notes { get; set; }
 
         public string MethodDisplay => Method switch
@@ -30,6 +34,9 @@ namespace Flower.Backend.Models.DTOs
             PaymentStatus.Failed => "Thất bại",
             PaymentStatus.Refunded => "Đã hoàn tiền",
             PaymentStatus.PartialRefund => "Hoàn tiền một phần",
+            PaymentStatus.RefundPending => "Chờ hoàn tiền",
+            PaymentStatus.PartialRefundPending => "Chờ hoàn tiền một phần",
+            PaymentStatus.PartialRefunded => "Đã hoàn tiền một phần",
             _ => "Không xác định"
         };
     }

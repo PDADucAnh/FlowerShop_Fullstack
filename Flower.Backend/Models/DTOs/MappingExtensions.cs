@@ -226,8 +226,12 @@ namespace Flower.Backend.Models.DTOs
                 RecipientPhone = order.RecipientPhone,
                 CancelledAt = order.CancelledAt,
                 CancellationReason = order.CancellationReason,
+                CancelledBy = order.CancelledBy,
+                CancellationFee = order.CancellationFee,
                 IsVerified = order.IsVerified,
-                RefundAmount = order.RefundAmount
+                RefundAmount = order.RefundAmount,
+                RefundRequestedAt = order.RefundRequestedAt,
+                RefundCompletedAt = order.RefundCompletedAt
             };
         }
 
@@ -276,6 +280,10 @@ namespace Flower.Backend.Models.DTOs
                 TransactionId = payment.TransactionId,
                 PaidAt = payment.PaidAt,
                 RefundedAt = payment.RefundedAt,
+                RefundTransactionId = payment.RefundTransactionId,
+                RefundResponseCode = payment.RefundResponseCode,
+                RefundedBy = payment.RefundedBy,
+                RefundNote = payment.RefundNote,
                 Notes = payment.Notes
             };
         }

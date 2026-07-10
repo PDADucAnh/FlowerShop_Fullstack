@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Flower.Backend.Models;
 using Flower.Backend.Services.Interfaces;
+using Flower.Data;
 using Flower.Data.Entities;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,11 +18,13 @@ namespace Flower.Backend.Services
     {
         private readonly EmailSettings _settings;
         private readonly ILogger<EmailService> _logger;
+        private readonly IApplicationDbContext _context;
 
-        public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger)
+        public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger, IApplicationDbContext context)
         {
             _settings = settings.Value;
             _logger = logger;
+            _context = context;
         }
 
         private SmtpClient CreateSmtpClient()
@@ -116,8 +119,8 @@ namespace Flower.Backend.Services
                 orderCompletedTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
 
-            var buyer = WebUtility.HtmlEncode(parsedNotes.Buyer);
-            var recipient = WebUtility.HtmlEncode(parsedNotes.Recipient);
+            var buyer = WebUtility.HtmlEncode(customerName);
+            var recipient = WebUtility.HtmlEncode(order.RecipientName ?? parsedNotes.Recipient);
             var greeting = WebUtility.HtmlEncode(parsedNotes.Greeting);
             var extraNotes = WebUtility.HtmlEncode(parsedNotes.ExtraNotes);
             var encodedAddress = WebUtility.HtmlEncode(fullAddress);
@@ -286,6 +289,259 @@ namespace Flower.Backend.Services
             }
         }
 
+        public async Task SendOrderCancelledByShopEmailAsync(Order order, string customerEmail, string customerName, string reason, decimal refundAmount)
+        {
+            try
+            {
+                var body = BuildCancellationEmailBody(order, customerName, "Đơn hàng đã bị hủy", reason, refundAmount, null, null);
+                var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail) && !_settings.SenderEmail.Contains("noreply")
+                    ? _settings.SenderEmail
+                    : _settings.Username ?? "noreply@flowershop.com";
+                using var message = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, _settings.SenderName),
+                    Subject = $"Đơn hàng #{order.Id} đã bị hủy - FlowerShop",
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                message.To.Add(new MailAddress(customerEmail, customerName));
+
+                using var client = CreateSmtpClient();
+
+                await client.SendMailAsync(message);
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledByShop", customerEmail, $"Đơn hàng #{order.Id} đã bị hủy - FlowerShop", true);
+                _logger.LogInformation("Order cancelled by shop email sent for order {OrderId} to {Email}", order.Id, customerEmail);
+            }
+            catch (Exception ex)
+            {
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledByShop", customerEmail, $"Đơn hàng #{order.Id} đã bị hủy - FlowerShop", false);
+                _logger.LogWarning(ex, "Failed to send order cancelled by shop email for order {OrderId}", order.Id);
+            }
+        }
+
+        public async Task SendOrderCancelledByCustomerEmailAsync(Order order, string customerEmail, string customerName, decimal refundAmount)
+        {
+            try
+            {
+                var reason = "Bạn đã hủy đơn hàng theo yêu cầu.";
+                var body = BuildCancellationEmailBody(order, customerName, "Đơn hàng đã hủy", reason, refundAmount, null, null);
+                var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail) && !_settings.SenderEmail.Contains("noreply")
+                    ? _settings.SenderEmail
+                    : _settings.Username ?? "noreply@flowershop.com";
+                using var message = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, _settings.SenderName),
+                    Subject = $"Đơn hàng #{order.Id} đã hủy - FlowerShop",
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                message.To.Add(new MailAddress(customerEmail, customerName));
+
+                using var client = CreateSmtpClient();
+
+                await client.SendMailAsync(message);
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledByCustomer", customerEmail, $"Đơn hàng #{order.Id} đã hủy - FlowerShop", true);
+                _logger.LogInformation("Order cancelled by customer email sent for order {OrderId} to {Email}", order.Id, customerEmail);
+            }
+            catch (Exception ex)
+            {
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledByCustomer", customerEmail, $"Đơn hàng #{order.Id} đã hủy - FlowerShop", false);
+                _logger.LogWarning(ex, "Failed to send order cancelled by customer email for order {OrderId}", order.Id);
+            }
+        }
+
+        public async Task SendOrderCancelledWithFeeEmailAsync(Order order, string customerEmail, string customerName, decimal refundAmount, decimal feePercent, decimal feeAmount)
+        {
+            try
+            {
+                var reason = $"Đơn hàng đang trong quá trình cắm hoa. Phí hủy {feePercent}% ({feeAmount:N0}₫) sẽ được khấu trừ.";
+                var body = BuildCancellationEmailBody(order, customerName, "Đơn hàng đã hủy (có phí)", reason, refundAmount, feePercent, feeAmount);
+                var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail) && !_settings.SenderEmail.Contains("noreply")
+                    ? _settings.SenderEmail
+                    : _settings.Username ?? "noreply@flowershop.com";
+                using var message = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, _settings.SenderName),
+                    Subject = $"Đơn hàng #{order.Id} đã hủy - FlowerShop",
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                message.To.Add(new MailAddress(customerEmail, customerName));
+
+                using var client = CreateSmtpClient();
+
+                await client.SendMailAsync(message);
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledWithFee", customerEmail, $"Đơn hàng #{order.Id} đã hủy - FlowerShop", true);
+                _logger.LogInformation("Order cancelled with fee email sent for order {OrderId} to {Email}", order.Id, customerEmail);
+            }
+            catch (Exception ex)
+            {
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCancelledWithFee", customerEmail, $"Đơn hàng #{order.Id} đã hủy - FlowerShop", false);
+                _logger.LogWarning(ex, "Failed to send order cancelled with fee email for order {OrderId}", order.Id);
+            }
+        }
+
+        public async Task SendOrderCannotCancelEmailAsync(Order order, string customerEmail, string customerName)
+        {
+            try
+            {
+                var body = $@"<!DOCTYPE html><html><head><meta charset='utf-8'><style>
+body {{ font-family: 'Georgia', serif; background: #f5f2ed; color: #1a1a1a; padding: 40px 20px; }}
+.container {{ max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #d4cfc7; }}
+.header {{ background: #ab2c5d; color: #fff; padding: 30px; text-align: center; }}
+.header h1 {{ margin: 0; font-size: 20px; letter-spacing: 2px; text-transform: uppercase; }}
+.content {{ padding: 30px; }}
+.footer {{ padding: 20px 30px; background: #f5f2ed; font-size: 12px; color: #666; text-align: center; }}
+</style></head><body>
+<div class='container'>
+<div class='header'><h1>Không thể hủy đơn hàng</h1></div>
+<div class='content'>
+<p>Kính gửi {WebUtility.HtmlEncode(customerName)},</p>
+<p>Đơn hàng #{order.Id} đang được giao.</p>
+<p>Bạn không thể hủy ở thời điểm này.</p>
+<p>Nếu cần hỗ trợ vui lòng liên hệ cửa hàng.</p>
+</div>
+<div class='footer'>
+<p>FlowerShop — Trân trọng!</p>
+</div></div></body></html>";
+                var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail) && !_settings.SenderEmail.Contains("noreply")
+                    ? _settings.SenderEmail
+                    : _settings.Username ?? "noreply@flowershop.com";
+                using var message = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, _settings.SenderName),
+                    Subject = $"Đơn hàng #{order.Id} - Không thể hủy - FlowerShop",
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                message.To.Add(new MailAddress(customerEmail, customerName));
+
+                using var client = CreateSmtpClient();
+
+                await client.SendMailAsync(message);
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCannotCancel", customerEmail, $"Đơn hàng #{order.Id} - Không thể hủy - FlowerShop", true);
+                _logger.LogInformation("Order cannot cancel email sent for order {OrderId} to {Email}", order.Id, customerEmail);
+            }
+            catch (Exception ex)
+            {
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "OrderCannotCancel", customerEmail, $"Đơn hàng #{order.Id} - Không thể hủy - FlowerShop", false);
+                _logger.LogWarning(ex, "Failed to send order cannot cancel email for order {OrderId}", order.Id);
+            }
+        }
+
+        public async Task SendRefundCompletedEmailAsync(Order order, string customerEmail, string customerName, decimal refundAmount, string? paymentMethod = null, string? refundTransactionId = null)
+        {
+            try
+            {
+                var methodDisplay = paymentMethod switch
+                {
+                    "VNPay" => "VNPay",
+                    "COD" => "COD (tiền mặt)",
+                    _ => paymentMethod ?? "Chuyển khoản"
+                };
+                var transactionHtml = !string.IsNullOrEmpty(refundTransactionId)
+                    ? $"<tr><td class='label'>Mã giao dịch hoàn tiền:</td><td class='value'>{WebUtility.HtmlEncode(refundTransactionId)}</td></tr>"
+                    : "";
+
+                var body = $@"<!DOCTYPE html><html><head><meta charset='utf-8'><style>
+body {{ font-family: 'Georgia', serif; background: #f5f2ed; color: #1a1a1a; padding: 40px 20px; }}
+.container {{ max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #d4cfc7; }}
+.header {{ background: #ab2c5d; color: #fff; padding: 30px; text-align: center; }}
+.header h1 {{ margin: 0; font-size: 20px; letter-spacing: 2px; text-transform: uppercase; }}
+.content {{ padding: 30px; }}
+.order-id {{ font-size: 24px; font-weight: bold; color: #ab2c5d; margin: 10px 0; }}
+.refund-amount {{ font-size: 28px; font-weight: bold; color: #ab2c5d; text-align: center; padding: 20px; background: #f5f2ed; margin: 20px 0; }}
+table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
+.label {{ font-weight: bold; color: #555; width: 40%; }}
+.value {{ color: #1a1a1a; }}
+.footer {{ padding: 20px 30px; background: #f5f2ed; font-size: 12px; color: #666; text-align: center; }}
+</style></head><body>
+<div class='container'>
+<div class='header'><h1>Hoàn tiền thành công</h1></div>
+<div class='content'>
+<p>Kính gửi {WebUtility.HtmlEncode(customerName)},</p>
+<p>Đơn hàng #{order.Id} đã được hoàn tiền.</p>
+<div class='refund-amount'>{refundAmount:N0} VNĐ</div>
+<table>
+<tr><td class='label'>Đơn hàng:</td><td class='value'>#{order.Id}</td></tr>
+<tr><td class='label'>Phương thức:</td><td class='value'>{methodDisplay}</td></tr>{transactionHtml}
+</table>
+<p>Tiền sẽ về tài khoản của bạn theo thời gian xử lý của ngân hàng.</p>
+<p>Xin cảm ơn.</p>
+</div>
+<div class='footer'>
+<p>FlowerShop — Trân trọng!</p>
+</div></div></body></html>";
+                var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail) && !_settings.SenderEmail.Contains("noreply")
+                    ? _settings.SenderEmail
+                    : _settings.Username ?? "noreply@flowershop.com";
+                using var message = new MailMessage
+                {
+                    From = new MailAddress(senderEmail, _settings.SenderName),
+                    Subject = $"Hoàn tiền đơn hàng #{order.Id} - FlowerShop",
+                    Body = body,
+                    IsBodyHtml = true
+                };
+                message.To.Add(new MailAddress(customerEmail, customerName));
+
+                using var client = CreateSmtpClient();
+
+                await client.SendMailAsync(message);
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "RefundCompleted", customerEmail, $"Hoàn tiền đơn hàng #{order.Id} - FlowerShop", true);
+                _logger.LogInformation("Refund completed email sent for order {OrderId} to {Email}", order.Id, customerEmail);
+            }
+            catch (Exception ex)
+            {
+                await LogEmailHistoryAsync(order.CustomerId, order.Id, "RefundCompleted", customerEmail, $"Hoàn tiền đơn hàng #{order.Id} - FlowerShop", false);
+                _logger.LogWarning(ex, "Failed to send refund completed email for order {OrderId}", order.Id);
+            }
+        }
+
+        private static string BuildCancellationEmailBody(Order order, string customerName, string title, string reason, decimal refundAmount, decimal? feePercent, decimal? feeAmount)
+        {
+            var total = order.OrderDetails?.Sum(d => d.Quantity * d.UnitPrice) ?? 0;
+
+            var sb = new StringBuilder();
+            sb.AppendLine("<!DOCTYPE html><html><head><meta charset='utf-8'><style>");
+            sb.AppendLine("body { font-family: 'Georgia', serif; background: #f5f2ed; color: #1a1a1a; padding: 40px 20px; }");
+            sb.AppendLine(".container { max-width: 600px; margin: 0 auto; background: #fff; border: 1px solid #d4cfc7; }");
+            sb.AppendLine(".header { background: #ab2c5d; color: #fff; padding: 30px; text-align: center; }");
+            sb.AppendLine(".header h1 { margin: 0; font-size: 20px; letter-spacing: 2px; text-transform: uppercase; }");
+            sb.AppendLine(".content { padding: 30px; }");
+            sb.AppendLine(".order-id { font-size: 24px; font-weight: bold; color: #ab2c5d; margin: 10px 0; }");
+            sb.AppendLine(".amount-box { font-size: 24px; font-weight: bold; color: #ab2c5d; text-align: center; padding: 15px; background: #f5f2ed; margin: 15px 0; }");
+            sb.AppendLine(".footer { padding: 20px 30px; background: #f5f2ed; font-size: 12px; color: #666; text-align: center; }");
+            sb.AppendLine(".reason { background: #fff3f0; padding: 15px; margin: 15px 0; border-left: 3px solid #ab2c5d; font-size: 14px; }");
+            sb.AppendLine("table { width: 100%; border-collapse: collapse; margin: 15px 0; }");
+            sb.AppendLine("td { padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }");
+            sb.AppendLine(".label { font-weight: bold; color: #555; width: 40%; }");
+            sb.AppendLine(".value { color: #1a1a1a; }");
+            sb.AppendLine("</style></head><body>");
+            sb.AppendLine("<div class='container'>");
+            sb.AppendLine($"<div class='header'><h1>{WebUtility.HtmlEncode(title)}</h1></div>");
+            sb.AppendLine("<div class='content'>");
+            sb.AppendLine($"<p>Kính gửi {WebUtility.HtmlEncode(customerName)},</p>");
+            sb.AppendLine($"<div class='order-id'>Mã đơn hàng: #{order.Id}</div>");
+            sb.AppendLine($"<div class='reason'>{WebUtility.HtmlEncode(reason)}</div>");
+            sb.AppendLine("<table>");
+            sb.AppendLine($"<tr><td class='label'>Giá trị đơn hàng:</td><td class='value'>{total:N0} VNĐ</td></tr>");
+            if (feePercent.HasValue && feeAmount.HasValue)
+            {
+                sb.AppendLine($"<tr><td class='label'>Phí hủy ({feePercent:N0}%):</td><td class='value'>{feeAmount:N0} VNĐ</td></tr>");
+            }
+            sb.AppendLine("</table>");
+            sb.AppendLine($"<div class='amount-box'>Số tiền hoàn: {refundAmount:N0} VNĐ</div>");
+            sb.AppendLine("<p>Tiền sẽ được hoàn trong vòng 24 giờ.</p>");
+            sb.AppendLine("<p>Xin lỗi vì sự bất tiện này.</p>");
+            sb.AppendLine("</div>");
+            sb.AppendLine("<div class='footer'>");
+            sb.AppendLine("<p>FlowerShop — Trân trọng!</p>");
+            sb.AppendLine("<p>Mọi thắc mắc xin vui lòng liên hệ: support@flowershop.com</p>");
+            sb.AppendLine("</div></div></body></html>");
+            return sb.ToString();
+        }
+
         private static string BuildOrderEmailBody(Order order, string customerName, string title, string statusText)
         {
             var parsedNotes = ParseNotes(order.Notes);
@@ -329,8 +585,8 @@ namespace Flower.Backend.Services
                 orderCompletedTime = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
             }
 
-            var buyer = WebUtility.HtmlEncode(parsedNotes.Buyer);
-            var recipient = WebUtility.HtmlEncode(parsedNotes.Recipient);
+            var buyer = WebUtility.HtmlEncode(customerName);
+            var recipient = WebUtility.HtmlEncode(order.RecipientName ?? parsedNotes.Recipient);
             var greeting = WebUtility.HtmlEncode(parsedNotes.Greeting);
             var extraNotes = WebUtility.HtmlEncode(parsedNotes.ExtraNotes);
             var encodedAddress = WebUtility.HtmlEncode(fullAddress);
@@ -412,6 +668,29 @@ namespace Flower.Backend.Services
             sb.AppendLine("<p>Mọi thắc mắc xin vui lòng liên hệ: pdahoctap@gmail.com</p>");
             sb.AppendLine("</div></div></body></html>");
             return sb.ToString();
+        }
+
+        private async Task LogEmailHistoryAsync(int? customerId, int? orderId, string emailType, string recipient, string? subject, bool success)
+        {
+            try
+            {
+                _context.EmailHistories.Add(new EmailHistory
+                {
+                    CustomerId = customerId,
+                    OrderId = orderId,
+                    EmailType = emailType,
+                    Recipient = recipient,
+                    Subject = subject,
+                    Status = success ? "Sent" : "Failed",
+                    SentAt = success ? DateTime.UtcNow : null,
+                    CreatedAt = DateTime.UtcNow
+                });
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to log email history for {EmailType} to {Recipient}", emailType, recipient);
+            }
         }
 
         private class ParsedNotes

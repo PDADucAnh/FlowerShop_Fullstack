@@ -28,8 +28,12 @@ namespace Flower.Backend.Models.DTOs
         public string? RecipientPhone { get; set; }
         public DateTime? CancelledAt { get; set; }
         public string? CancellationReason { get; set; }
+        public string? CancelledBy { get; set; }
+        public decimal CancellationFee { get; set; }
         public bool IsVerified { get; set; }
         public decimal RefundAmount { get; set; }
+        public DateTime? RefundRequestedAt { get; set; }
+        public DateTime? RefundCompletedAt { get; set; }
 
         public string StatusDisplay => Status switch
         {
@@ -42,7 +46,10 @@ namespace Flower.Backend.Models.DTOs
             OrderStatus.Shipping => "Đang giao",
             OrderStatus.Completed => "Đã giao",
             OrderStatus.Cancelled => "Đã hủy",
+            OrderStatus.CancelledByCustomer => "Khách hàng hủy",
+            OrderStatus.CancelledByShop => "Cửa hàng hủy",
             OrderStatus.ReadyForDelivery => "Sẵn sàng giao",
+            OrderStatus.RefundPending => "Chờ hoàn tiền",
             OrderStatus.Refunded => "Đã hoàn tiền",
             _ => "Không xác định"
         };
@@ -53,9 +60,9 @@ namespace Flower.Backend.Models.DTOs
         {
             get
             {
-                if (Status == OrderStatus.Cancelled || Status == OrderStatus.Completed)
+                if (Status == OrderStatus.Cancelled || Status == OrderStatus.CancelledByCustomer || Status == OrderStatus.CancelledByShop || Status == OrderStatus.Completed || Status == OrderStatus.Refunded || Status == OrderStatus.RefundPending)
                     return false;
-                if (Status == OrderStatus.Preparing || Status == OrderStatus.Shipping || Status == OrderStatus.ReadyForDelivery)
+                if (Status == OrderStatus.Shipping || Status == OrderStatus.ReadyForDelivery)
                     return false;
                 return true;
             }
@@ -142,6 +149,44 @@ namespace Flower.Backend.Models.DTOs
     {
         [MaxLength(500)]
         public string? Reason { get; set; }
+
+        [MaxLength(50)]
+        public string? CancelledBy { get; set; }
+    }
+
+    public class CancellationPolicyDTO
+    {
+        public int Id { get; set; }
+        public string OrderStatus { get; set; } = string.Empty;
+        public int RefundPercent { get; set; }
+        public int CancellationFeePercent { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class UpdateCancellationPolicyDTO
+    {
+        public int RefundPercent { get; set; }
+        public int CancellationFeePercent { get; set; }
+        public string? Description { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    public class RefundDTO
+    {
+        public int Id { get; set; }
+        public int OrderId { get; set; }
+        public int? PaymentId { get; set; }
+        public string? RequestedBy { get; set; }
+        public string? ApprovedBy { get; set; }
+        public string? Reason { get; set; }
+        public string? RefundType { get; set; }
+        public int RefundPercent { get; set; }
+        public decimal RefundAmount { get; set; }
+        public int RefundStatus { get; set; }
+        public string? GatewayRefundId { get; set; }
+        public DateTime? ProcessedAt { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class CheckoutRequest

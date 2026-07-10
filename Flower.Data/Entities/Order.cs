@@ -17,7 +17,10 @@ namespace Flower.Data.Entities
         PendingPayment = 7,
         Paid = 8,
         ReadyForDelivery = 9,
-        Refunded = 10
+        Refunded = 10,
+        CancelledByCustomer = 11,
+        CancelledByShop = 12,
+        RefundPending = 13
     }
 
     public enum PaymentMethod
@@ -34,7 +37,10 @@ namespace Flower.Data.Entities
         Refunded = 3,
         PartialRefund = 4,
         Expired = 5,
-        Cancelled = 6
+        Cancelled = 6,
+        RefundPending = 7,
+        PartialRefundPending = 8,
+        PartialRefunded = 9
     }
 
     public class Order
@@ -111,6 +117,16 @@ namespace Flower.Data.Entities
         public DateTime? VerifiedAt { get; set; }
 
         public decimal RefundAmount { get; set; }
+
+        [MaxLength(50)]
+        public string? CancelledBy { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CancellationFee { get; set; }
+
+        public DateTime? RefundRequestedAt { get; set; }
+
+        public DateTime? RefundCompletedAt { get; set; }
 
         public DateTime? TargetFinishedTime { get; set; }
 

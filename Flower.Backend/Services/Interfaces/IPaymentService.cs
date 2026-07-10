@@ -14,5 +14,6 @@ namespace Flower.Backend.Services.Interfaces
         Task<PaymentDTO?> GetByOrderId(int orderId);
         Task<(bool Success, string Message, int PaymentId, string? PaymentUrl)> CreateRetryPayment(int orderId, PaymentMethod method);
         Task<(bool Success, string Message)> MarkPaymentFailed(int orderId, string? gatewayResponse = null, string? ipAddress = null, string? userAgent = null);
+        Task<(bool Success, string Message)> ProcessRefund(int orderId, string? transactionId = null, string? responseCode = null, string? processedBy = null);
     }
 }

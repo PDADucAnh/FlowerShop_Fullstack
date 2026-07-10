@@ -20,9 +20,10 @@ namespace Flower.Backend.Services.Interfaces
             string? recipientName = null, string? recipientPhone = null);
         Task<bool> Update(int id, UpdateOrderDTO dto);
         Task<bool> Delete(int id);
-        Task<bool> Cancel(int id);
 
-        Task<(bool Success, string Message)> CancelWithPolicy(int id, string? reason = null);
+        Task<(bool Success, string Message)> CancelByCustomer(int id, string? reason = null);
+
+        Task<(bool Success, string Message)> CancelByShop(int id, string? reason = null);
 
         Task<bool> CancelWithReason(int id, string? reason);
 

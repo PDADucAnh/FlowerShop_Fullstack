@@ -147,6 +147,20 @@ const OrderDetailPage: React.FC = () => {
                 </div>
               )}
 
+              {(order.recipientName || order.recipientPhone) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
+                  <div className="space-y-1">
+                    <p className="font-label-md text-on-surface-variant">Người đặt</p>
+                    <p className="font-body-md font-medium">{order.customerName || 'N/A'}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-label-md text-on-surface-variant">Người nhận</p>
+                    <p className="font-body-md font-medium">{order.recipientName || 'N/A'}</p>
+                    {order.recipientPhone && <p className="font-body-md text-sm text-on-surface-variant">SĐT: {order.recipientPhone}</p>}
+                  </div>
+                </div>
+              )}
+
               {(order.paymentMethod !== undefined || order.paymentStatus !== undefined) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
                   <div className="space-y-1">
@@ -155,7 +169,18 @@ const OrderDetailPage: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <p className="font-label-md text-on-surface-variant">Trạng thái thanh toán</p>
-                    <p className="font-body-md">{order.paymentStatus === 1 ? 'Đã thanh toán' : order.paymentStatus === 2 ? 'Thất bại' : order.paymentStatus === 3 ? 'Đã hoàn tiền' : 'Chưa thanh toán'}</p>
+                    <p className="font-body-md">
+                      {order.paymentStatus === 1 ? 'Đã thanh toán' :
+                       order.paymentStatus === 2 ? 'Thất bại' :
+                       order.paymentStatus === 3 ? 'Đã hoàn tiền' :
+                       order.paymentStatus === 4 ? 'Hoàn tiền một phần' :
+                       order.paymentStatus === 5 ? 'Hết hạn' :
+                       order.paymentStatus === 6 ? 'Đã hủy' :
+                       order.paymentStatus === 7 ? 'Chờ hoàn tiền' :
+                       order.paymentStatus === 8 ? 'Chờ hoàn tiền một phần' :
+                       order.paymentStatus === 9 ? 'Đã hoàn tiền một phần' :
+                       'Chưa thanh toán'}
+                    </p>
                   </div>
                 </div>
               )}

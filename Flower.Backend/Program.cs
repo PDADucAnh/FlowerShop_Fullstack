@@ -144,6 +144,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IDeliverySlotServi
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPaymentService, Flower.Backend.Services.PaymentService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IVnPayService, Flower.Backend.Services.VnPayService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IFraudDetectionService, Flower.Backend.Services.FraudDetectionService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IDashboardService, Flower.Backend.Services.DashboardService>();
 builder.Services.Configure<Flower.Backend.Models.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSettings>() ?? new TimeSettings();
 builder.Services.AddSingleton(timeSettings);

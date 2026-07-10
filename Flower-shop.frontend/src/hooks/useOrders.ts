@@ -29,6 +29,13 @@ export const useOrderDetail = (id: number) => {
     queryKey: ['orders', id],
     queryFn: () => orderService.getOrderById(id),
     enabled: !!id,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      if (data && data.paymentStatus !== undefined && data.paymentStatus !== 0 && data.paymentStatus !== 7 && data.paymentStatus !== 8) {
+        return false;
+      }
+      return 5000;
+    },
   });
 };
 

@@ -22,8 +22,12 @@ const orderService = {
     return data;
   },
 
-  cancelOrder: async (id: number): Promise<void> => {
-    await axiosClient.put(`/Orders/${id}/cancel`);
+  cancelOrder: async (id: number, reason?: string): Promise<void> => {
+    await axiosClient.put(`/Orders/${id}/cancel`, { reason });
+  },
+
+  cancelByShop: async (id: number, reason?: string): Promise<void> => {
+    await axiosClient.put(`/Orders/${id}/cancel-by-shop`, { reason });
   }
 };
 

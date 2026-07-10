@@ -1,21 +1,31 @@
 using Flower.Backend.Models;
+using Flower.Backend.Models.DTOs;
+using Flower.Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
+    [Authorize(Policy = "AdminOnly")]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IDashboardService _dashboardService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, IDashboardService dashboardService)
         {
             _logger = logger;
+            _dashboardService = dashboardService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var summary = await _dashboardService.GetSummary();
+            var charts = await _dashboardService.GetCharts();
+            ViewBag.Charts = charts;
+            return View(summary);
         }
 
         public IActionResult Privacy()

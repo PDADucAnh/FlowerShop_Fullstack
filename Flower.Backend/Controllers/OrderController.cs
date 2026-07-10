@@ -1,9 +1,12 @@
 using Flower.Backend.Models.DTOs;
+using Flower.Data;
 using Flower.Data.Entities;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
@@ -12,11 +15,15 @@ namespace Flower.Backend.Controllers
     {
         private readonly IOrderService _orderService;
         private readonly ICustomerService _customerService;
+        private readonly IPaymentService _paymentService;
+        private readonly IApplicationDbContext _context;
 
-        public OrderController(IOrderService orderService, ICustomerService customerService)
+        public OrderController(IOrderService orderService, ICustomerService customerService, IPaymentService paymentService, IApplicationDbContext context)
         {
             _orderService = orderService;
             _customerService = customerService;
+            _paymentService = paymentService;
+            _context = context;
         }
 
         public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
@@ -125,7 +132,58 @@ namespace Flower.Backend.Controllers
         {
             var order = await _orderService.GetDetail(id);
             if (order == null) return NotFound();
+
+            ViewData["EmailHistories"] = await _context.EmailHistories
+                .Where(e => e.OrderId == id)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+
             return View(order);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelByShop(int id, string? reason)
+        {
+            var (success, message) = await _orderService.CancelByShop(id, reason);
+            if (success)
+            {
+                TempData["Success"] = message;
+            }
+            else
+            {
+                TempData["Error"] = message;
+            }
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelByCustomer(int id, string? reason)
+        {
+            var (success, message) = await _orderService.CancelByCustomer(id, reason);
+            if (success)
+            {
+                TempData["Success"] = message;
+            }
+            else
+            {
+                TempData["Error"] = message;
+            }
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ProcessRefund(int id)
+        {
+            var (success, message) = await _paymentService.ProcessRefund(id, processedBy: User?.Identity?.Name ?? "Admin");
+            if (success)
+            {
+                TempData["Success"] = message;
+            }
+            else
+            {
+                TempData["Error"] = message;
+            }
+            return RedirectToAction("Details", new { id });
         }
     }
 }

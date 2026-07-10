@@ -1,6 +1,14 @@
+@model DashboardSummaryDTO
 @{
     ViewData["Title"] = "Tổng quan";
     Layout = "_LayoutAdmin";
+    var charts = ViewBag.Charts as DashboardChartsDTO;
+    var maxRevenue = charts?.Revenue.Data.Any() == true ? charts.Revenue.Data.Max() : 1m;
+    var totalStock = Model.Inventory.InStock + Model.Inventory.LowStock + Model.Inventory.OutOfStock;
+    totalStock = totalStock == 0 ? 1 : totalStock;
+
+    string FormatCurrency(decimal value) =>
+        value.ToString("#,##0") + " đ";
 }
 
 <div class="space-y-stack-lg">
@@ -22,10 +30,10 @@
         <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl petal-shadow-1 p-6 space-y-4 group hover:border-primary/40 transition-all">
             <div class="flex justify-between items-start">
                 <div class="space-y-1">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Tổng doanh thu</span>
-                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">128.430.000 đ</p>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Doanh thu hôm nay</span>
+                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">@FormatCurrency(Model.Revenue.Today)</p>
                 </div>
-                <span class="text-[#2E7D32] bg-[#E8F5E9] px-2 py-1 rounded font-label-sm text-label-sm">+12.5%</span>
+                <span class="text-on-surface-variant bg-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">Tháng: @FormatCurrency(Model.Revenue.Month)</span>
             </div>
             <div class="h-16 w-full relative overflow-hidden bg-surface-container-low rounded-lg">
                 <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
@@ -37,9 +45,9 @@
             <div class="flex justify-between items-start">
                 <div class="space-y-1">
                     <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Đơn hàng mới</span>
-                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">432</p>
+                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">@Model.Orders.New</p>
                 </div>
-                <span class="text-[#2E7D32] bg-[#E8F5E9] px-2 py-1 rounded font-label-sm text-label-sm">+8.2%</span>
+                <span class="text-on-surface-variant bg-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">Tổng: @Model.Orders.Completed hoàn thành</span>
             </div>
             <div class="h-16 w-full relative overflow-hidden bg-surface-container-low rounded-lg">
                 <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
@@ -51,9 +59,9 @@
             <div class="flex justify-between items-start">
                 <div class="space-y-1">
                     <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Khách hàng đang hoạt động</span>
-                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">1.284</p>
+                    <p class="font-headline-sm text-headline-sm text-on-surface font-bold">@Model.Customers.Active</p>
                 </div>
-                <span class="text-on-surface-variant bg-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">+5.1%</span>
+                <span class="text-on-surface-variant bg-surface-variant px-2 py-1 rounded font-label-sm text-label-sm">Tổng: @Model.Customers.Total</span>
             </div>
             <div class="h-16 w-full relative overflow-hidden bg-surface-container-low rounded-lg">
                 <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 40">
@@ -70,10 +78,7 @@
                 <h4 class="font-headline-sm text-headline-sm text-on-surface">Hiệu suất doanh thu</h4>
                 <div class="flex gap-4">
                     <span class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface">
-                        <span class="w-2 h-2 rounded-full bg-primary"></span> Năm nay
-                    </span>
-                    <span class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant">
-                        <span class="w-2 h-2 rounded-full bg-surface-container-highest"></span> Năm trước
+                        <span class="w-2 h-2 rounded-full bg-primary"></span> @DateTime.Now.Year
                     </span>
                 </div>
             </div>
@@ -84,56 +89,63 @@
                     <div class="border-b border-outline"></div>
                     <div class="border-b border-outline"></div>
                 </div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 60%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 45%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 75%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 85%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 65%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 90%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 55%;"></div>
-                <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: 70%;"></div>
+                @if (charts?.Revenue.Data.Any() == true)
+                {
+                    @for (int i = 0; i < charts.Revenue.Data.Count; i++)
+                    {
+                        var heightPercent = maxRevenue > 0 ? (charts.Revenue.Data[i] / maxRevenue) * 85 : 0;
+                        var h = Math.Max((double)heightPercent, 4);
+                        <div class="w-10 bg-primary rounded-t-md hover:opacity-80 transition-opacity" style="height: @h%;" title="@FormatCurrency(charts.Revenue.Data[i])"></div>
+                    }
+                }
+                else
+                {
+                    <div class="w-full text-center text-on-surface-variant font-body-md text-body-md">Chưa có dữ liệu</div>
+                }
             </div>
             <div class="flex justify-between px-4 mt-3 font-label-sm text-label-sm text-on-surface-variant">
-                <span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span><span>Jul</span><span>Aug</span>
+                @if (charts?.Revenue.Labels.Any() == true)
+                {
+                    @foreach (var label in charts.Revenue.Labels)
+                    {
+                        <span>@label</span>
+                    }
+                }
             </div>
         </div>
         <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl petal-shadow-1 p-6 flex flex-col">
-            <h4 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md">Phân bổ tồn kho</h4>
+            <h4 class="font-headline-sm text-headline-sm text-on-surface mb-stack-md">Phân bố tồn kho</h4>
             <div class="flex-1 flex flex-col justify-center gap-5">
+                @{
+                    var inStockPercent = (double)Model.Inventory.InStock / totalStock * 100;
+                    var lowStockPercent = (double)Model.Inventory.LowStock / totalStock * 100;
+                    var outOfStockPercent = (double)Model.Inventory.OutOfStock / totalStock * 100;
+                }
                 <div class="space-y-2">
                     <div class="flex justify-between font-label-sm text-label-sm text-on-surface">
-                        <span>Roses</span>
-                        <span>45%</span>
+                        <span>Còn hàng</span>
+                        <span>@inStockPercent.ToString("0")%</span>
                     </div>
                     <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full" style="width: 45%;"></div>
+                        <div class="h-full bg-primary rounded-full" style="width: @inStockPercent%;"></div>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between font-label-sm text-label-sm text-on-surface">
-                        <span>Peonies</span>
-                        <span>30%</span>
+                        <span>Sắp hết</span>
+                        <span>@lowStockPercent.ToString("0")%</span>
                     </div>
                     <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full" style="width: 30%;"></div>
+                        <div class="h-full bg-warning rounded-full" style="width: @lowStockPercent%; background: #f59e0b;"></div>
                     </div>
                 </div>
                 <div class="space-y-2">
                     <div class="flex justify-between font-label-sm text-label-sm text-on-surface">
-                        <span>Tulips</span>
-                        <span>15%</span>
+                        <span>Hết hàng</span>
+                        <span>@outOfStockPercent.ToString("0")%</span>
                     </div>
                     <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full" style="width: 15%;"></div>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex justify-between font-label-sm text-label-sm text-on-surface">
-                        <span>Orchids</span>
-                        <span>10%</span>
-                    </div>
-                    <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
-                        <div class="h-full bg-primary rounded-full" style="width: 10%;"></div>
+                        <div class="h-full bg-error rounded-full" style="width: @outOfStockPercent%;"></div>
                     </div>
                 </div>
             </div>

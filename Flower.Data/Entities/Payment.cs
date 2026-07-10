@@ -39,6 +39,18 @@ namespace Flower.Data.Entities
 
         public DateTime? RefundedAt { get; set; }
 
+        [MaxLength(200)]
+        public string? RefundTransactionId { get; set; }
+
+        [MaxLength(50)]
+        public string? RefundResponseCode { get; set; }
+
+        [MaxLength(100)]
+        public string? RefundedBy { get; set; }
+
+        [MaxLength(500)]
+        public string? RefundNote { get; set; }
+
         [MaxLength(500)]
         public string? Notes { get; set; }
 

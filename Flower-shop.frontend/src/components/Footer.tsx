@@ -13,11 +13,11 @@ const Footer: React.FC = () => {
             <span className="font-body-md text-body-md text-secondary">© 2026 PDA FLOWER. All rights reserved.</span>
           </div>
           <div className="flex flex-col gap-2">
-            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/shop">Delivery Policy</Link>
-            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/shop">Return Policy</Link>
+            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/delivery-policy">Delivery Policy</Link>
+            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/return-policy">Return Policy</Link>
           </div>
           <div className="flex flex-col gap-2">
-            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/shop">Privacy Policy</Link>
+            <Link className="font-body-md text-body-md text-on-surface-variant hover:text-primary underline underline-offset-4 opacity-90 hover:opacity-100 transition-opacity no-underline" to="/privacy-policy">Privacy Policy</Link>
           </div>
           <div className="flex flex-col gap-2">
             <span className="font-body-md text-body-md text-on-surface-variant">Tay Ninh, Vietnam</span>
@@ -42,13 +42,13 @@ const Footer: React.FC = () => {
             <h4 className="font-label-sm text-label-sm uppercase tracking-widest text-primary mb-4">Chính sách</h4>
             <ul className="space-y-2.5 list-none p-0 m-0">
               <li>
-                <Link to="/shop" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Giao hàng</Link>
+                <Link to="/delivery-policy" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Giao hàng</Link>
               </li>
               <li>
-                <Link to="/shop" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Đổi trả</Link>
+                <Link to="/return-policy" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Đổi trả</Link>
               </li>
               <li>
-                <Link to="/shop" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Bảo mật</Link>
+                <Link to="/privacy-policy" className="font-body-md text-body-md text-on-surface-variant hover:text-primary transition-colors no-underline">Bảo mật</Link>
               </li>
             </ul>
           </div>
