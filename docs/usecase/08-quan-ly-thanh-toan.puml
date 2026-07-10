@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Quản Trị Viên" as Admin
+actor "Hệ Thống VNPay" as VNPay
+
+rectangle "Quản Lý Thanh Toán" {
+  usecase "(Xem danh sách giao dịch)" as UC_LIST
+  usecase "(Xem chi tiết giao dịch)" as UC_DETAIL
+  usecase "(Xem yêu cầu hoàn tiền)" as UC_REFUND_LIST
+  usecase "(Phê duyệt hoàn tiền)" as UC_APPROVE
+  usecase "(Từ chối hoàn tiền)" as UC_REJECT
+  usecase "(Xem lịch sử thanh toán đơn)" as UC_PAY_HIST
+  usecase "(Xem nhật ký thanh toán thất bại)" as UC_FAIL_LOG
+}
+
+Admin --> UC_LIST
+Admin --> UC_DETAIL
+Admin --> UC_REFUND_LIST
+Admin --> UC_APPROVE
+UC_APPROVE --> VNPay : (Hoàn tiền qua VNPay)
+Admin --> UC_REJECT
+Admin --> UC_PAY_HIST
+Admin --> UC_FAIL_LOG
+
+@enduml

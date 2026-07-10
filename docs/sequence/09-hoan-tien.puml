@@ -1,0 +1,43 @@
+@startuml
+actor "Quản Trị Viên" as Admin
+participant "ASP.NET MVC CMS" as CMS
+participant "OrderController" as Controller
+participant "OrderService" as Service
+participant "PaymentService" as PaymentSvc
+participant "VNPay Gateway" as VNPay
+participant "ApplicationDbContext" as DB
+
+Admin -> CMS: Vào trang chi tiết đơn hàng
+CMS -> Controller: GET /Order/Detail/{id}
+Controller -> Service: GetOrderByIdAsync(id)
+Service -> DB: Query order + payment
+DB --> Service: Order + Payment
+Controller --> CMS: Render view
+
+Admin -> CMS: Click "Xử lý hoàn tiền"
+CMS -> Controller: POST /Order/ProcessRefund
+Controller -> Service: ProcessRefundAsync(orderId, amount)
+Service -> DB: Lấy thông tin payment
+DB --> Service: Payment info
+
+alt Thanh toán VNPay
+  Service -> PaymentSvc: RefundViaVnPayAsync(transactionId, amount)
+  PaymentSvc -> VNPay: Gọi API hoàn tiền
+  VNPay --> PaymentSvc: RefundResponse
+  alt Hoàn tiền thành công
+    PaymentSvc -> DB: Cập nhật Refund (Approved)
+    PaymentSvc -> DB: Cập nhật Payment (Refunded)
+    Service -> Service: Gửi email thông báo hoàn tiền
+    Controller --> CMS: 200 OK + thông báo thành công
+    CMS --> Admin: Hiển thị "Đã hoàn tiền thành công"
+  else Thất bại
+    PaymentSvc --> Service: Lỗi refund
+    Controller --> CMS: 400 Bad Request
+    CMS --> Admin: Hiển thị lỗi
+  end
+else Thanh toán COD
+  Service -> DB: Cập nhật Refund (Approved)
+  Controller --> CMS: 200 OK
+  CMS --> Admin: Hiển thị "Đã xác nhận hoàn tiền COD"
+end
+@enduml

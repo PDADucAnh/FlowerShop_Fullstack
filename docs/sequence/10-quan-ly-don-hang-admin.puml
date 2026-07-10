@@ -1,0 +1,43 @@
+@startuml
+actor "Quản Trị Viên" as Admin
+participant "ASP.NET MVC CMS" as CMS
+participant "OrderController" as Controller
+participant "OrderService" as Service
+participant "ApplicationDbContext" as DB
+
+== Xem danh sách đơn hàng ==
+Admin -> CMS: Vào trang Quản lý đơn hàng
+CMS -> Controller: GET /Order
+Controller -> Service: GetAllOrdersAsync(filters)
+Service -> DB: Query orders (có phân trang, lọc)
+DB --> Service: List<Order>
+Controller --> CMS: Render view với danh sách
+CMS --> Admin: Hiển thị bảng đơn hàng
+
+== Xem chi tiết đơn hàng ==
+Admin -> CMS: Click vào một đơn hàng
+CMS -> Controller: GET /Order/Detail/{id}
+Controller -> Service: GetOrderDetailAsync(id)
+Service -> DB: Query order + orderDetails + payment + emailHistory
+DB --> Service: Order detail
+Controller --> CMS: Render detail view
+CMS --> Admin: Hiển thị chi tiết đơn hàng
+
+== Xác nhận đơn COD ==
+Admin -> CMS: Click "Xác nhận COD"
+CMS -> Controller: POST /Order/ConfirmCOD
+Controller -> Service: ConfirmCodOrderAsync(orderId)
+Service -> DB: Cập nhật Order (Confirmed)
+Service -> DB: Cập nhật Payment (Success)
+Service -> Service: Gửi email xác nhận
+Controller --> CMS: 200 OK
+CMS --> Admin: Thông báo "Đã xác nhận đơn hàng"
+
+== Xem lịch sử email ==
+Admin -> CMS: Click "Lịch sử email"
+CMS -> Controller: GET /Order/EmailHistory/{orderId}
+Controller -> Service: GetEmailHistoryAsync(orderId)
+Service -> DB: Query EmailHistory
+Controller --> CMS: Render partial view
+CMS --> Admin: Hiển thị danh sách email đã gửi
+@enduml

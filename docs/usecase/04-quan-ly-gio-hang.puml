@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+
+rectangle "Quản Lý Giỏ Hàng" {
+  usecase "(Thêm sản phẩm vào giỏ)" as UC_ADD
+  usecase "(Xem giỏ hàng)" as UC_VIEW
+  usecase "(Cập nhật số lượng)" as UC_QTY
+  usecase "(Xóa sản phẩm khỏi giỏ)" as UC_REMOVE
+  usecase "(Thêm vào danh sách yêu thích)" as UC_WISHLIST
+  usecase "(Xem danh sách yêu thích)" as UC_VIEW_WISH
+  usecase "(Xóa khỏi danh sách yêu thích)" as UC_REMOVE_WISH
+  usecase "(Tiến hành đặt hàng)" as UC_CHECKOUT
+}
+
+Customer --> UC_ADD
+Customer --> UC_VIEW
+Customer --> UC_QTY
+Customer --> UC_REMOVE
+Customer --> UC_WISHLIST
+Customer --> UC_VIEW_WISH
+Customer --> UC_REMOVE_WISH
+Customer --> UC_CHECKOUT
+
+@enduml

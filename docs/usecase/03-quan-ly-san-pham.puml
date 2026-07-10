@@ -1,0 +1,53 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+
+rectangle "Quản Lý Sản Phẩm" {
+  usecase "(Xem danh sách sản phẩm)" as UC_LIST
+  usecase "(Lọc sản phẩm theo danh mục)" as UC_FILTER_CAT
+  usecase "(Lọc sản phẩm theo giá)" as UC_FILTER_PRICE
+  usecase "(Sắp xếp sản phẩm)" as UC_SORT
+  usecase "(Tìm kiếm sản phẩm)" as UC_SEARCH
+  usecase "(Xem chi tiết sản phẩm)" as UC_DETAIL
+  usecase "(Xem sản phẩm xu hướng)" as UC_TREND
+  usecase "(Xem sản phẩm bán chạy)" as UC_BEST
+  usecase "(Thêm sản phẩm mới)" as UC_CREATE
+  usecase "(Sửa thông tin sản phẩm)" as UC_UPDATE
+  usecase "(Xóa sản phẩm)" as UC_DELETE
+  usecase "(Tải lên hình ảnh)" as UC_IMAGE
+  usecase "(Quản lý tồn kho)" as UC_STOCK
+  usecase "(Quản lý biến thể)" as UC_VARIANT
+  usecase "(Thêm vào giỏ hàng)" as UC_ADD_CART
+}
+
+Customer --> UC_LIST
+Customer --> UC_FILTER_CAT
+Customer --> UC_FILTER_PRICE
+Customer --> UC_SORT
+Customer --> UC_SEARCH
+Customer --> UC_DETAIL
+Customer --> UC_TREND
+Customer --> UC_BEST
+Customer --> UC_ADD_CART
+
+Admin --> UC_LIST
+Admin --> UC_CREATE
+Admin --> UC_UPDATE
+Admin --> UC_DELETE
+Admin --> UC_IMAGE
+Admin --> UC_STOCK
+Admin --> UC_VARIANT
+
+Editor --> UC_LIST
+Editor --> UC_CREATE
+Editor --> UC_UPDATE
+Editor --> UC_DELETE
+Editor --> UC_IMAGE
+Editor --> UC_STOCK
+Editor --> UC_VARIANT
+
+@enduml

@@ -1,0 +1,21 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "ProductsController" as API
+participant "ProductService" as Service
+participant "ApplicationDbContext" as DB
+
+User -> Frontend: Nhập từ khóa tìm kiếm
+Frontend -> API: GET /api/products/search?keyword=...
+API -> Service: SearchProductsAsync(keyword)
+Service -> DB: Query sản phẩm theo tên/SKU (LIKE/FullText)
+DB --> Service: Danh sách Product
+Service --> API: List<ProductDto>
+API --> Frontend: 200 OK (danh sách sản phẩm)
+Frontend -> Frontend: Render danh sách lên giao diện
+Frontend --> User: Hiển thị kết quả tìm kiếm
+
+alt Không có kết quả
+  Frontend --> User: Hiển thị "Không tìm thấy sản phẩm"
+end
+@enduml

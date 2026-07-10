@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+
+rectangle "Quản Lý Đơn Hàng" {
+  usecase "(Xem lịch sử đơn hàng)" as UC_HISTORY
+  usecase "(Xem chi tiết đơn hàng)" as UC_DETAIL
+  usecase "(Hủy đơn hàng)" as UC_CANCEL
+  usecase "(Xem danh sách đơn hàng)" as UC_LIST
+  usecase "(Xem chi tiết đơn hàng - Admin)" as UC_ADMIN_DETAIL
+  usecase "(Cập nhật trạng thái đơn hàng)" as UC_STATUS
+  usecase "(Xác nhận đơn COD)" as UC_CONFIRM_COD
+  usecase "(Hủy đơn hàng - Admin)" as UC_ADMIN_CANCEL
+  usecase "(Xem lịch sử email)" as UC_EMAIL_HIST
+  usecase "(Quản lý chi tiết đơn hàng)" as UC_LINE_ITEM
+}
+
+Customer --> UC_HISTORY
+Customer --> UC_DETAIL
+Customer --> UC_CANCEL
+
+Admin --> UC_LIST
+Admin --> UC_ADMIN_DETAIL
+Admin --> UC_STATUS
+Admin --> UC_CONFIRM_COD
+Admin --> UC_ADMIN_CANCEL
+Admin --> UC_EMAIL_HIST
+Admin --> UC_LINE_ITEM
+
+Editor --> UC_LIST
+Editor --> UC_ADMIN_DETAIL
+Editor --> UC_STATUS
+Editor --> UC_ADMIN_CANCEL
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #333333
+  FontSize 12
+}
+
+actor "Khách Hàng" as Customer
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+
+rectangle "Hệ Thống Quản Lý Bán Hoa\nFlowerShop" {
+  usecase "(Quản lý tài khoản)" as UC_ACC
+  usecase "(Quản lý sản phẩm)" as UC_PROD
+  usecase "(Quản lý giỏ hàng)" as UC_CART
+  usecase "(Đặt hàng)" as UC_ORDER
+  usecase "(Thanh toán VNPAY)" as UC_PAY
+  usecase "(Quản lý đơn hàng)" as UC_MGR_ORDER
+  usecase "(Quản lý thanh toán)" as UC_PAY_MGR
+  usecase "(Quản lý khách hàng)" as UC_CUS
+  usecase "(Quản lý bài viết)" as UC_POST
+  usecase "(Quản lý khuyến mãi)" as UC_PROMO
+  usecase "(Dashboard thống kê)" as UC_DASH
+}
+
+Customer --> UC_ACC
+Customer --> UC_PROD
+Customer --> UC_CART
+Customer --> UC_ORDER
+Customer --> UC_PAY
+Customer --> UC_MGR_ORDER
+
+Admin --> UC_MGR_ORDER
+Admin --> UC_PAY_MGR
+Admin --> UC_CUS
+Admin --> UC_POST
+Admin --> UC_PROMO
+Admin --> UC_DASH
+Admin --> UC_PROD
+
+Editor --> UC_PROD
+Editor --> UC_POST
+Editor --> UC_PROMO
+Editor --> UC_DASH
+
+@enduml

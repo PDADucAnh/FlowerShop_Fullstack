@@ -1,0 +1,33 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+actor "Quản Trị Viên" as Admin
+
+rectangle "Quản Lý Tài Khoản" {
+  usecase "(Đăng ký tài khoản)" as UC_REG
+  usecase "(Đăng nhập)" as UC_LOGIN
+  usecase "(Quên mật khẩu)" as UC_FORGOT
+  usecase "(Đặt lại mật khẩu)" as UC_RESET
+  usecase "(Xem hồ sơ cá nhân)" as UC_PROFILE
+  usecase "(Cập nhật hồ sơ)" as UC_UPDATE
+  usecase "(Đổi mật khẩu)" as UC_CHPWD
+  usecase "(Đăng nhập quản trị)" as UC_ADMIN_LOGIN
+  usecase "(Đăng xuất)" as UC_LOGOUT
+  usecase "(Phân quyền người dùng)" as UC_ROLE
+}
+
+Customer --> UC_REG
+Customer --> UC_LOGIN
+Customer --> UC_FORGOT
+Customer --> UC_RESET
+Customer --> UC_PROFILE
+Customer --> UC_UPDATE
+Customer --> UC_CHPWD
+
+Admin --> UC_ADMIN_LOGIN
+Admin --> UC_LOGOUT
+Admin --> UC_ROLE
+
+@enduml

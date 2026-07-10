@@ -1,0 +1,31 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+
+rectangle "Đặt Hàng" {
+  usecase "(Nhập thông tin người mua)" as UC_BUYER
+  usecase "(Nhập thông tin người nhận)" as UC_RECIPIENT
+  usecase "(Chọn địa chỉ giao hàng)" as UC_ADDRESS
+  usecase "(Chọn khung giờ giao)" as UC_SLOT
+  usecase "(Chọn phương thức thanh toán)" as UC_PAY_METHOD
+  usecase "(Thanh toán COD)" as UC_COD
+  usecase "(Thanh toán VNPAY)" as UC_VNPAY
+  usecase "(Xác thực COD qua OTP)" as UC_OTP
+  usecase "(Xác nhận đặt hàng)" as UC_CONFIRM
+  usecase "(Hủy đặt hàng)" as UC_CANCEL
+}
+
+Customer --> UC_BUYER
+Customer --> UC_RECIPIENT
+Customer --> UC_ADDRESS
+Customer --> UC_SLOT
+Customer --> UC_PAY_METHOD
+UC_PAY_METHOD --> UC_COD : <<extend>>
+UC_PAY_METHOD --> UC_VNPAY : <<extend>>
+UC_COD --> UC_OTP : <<extend>>
+Customer --> UC_CONFIRM
+Customer --> UC_CANCEL
+
+@enduml

@@ -1,0 +1,27 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Quản Trị Viên" as Admin
+
+rectangle "Quản Lý Khách Hàng" {
+  usecase "(Xem danh sách khách hàng)" as UC_LIST
+  usecase "(Xem chi tiết khách hàng)" as UC_DETAIL
+  usecase "(Xem lịch sử mua hàng)" as UC_HISTORY
+  usecase "(Xem fraud score)" as UC_FRAUD
+  usecase "(Sửa thông tin khách hàng)" as UC_UPDATE
+  usecase "(Xóa khách hàng)" as UC_DELETE
+  usecase "(Quản lý địa chỉ khách hàng)" as UC_ADDRESS
+  usecase "(Quản lý số điện thoại blacklist)" as UC_BLACKLIST
+}
+
+Admin --> UC_LIST
+Admin --> UC_DETAIL
+Admin --> UC_HISTORY
+Admin --> UC_FRAUD
+Admin --> UC_UPDATE
+Admin --> UC_DELETE
+Admin --> UC_ADDRESS
+Admin --> UC_BLACKLIST
+
+@enduml

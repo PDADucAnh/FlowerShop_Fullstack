@@ -1,0 +1,43 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "PaymentController" as API
+participant "PaymentService" as Service
+participant "VNPay Gateway" as VNPay
+participant "ApplicationDbContext" as DB
+
+User -> Frontend: Click "Thanh toán lại"
+Frontend -> API: POST /api/payment/retry/{orderId}
+API -> Service: RetryPaymentAsync(orderId)
+Service -> DB: Kiểm tra đơn hàng
+DB --> Service: Order info
+
+alt Đơn hàng không hợp lệ (đã thanh toán / hết hạn)
+  Service --> API: Lỗi "Cannot retry payment"
+  API --> Frontend: 400 Bad Request
+  Frontend --> User: Thông báo lỗi
+else Hợp lệ
+  Service -> DB: Tạo PaymentAttempt mới
+  Service -> Service: Tạo VNPay URL mới
+  Service --> API: PaymentUrl
+  API --> Frontend: 200 OK (vnpayUrl)
+  Frontend -> Frontend: Redirect sang VNPay
+  Frontend -> VNPay: GET {vnpayUrl}
+  
+  VNPay -> User: Hiển thị cổng thanh toán
+  User -> VNPay: Nhập thông tin thẻ
+  VNPay -> VNPay: Xử lý giao dịch
+  
+  alt Thành công
+    VNPay -> API: Callback
+    API -> Service: ProcessVnPayCallbackAsync(params)
+    Service -> DB: Cập nhật Payment + Order
+    API --> Frontend: 302 Redirect
+    Frontend --> User: "Thanh toán thành công"
+  else Thất bại
+    VNPay -> API: Callback
+    Service -> DB: Ghi nhận PaymentAttempt thất bại
+    Frontend --> User: "Thanh toán thất bại" (có thể thử lại)
+  end
+end
+@enduml

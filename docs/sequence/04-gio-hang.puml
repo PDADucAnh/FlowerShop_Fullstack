@@ -1,0 +1,36 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "ProductsController" as API
+participant "ProductService" as Service
+participant "localStorage" as Storage
+
+== Thêm vào giỏ hàng ==
+User -> Frontend: Click "Thêm vào giỏ" (productId, variant, qty)
+Frontend -> API: POST /api/products/{id}/track-add-to-cart
+API -> Service: TrackAddToCartAsync(productId)
+Service --> API: OK
+Frontend -> Storage: Lấy giỏ hàng hiện tại
+Storage --> Frontend: Cart data (JSON)
+Frontend -> Frontend: Thêm sản phẩm vào cart
+Frontend -> Storage: Lưu giỏ hàng mới
+Frontend --> User: Hiển thị badge + thông báo "Đã thêm vào giỏ"
+
+== Xem giỏ hàng ==
+User -> Frontend: Click vào biểu tượng giỏ hàng
+Frontend -> Storage: Lấy giỏ hàng
+Storage --> Frontend: Cart data
+Frontend -> Frontend: Tính tổng tiền
+Frontend --> User: Hiển thị danh sách + tổng tiền
+
+== Cập nhật số lượng ==
+User -> Frontend: Thay đổi số lượng
+Frontend -> Storage: Cập nhật số lượng
+Frontend -> Frontend: Tính lại tổng tiền
+Frontend --> User: Cập nhật hiển thị
+
+== Xóa sản phẩm ==
+User -> Frontend: Click "Xóa"
+Frontend -> Storage: Xóa sản phẩm khỏi cart
+Frontend --> User: Cập nhật giỏ hàng
+@enduml

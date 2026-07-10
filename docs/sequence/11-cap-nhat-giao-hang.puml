@@ -1,0 +1,38 @@
+@startuml
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+participant "ASP.NET MVC CMS" as CMS
+participant "OrderController" as Controller
+participant "OrderService" as Service
+participant "ApplicationDbContext" as DB
+
+Admin -> CMS: Vào chi tiết đơn hàng
+CMS -> Controller: GET /Order/Detail/{id}
+Controller -> Service: GetOrderDetailAsync(id)
+Service -> DB: Query order
+Controller --> CMS: Render view
+CMS --> Admin: Hiển thị trạng thái hiện tại
+
+Admin -> CMS: Chọn trạng thái mới (Processing / Shipping / Completed)
+Admin -> CMS: Click "Cập nhật"
+CMS -> Controller: POST /Order/UpdateStatus
+Controller -> Service: UpdateOrderStatusAsync(orderId, newStatus)
+Service -> DB: Kiểm tra trạng thái hiện tại
+
+alt Chuyển trạng thái hợp lệ
+  Service -> DB: Cập nhật Order status
+  Service -> DB: Ghi lại lịch sử
+  alt Trạng thái = Shipping
+    Service -> Service: Gửi email thông báo "Đơn hàng đang giao"
+  else Trạng thái = Completed
+    Service -> Service: Gửi email "Giao hàng thành công"
+  end
+  Service --> Controller: Success
+  Controller --> CMS: 200 OK
+  CMS --> Admin: Thông báo "Cập nhật trạng thái thành công"
+else Chuyển trạng thái không hợp lệ
+  Service --> Controller: Lỗi "Invalid status transition"
+  Controller --> CMS: 400 Bad Request
+  CMS --> Admin: Thông báo lỗi
+end
+@enduml

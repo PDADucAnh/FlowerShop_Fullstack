@@ -1,0 +1,30 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+
+rectangle "Dashboard Thống Kê" {
+  usecase "(Xem tổng quan dashboard)" as UC_DASH
+  usecase "(Xem tổng doanh thu)" as UC_REVENUE
+  usecase "(Xem số lượng đơn hàng)" as UC_ORDER_CNT
+  usecase "(Xem số lượng sản phẩm)" as UC_PROD_CNT
+  usecase "(Xem số lượng khách hàng)" as UC_CUS_CNT
+  usecase "(Xem biểu đồ doanh thu)" as UC_CHART
+  usecase "(Xem đơn hàng theo trạng thái)" as UC_STATUS
+  usecase "(Xem sản phẩm bán chạy)" as UC_BEST
+}
+
+Admin --> UC_DASH
+Admin --> UC_REVENUE
+Admin --> UC_ORDER_CNT
+Admin --> UC_PROD_CNT
+Admin --> UC_CUS_CNT
+Admin --> UC_CHART
+Admin --> UC_STATUS
+Admin --> UC_BEST
+
+Editor --> UC_DASH
+
+@enduml

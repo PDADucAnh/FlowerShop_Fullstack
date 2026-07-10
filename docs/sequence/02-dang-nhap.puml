@@ -1,0 +1,32 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "AuthController" as API
+participant "AuthService" as Service
+participant "ApplicationDbContext" as DB
+
+User -> Frontend: Nhập email, password
+Frontend -> API: POST /api/auth/login
+API -> Service: LoginAsync(email, password)
+Service -> DB: Tìm customer theo email
+DB --> Service: Customer entity
+
+alt Không tìm thấy
+  Service --> API: Lỗi "Invalid credentials"
+  API --> Frontend: 401 Unauthorized
+  Frontend --> User: Hiển thị lỗi
+else Tìm thấy
+  Service -> Service: Verify password (BCrypt)
+  alt Sai mật khẩu
+    Service --> API: Lỗi "Invalid credentials"
+    API --> Frontend: 401 Unauthorized
+    Frontend --> User: Hiển thị lỗi
+  else Đúng
+    Service -> Service: Tạo JWT access token + refresh token
+    Service --> API: AuthResponse
+    API --> Frontend: 200 OK (token + profile)
+    Frontend -> Frontend: Lưu token vào localStorage
+    Frontend --> User: Chuyển hướng đến trang chủ
+  end
+end
+@enduml

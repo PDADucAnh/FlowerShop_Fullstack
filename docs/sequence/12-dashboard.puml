@@ -1,0 +1,34 @@
+@startuml
+actor "Quản Trị Viên" as Admin
+actor "Biên Tập Viên" as Editor
+participant "ASP.NET MVC CMS" as CMS
+participant "HomeController" as Controller
+participant "DashboardService" as Service
+participant "ApplicationDbContext" as DB
+
+Admin -> CMS: Vào trang Dashboard
+CMS -> Controller: GET /Home/Index
+Controller -> Service: GetDashboardDataAsync()
+
+Service -> DB: Đếm tổng số đơn hàng
+DB --> Service: OrderCount
+
+Service -> DB: Tính tổng doanh thu (tháng hiện tại)
+DB --> Service: Revenue
+
+Service -> DB: Đếm tổng số sản phẩm
+DB --> Service: ProductCount
+
+Service -> DB: Đếm tổng số khách hàng
+DB --> Service: CustomerCount
+
+Service -> DB: Lấy danh sách đơn hàng theo trạng thái
+DB --> Service: OrdersByStatus
+
+Service -> DB: Lấy sản phẩm bán chạy
+DB --> Service: BestSellingProducts
+
+Service --> Controller: DashboardViewModel
+Controller --> CMS: Render view
+CMS --> Admin: Hiển thị biểu đồ + số liệu thống kê
+@enduml

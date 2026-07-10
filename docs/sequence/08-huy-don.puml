@@ -1,0 +1,34 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "OrdersController" as API
+participant "OrderService" as Service
+participant "CancellationPolicyService" as Policy
+participant "ApplicationDbContext" as DB
+
+User -> Frontend: Click "Hủy đơn hàng"
+Frontend -> API: PUT /api/orders/{id}/cancel
+API -> Service: CancelOrderAsync(orderId, reason)
+Service -> DB: Lấy thông tin đơn hàng
+DB --> Service: Order
+
+Service -> Policy: Tính phí hủy theo CancellationPolicy
+Policy --> Service: RefundPercentage, CancelFee
+
+alt Không được phép hủy (trạng thái không hợp lệ)
+  Service --> API: Lỗi "Cannot cancel order"
+  API --> Frontend: 400 Bad Request
+  Frontend --> User: Thông báo lỗi
+else Được phép hủy
+  Service -> DB: Cập nhật Order (Cancelled)
+  Service -> DB: Ghi lý do hủy
+  Service -> DB: Unlock stock (hoàn lại tồn kho)
+  alt Có thanh toán VNPay
+    Service -> Service: Tạo Refund request
+    Service -> DB: Lưu Refund (Pending)
+  end
+  Service --> API: CancelResult (fee, refund amount)
+  API --> Frontend: 200 OK
+  Frontend --> User: Hiển thị "Đã hủy đơn hàng" + thông tin hoàn tiền
+end
+@enduml

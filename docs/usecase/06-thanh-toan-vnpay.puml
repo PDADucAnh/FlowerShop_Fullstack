@@ -1,0 +1,32 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Khách Hàng" as Customer
+actor "Hệ Thống VNPay" as VNPay
+
+rectangle "Thanh Toán VNPAY" {
+  usecase "(Tạo yêu cầu thanh toán)" as UC_CREATE
+  usecase "(Tạo URL thanh toán)" as UC_URL
+  usecase "(Chuyển hướng sang VNPay)" as UC_REDIRECT
+  usecase "(Nhập thông tin thẻ)" as UC_CARD
+  usecase "(Xác thực giao dịch)" as UC_AUTH
+  usecase "(Nhận kết quả callback)" as UC_CALLBACK
+  usecase "(Xử lý kết quả thanh toán)" as UC_PROCESS
+  usecase "(Cập nhật trạng thái đơn hàng)" as UC_UPDATE
+  usecase "(Thanh toán thất bại)" as UC_FAIL
+  usecase "(Hoàn tiền qua VNPay)" as UC_REFUND
+}
+
+Customer --> UC_CREATE
+UC_CREATE --> UC_URL : <<include>>
+UC_URL --> UC_REDIRECT : <<include>>
+Customer --> UC_CARD
+UC_CARD --> UC_AUTH : <<include>>
+VNPay --> UC_CALLBACK
+UC_CALLBACK --> UC_PROCESS : <<include>>
+UC_PROCESS --> UC_UPDATE : <<include>>
+UC_PROCESS --> UC_FAIL : <<extend>>
+Admin --> UC_REFUND
+
+@enduml

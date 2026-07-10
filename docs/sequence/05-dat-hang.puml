@@ -1,0 +1,47 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "OrdersController" as API
+participant "OrderService" as Service
+participant "ApplicationDbContext" as DB
+
+== Bước 1: Nhập thông tin ==
+User -> Frontend: Nhập thông tin người mua + người nhận
+Frontend --> User: Hiển thị form
+
+== Bước 2: Chọn khung giờ ==
+User -> Frontend: Chọn ngày, quận/huyện
+Frontend -> API: GET /api/delivery/slots?date=X&districtId=Y
+API -> Service: GetAvailableSlots(date, districtId)
+Service --> API: Danh sách khung giờ
+API --> Frontend: 200 OK
+Frontend --> User: Hiển thị khung giờ trống
+User -> Frontend: Chọn khung giờ
+
+== Bước 3: Chọn thanh toán ==
+User -> Frontend: Chọn COD hoặc VNPay
+
+== Bước 4: Xác nhận ==
+User -> Frontend: Click "Đặt hàng"
+Frontend -> API: POST /api/orders
+API -> Service: CreateOrderAsync(request)
+Service -> Service: Tính tổng tiền
+Service -> DB: Kiểm tra tồn kho
+DB --> Service: Stock OK
+
+alt Hết hàng
+  Service --> API: Lỗi "Out of stock"
+  API --> Frontend: 400 Bad Request
+  Frontend --> User: Thông báo lỗi
+else Còn hàng
+  Service -> DB: Tạo Order (Pending)
+  Service -> DB: Tạo OrderDetails
+  Service -> DB: Lock stock (15 phút TTL)
+  Service -> DB: Tạo Payment (chờ thanh toán)
+  DB --> Service: Order created
+  Service --> API: OrderResponse
+  API --> Frontend: 200 OK (order info)
+  Frontend -> Frontend: Xóa giỏ hàng
+  Frontend --> User: Chuyển đến trang xác nhận đơn hàng
+end
+@enduml

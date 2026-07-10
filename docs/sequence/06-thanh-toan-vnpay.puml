@@ -1,0 +1,43 @@
+@startuml
+actor "Khách Hàng" as User
+participant "React SPA" as Frontend
+participant "PaymentController" as API
+participant "PaymentService" as Service
+participant "VNPay Gateway" as VNPay
+participant "ApplicationDbContext" as DB
+
+User -> Frontend: Click "Thanh toán VNPay"
+Frontend -> API: POST /api/payment/create-vnpay-url
+API -> Service: CreateVnPayUrlAsync(orderId)
+Service -> DB: Lấy thông tin đơn hàng
+DB --> Service: Order + Payment
+Service -> Service: Tạo PaymentRequest (IPN URL, order info)
+Service --> API: PaymentUrl
+API --> Frontend: 200 OK (vnpayUrl)
+Frontend -> Frontend: Redirect sang VNPay
+Frontend -> VNPay: GET {vnpayUrl}
+
+VNPay -> User: Hiển thị cổng thanh toán
+User -> VNPay: Nhập thông tin thẻ + xác thực
+VNPay -> VNPay: Xử lý giao dịch
+
+alt Giao dịch thành công
+  VNPay -> API: GET /api/payment/vnpay-callback (vnp_ResponseCode=00)
+  API -> Service: ProcessVnPayCallbackAsync(params)
+  Service -> DB: Cập nhật Payment (Success)
+  Service -> DB: Cập nhật Order (Confirmed)
+  DB --> Service: Updated
+  Service --> API: Redirect URL
+  API --> Frontend: 302 Redirect
+  Frontend --> User: Hiển thị "Thanh toán thành công"
+else Giao dịch thất bại
+  VNPay -> API: GET /api/payment/vnpay-callback (vnp_ResponseCode!=00)
+  API -> Service: ProcessVnPayCallbackAsync(params)
+  Service -> DB: Cập nhật Payment (Failed)
+  Service -> DB: Ghi nhận PaymentAttempt
+  DB --> Service: Updated
+  Service --> API: Redirect URL
+  API --> Frontend: 302 Redirect
+  Frontend --> User: Hiển thị "Thanh toán thất bại" + nút thanh toán lại
+end
+@enduml
