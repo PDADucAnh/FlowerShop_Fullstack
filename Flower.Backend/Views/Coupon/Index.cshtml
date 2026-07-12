@@ -1,0 +1,132 @@
+@model IEnumerable<CouponDTO>
+@{
+    ViewData["Title"] = "Mã giảm giá";
+    Layout = "_LayoutAdmin";
+    var now = DateTime.UtcNow;
+}
+
+<div class="space-y-stack-lg">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="font-display-lg text-display-lg text-on-background mb-2">Mã giảm giá</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Quản lý mã giảm giá và voucher cho khách hàng.</p>
+        </div>
+        <div>
+            <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
+                <span class="material-symbols-outlined text-[18px]">add</span>
+                Thêm mã giảm giá
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-outline-variant/20">
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Mã</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Giảm giá</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Đã dùng / Giới hạn</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Hạn sử dụng</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Trạng thái</th>
+                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-right">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr class="border-b border-outline-variant/10 hover:bg-surface-container-low transition-colors">
+                        <td class="px-4 py-4">
+                            <p class="font-body-md text-body-md text-on-surface font-semibold font-mono">@item.Code</p>
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <p class="font-label-sm text-label-sm text-on-surface-variant line-clamp-1">@item.Description</p>
+                            }
+                        </td>
+                        <td class="px-4 py-4 font-body-md text-body-md text-on-surface">
+                            @if (item.DiscountType == DiscountType.Percent)
+                            {
+                                <span>@item.DiscountValue%</span>
+                                if (item.MaximumDiscountAmount.HasValue)
+                                {
+                                    <span class="text-on-surface-variant font-label-sm text-label-sm ml-1">(tối đa @item.MaximumDiscountAmount.Value.ToString("N0")đ)</span>
+                                }
+                            }
+                            else
+                            {
+                                <span>@item.DiscountValue.ToString("N0")đ</span>
+                            }
+                        </td>
+                        <td class="px-4 py-4">
+                            @if (item.UsageLimit.HasValue)
+                            {
+                                <span class="font-label-sm text-label-sm">@item.UsedCount / @item.UsageLimit</span>
+                            }
+                            else
+                            {
+                                <span class="font-label-sm text-label-sm">@item.UsedCount / ∞</span>
+                            }
+                        </td>
+                        <td class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant">
+                            @if (item.StartDate.HasValue || item.EndDate.HasValue)
+                            {
+                                if (item.StartDate.HasValue)
+                                {
+                                    <span>Từ @item.StartDate.Value.ToString("dd/MM/yyyy")</span>
+                                }
+                                if (item.EndDate.HasValue)
+                                {
+                                    <br /><span>Đến @item.EndDate.Value.ToString("dd/MM/yyyy")</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-outline">Không giới hạn</span>
+                            }
+                        </td>
+                        <td class="px-4 py-4">
+                            @if (item.IsActive && (!item.EndDate.HasValue || item.EndDate.Value >= now))
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-[#E8F5E9] text-[#2E7D32] rounded-full font-label-sm text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#2E7D32]"></span>
+                                    Hoạt động
+                                </span>
+                            }
+                            else if (item.IsActive && item.EndDate.HasValue && item.EndDate.Value < now)
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full font-label-sm text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-yellow-500"></span>
+                                    Hết hạn
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-3 py-1 bg-surface-variant text-on-surface-variant rounded-full font-label-sm text-label-sm">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant"></span>
+                                    Tắt
+                                </span>
+                            }
+                        </td>
+                        <td class="px-4 py-4 text-right">
+                            <div class="flex gap-2 justify-end">
+                                <a asp-action="ToggleActive" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">
+                                    @(item.IsActive ? "Tắt" : "Bật")
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa mã giảm giá này?')">Xóa</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="px-4 py-12 text-center">
+                            <span class="material-symbols-outlined text-4xl text-outline mb-2 block">confirmation_number</span>
+                            <p class="font-body-md text-body-md text-on-surface-variant">Chưa có mã giảm giá nào.</p>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

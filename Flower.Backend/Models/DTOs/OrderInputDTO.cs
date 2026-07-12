@@ -20,5 +20,7 @@ namespace Flower.Backend.Models.DTOs
         public string? DeliveryAddress { get; set; }
         public string? RecipientName { get; set; }
         public string? RecipientPhone { get; set; }
+        [MaxLength(50)]
+        public string? CouponCode { get; set; }
     }
 }

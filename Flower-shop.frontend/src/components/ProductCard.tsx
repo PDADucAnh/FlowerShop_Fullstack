@@ -16,6 +16,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
 
     const imageUrl = getImageUrl(item.imageUrl);
     const isOutOfStock = item.stockQuantity === 0;
+    const displayPrice = item.promotionPrice ?? item.discountPrice ?? item.price;
+    const hasPromotion = !!item.promotionPrice;
 
     const handleAddToCart = (e: MouseEvent) => {
         e.preventDefault();
@@ -68,7 +70,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                             {item.name}
                         </Link>
                     </h3>
-                    <p className="text-primary font-label-md mb-4">{formatCurrency(item.price)}</p>
+                    <p className="text-primary font-label-md mb-4">
+                      {hasPromotion ? (
+                        <>
+                          <span className="text-error font-headline-sm">{formatCurrency(displayPrice)}</span>
+                          <span className="text-on-surface-variant line-through text-xs ml-2">{formatCurrency(item.price)}</span>
+                        </>
+                      ) : formatCurrency(displayPrice)}
+                    </p>
                     <div className="flex gap-2 w-full mt-auto" onClick={(e) => e.stopPropagation()}>
                         <button
                             onClick={handleAddToCart}
@@ -124,7 +133,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                         {item.name}
                     </Link>
                 </h3>
-                <p className="text-label-sm mb-2" style={{ color: 'rgb(128, 0, 0)' }}>{formatCurrency(item.price)}</p>
+                <p className="text-label-sm mb-2" style={{ color: 'rgb(128, 0, 0)' }}>
+                  {hasPromotion ? (
+                    <>
+                      <span className="text-error font-headline-sm">{formatCurrency(displayPrice)}</span>
+                      <span className="text-gray-400 line-through text-xs ml-2">{formatCurrency(item.price)}</span>
+                    </>
+                  ) : formatCurrency(displayPrice)}
+                </p>
                 <div className="flex gap-2 w-full mt-auto" onClick={(e) => e.stopPropagation()}>
                     <button
                         onClick={handleAddToCart}

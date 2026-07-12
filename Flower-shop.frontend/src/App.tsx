@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminRoute from './components/AdminRoute';
+
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { WishlistProvider } from './context/WishlistContext';
@@ -37,7 +37,6 @@ const Search = lazy(() => import('./pages/search/index'));
 const ReturnPolicy = lazy(() => import('./pages/return-policy/index'));
 const PrivacyPolicy = lazy(() => import('./pages/privacy-policy/index'));
 const DeliveryPolicy = lazy(() => import('./pages/delivery-policy/index'));
-const AdminDashboard = lazy(() => import('./pages/admin/dashboard/index'));
 
 
 const PageLoader: React.FC = () => (
@@ -121,7 +120,7 @@ const App: React.FC = () => {
                     <Route path="/about" element={<About />} />
                     <Route path="/contact" element={<Contact />} />
 
-                    <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

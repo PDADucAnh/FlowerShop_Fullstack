@@ -6,6 +6,10 @@ export interface Product {
   slug?: string;
   price: number;
   discountPrice?: number;
+  promotionPrice?: number;
+  promotionPercent?: number;
+  promotionType?: string;
+  hasFlashSale?: boolean;
   imageUrl?: string;
   stockQuantity: number;
   categoryProductName?: string;

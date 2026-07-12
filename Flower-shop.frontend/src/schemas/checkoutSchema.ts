@@ -19,6 +19,9 @@ export const checkoutSchema = z.object({
   // Ghi chú thêm
   notes: z.string().optional(),
 
+  // Mã giảm giá
+  couponCode: z.string().optional(),
+
   // Phương thức thanh toán
   paymentMethod: z.enum(['COD', 'OnlinePayment'], { errorMap: () => ({ message: 'Phương thức thanh toán không hợp lệ' }) }),
 });

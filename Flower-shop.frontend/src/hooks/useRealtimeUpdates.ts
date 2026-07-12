@@ -6,6 +6,8 @@ const entityQueryMap: Record<string, string[]> = {
   CategoryProduct: ['categories', 'products'],
   Product: ['products'],
   Post: ['posts'],
+  PromotionCampaign: ['promotions'],
+  Coupon: ['coupons'],
 };
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7224';

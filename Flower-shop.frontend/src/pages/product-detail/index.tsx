@@ -7,6 +7,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { getImageUrl } from '../../utils/apiUtils';
 import { formatCurrency } from '../../utils/currency';
 import toast from 'react-hot-toast';
+import promotionService from '../../services/promotionService';
 
 const formatImageUrl = (url?: string): string => {
   return getImageUrl(url) || '';
@@ -25,6 +26,7 @@ const ProductDetailPage = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [promotionInfo, setPromotionInfo] = useState<{ promotionPrice?: number; promotionPercent?: number; promotionType?: string; hasFlashSale?: boolean } | null>(null);
 
   const videoUrl = "https://www.youtube.com/embed/g20T21s0uVw"; // Aesthetic Flower Care Tutorial
 
@@ -40,11 +42,27 @@ const ProductDetailPage = () => {
     }
   }, [product]);
 
+  useEffect(() => {
+    if (product) {
+      promotionService.getBestForProduct(product.id).then((res: any) => {
+        const data = res?.data || res;
+        if (data) {
+          setPromotionInfo({
+            promotionPrice: data.promotionPrice,
+            promotionPercent: data.promotionPercent,
+            promotionType: data.promotionType,
+            hasFlashSale: data.hasFlashSale,
+          });
+        }
+      }).catch(() => {});
+    }
+  }, [product]);
+
   const isOutOfStock = product ? product.stockQuantity === 0 : false;
   const isLowStock = product ? product.stockQuantity > 0 && product.stockQuantity <= 5 : false;
 
   const sizePriceAdjustment = selectedSize === 'Deluxe' ? 300000 : selectedSize === 'Grand' ? 600000 : 0;
-  const basePrice = product ? (product.discountPrice || product.price) : 0;
+  const basePrice = product ? (promotionInfo?.promotionPrice ?? product.discountPrice ?? product.price) : 0;
   const finalPrice = basePrice + sizePriceAdjustment;
   
   const originalPrice = product ? product.price : 0;
@@ -221,6 +239,11 @@ const ProductDetailPage = () => {
             {/* Header badge & Clean Title */}
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Bán chạy nhất</span>
+              {promotionInfo?.promotionPercent && (
+                <span className="bg-error text-on-error px-3 py-1 rounded-full font-label-sm text-label-sm">
+                  -{promotionInfo.promotionPercent}%
+                </span>
+              )}
               {product.categoryProductName && (
                 <span className="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full font-label-sm text-label-sm">{product.categoryProductName}</span>
               )}
@@ -232,7 +255,7 @@ const ProductDetailPage = () => {
               <p className="font-headline-md text-headline-md text-primary">
                 {formatCurrency(finalPrice)}
               </p>
-              {product.discountPrice! > 0 && (
+              {(promotionInfo?.promotionPrice || product.discountPrice) && (
                 <p className="font-body-md text-body-md text-on-surface-variant line-through opacity-60">
                   {formatCurrency(finalOriginalPrice)}
                 </p>

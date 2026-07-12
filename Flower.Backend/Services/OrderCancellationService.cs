@@ -17,19 +17,22 @@ namespace Flower.Backend.Services
         private readonly StockLockService _stockLockService;
         private readonly IEmailService _emailService;
         private readonly ILogger<OrderCancellationService> _logger;
+        private readonly ICouponService _couponService;
 
         public OrderCancellationService(
             IApplicationDbContext context,
             IDeliverySlotService deliverySlotService,
             StockLockService stockLockService,
             IEmailService emailService,
-            ILogger<OrderCancellationService> logger)
+            ILogger<OrderCancellationService> logger,
+            ICouponService couponService)
         {
             _context = context;
             _deliverySlotService = deliverySlotService;
             _stockLockService = stockLockService;
             _emailService = emailService;
             _logger = logger;
+            _couponService = couponService;
         }
 
         public async Task<bool> CancelWithReason(int id, string? reason)
@@ -267,6 +270,8 @@ namespace Flower.Backend.Services
                     _stockLockService.ReleaseReservedStock(detail.ProductId, detail.Quantity);
                 }
             }
+
+            await _couponService.ReleaseCoupon(order.Id);
         }
     }
 }

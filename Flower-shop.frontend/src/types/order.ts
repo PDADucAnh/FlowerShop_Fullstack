@@ -41,6 +41,13 @@ export interface Order {
   refundRequestedAt?: string;
   refundCompletedAt?: string;
   canCancel: boolean;
+  promotionId?: number;
+  promotionName?: string;
+  couponId?: number;
+  couponCode?: string;
+  originalAmount: number;
+  discountAmount: number;
+  finalAmount: number;
 }
 
 export interface OrderInput {
@@ -53,4 +60,5 @@ export interface OrderInput {
   deliveryAddress?: string;
   recipientName?: string;
   recipientPhone?: string;
+  couponCode?: string;
 }

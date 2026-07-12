@@ -16,6 +16,9 @@ namespace Flower.Backend.Models.DTOs
         public List<DashboardNotificationDTO> Notifications { get; set; } = new();
         public List<TopProductDTO> TopProducts { get; set; } = new();
         public List<TopCustomerDTO> TopCustomers { get; set; } = new();
+        public int ActivePromotions { get; set; }
+        public decimal TotalDiscountGiven { get; set; }
+        public int PromotionUsageCount { get; set; }
     }
 
     public class DashboardRevenueDTO
@@ -151,5 +154,13 @@ namespace Flower.Backend.Models.DTOs
         public DashboardOrderChartDTO Orders { get; set; } = new();
         public DashboardPaymentChartDTO Payments { get; set; } = new();
         public DashboardCategoryRevenueDTO CategoryRevenue { get; set; } = new();
+    }
+
+    public class DashboardPromotionStatsDTO
+    {
+        public int ActiveCampaigns { get; set; }
+        public int TotalCampaigns { get; set; }
+        public decimal TotalDiscountGiven { get; set; }
+        public int ActiveFlashSales { get; set; }
     }
 }

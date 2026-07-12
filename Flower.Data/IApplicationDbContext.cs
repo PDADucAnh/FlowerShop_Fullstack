@@ -32,6 +32,12 @@ namespace Flower.Data
         DbSet<Refund> Refunds { get; set; }
         DbSet<Notification> Notifications { get; set; }
         DbSet<EmailHistory> EmailHistories { get; set; }
+        DbSet<PromotionCampaign> PromotionCampaigns { get; set; }
+        DbSet<PromotionProduct> PromotionProducts { get; set; }
+        DbSet<Coupon> Coupons { get; set; }
+        DbSet<CouponUsage> CouponUsages { get; set; }
+        DbSet<FlashSale> FlashSales { get; set; }
+        DbSet<FlashSaleProduct> FlashSaleProducts { get; set; }
 
         EntityEntry Entry(object entity);
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

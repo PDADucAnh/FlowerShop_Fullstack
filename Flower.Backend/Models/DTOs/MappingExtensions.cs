@@ -231,7 +231,14 @@ namespace Flower.Backend.Models.DTOs
                 IsVerified = order.IsVerified,
                 RefundAmount = order.RefundAmount,
                 RefundRequestedAt = order.RefundRequestedAt,
-                RefundCompletedAt = order.RefundCompletedAt
+                RefundCompletedAt = order.RefundCompletedAt,
+                PromotionId = order.PromotionId,
+                PromotionName = order.Promotion?.Name,
+                CouponId = order.CouponId,
+                CouponCode = order.Coupon?.Code,
+                OriginalAmount = order.OriginalAmount,
+                DiscountAmount = order.DiscountAmount,
+                FinalAmount = order.FinalAmount
             };
         }
 
@@ -315,6 +322,143 @@ namespace Flower.Backend.Models.DTOs
                 SortOrder = ad.SortOrder,
                 IsActive = ad.IsActive,
                 CreatedAt = ad.CreatedAt
+            };
+        }
+
+        public static PromotionCampaignDTO ToDTO(this PromotionCampaign campaign)
+        {
+            if (campaign == null) return null;
+            return new PromotionCampaignDTO
+            {
+                Id = campaign.Id,
+                Name = campaign.Name,
+                Description = campaign.Description,
+                PromotionType = campaign.PromotionType,
+                DiscountType = campaign.DiscountType,
+                DiscountValue = campaign.DiscountValue,
+                StartDate = campaign.StartDate,
+                EndDate = campaign.EndDate,
+                Priority = campaign.Priority,
+                BannerImage = campaign.BannerImage,
+                IsStackable = campaign.IsStackable,
+                IsActive = campaign.IsActive,
+                CreatedAt = campaign.CreatedAt,
+                UpdatedAt = campaign.UpdatedAt
+            };
+        }
+
+        public static PromotionCampaign ToEntity(this CreatePromotionCampaignDTO dto)
+        {
+            if (dto == null) return null;
+            return new PromotionCampaign
+            {
+                Name = dto.Name,
+                Description = dto.Description,
+                PromotionType = dto.PromotionType,
+                DiscountType = dto.DiscountType,
+                DiscountValue = dto.DiscountValue,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                Priority = dto.Priority,
+                BannerImage = dto.BannerImage,
+                IsStackable = dto.IsStackable,
+                IsActive = dto.IsActive
+            };
+        }
+
+        public static void UpdateEntity(this UpdatePromotionCampaignDTO dto, PromotionCampaign entity)
+        {
+            if (dto == null || entity == null) return;
+            entity.Name = dto.Name;
+            entity.Description = dto.Description;
+            entity.PromotionType = dto.PromotionType;
+            entity.DiscountType = dto.DiscountType;
+            entity.DiscountValue = dto.DiscountValue;
+            entity.StartDate = dto.StartDate;
+            entity.EndDate = dto.EndDate;
+            entity.Priority = dto.Priority;
+            entity.BannerImage = dto.BannerImage;
+            entity.IsStackable = dto.IsStackable;
+            entity.IsActive = dto.IsActive;
+        }
+
+        public static CouponDTO ToDTO(this Coupon coupon)
+        {
+            if (coupon == null) return null;
+            return new CouponDTO
+            {
+                Id = coupon.Id,
+                Code = coupon.Code,
+                Description = coupon.Description,
+                DiscountType = coupon.DiscountType,
+                DiscountValue = coupon.DiscountValue,
+                MinimumOrderAmount = coupon.MinimumOrderAmount,
+                MaximumDiscountAmount = coupon.MaximumDiscountAmount,
+                UsageLimit = coupon.UsageLimit,
+                UsedCount = coupon.UsedCount,
+                UsagePerCustomer = coupon.UsagePerCustomer,
+                CustomerId = coupon.CustomerId,
+                StartDate = coupon.StartDate,
+                EndDate = coupon.EndDate,
+                IsPublic = coupon.IsPublic,
+                IsActive = coupon.IsActive,
+                CreatedAt = coupon.CreatedAt,
+                UpdatedAt = coupon.UpdatedAt
+            };
+        }
+
+        public static Coupon ToEntity(this CreateCouponDTO dto)
+        {
+            if (dto == null) return null;
+            return new Coupon
+            {
+                Code = dto.Code,
+                Description = dto.Description,
+                DiscountType = dto.DiscountType,
+                DiscountValue = dto.DiscountValue,
+                MinimumOrderAmount = dto.MinimumOrderAmount,
+                MaximumDiscountAmount = dto.MaximumDiscountAmount,
+                UsageLimit = dto.UsageLimit,
+                UsagePerCustomer = dto.UsagePerCustomer,
+                CustomerId = dto.CustomerId,
+                StartDate = dto.StartDate,
+                EndDate = dto.EndDate,
+                IsPublic = dto.IsPublic,
+                IsActive = dto.IsActive
+            };
+        }
+
+        public static void UpdateEntity(this UpdateCouponDTO dto, Coupon entity)
+        {
+            if (dto == null || entity == null) return;
+            entity.Code = dto.Code;
+            entity.Description = dto.Description;
+            entity.DiscountType = dto.DiscountType;
+            entity.DiscountValue = dto.DiscountValue;
+            entity.MinimumOrderAmount = dto.MinimumOrderAmount;
+            entity.MaximumDiscountAmount = dto.MaximumDiscountAmount;
+            entity.UsageLimit = dto.UsageLimit;
+            entity.UsagePerCustomer = dto.UsagePerCustomer;
+            entity.CustomerId = dto.CustomerId;
+            entity.StartDate = dto.StartDate;
+            entity.EndDate = dto.EndDate;
+            entity.IsPublic = dto.IsPublic;
+            entity.IsActive = dto.IsActive;
+        }
+
+        public static CouponUsageDTO ToDTO(this CouponUsage usage)
+        {
+            if (usage == null) return null;
+            return new CouponUsageDTO
+            {
+                Id = usage.Id,
+                CouponId = usage.CouponId,
+                CustomerId = usage.CustomerId,
+                OrderId = usage.OrderId,
+                DiscountAmount = usage.DiscountAmount,
+                UsedAt = usage.UsedAt,
+                CouponCode = usage.Coupon?.Code,
+                CustomerName = usage.Customer?.FullName
             };
         }
 

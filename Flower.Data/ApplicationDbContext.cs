@@ -30,6 +30,12 @@ namespace Flower.Data
         public DbSet<Refund> Refunds { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<EmailHistory> EmailHistories { get; set; }
+        public DbSet<PromotionCampaign> PromotionCampaigns { get; set; }
+        public DbSet<PromotionProduct> PromotionProducts { get; set; }
+        public DbSet<Coupon> Coupons { get; set; }
+        public DbSet<CouponUsage> CouponUsages { get; set; }
+        public DbSet<FlashSale> FlashSales { get; set; }
+        public DbSet<FlashSaleProduct> FlashSaleProducts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -211,6 +217,87 @@ namespace Flower.Data
             modelBuilder.Entity<EmailHistory>()
                 .HasIndex(e => e.EmailType)
                 .HasDatabaseName("IX_EmailHistories_EmailType");
+
+            modelBuilder.Entity<PromotionProduct>()
+                .HasOne(pp => pp.Promotion)
+                .WithMany(p => p.PromotionProducts)
+                .HasForeignKey(pp => pp.PromotionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PromotionProduct>()
+                .HasOne(pp => pp.Product)
+                .WithMany()
+                .HasForeignKey(pp => pp.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PromotionProduct>()
+                .HasIndex(pp => new { pp.PromotionId, pp.ProductId })
+                .IsUnique()
+                .HasDatabaseName("IX_PromotionProducts_PromotionId_ProductId");
+
+            modelBuilder.Entity<PromotionCampaign>()
+                .HasIndex(pc => new { pc.IsActive, pc.StartDate, pc.EndDate })
+                .HasDatabaseName("IX_PromotionCampaigns_Active_StartDate_EndDate");
+
+            modelBuilder.Entity<Coupon>()
+                .HasIndex(c => c.Code)
+                .IsUnique()
+                .HasDatabaseName("IX_Coupons_Code");
+
+            modelBuilder.Entity<CouponUsage>()
+                .HasOne(cu => cu.Coupon)
+                .WithMany(c => c.Usages)
+                .HasForeignKey(cu => cu.CouponId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CouponUsage>()
+                .HasOne(cu => cu.Customer)
+                .WithMany()
+                .HasForeignKey(cu => cu.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CouponUsage>()
+                .HasOne(cu => cu.Order)
+                .WithMany()
+                .HasForeignKey(cu => cu.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CouponUsage>()
+                .HasIndex(cu => cu.OrderId)
+                .IsUnique()
+                .HasDatabaseName("IX_CouponUsages_OrderId");
+
+            modelBuilder.Entity<CouponUsage>()
+                .HasIndex(cu => new { cu.CouponId, cu.CustomerId })
+                .HasDatabaseName("IX_CouponUsages_CouponId_CustomerId");
+
+            modelBuilder.Entity<FlashSale>()
+                .HasIndex(fs => new { fs.IsActive, fs.StartDate, fs.EndDate })
+                .HasDatabaseName("IX_FlashSales_Active_StartDate_EndDate");
+
+            modelBuilder.Entity<FlashSaleProduct>()
+                .HasOne(fsp => fsp.FlashSale)
+                .WithMany(fs => fs.FlashSaleProducts)
+                .HasForeignKey(fsp => fsp.FlashSaleId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<FlashSaleProduct>()
+                .HasOne(fsp => fsp.Product)
+                .WithMany()
+                .HasForeignKey(fsp => fsp.ProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Promotion)
+                .WithMany()
+                .HasForeignKey(o => o.PromotionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Order>()
+                .HasOne(o => o.Coupon)
+                .WithMany()
+                .HasForeignKey(o => o.CouponId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

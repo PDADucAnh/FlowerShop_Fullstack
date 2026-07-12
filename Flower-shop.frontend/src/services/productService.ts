@@ -80,7 +80,17 @@ const productService = {
         } catch (error) {
             console.error('API trackAddToCart error:', error);
         }
-    }
+    },
+
+    getBestPromotion: async (productId: number) => {
+        try {
+            const response = await axiosClient.get(`/Promotions/product/${productId}`);
+            return response.data || response;
+        } catch (error) {
+            console.error('API getBestPromotion error:', error);
+            return null;
+        }
+    },
 };
 
 export default productService;

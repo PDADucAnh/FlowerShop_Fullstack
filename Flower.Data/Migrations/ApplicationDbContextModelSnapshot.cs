@@ -168,6 +168,111 @@ namespace Flower.Data.Migrations
                     b.ToTable("CategoriesProducts");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.Coupon", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal?>("MaximumDiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal?>("MinimumOrderAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("UsageLimit")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UsagePerCustomer")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Coupons_Code");
+
+                    b.ToTable("Coupons");
+                });
+
+            modelBuilder.Entity("Flower.Data.Entities.CouponUsage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CouponId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_CouponUsages_OrderId");
+
+                    b.HasIndex("CouponId", "CustomerId")
+                        .HasDatabaseName("IX_CouponUsages_CouponId_CustomerId");
+
+                    b.ToTable("CouponUsages");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -456,6 +561,78 @@ namespace Flower.Data.Migrations
                     b.ToTable("EmailHistories");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.FlashSale", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive", "StartDate", "EndDate")
+                        .HasDatabaseName("IX_FlashSales_Active_StartDate_EndDate");
+
+                    b.ToTable("FlashSales");
+                });
+
+            modelBuilder.Entity("Flower.Data.Entities.FlashSaleProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("FlashSaleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlashSaleId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("FlashSaleProducts");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -523,6 +700,9 @@ namespace Flower.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("CouponId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -571,6 +751,12 @@ namespace Flower.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("FinalAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
@@ -579,6 +765,9 @@ namespace Flower.Data.Migrations
 
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("OriginalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("PaymentMethod")
                         .HasColumnType("int");
@@ -592,6 +781,9 @@ namespace Flower.Data.Migrations
                     b.Property<string>("PaymentTransactionId")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("PromotionId")
+                        .HasColumnType("int");
 
                     b.Property<string>("RecipientName")
                         .HasMaxLength(200)
@@ -624,10 +816,14 @@ namespace Flower.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CouponId");
+
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("OrderDate")
                         .HasDatabaseName("IX_Orders_OrderDate");
+
+                    b.HasIndex("PromotionId");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Orders_Status");
@@ -1041,6 +1237,93 @@ namespace Flower.Data.Migrations
                     b.ToTable("ProductVariants");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.PromotionCampaign", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("BannerImage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("DiscountType")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsStackable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("Priority")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PromotionType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsActive", "StartDate", "EndDate")
+                        .HasDatabaseName("IX_PromotionCampaigns_Active_StartDate_EndDate");
+
+                    b.ToTable("PromotionCampaigns");
+                });
+
+            modelBuilder.Entity("Flower.Data.Entities.PromotionProduct", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PromotionId", "ProductId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PromotionProducts_PromotionId_ProductId");
+
+                    b.ToTable("PromotionProducts");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
@@ -1205,6 +1488,33 @@ namespace Flower.Data.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.CouponUsage", b =>
+                {
+                    b.HasOne("Flower.Data.Entities.Coupon", "Coupon")
+                        .WithMany("Usages")
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Flower.Data.Entities.Customer", "Customer")
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Flower.Data.Entities.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Coupon");
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.CustomerAddress", b =>
                 {
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
@@ -1256,6 +1566,25 @@ namespace Flower.Data.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.FlashSaleProduct", b =>
+                {
+                    b.HasOne("Flower.Data.Entities.FlashSale", "FlashSale")
+                        .WithMany("FlashSaleProducts")
+                        .HasForeignKey("FlashSaleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Flower.Data.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FlashSale");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.Notification", b =>
                 {
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
@@ -1269,13 +1598,27 @@ namespace Flower.Data.Migrations
 
             modelBuilder.Entity("Flower.Data.Entities.Order", b =>
                 {
+                    b.HasOne("Flower.Data.Entities.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("Flower.Data.Entities.PromotionCampaign", "Promotion")
+                        .WithMany()
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Coupon");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Promotion");
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.OrderDetail", b =>
@@ -1363,6 +1706,25 @@ namespace Flower.Data.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.PromotionProduct", b =>
+                {
+                    b.HasOne("Flower.Data.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Flower.Data.Entities.PromotionCampaign", "Promotion")
+                        .WithMany("PromotionProducts")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Flower.Data.Entities.User", "User")
@@ -1402,9 +1764,19 @@ namespace Flower.Data.Migrations
                     b.Navigation("Products");
                 });
 
+            modelBuilder.Entity("Flower.Data.Entities.Coupon", b =>
+                {
+                    b.Navigation("Usages");
+                });
+
             modelBuilder.Entity("Flower.Data.Entities.Customer", b =>
                 {
                     b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("Flower.Data.Entities.FlashSale", b =>
+                {
+                    b.Navigation("FlashSaleProducts");
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Order", b =>
@@ -1415,6 +1787,11 @@ namespace Flower.Data.Migrations
             modelBuilder.Entity("Flower.Data.Entities.Product", b =>
                 {
                     b.Navigation("ProductVariants");
+                });
+
+            modelBuilder.Entity("Flower.Data.Entities.PromotionCampaign", b =>
+                {
+                    b.Navigation("PromotionProducts");
                 });
 #pragma warning restore 612, 618
         }

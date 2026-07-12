@@ -28,6 +28,8 @@ namespace Flower.Backend.Services
         private readonly TimeSettings _timeSettings;
         private readonly IMemoryCache _memoryCache;
         private readonly IOrderCancellationService _orderCancellationService;
+        private readonly IPromotionService _promotionService;
+        private readonly ICouponService _couponService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -40,7 +42,9 @@ namespace Flower.Backend.Services
             IEmailService emailService,
             TimeSettings timeSettings,
             IMemoryCache memoryCache,
-            IOrderCancellationService orderCancellationService)
+            IOrderCancellationService orderCancellationService,
+            IPromotionService promotionService,
+            ICouponService couponService)
         {
             _context = context;
             _logger = logger;
@@ -53,6 +57,8 @@ namespace Flower.Backend.Services
             _timeSettings = timeSettings;
             _memoryCache = memoryCache;
             _orderCancellationService = orderCancellationService;
+            _promotionService = promotionService;
+            _couponService = couponService;
         }
 
         private async Task<int?> GetCurrentCustomerId()
@@ -94,12 +100,14 @@ namespace Flower.Backend.Services
                 .Include(o => o.Customer)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                .Include(o => o.Promotion)
+                .Include(o => o.Coupon)
                 .OrderByDescending(o => o.OrderDate);
 
             query = ApplyOwnershipFilter(query);
 
             var orders = await query.ToListAsync();
-            return orders.Select(o => o.ToDTO());
+            return orders.Select(o => o.ToDTO()).ToList();
         }
 
         public async Task<PagedResult<OrderDTO>> GetPaged(int page, int pageSize)
@@ -108,6 +116,8 @@ namespace Flower.Backend.Services
                 .Include(o => o.Customer)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                .Include(o => o.Promotion)
+                .Include(o => o.Coupon)
                 .OrderByDescending(o => o.OrderDate);
 
             query = ApplyOwnershipFilter(query);
@@ -118,9 +128,10 @@ namespace Flower.Backend.Services
                 .Take(pageSize)
                 .ToListAsync();
 
+            var dtos = items.Select(o => o.ToDTO()).ToList();
             return new PagedResult<OrderDTO>
             {
-                Items = items.Select(o => o.ToDTO()).ToList(),
+                Items = dtos,
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
@@ -133,12 +144,15 @@ namespace Flower.Backend.Services
                 .Include(o => o.Customer)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
+                .Include(o => o.Promotion)
+                .Include(o => o.Coupon)
                 .Where(o => o.Id == id);
 
             query = ApplyOwnershipFilter(query);
 
             var order = await query.FirstOrDefaultAsync();
-            return order?.ToDTO();
+            if (order == null) return null;
+            return order.ToDTO();
         }
 
         public async Task<(bool Success, string Message, int OrderId)> CreateOrder(
@@ -146,7 +160,8 @@ namespace Flower.Backend.Services
             OrderStatus? status = null, PaymentMethod? paymentMethod = null,
             DateTime? deliveryDate = null, string? deliveryTimeSlot = null,
             string? deliveryDistrict = null, string? deliveryAddress = null,
-            string? recipientName = null, string? recipientPhone = null)
+            string? recipientName = null, string? recipientPhone = null,
+            string? couponCode = null)
         {
             if (items == null || items.Count == 0)
                 return (false, "Giỏ hàng trống, vui lòng chọn sản phẩm", 0);
@@ -230,6 +245,65 @@ namespace Flower.Backend.Services
                     }
                 }
 
+                // Calculate amounts
+                var originalAmount = items?.Sum(i => i.UnitPrice * i.Quantity) ?? 0;
+
+                // Find active promotions and compute discount
+                decimal promotionDiscount = 0;
+                int? appliedPromotionId = null;
+
+                var activePromotions = await _promotionService.GetActivePromotions();
+                if (activePromotions != null && activePromotions.Any() && items != null)
+                {
+                    var productIds = items.Select(i => i.ProductId).Distinct().ToList();
+                    var products = await _context.Products
+                        .Where(p => productIds.Contains(p.Id))
+                        .ToDictionaryAsync(p => p.Id);
+
+                    foreach (var item in items)
+                    {
+                        var bestPromo = activePromotions
+                            .Where(p => p.ProductIds.Contains(item.ProductId))
+                            .OrderByDescending(p => p.Priority)
+                            .FirstOrDefault();
+
+                        if (bestPromo != null && products.TryGetValue(item.ProductId, out var product))
+                        {
+                            var itemDiscount = bestPromo.DiscountType == DiscountType.Percent
+                                ? product.Price * bestPromo.DiscountValue / 100m
+                                : bestPromo.DiscountValue;
+                            promotionDiscount += itemDiscount * item.Quantity;
+
+                            if (appliedPromotionId == null)
+                                appliedPromotionId = bestPromo.PromotionId;
+                        }
+                    }
+                }
+
+                // Handle coupon
+                decimal couponDiscount = 0;
+                int? appliedCouponId = null;
+
+                if (!string.IsNullOrEmpty(couponCode))
+                {
+                    var applyRequest = new ApplyCouponRequest
+                    {
+                        Code = couponCode,
+                        CustomerId = customerId,
+                        OrderTotal = originalAmount
+                    };
+                    var couponValidation = await _couponService.ValidateAndApply(applyRequest);
+                    if (couponValidation.IsValid && couponValidation.Coupon != null)
+                    {
+                        couponDiscount = couponValidation.DiscountAmount;
+                        appliedCouponId = couponValidation.Coupon.Id;
+                    }
+                }
+
+                var totalDiscount = promotionDiscount + couponDiscount;
+                var finalAmount = originalAmount - totalDiscount;
+                if (finalAmount < 0) finalAmount = 0;
+
                 var newOrder = new Order
                 {
                     OrderDate = orderDate ?? DateTime.UtcNow,
@@ -244,7 +318,12 @@ namespace Flower.Backend.Services
                     DeliveryAddress = deliveryAddress,
                     RecipientName = recipientName,
                     RecipientPhone = recipientPhone,
-                    TargetFinishedTime = targetFinishedTime
+                    TargetFinishedTime = targetFinishedTime,
+                    PromotionId = appliedPromotionId,
+                    CouponId = appliedCouponId,
+                    OriginalAmount = originalAmount,
+                    DiscountAmount = totalDiscount,
+                    FinalAmount = finalAmount
                 };
 
                 Dictionary<int, Product> productDict = new Dictionary<int, Product>();
@@ -306,6 +385,26 @@ namespace Flower.Backend.Services
 
             _context.Orders.Add(newOrder);
             await _context.SaveChangesAsync();
+
+            // If coupon was applied, create usage record
+            if (appliedCouponId.HasValue && !string.IsNullOrEmpty(couponCode))
+            {
+                var coupon = await _context.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+                if (coupon != null)
+                {
+                    coupon.UsedCount++;
+                    _context.CouponUsages.Add(new CouponUsage
+                    {
+                        CouponId = coupon.Id,
+                        OrderId = newOrder.Id,
+                        CustomerId = customerId,
+                        DiscountAmount = couponDiscount,
+                        UsedAt = DateTime.UtcNow
+                    });
+                    await _context.SaveChangesAsync();
+                }
+            }
+
             await transaction.CommitAsync();
 
             if (customer != null)

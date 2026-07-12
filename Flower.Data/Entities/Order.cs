@@ -133,5 +133,24 @@ namespace Flower.Data.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
+
+        public int? PromotionId { get; set; }
+
+        public int? CouponId { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal OriginalAmount { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal DiscountAmount { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal FinalAmount { get; set; }
+
+        [ForeignKey("PromotionId")]
+        public virtual PromotionCampaign? Promotion { get; set; }
+
+        [ForeignKey("CouponId")]
+        public virtual Coupon? Coupon { get; set; }
     }
 }

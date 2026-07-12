@@ -15,11 +15,13 @@ namespace Flower.Backend.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly ILogger<DashboardService> _logger;
+        private readonly IPromotionService _promotionService;
 
-        public DashboardService(IApplicationDbContext context, ILogger<DashboardService> logger)
+        public DashboardService(IApplicationDbContext context, ILogger<DashboardService> logger, IPromotionService promotionService)
         {
             _context = context;
             _logger = logger;
+            _promotionService = promotionService;
         }
 
         public async Task<DashboardSummaryDTO> GetSummary()
@@ -159,6 +161,9 @@ namespace Flower.Backend.Services
                 }
             ).OrderByDescending(c => c.TotalSpent).Take(10).ToListAsync();
 
+            var activePromotions = await _promotionService.GetActivePromotions();
+            var allCampaigns = await _promotionService.GetAll();
+
             return new DashboardSummaryDTO
             {
                 Revenue = revenue,
@@ -172,6 +177,9 @@ namespace Flower.Backend.Services
                 Notifications = notifications,
                 TopProducts = topProducts,
                 TopCustomers = topCustomers,
+                ActivePromotions = activePromotions?.Count() ?? 0,
+                TotalDiscountGiven = 0,
+                PromotionUsageCount = 0,
             };
         }
 

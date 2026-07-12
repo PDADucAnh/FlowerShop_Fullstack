@@ -127,3 +127,27 @@ Luôn:
 - Test
 - Xác minh
 - Sau đó mới kết luận.
+
+---
+
+## Promotion Integration (2026-07-12)
+
+### Modules tích hợp Promotion (khuyến mãi) vào toàn bộ hệ thống FlowerShop:
+
+**Backend:**
+- **ProductService** — Inject `IPriceCalculationService`, thêm method `EnrichWithPromotion` dùng `CalculateBulkPrices` để populate promotion fields (`PromotionPrice`, `PromotionPercent`, `PromotionType`, `HasFlashSale`) vào `ProductDTO` trong: `GetAll`, `GetPaged`, `GetByCategoryProduct`, `GetDetail`, `Search`, `GetTrending`.
+- **OrderService** — Inject `IPromotionService`, thêm method `ComputePromotionDiscount` tính động promotion discount từ active promotions cho mỗi order detail trong: `GetAll`, `GetPaged`, `GetDetail`.
+- **DashboardService** — Inject `IPromotionService`, thêm `ActivePromotions` count vào `DashboardSummaryDTO`.
+- **DashboardDTOs** — Thêm `ActivePromotions`, `TotalDiscountGiven`, `PromotionUsageCount` vào `DashboardSummaryDTO`; thêm class `DashboardPromotionStatsDTO`.
+
+**Frontend:**
+- **CartContext** — `cartTotal` ưu tiên `promotionPrice` > `discountPrice` > `price`.
+- **CartTable** — Hiển thị `promotionPrice` cho unit price và line total.
+- **Checkout** — Gửi `unitPrice` với `promotionPrice` ưu tiên; hiển thị giá đúng trong order summary.
+- **OrderDetail** — Thêm dòng "Khuyến mãi" trong Price Summary với `promotionDiscount`.
+- **MyOrders** — Total trừ `promotionDiscount` + `couponDiscount`.
+- **ProductDetail** — Fetch `getBestForProduct` từ promotionService; hiển thị promotion badge "-X%"; `basePrice` ưu tiên `promotionPrice`.
+- **productService** — Thêm method `getBestPromotion`.
+
+### Price priority chain:
+`promotionPrice` > `discountPrice` > `price`

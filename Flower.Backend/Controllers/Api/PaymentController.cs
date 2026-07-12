@@ -63,7 +63,7 @@ namespace Flower.Backend.Controllers.Api
             if (order.PaymentStatus == PaymentStatus.Completed)
                 return BadRequest(new { message = "Đơn hàng đã được thanh toán" });
 
-            var totalAmount = order.TotalAmount;
+            var totalAmount = order.FinalAmount > 0 ? order.FinalAmount : order.TotalAmount;
             if (totalAmount <= 0)
                 return BadRequest(new { message = "Số tiền thanh toán không hợp lệ" });
 
@@ -163,7 +163,7 @@ namespace Flower.Backend.Controllers.Api
             if (!retrySuccess)
                 return BadRequest(new { message = retryMessage });
 
-            var totalAmount = order.TotalAmount;
+            var totalAmount = order.FinalAmount > 0 ? order.FinalAmount : order.TotalAmount;
             var vnpayModel = new VnPaymentRequestModel
             {
                 OrderId = orderId,

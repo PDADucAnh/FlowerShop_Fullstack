@@ -34,6 +34,13 @@ namespace Flower.Backend.Models.DTOs
         public decimal RefundAmount { get; set; }
         public DateTime? RefundRequestedAt { get; set; }
         public DateTime? RefundCompletedAt { get; set; }
+        public int? PromotionId { get; set; }
+        public string? PromotionName { get; set; }
+        public int? CouponId { get; set; }
+        public string? CouponCode { get; set; }
+        public decimal OriginalAmount { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal FinalAmount { get; set; }
 
         public string StatusDisplay => Status switch
         {
@@ -220,7 +227,12 @@ namespace Flower.Backend.Models.DTOs
 
         [MaxLength(20)]
         public string? RecipientPhone { get; set; }
+
+        [MaxLength(50)]
+        public string? CouponCode { get; set; }
     }
+
+
 
     public class DeliverySlotDTO
     {

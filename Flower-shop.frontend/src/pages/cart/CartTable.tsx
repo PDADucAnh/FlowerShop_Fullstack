@@ -84,7 +84,7 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
 
             <div className="col-span-1 md:col-span-2 text-center font-body-md text-on-surface">
               <span className="md:hidden font-label-md text-on-surface-variant">Giá: </span>
-              {formatCurrency(item.discountPrice || item.price)}
+              {formatCurrency(item.promotionPrice ?? item.discountPrice ?? item.price)}
             </div>
 
             <div className="col-span-1 md:col-span-2 flex justify-center">
@@ -116,7 +116,7 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
 
             <div className="col-span-1 md:col-span-2 text-right font-headline-sm text-primary text-[20px]">
               <span className="md:hidden font-label-md text-on-surface-variant">Tổng: </span>
-              {formatCurrency((item.discountPrice || item.price) * item.quantity)}
+              {formatCurrency((item.promotionPrice ?? item.discountPrice ?? item.price) * item.quantity)}
             </div>
           </div>
         );

@@ -19,6 +19,10 @@ namespace Flower.Backend.Models.DTOs
         public int AddToCartCount { get; set; }
         public double TrendingScore { get; set; }
         public string? TrendingBadge { get; set; }
+        public decimal? PromotionPrice { get; set; }
+        public decimal? PromotionPercent { get; set; }
+        public string? PromotionType { get; set; }
+        public bool HasFlashSale { get; set; }
     }
 
     public class CreateProductDTO

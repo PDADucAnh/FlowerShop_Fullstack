@@ -13,12 +13,31 @@ namespace Flower.Backend.Services
     public class ProductService : IProductService
     {
         private readonly IApplicationDbContext _context;
+        private readonly IPriceCalculationService _priceCalculationService;
 
-        public ProductService(IApplicationDbContext context)
+        public ProductService(IApplicationDbContext context, IPriceCalculationService priceCalculationService)
         {
             _context = context;
+            _priceCalculationService = priceCalculationService;
         }
 
+        private async Task EnrichWithPromotion(IEnumerable<ProductDTO> products)
+        {
+            var list = products.ToList();
+            if (list.Count == 0) return;
+            var productIds = list.Select(p => p.Id).ToList();
+            var bulkPrices = await _priceCalculationService.CalculateBulkPrices(productIds);
+            foreach (var product in list)
+            {
+                if (bulkPrices.TryGetValue(product.Id, out var calc))
+                {
+                    product.PromotionPrice = calc.PromotionPrice;
+                    product.PromotionPercent = calc.PromotionPercent;
+                    product.PromotionType = calc.PromotionType;
+                    product.HasFlashSale = calc.HasFlashSale;
+                }
+            }
+        }
 
         private IQueryable<Product> BuildQuery()
         {
@@ -31,7 +50,9 @@ namespace Flower.Backend.Services
             var products = await BuildQuery()
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
-            return products.Select(p => p.ToDTO());
+            var dtos = products.Select(p => p.ToDTO()).ToList();
+            await EnrichWithPromotion(dtos);
+            return dtos;
         }
 
         public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null)
@@ -61,9 +82,11 @@ namespace Flower.Backend.Services
                 .Take(pageSize)
                 .ToListAsync();
 
+            var dtos = items.Select(p => p.ToDTO()).ToList();
+            await EnrichWithPromotion(dtos);
             return new PagedResult<ProductDTO>
             {
-                Items = items.Select(p => p.ToDTO()).ToList(),
+                Items = dtos,
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize
@@ -75,14 +98,23 @@ namespace Flower.Backend.Services
             var products = await BuildQuery()
                 .Where(p => p.CategoryProductId == categoryProductId)
                 .ToListAsync();
-            return products.Select(p => p.ToDTO());
+            var dtos = products.Select(p => p.ToDTO()).ToList();
+            await EnrichWithPromotion(dtos);
+            return dtos;
         }
 
         public async Task<ProductDTO?> GetDetail(int id)
         {
             var product = await BuildQuery()
                 .FirstOrDefaultAsync(p => p.Id == id);
-            return product?.ToDTO();
+            if (product == null) return null;
+            var dto = product.ToDTO();
+            var calc = await _priceCalculationService.CalculateProductPrice(id);
+            dto.PromotionPrice = calc.PromotionPrice;
+            dto.PromotionPercent = calc.PromotionPercent;
+            dto.PromotionType = calc.PromotionType;
+            dto.HasFlashSale = calc.HasFlashSale;
+            return dto;
         }
 
         public async Task<ProductDTO> Create(CreateProductDTO dto)
@@ -162,7 +194,9 @@ namespace Flower.Backend.Services
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
 
-            return products.Select(p => p.ToDTO());
+            var dtos = products.Select(p => p.ToDTO()).ToList();
+            await EnrichWithPromotion(dtos);
+            return dtos;
         }
 
         public async Task TrackView(int productId)
@@ -232,6 +266,7 @@ namespace Flower.Backend.Services
             .Take(count)
             .ToList();
 
+            await EnrichWithPromotion(scored);
             return scored;
         }
     }

@@ -44,7 +44,8 @@ namespace Flower.Backend.Controllers.Api
                 deliveryDistrict: input.DeliveryDistrict,
                 deliveryAddress: input.DeliveryAddress,
                 recipientName: input.RecipientName,
-                recipientPhone: input.RecipientPhone);
+                recipientPhone: input.RecipientPhone,
+                couponCode: input.CouponCode);
 
             if (!success)
                 return BadRequest(new { message });
@@ -73,7 +74,8 @@ namespace Flower.Backend.Controllers.Api
                 deliveryDistrict: request.DeliveryDistrict,
                 deliveryAddress: request.DeliveryAddress,
                 recipientName: request.RecipientName,
-                recipientPhone: request.RecipientPhone);
+                recipientPhone: request.RecipientPhone,
+                couponCode: request.CouponCode);
 
             if (!success)
                 return BadRequest(new { message });

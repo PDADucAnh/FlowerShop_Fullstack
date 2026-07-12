@@ -123,7 +123,8 @@ const MyOrders: React.FC = () => {
                   <tbody className="divide-y divide-outline-variant/30">
                     {orders.map((order: Order) => {
                       const preview = order.orderDetails?.[0];
-                      const total = order.orderDetails?.reduce((sum: number, item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
+                      const subtotal = order.orderDetails?.reduce((sum: number, item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
+                      const displayTotal = order.finalAmount > 0 ? order.finalAmount : subtotal;
                       const statusClass = statusStyles[order.status] || statusStyles.Pending;
 
                       return (
@@ -148,7 +149,7 @@ const MyOrders: React.FC = () => {
                               year: 'numeric', month: '2-digit', day: '2-digit'
                             })}
                           </td>
-                          <td className="py-stack-md px-base font-semibold text-primary">{formatCurrency(total)}</td>
+                          <td className="py-stack-md px-base font-semibold text-primary">{formatCurrency(displayTotal)}</td>
                           <td className="py-stack-md px-base">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusClass}`}>
                               {statusConfig[order.status]?.label || order.status}
