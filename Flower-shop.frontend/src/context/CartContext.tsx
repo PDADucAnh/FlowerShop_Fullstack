@@ -90,10 +90,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   }, []);
 
+  const cartItemsRef = React.useRef(cartItems);
+  useEffect(() => {
+    cartItemsRef.current = cartItems;
+  }, [cartItems]);
+
   const recalculateCartPrices = useCallback(async () => {
-    if (cartItems.length === 0) return;
+    const currentItems = cartItemsRef.current;
+    if (currentItems.length === 0) return;
     try {
-      const payload = cartItems.map(item => ({
+      const payload = currentItems.map(item => ({
         productId: item.id,
         quantity: item.quantity,
         name: item.name,
@@ -103,7 +109,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       const res = await productService.recalculateCart(payload);
       if (res && res.items) {
-        const updatedItems = cartItems.map(item => {
+        const updatedItems = currentItems.map(item => {
           const matched = res.items.find((i: any) => i.productId === item.id);
           if (matched) {
             return {
@@ -122,7 +128,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           return item;
         });
 
-        // Compare if items changed to avoid unnecessary local storage updates, but always sync
         setCartItems(updatedItems);
         if (res.priceChanged) {
           toast.error(res.message || "Giá của một hoặc nhiều sản phẩm đã được cập nhật do chương trình khuyến mãi đã kết thúc hoặc thay đổi.", {
@@ -134,16 +139,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     } catch (err) {
       console.error("Lỗi khi đồng bộ giá giỏ hàng với Backend:", err);
     }
-  }, [cartItems]);
-
-  const [hasRecalculated, setHasRecalculated] = useState(false);
-
-  useEffect(() => {
-    if (cartItems.length > 0 && !hasRecalculated) {
-      setHasRecalculated(true);
-      recalculateCartPrices().catch(console.error);
-    }
-  }, [cartItems, hasRecalculated, recalculateCartPrices]);
+  }, [setCartItems]);
 
   const clearCart = useCallback(() => {
     setCartItems([]);
