@@ -3,6 +3,9 @@ using Flower.Backend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
+using Flower.Data;
 
 namespace Flower.Backend.Controllers.Api
 {
@@ -13,11 +16,19 @@ namespace Flower.Backend.Controllers.Api
     {
         private readonly IProductService _productService;
         private readonly INotificationService _notificationService;
+        private readonly IApplicationDbContext _context;
+        private readonly IPriceCalculationService _priceCalculationService;
 
-        public ProductsController(IProductService productService, INotificationService notificationService)
+        public ProductsController(
+            IProductService productService, 
+            INotificationService notificationService,
+            IApplicationDbContext context,
+            IPriceCalculationService priceCalculationService)
         {
             _productService = productService;
             _notificationService = notificationService;
+            _context = context;
+            _priceCalculationService = priceCalculationService;
         }
 
         [AllowAnonymous]
@@ -128,6 +139,89 @@ namespace Flower.Backend.Controllers.Api
 
             await _notificationService.NotifyEntityChanged("Product");
             return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("recalculate-cart")]
+        public async Task<IActionResult> RecalculateCart([FromBody] CartRecalculateRequest request)
+        {
+            if (request == null || request.Items == null)
+                return BadRequest(new { message = "Dữ liệu giỏ hàng không hợp lệ" });
+
+            var response = new CartRecalculateResponse();
+            bool priceChanged = false;
+
+            var productIds = request.Items.Select(i => i.ProductId).Distinct().ToList();
+            var products = await _context.Products
+                .Where(p => productIds.Contains(p.Id))
+                .ToListAsync();
+            var productDict = products.ToDictionary(p => p.Id);
+
+            // Get bulk calculated prices (with promotions applied at Vietnam Standard time)
+            var priceCalculations = await _priceCalculationService.CalculateBulkPrices(productIds);
+
+            foreach (var item in request.Items)
+            {
+                if (!productDict.TryGetValue(item.ProductId, out var product))
+                {
+                    continue;
+                }
+
+                // Determine size adjustment based on name
+                decimal sizeAdjustment = 0;
+                if (item.Name.EndsWith("(Deluxe)")) sizeAdjustment = 300000;
+                else if (item.Name.EndsWith("(Grand)")) sizeAdjustment = 600000;
+
+                // Load price calculation details
+                priceCalculations.TryGetValue(item.ProductId, out var calc);
+                
+                var baseOriginalPrice = calc?.OriginalPrice ?? product.Price;
+                var latestOriginalPrice = baseOriginalPrice + sizeAdjustment;
+                
+                decimal? latestPromotionPrice = null;
+                if (calc != null && calc.PromotionPrice.HasValue)
+                {
+                    latestPromotionPrice = calc.PromotionPrice.Value + sizeAdjustment;
+                }
+
+                var latestCurrentPrice = latestPromotionPrice ?? latestOriginalPrice;
+                var hasFlashSale = calc?.HasFlashSale ?? false;
+                var promotionPercent = calc?.PromotionPercent;
+                var promotionName = calc?.PromotionName;
+
+                // Check if price changed compared to what was sent
+                var clientOriginalPrice = item.Price;
+                var clientPromotionPrice = item.PromotionPrice;
+
+                if (latestOriginalPrice != clientOriginalPrice || latestPromotionPrice != clientPromotionPrice)
+                {
+                    priceChanged = true;
+                }
+
+                response.Items.Add(new CartItemRecalculatedDTO
+                {
+                    ProductId = item.ProductId,
+                    Name = item.Name,
+                    Quantity = item.Quantity,
+                    Price = latestOriginalPrice,
+                    PromotionPrice = latestPromotionPrice,
+                    CurrentPrice = latestCurrentPrice,
+                    HasFlashSale = hasFlashSale,
+                    PromotionPercent = promotionPercent,
+                    PromotionName = promotionName,
+                    ImageUrl = product.ImageUrl,
+                    StockQuantity = product.StockQuantity,
+                    Description = product.Description
+                });
+            }
+
+            response.PriceChanged = priceChanged;
+            if (priceChanged)
+            {
+                response.Message = "Giá của một hoặc nhiều sản phẩm đã được cập nhật do chương trình khuyến mãi đã kết thúc hoặc thay đổi.";
+            }
+
+            return Ok(response);
         }
     }
 }

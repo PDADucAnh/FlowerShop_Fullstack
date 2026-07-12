@@ -248,6 +248,7 @@ namespace Flower.Backend.Models.DTOs
         public static OrderDetailDTO ToDTO(this OrderDetail detail)
         {
             if (detail == null) return null;
+            var discount = detail.Discount ?? 0;
             return new OrderDetailDTO
             {
                 Id = detail.Id,
@@ -258,7 +259,10 @@ namespace Flower.Backend.Models.DTOs
                 SizeVariant = detail.SizeVariant,
                 CustomerName = detail.Order?.Customer?.FullName,
                 Quantity = detail.Quantity,
-                UnitPrice = detail.UnitPrice
+                UnitPrice = detail.UnitPrice,
+                DiscountAmount = discount,
+                OriginalPrice = detail.UnitPrice + discount,
+                Subtotal = detail.Subtotal ?? (detail.UnitPrice * detail.Quantity)
             };
         }
 

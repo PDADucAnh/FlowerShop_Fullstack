@@ -15,6 +15,7 @@ interface CartContextType {
   clearCart: () => void;
   cartCount: number;
   cartTotal: number;
+  recalculateCartPrices: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -89,6 +90,61 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   }, []);
 
+  const recalculateCartPrices = useCallback(async () => {
+    if (cartItems.length === 0) return;
+    try {
+      const payload = cartItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        name: item.name,
+        price: item.price,
+        promotionPrice: item.promotionPrice
+      }));
+
+      const res = await productService.recalculateCart(payload);
+      if (res && res.items) {
+        const updatedItems = cartItems.map(item => {
+          const matched = res.items.find((i: any) => i.productId === item.id);
+          if (matched) {
+            return {
+              ...item,
+              price: matched.price,
+              promotionPrice: matched.promotionPrice ?? undefined,
+              currentPrice: matched.currentPrice,
+              hasFlashSale: matched.hasFlashSale,
+              promotionPercent: matched.promotionPercent ?? undefined,
+              promotionName: matched.promotionName ?? undefined,
+              stockQuantity: matched.stockQuantity,
+              imageUrl: matched.imageUrl ?? item.imageUrl,
+              description: matched.description ?? item.description
+            };
+          }
+          return item;
+        });
+
+        // Compare if items changed to avoid unnecessary local storage updates, but always sync
+        setCartItems(updatedItems);
+        if (res.priceChanged) {
+          toast.error(res.message || "Giá của một hoặc nhiều sản phẩm đã được cập nhật do chương trình khuyến mãi đã kết thúc hoặc thay đổi.", {
+            duration: 5000,
+            position: 'top-center'
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Lỗi khi đồng bộ giá giỏ hàng với Backend:", err);
+    }
+  }, [cartItems]);
+
+  const [hasRecalculated, setHasRecalculated] = useState(false);
+
+  useEffect(() => {
+    if (cartItems.length > 0 && !hasRecalculated) {
+      setHasRecalculated(true);
+      recalculateCartPrices().catch(console.error);
+    }
+  }, [cartItems, hasRecalculated, recalculateCartPrices]);
+
   const clearCart = useCallback(() => {
     setCartItems([]);
   }, []);
@@ -109,7 +165,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     clearCart,
     cartCount,
     cartTotal,
-  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal]);
+    recalculateCartPrices,
+  }), [cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartCount, cartTotal, recalculateCartPrices]);
 
   return (
     <CartContext.Provider value={contextValue}>

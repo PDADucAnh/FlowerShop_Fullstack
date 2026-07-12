@@ -245,37 +245,62 @@ namespace Flower.Backend.Services
                     }
                 }
 
-                // Calculate amounts
-                var originalAmount = items?.Sum(i => i.UnitPrice * i.Quantity) ?? 0;
+                // Load products from DB for validation and mapping
+                var productIds = items?.Select(i => i.ProductId).Distinct().ToList() ?? new List<int>();
+                var products = await _context.Products
+                    .Where(p => productIds.Contains(p.Id))
+                    .ToDictionaryAsync(p => p.Id);
 
-                // Find active promotions and compute discount
+                // Fetch active promotions (respecting Vietnam Time)
+                var activePromotions = await _promotionService.GetActivePromotions();
+
+                decimal originalAmount = 0;
                 decimal promotionDiscount = 0;
                 int? appliedPromotionId = null;
+                var itemDiscounts = new Dictionary<int, decimal>();
 
-                var activePromotions = await _promotionService.GetActivePromotions();
-                if (activePromotions != null && activePromotions.Any() && items != null)
+                if (items != null)
                 {
-                    var productIds = items.Select(i => i.ProductId).Distinct().ToList();
-                    var products = await _context.Products
-                        .Where(p => productIds.Contains(p.Id))
-                        .ToDictionaryAsync(p => p.Id);
-
                     foreach (var item in items)
                     {
+                        if (!products.TryGetValue(item.ProductId, out var product))
+                        {
+                            return (false, "Một hoặc nhiều sản phẩm trong giỏ hàng không tồn tại", 0);
+                        }
+
+                        // Determine size adjustment based on SizeVariant
+                        decimal sizeAdjustment = 0;
+                        if (item.SizeVariant == "Deluxe") sizeAdjustment = 300000;
+                        else if (item.SizeVariant == "Grand") sizeAdjustment = 600000;
+
+                        var latestOriginalPrice = product.Price + sizeAdjustment;
+                        originalAmount += latestOriginalPrice * item.Quantity;
+
+                        // Find the best active promotion for this product
                         var bestPromo = activePromotions
                             .Where(p => p.ProductIds.Contains(item.ProductId))
                             .OrderByDescending(p => p.Priority)
                             .FirstOrDefault();
 
-                        if (bestPromo != null && products.TryGetValue(item.ProductId, out var product))
+                        decimal itemDiscount = 0;
+                        if (bestPromo != null)
                         {
-                            var itemDiscount = bestPromo.DiscountType == DiscountType.Percent
+                            itemDiscount = bestPromo.DiscountType == DiscountType.Percent
                                 ? product.Price * bestPromo.DiscountValue / 100m
                                 : bestPromo.DiscountValue;
-                            promotionDiscount += itemDiscount * item.Quantity;
 
                             if (appliedPromotionId == null)
                                 appliedPromotionId = bestPromo.PromotionId;
+                        }
+
+                        itemDiscounts[item.ProductId] = itemDiscount;
+                        promotionDiscount += itemDiscount * item.Quantity;
+
+                        // Validation: If client-sent unit price differs from backend recalculated price, reject order!
+                        var latestCurrentPrice = latestOriginalPrice - itemDiscount;
+                        if (item.UnitPrice != latestCurrentPrice)
+                        {
+                            return (false, "Một hoặc nhiều sản phẩm đã thay đổi giá. Vui lòng kiểm tra lại giỏ hàng.", 0);
                         }
                     }
                 }
@@ -290,7 +315,7 @@ namespace Flower.Backend.Services
                     {
                         Code = couponCode,
                         CustomerId = customerId,
-                        OrderTotal = originalAmount
+                        OrderTotal = originalAmount - promotionDiscount
                     };
                     var couponValidation = await _couponService.ValidateAndApply(applyRequest);
                     if (couponValidation.IsValid && couponValidation.Coupon != null)
@@ -326,20 +351,11 @@ namespace Flower.Backend.Services
                     FinalAmount = finalAmount
                 };
 
-                Dictionary<int, Product> productDict = new Dictionary<int, Product>();
                 if (items != null && items.Count > 0)
                 {
-                    var productIds = items.Select(i => i.ProductId).ToList();
-                    var products = await _context.Products
-                        .Where(p => productIds.Contains(p.Id))
-                        .ToListAsync();
-                    productDict = products.ToDictionary(p => p.Id);
-
                     foreach (var item in items)
                     {
-                        if (!productDict.TryGetValue(item.ProductId, out var product))
-                            throw new KeyNotFoundException($"Sản phẩm không tồn tại");
-
+                        var product = products[item.ProductId];
                         int reserved = _stockLockService.GetReservedStock(item.ProductId);
                         int availableStock = product.StockQuantity - reserved;
                         if (availableStock < item.Quantity)
@@ -347,17 +363,21 @@ namespace Flower.Backend.Services
                     }
 
                     newOrder.OrderDetails = items.Select(item =>
-                {
-                    var product = productDict[item.ProductId];
-                    return new OrderDetail
                     {
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        ProductName = product.Name,
-                        ProductImage = product.ImageUrl
-                    };
-                }).ToList();
+                        var product = products[item.ProductId];
+                        var itemDiscount = itemDiscounts[item.ProductId];
+                        return new OrderDetail
+                        {
+                            ProductId = item.ProductId,
+                            Quantity = item.Quantity,
+                            UnitPrice = item.UnitPrice,
+                            ProductName = product.Name,
+                            ProductImage = product.ImageUrl,
+                            SizeVariant = item.SizeVariant,
+                            Discount = itemDiscount,
+                            Subtotal = item.UnitPrice * item.Quantity
+                        };
+                    }).ToList();
 
                     if (method == PaymentMethod.OnlinePayment)
                     {
@@ -378,7 +398,7 @@ namespace Flower.Backend.Services
                     if (affected == 0)
                     {
                         await transaction.RollbackAsync();
-                        return (false, $"Sản phẩm '{productDict[item.ProductId].Name}' vừa hết hàng, vui lòng thử lại.", 0);
+                        return (false, $"Sản phẩm '{products[item.ProductId].Name}' vừa hết hàng, vui lòng thử lại.", 0);
                     }
                 }
             }

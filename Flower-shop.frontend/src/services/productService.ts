@@ -91,6 +91,16 @@ const productService = {
             return null;
         }
     },
+
+    recalculateCart: async (items: { productId: number; quantity: number; name: string; price: number; promotionPrice?: number }[]) => {
+        try {
+            const response = await axiosClient.post('/Products/recalculate-cart', { items });
+            return response.data || response;
+        } catch (error) {
+            console.error('API recalculateCart error:', error);
+            throw error;
+        }
+    },
 };
 
 export default productService;

@@ -96,6 +96,9 @@ namespace Flower.Backend.Models.DTOs
         [Required]
         [Range(0, double.MaxValue)]
         public decimal UnitPrice { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal Subtotal { get; set; }
     }
 
     public class UpdateOrderDTO
@@ -128,6 +131,7 @@ namespace Flower.Backend.Models.DTOs
         [Required]
         [Range(0, double.MaxValue)]
         public decimal UnitPrice { get; set; }
+        public string? SizeVariant { get; set; }
     }
 
     public class CreateOrderDTO

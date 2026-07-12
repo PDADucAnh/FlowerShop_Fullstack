@@ -29,7 +29,7 @@ const DEFAULT_SLOTS = [
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, cartTotal, clearCart } = useCart();
+  const { cartItems, cartTotal, clearCart, recalculateCartPrices } = useCart();
   const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const promotionDiscountTotal = cartItems.reduce((sum, item) => {
     const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
@@ -95,7 +95,8 @@ const CheckoutPage: React.FC = () => {
 
   useEffect(() => {
     refreshProfile();
-  }, [refreshProfile]);
+    recalculateCartPrices().catch(console.error);
+  }, [refreshProfile, recalculateCartPrices]);
 
   const phoneBlurRef = React.useRef<any>(null);
   const handlePhoneBlur = async (phoneVal: string) => {
@@ -176,11 +177,17 @@ const CheckoutPage: React.FC = () => {
     const orderPayload = {
       customerId: user?.id || 0,
       notes: [formData.notes, formData.greetingCard ? `Lời chúc: ${formData.greetingCard}` : ''].filter(Boolean).join(' | '),
-      items: cartItems.map(item => ({
-        productId: item.id,
-        quantity: item.quantity,
-        unitPrice: item.promotionPrice ?? item.discountPrice ?? item.price,
-      })),
+      items: cartItems.map(item => {
+        let sizeVariant = 'Classic';
+        if (item.name.includes('(Deluxe)')) sizeVariant = 'Deluxe';
+        else if (item.name.includes('(Grand)')) sizeVariant = 'Grand';
+        return {
+          productId: item.id,
+          quantity: item.quantity,
+          unitPrice: item.promotionPrice ?? item.discountPrice ?? item.price,
+          sizeVariant: sizeVariant
+        };
+      }),
       paymentMethod: formData.paymentMethod === 'OnlinePayment' ? 0 : 1,
       deliveryDate: formData.deliveryDate,
       deliveryTimeSlot: formData.deliveryTimeSlot,
@@ -205,8 +212,11 @@ const CheckoutPage: React.FC = () => {
       } else {
         navigate(`/order-confirmation?orderId=${result.orderId}`);
       }
-    } catch {
-      // toast handled by useCreateOrder onError
+    } catch (err: any) {
+      const errorMsg = err?.response?.data?.message || err?.message || "";
+      if (errorMsg.includes("thay đổi giá") || errorMsg.includes("đã thay đổi giá")) {
+        recalculateCartPrices().catch(console.error);
+      }
     }
   };
 

@@ -7,7 +7,11 @@ import { formatCurrency } from '../../utils/currency';
 
 const ShoppingCartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, updateQuantity, cartTotal } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, cartTotal, recalculateCartPrices } = useCart();
+
+  React.useEffect(() => {
+    recalculateCartPrices().catch(console.error);
+  }, [recalculateCartPrices]);
 
   if (cartItems.length === 0) {
     return (

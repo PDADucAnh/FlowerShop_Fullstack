@@ -33,7 +33,8 @@ namespace Flower.Backend.Controllers.Api
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice
+                UnitPrice = i.UnitPrice,
+                SizeVariant = i.SizeVariant
             }).ToList() ?? new List<OrderItemInput>();
 
             var (success, message, orderId) = await _orderService.CreateOrder(
@@ -63,7 +64,8 @@ namespace Flower.Backend.Controllers.Api
             {
                 ProductId = i.ProductId,
                 Quantity = i.Quantity,
-                UnitPrice = i.UnitPrice
+                UnitPrice = i.UnitPrice,
+                SizeVariant = i.SizeVariant
             }).ToList() ?? new List<OrderItemInput>();
 
             var (success, message, orderId) = await _orderService.CreateOrder(
