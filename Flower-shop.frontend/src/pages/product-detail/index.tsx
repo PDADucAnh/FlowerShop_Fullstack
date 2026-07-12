@@ -26,7 +26,7 @@ const ProductDetailPage = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [promotionInfo, setPromotionInfo] = useState<{ promotionPrice?: number; promotionPercent?: number; promotionType?: string; hasFlashSale?: boolean } | null>(null);
+  const [promotionInfo, setPromotionInfo] = useState<{ promotionPrice?: number; promotionPercent?: number; promotionType?: string; hasFlashSale?: boolean; name?: string } | null>(null);
 
   const videoUrl = "https://www.youtube.com/embed/g20T21s0uVw"; // Aesthetic Flower Care Tutorial
 
@@ -52,6 +52,7 @@ const ProductDetailPage = () => {
             promotionPercent: data.promotionPercent,
             promotionType: data.promotionType,
             hasFlashSale: data.hasFlashSale,
+            name: data.name,
           });
         }
       }).catch(() => {});
@@ -91,14 +92,22 @@ const ProductDetailPage = () => {
       toast.error(`Chỉ còn ${product.stockQuantity} sản phẩm trong kho`);
       return;
     }
+    const isFlash = promotionInfo?.hasFlashSale || product.hasFlashSale || product.isFlashSale || promotionInfo?.promotionType === 'FlashSale' || product.promotionType === 'FlashSale';
+    const pct = promotionInfo?.promotionPercent ?? product.promotionPercent ?? product.discountPercent;
+    const name = promotionInfo?.name ?? product.promotionName;
     const customizedProduct = {
       ...product,
       name: selectedSize !== 'Classic' ? `${product.name} (${selectedSize})` : product.name,
-      price: finalPrice
+      price: finalOriginalPrice,
+      promotionPrice: hasPromoActive ? finalPrice : undefined,
+      currentPrice: hasPromoActive ? finalPrice : finalOriginalPrice,
+      hasFlashSale: isFlash,
+      promotionPercent: pct,
+      promotionName: name
     };
     addToCart(customizedProduct, quantity);
     toast.success(`Đã thêm "${customizedProduct.name}" (x${quantity}) vào giỏ hàng`);
-  }, [product, quantity, selectedSize, finalPrice, addToCart]);
+  }, [product, quantity, selectedSize, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart]);
 
   const handleBuyNow = useCallback(() => {
     if (!product) return;
@@ -106,14 +115,22 @@ const ProductDetailPage = () => {
       toast.error(`Chỉ còn ${product.stockQuantity} sản phẩm trong kho`);
       return;
     }
+    const isFlash = promotionInfo?.hasFlashSale || product.hasFlashSale || product.isFlashSale || promotionInfo?.promotionType === 'FlashSale' || product.promotionType === 'FlashSale';
+    const pct = promotionInfo?.promotionPercent ?? product.promotionPercent ?? product.discountPercent;
+    const name = promotionInfo?.name ?? product.promotionName;
     const customizedProduct = {
       ...product,
       name: selectedSize !== 'Classic' ? `${product.name} (${selectedSize})` : product.name,
-      price: finalPrice
+      price: finalOriginalPrice,
+      promotionPrice: hasPromoActive ? finalPrice : undefined,
+      currentPrice: hasPromoActive ? finalPrice : finalOriginalPrice,
+      hasFlashSale: isFlash,
+      promotionPercent: pct,
+      promotionName: name
     };
     addToCart(customizedProduct, quantity);
     navigate('/checkout');
-  }, [product, quantity, selectedSize, finalPrice, addToCart, navigate]);
+  }, [product, quantity, selectedSize, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart, navigate]);
 
   // Load related products
   const { data: relatedResult } = useProductsPaged(1, 5, null, null, product?.categoryProductId || null);
@@ -424,35 +441,53 @@ const ProductDetailPage = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-              {relatedProducts.map((p: any) => (
-                <Link
-                  key={p.id}
-                  to={`/product/${p.id}`}
-                  className="group cursor-pointer text-decoration-none block"
-                >
-                  <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-surface-container-low mb-4 shadow-[0_4px_20px_rgba(171,44,93,0.02)] transition-shadow group-hover:shadow-[0_8px_30px_rgba(171,44,93,0.08)]">
-                    <img
-                      alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      src={formatImageUrl(p.imageUrl)}
-                      loading="lazy"
-                    />
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
-                    <div className="flex justify-center gap-2 items-center">
-                      <p className="font-body-md text-body-md text-primary mb-0 font-semibold">
-                        {formatCurrency(p.discountPrice || p.price)}
-                      </p>
-                      {p.discountPrice! > 0 && (
-                        <p className="font-body-sm text-body-sm text-secondary line-through mb-0 opacity-60">
-                          {formatCurrency(p.price)}
-                        </p>
+              {relatedProducts.map((p: any) => {
+                const displayPrice = p.promotionPrice ?? p.currentPrice ?? p.discountPrice ?? p.price;
+                const hasPromo = displayPrice < p.price;
+                const isFlash = p.hasFlashSale || p.isFlashSale || p.promotionType === 'FlashSale';
+                const percent = p.promotionPercent ?? p.discountPercent;
+
+                return (
+                  <Link
+                    key={p.id}
+                    to={`/product/${p.id}`}
+                    className="group cursor-pointer text-decoration-none block"
+                  >
+                    <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-surface-container-low mb-4 shadow-[0_4px_20px_rgba(171,44,93,0.02)] transition-shadow group-hover:shadow-[0_8px_30px_rgba(171,44,93,0.08)] relative">
+                      <img
+                        alt={p.name}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        src={formatImageUrl(p.imageUrl)}
+                        loading="lazy"
+                      />
+                      {isFlash && (
+                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide flex items-center gap-0.5 shadow z-10 animate-pulse">
+                          <span className="material-symbols-outlined text-[11px] font-bold">bolt</span>
+                          Flash Sale {percent ? `-${percent}%` : ''}
+                        </div>
+                      )}
+                      {!isFlash && hasPromo && (
+                        <div className="absolute top-2 left-2 bg-primary text-on-primary px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide shadow z-10">
+                          KM {percent ? `-${percent}%` : ''}
+                        </div>
                       )}
                     </div>
-                  </div>
-                </Link>
-              ))}
+                    <div className="text-center">
+                      <h3 className="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
+                      <div className="flex justify-center gap-2 items-baseline">
+                        <p className="font-body-md text-body-md text-primary mb-0 font-semibold">
+                          {formatCurrency(displayPrice)}
+                        </p>
+                        {hasPromo && (
+                          <p className="font-body-sm text-body-sm text-secondary line-through mb-0 opacity-60">
+                            {formatCurrency(p.price)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
             
             <div className="mt-6 text-center sm:hidden">

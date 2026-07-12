@@ -6,6 +6,7 @@ Báo cáo chi tiết về việc rà soát, phát hiện nguyên nhân và khắ
 
 ## 1. Tổng quan các lỗi (Overview of Issues)
 
+### Các lỗi ban đầu đã khắc phục:
 1. **Lỗi 1: Trạng thái Flash Sale / Khuyến mãi không tự cập nhật**:
    - Khi tạo chương trình và đến thời gian bắt đầu, Admin vẫn hiển thị "Sắp diễn ra" hoặc "Tạm dừng" thay vì chuyển sang "Đang chạy".
 2. **Lỗi 2: Frontend danh sách sản phẩm không hiển thị giá giảm và Badge Flash Sale**:
@@ -14,6 +15,12 @@ Báo cáo chi tiết về việc rà soát, phát hiện nguyên nhân và khắ
    - Khi vào trang chi tiết, sản phẩm vẫn hiển thị giá gốc ban đầu và không cập nhật thông tin khuyến mãi.
 4. **Lỗi 4: Trang Checkout thiếu thông tin chi tiết giảm giá**:
    - Khách hàng không thấy được giá gốc (gạch ngang), đang giảm bao nhiêu %, tên chương trình khuyến mãi nào được áp dụng, và phần tóm tắt đơn hàng (Order Summary) chỉ hiển thị tổng tiền cuối cùng thay vì hiển thị rõ ràng giá trị gốc, giá trị giảm Flash Sale và giá trị Coupon riêng biệt.
+
+### 2 lỗi bổ sung đã được khắc phục hoàn toàn:
+5. **Lỗi 5: Giao diện Checkout mất giá gốc gốc (OriginalPrice hiển thị sai lệch)**:
+   - Khi người dùng thêm sản phẩm từ trang chi tiết với tùy chọn size (Classic, Deluxe, Grand) vào giỏ hàng, thuộc tính `price` trong cart item bị ghi đè trực tiếp bởi giá bán sau cùng đã giảm khuyến mãi (`finalPrice`). Điều này làm mất hẳn giá gốc ban đầu, khiến cả hóa đơn và cột sản phẩm ở trang Checkout hiển thị "Tạm tính (Giá gốc)" trùng khớp với giá đã giảm.
+6. **Lỗi 6: Sản phẩm tương tự (Related Products) không hiển thị Flash Sale**:
+   - Trên trang chi tiết sản phẩm, danh sách "Sản phẩm tương tự" vẫn chỉ hiển thị giá gốc, không có badge Flash Sale hay giá bán đã giảm, dù các sản phẩm đó đang trong chiến dịch Flash Sale có hiệu lực.
 
 ---
 
@@ -26,8 +33,10 @@ Báo cáo chi tiết về việc rà soát, phát hiện nguyên nhân và khắ
    - Đối tượng `ProductDTO` trên API danh sách sản phẩm thiếu các thuộc tính cấu trúc cụ thể mà Frontend mong đợi để render trực quan như: `OriginalPrice`, `CurrentPrice`, `DiscountPercent`, `DiscountAmount`, `IsFlashSale`, `PromotionName`.
 3. **Thiếu liên kết tính giá trong API lấy Promotion tốt nhất**:
    - API `/api/Promotions/product/{productId}` vốn chỉ trả về dữ liệu thô của chương trình khuyến mãi (ActivePromotionDTO) mà không thực hiện tính toán giá cụ thể (promotionPrice, promotionPercent, hasFlashSale) dựa trên đơn giá sản phẩm.
-4. **Frontend tính toán và tóm tắt chưa chi tiết**:
-   - `ProductCard.tsx`, `ProductDetailPage` và `Checkout` trên Next.js chưa hỗ trợ đầy đủ việc hiển thị đan xen giữa giá gốc (line-through), phần trăm giảm giá và badge Flash Sale nhấp nháy, cũng như chưa bóc tách riêng tổng giá gốc và tổng tiền giảm Flash Sale trong phần tóm tắt.
+4. **Ghi đè thuộc tính giá gốc trong giỏ hàng (Lỗi 5)**:
+   - File `product-detail/index.tsx` khi đẩy sản phẩm vào `addToCart` đã gắn `price: finalPrice` (giá đã giảm) làm thuộc tính giá gốc của thực thể trong giỏ. Điều này dẫn tới việc giỏ hàng bị mất dữ liệu giá trị gốc ban đầu.
+5. **Chưa áp dụng logic khuyến mãi cho Sản phẩm tương tự (Lỗi 6)**:
+   - Giao diện render danh sách liên quan tại `product-detail/index.tsx` sử dụng trực tiếp thuộc tính `p.discountPrice || p.price` mà bỏ qua thuộc tính `p.promotionPrice` hay `p.currentPrice` đã được backend bổ sung khi tải dữ liệu liên quan.
 
 ---
 
@@ -53,9 +62,9 @@ Báo cáo chi tiết về việc rà soát, phát hiện nguyên nhân và khắ
   - Hiển thị badge "Flash Sale" nhấp nháy màu đỏ kèm phần trăm giảm trên góc ảnh sản phẩm nếu có Flash Sale đang chạy.
   - Sắp xếp vị trí badge tồn kho thấp xuống góc dưới để tránh chồng lấp giao diện.
 - [product-detail/index.tsx](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower-shop.frontend/src/pages/product-detail/index.tsx):
-  - Đồng bộ tính toán giá sản phẩm gốc và giá khuyến mãi dựa trên dữ liệu sản phẩm trả về từ API và dữ liệu tính toán bổ sung.
-  - Hiển thị badge Flash Sale đỏ nhấp nháy bên cạnh nhãn "Bán chạy nhất" ở đầu trang.
-  - Hiển thị giá gốc gạch ngang và giá khuyến mãi lớn nổi bật.
+  - Khai báo thêm thuộc tính `name` vào kiểu dữ liệu của state `promotionInfo` để lưu tên đợt khuyến mãi.
+  - Sửa đổi phương thức thêm sản phẩm vào giỏ hàng (`handleAddToCart` và `handleBuyNow`) để lưu giữ giá gốc chính xác tại trường `price: finalOriginalPrice` và lưu giá khuyến mãi tại `promotionPrice` / `currentPrice`.
+  - Triển khai hiển thị danh sách "Sản phẩm tương tự" động: Rút ra giá khuyến mãi qua `p.promotionPrice ?? p.currentPrice`, hiển thị giá gốc gạch ngang và Badge Flash Sale kèm % giảm giá đỏ nhấp nháy.
 - [checkout/index.tsx](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower-shop.frontend/src/pages/checkout/index.tsx):
   - Khắc phục lỗi `useRef<NodeJS.Timeout>` trong môi trường trình duyệt.
   - Tính toán tổng tiền gốc (`originalTotal`) và tổng tiền giảm Flash Sale (`promotionDiscountTotal`).
@@ -99,5 +108,5 @@ graph TD
 
 ## 6. Kết quả biên dịch (Build Verification)
 
-- **Backend compilation**: `dotnet build Flower.Backend/Flower.Backend.csproj` hoàn thành thành công với **0 lỗi (0 Errors)** và 87 cảnh báo về nullability mặc định của C#.
+- **Backend compilation**: `dotnet build Flower.Backend/Flower.Backend.csproj` hoàn thành thành công với **0 lỗi (0 Errors)** và 105 cảnh báo về nullability mặc định của C#.
 - **Frontend compilation**: `npm run build` (gồm `tsc -b && vite build`) hoàn thành thành công, đóng gói và tối ưu hóa tài nguyên tĩnh hoàn tất, **0 lỗi (0 Errors)**.

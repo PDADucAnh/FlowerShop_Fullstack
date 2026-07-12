@@ -523,7 +523,9 @@ const CheckoutPage: React.FC = () => {
                   const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
                   const hasPromo = displayPrice < item.price;
                   const percent = item.promotionPercent ?? item.discountPercent;
-                  const promoName = item.promotionName || (item.hasFlashSale || item.isFlashSale || item.promotionType === 'FlashSale' ? 'Flash Sale' : 'Khuyến mãi');
+                  const isFlash = item.hasFlashSale || item.isFlashSale || item.promotionType === 'FlashSale';
+                  const promoLabel = isFlash ? 'FLASH SALE' : 'KHUYẾN MÃI';
+                  const savings = (item.price - displayPrice) * item.quantity;
 
                   return (
                     <div className="flex items-start pb-6 border-b border-[#FCE4EC]" key={item.id}>
@@ -540,18 +542,21 @@ const CheckoutPage: React.FC = () => {
                         <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">SL: {item.quantity}</p>
                         
                         {hasPromo ? (
-                          <div className="mb-1">
-                            <p className="text-error font-headline-sm text-base mb-0.5">
-                              {formatCurrency(displayPrice * item.quantity)}
-                            </p>
-                            <div className="flex items-center gap-2 flex-wrap">
+                          <div className="space-y-1">
+                            <span className="inline-block bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded tracking-wider uppercase">
+                              {promoLabel}
+                            </span>
+                            <div className="flex items-baseline gap-2">
                               <span className="text-gray-400 line-through text-xs">
                                 {formatCurrency(item.price * item.quantity)}
                               </span>
-                              <span className="bg-red-50 text-red-600 px-1.5 py-0.5 rounded text-[10px] font-bold">
-                                {promoName} {percent ? `-${percent}%` : ''}
+                              <span className="text-error font-semibold text-base">
+                                {formatCurrency(displayPrice * item.quantity)}
                               </span>
                             </div>
+                            <p className="text-[11px] text-green-600 font-medium">
+                              Tiết kiệm {formatCurrency(savings)} {percent ? `(${percent}%)` : ''}
+                            </p>
                           </div>
                         ) : (
                           <p className="font-headline-sm text-base text-primary">
