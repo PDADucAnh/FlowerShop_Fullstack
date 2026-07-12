@@ -1,8 +1,9 @@
+@using Flower.Backend.Utils
 @model IEnumerable<CouponDTO>
 @{
     ViewData["Title"] = "Mã giảm giá";
     Layout = "_LayoutAdmin";
-    var now = DateTime.UtcNow;
+    var now = DateTimeUtils.GetVietnamTime();
 }
 
 <div class="space-y-stack-lg">

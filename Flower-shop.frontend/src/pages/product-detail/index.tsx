@@ -62,11 +62,13 @@ const ProductDetailPage = () => {
   const isLowStock = product ? product.stockQuantity > 0 && product.stockQuantity <= 5 : false;
 
   const sizePriceAdjustment = selectedSize === 'Deluxe' ? 300000 : selectedSize === 'Grand' ? 600000 : 0;
-  const basePrice = product ? (promotionInfo?.promotionPrice ?? product.discountPrice ?? product.price) : 0;
+  const basePrice = product ? (promotionInfo?.promotionPrice ?? product.promotionPrice ?? product.currentPrice ?? product.discountPrice ?? product.price) : 0;
   const finalPrice = basePrice + sizePriceAdjustment;
   
   const originalPrice = product ? product.price : 0;
   const finalOriginalPrice = originalPrice + sizePriceAdjustment;
+
+  const hasPromoActive = !!promotionInfo?.promotionPrice || !!product?.promotionPrice || (!!product?.currentPrice && product.currentPrice < product.price);
 
   const canAddToCart = product && quantity <= product.stockQuantity && product.stockQuantity > 0;
 
@@ -237,11 +239,17 @@ const ProductDetailPage = () => {
           {/* Right Column: Product Details */}
           <div className="lg:col-span-5 flex flex-col pt-2 md:pt-0 sticky top-stack-lg">
             {/* Header badge & Clean Title */}
-            <div className="flex items-center gap-2 mb-2">
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {(promotionInfo?.hasFlashSale || product.hasFlashSale || product.isFlashSale || promotionInfo?.promotionType === 'FlashSale' || product.promotionType === 'FlashSale') && (
+                <span className="bg-red-600 text-white px-3 py-1 rounded-full font-label-sm text-label-sm font-bold flex items-center gap-0.5 animate-pulse shadow-sm">
+                  <span className="material-symbols-outlined text-[14px]">bolt</span>
+                  Flash Sale
+                </span>
+              )}
               <span className="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full font-label-sm text-label-sm">Bán chạy nhất</span>
-              {promotionInfo?.promotionPercent && (
-                <span className="bg-error text-on-error px-3 py-1 rounded-full font-label-sm text-label-sm">
-                  -{promotionInfo.promotionPercent}%
+              {(promotionInfo?.promotionPercent || product.promotionPercent || product.discountPercent) && (
+                <span className="bg-error text-on-error px-3 py-1 rounded-full font-label-sm text-label-sm font-semibold">
+                  -{promotionInfo?.promotionPercent ?? product.promotionPercent ?? product.discountPercent}%
                 </span>
               )}
               {product.categoryProductName && (
@@ -255,7 +263,7 @@ const ProductDetailPage = () => {
               <p className="font-headline-md text-headline-md text-primary">
                 {formatCurrency(finalPrice)}
               </p>
-              {(promotionInfo?.promotionPrice || product.discountPrice) && (
+              {hasPromoActive && (
                 <p className="font-body-md text-body-md text-on-surface-variant line-through opacity-60">
                   {formatCurrency(finalOriginalPrice)}
                 </p>

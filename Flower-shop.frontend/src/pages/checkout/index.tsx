@@ -30,6 +30,12 @@ const DEFAULT_SLOTS = [
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const promotionDiscountTotal = cartItems.reduce((sum, item) => {
+    const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
+    const discount = item.price - displayPrice;
+    return sum + (discount > 0 ? discount * item.quantity : 0);
+  }, 0);
   const { user, refreshProfile } = useAuth();
   const createOrder = useCreateOrder();
 
@@ -91,7 +97,7 @@ const CheckoutPage: React.FC = () => {
     refreshProfile();
   }, [refreshProfile]);
 
-  const phoneBlurRef = React.useRef<NodeJS.Timeout>();
+  const phoneBlurRef = React.useRef<any>(null);
   const handlePhoneBlur = async (phoneVal: string) => {
     if (!phoneVal || phoneVal.length < 10) return;
     if (phoneBlurRef.current) clearTimeout(phoneBlurRef.current);
@@ -513,32 +519,68 @@ const CheckoutPage: React.FC = () => {
               </h2>
               {/* Product Item List */}
               <div className="space-y-6 max-h-96 overflow-y-auto no-scrollbar">
-                {cartItems.map(item => (
-                  <div className="flex items-start pb-6 border-b border-[#FCE4EC]" key={item.id}>
-                    <div className="w-20 h-24 bg-surface-container-low rounded-lg overflow-hidden flex-shrink-0 mr-4 petal-shadow">
-                      <img
-                        className="w-full h-full object-cover"
-                        src={getImageUrl(item.imageUrl)}
-                        alt={item.name}
-                        loading="lazy"
-                      />
+                {cartItems.map(item => {
+                  const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
+                  const hasPromo = displayPrice < item.price;
+                  const percent = item.promotionPercent ?? item.discountPercent;
+                  const promoName = item.promotionName || (item.hasFlashSale || item.isFlashSale || item.promotionType === 'FlashSale' ? 'Flash Sale' : 'Khuyến mãi');
+
+                  return (
+                    <div className="flex items-start pb-6 border-b border-[#FCE4EC]" key={item.id}>
+                      <div className="w-20 h-24 bg-surface-container-low rounded-lg overflow-hidden flex-shrink-0 mr-4 petal-shadow">
+                        <img
+                          className="w-full h-full object-cover"
+                          src={getImageUrl(item.imageUrl)}
+                          alt={item.name}
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="font-label-md text-label-md text-on-surface mb-1">{item.name}</h3>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">SL: {item.quantity}</p>
+                        
+                        {hasPromo ? (
+                          <div className="mb-1">
+                            <p className="text-error font-headline-sm text-base mb-0.5">
+                              {formatCurrency(displayPrice * item.quantity)}
+                            </p>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-gray-400 line-through text-xs">
+                                {formatCurrency(item.price * item.quantity)}
+                              </span>
+                              <span className="bg-red-50 text-red-600 px-1.5 py-0.5 rounded text-[10px] font-bold">
+                                {promoName} {percent ? `-${percent}%` : ''}
+                              </span>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="font-headline-sm text-base text-primary">
+                            {formatCurrency(item.price * item.quantity)}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex-grow">
-                      <h3 className="font-label-md text-label-md text-on-surface mb-1">{item.name}</h3>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant mb-2">SL: {item.quantity}</p>
-                      <p className="font-headline-sm text-lg text-primary">
-                        {formatCurrency((item.promotionPrice ?? item.discountPrice ?? item.price) * item.quantity)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {/* Subtotals */}
               <div className="space-y-3 font-body-md text-body-md text-on-surface-variant mb-6 pb-6 border-b border-[#FCE4EC] mt-6">
                 <div className="flex justify-between">
-                  <span>Tạm tính</span>
-                  <span>{formatCurrency(cartTotal)}</span>
+                  <span>Tạm tính (Giá gốc)</span>
+                  <span>{formatCurrency(originalTotal)}</span>
                 </div>
+                {promotionDiscountTotal > 0 && (
+                  <div className="flex justify-between text-error font-medium">
+                    <span>Khuyến mãi / Flash Sale</span>
+                    <span>-{formatCurrency(promotionDiscountTotal)}</span>
+                  </div>
+                )}
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-700 font-medium">
+                    <span>Mã giảm giá (Coupon)</span>
+                    <span>-{formatCurrency(appliedCoupon.discountAmount)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span>Phí vận chuyển</span>
                   <span className="text-primary font-medium">Miễn phí</span>
@@ -588,18 +630,11 @@ const CheckoutPage: React.FC = () => {
                   </div>
                 )}
               </div>
-              {/* Discount */}
-              {appliedCoupon && (
-                <div className="flex justify-between mb-2">
-                  <span className="font-body-md text-body-md text-on-surface-variant">Giảm giá</span>
-                  <span className="font-body-md text-body-md text-error">-{formatCurrency(appliedCoupon.discountAmount)}</span>
-                </div>
-              )}
               {/* Total */}
               <div className="flex justify-between items-end mb-8">
-                <span className="font-label-md text-label-md text-on-surface">Tổng cộng</span>
+                <span className="font-label-md text-label-md text-on-surface">Tổng thanh toán</span>
                 <span className="font-headline-md text-headline-sm text-primary">
-                  {formatCurrency(appliedCoupon ? appliedCoupon.finalTotal : cartTotal)}
+                  {formatCurrency(appliedCoupon ? appliedCoupon.finalTotal : originalTotal - promotionDiscountTotal)}
                 </span>
               </div>
               {/* Checkout Button */}

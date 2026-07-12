@@ -45,6 +45,7 @@ namespace Flower.Backend.Services
                 result.PromotionType = promotion.PromotionType.ToString();
                 result.HasFlashSale = promotion.PromotionType == PromotionType.FlashSale;
                 result.DiscountAmount = discountAmount;
+                result.PromotionName = promotion.Name;
             }
 
             return result;
@@ -83,6 +84,7 @@ namespace Flower.Backend.Services
                     calc.PromotionType = bestPromo.PromotionType.ToString();
                     calc.HasFlashSale = bestPromo.PromotionType == PromotionType.FlashSale;
                     calc.DiscountAmount = discountAmount;
+                    calc.PromotionName = bestPromo.Name;
                 }
 
                 result[product.Id] = calc;

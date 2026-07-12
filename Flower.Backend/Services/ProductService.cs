@@ -35,6 +35,18 @@ namespace Flower.Backend.Services
                     product.PromotionPercent = calc.PromotionPercent;
                     product.PromotionType = calc.PromotionType;
                     product.HasFlashSale = calc.HasFlashSale;
+                    product.OriginalPrice = product.Price;
+                    product.CurrentPrice = calc.PromotionPrice ?? product.Price;
+                    product.DiscountPercent = calc.PromotionPercent;
+                    product.DiscountAmount = calc.DiscountAmount;
+                    product.IsFlashSale = calc.HasFlashSale;
+                    product.PromotionName = calc.PromotionName;
+                }
+                else
+                {
+                    product.OriginalPrice = product.Price;
+                    product.CurrentPrice = product.Price;
+                    product.IsFlashSale = false;
                 }
             }
         }
@@ -114,6 +126,12 @@ namespace Flower.Backend.Services
             dto.PromotionPercent = calc.PromotionPercent;
             dto.PromotionType = calc.PromotionType;
             dto.HasFlashSale = calc.HasFlashSale;
+            dto.OriginalPrice = dto.Price;
+            dto.CurrentPrice = calc.PromotionPrice ?? dto.Price;
+            dto.DiscountPercent = calc.PromotionPercent;
+            dto.DiscountAmount = calc.DiscountAmount;
+            dto.IsFlashSale = calc.HasFlashSale;
+            dto.PromotionName = calc.PromotionName;
             return dto;
         }
 

@@ -9,5 +9,6 @@ namespace Flower.Backend.Models.DTOs
         public string? PromotionType { get; set; }
         public bool HasFlashSale { get; set; }
         public decimal? DiscountAmount { get; set; }
+        public string? PromotionName { get; set; }
     }
 }

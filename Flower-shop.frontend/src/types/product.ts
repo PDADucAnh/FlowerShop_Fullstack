@@ -18,6 +18,12 @@ export interface Product {
   addToCartCount?: number;
   trendingScore?: number;
   trendingBadge?: string;
+  originalPrice?: number;
+  currentPrice?: number;
+  discountPercent?: number;
+  discountAmount?: number;
+  isFlashSale?: boolean;
+  promotionName?: string;
 }
 
 export interface ProductInput {

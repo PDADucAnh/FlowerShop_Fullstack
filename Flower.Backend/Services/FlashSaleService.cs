@@ -2,6 +2,7 @@ using Flower.Data;
 using Flower.Data.Entities;
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
+using Flower.Backend.Utils;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -21,7 +22,7 @@ namespace Flower.Backend.Services
 
         public async Task<IEnumerable<FlashSaleActiveDTO>> GetActiveFlashSales()
         {
-            var now = DateTime.UtcNow;
+            var now = DateTimeUtils.GetVietnamTime();
             var activeFlashSales = await _context.FlashSales
                 .Include(fs => fs.FlashSaleProducts)
                     .ThenInclude(fsp => fsp.Product)

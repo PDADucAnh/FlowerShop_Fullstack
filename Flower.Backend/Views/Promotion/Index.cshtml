@@ -1,8 +1,9 @@
+@using Flower.Backend.Utils
 @model IEnumerable<PromotionCampaignDTO>
 @{
     ViewData["Title"] = "Khuyến mãi";
     Layout = "_LayoutAdmin";
-    var now = DateTime.UtcNow;
+    var now = DateTimeUtils.GetVietnamTime();
 }
 
 <div class="space-y-stack-lg">

@@ -113,7 +113,10 @@ namespace Flower.Backend.Models.DTOs
                 CategoryProductId = product.CategoryProductId,
                 CategoryProductName = product.CategoryProduct?.Name,
                 ViewCount = product.ViewCount,
-                AddToCartCount = product.AddToCartCount
+                AddToCartCount = product.AddToCartCount,
+                OriginalPrice = product.Price,
+                CurrentPrice = product.Price,
+                IsFlashSale = false
             };
         }
 

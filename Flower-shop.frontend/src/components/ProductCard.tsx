@@ -16,8 +16,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
 
     const imageUrl = getImageUrl(item.imageUrl);
     const isOutOfStock = item.stockQuantity === 0;
-    const displayPrice = item.promotionPrice ?? item.discountPrice ?? item.price;
-    const hasPromotion = !!item.promotionPrice;
+    const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
+    const hasPromotion = !!item.promotionPrice || (!!item.currentPrice && item.currentPrice < item.price);
+    const isFlashSale = !!item.hasFlashSale || !!item.isFlashSale || item.promotionType === 'FlashSale';
+    const percent = item.promotionPercent ?? item.discountPercent;
 
     const handleAddToCart = (e: MouseEvent) => {
         e.preventDefault();
@@ -53,14 +55,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                             loading="lazy"
                         />
                     </Link>
+                    {isFlashSale && (
+                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-lg z-10 animate-pulse">
+                            <span className="material-symbols-outlined text-[12px] font-bold">bolt</span>
+                            Flash Sale {percent ? `-${percent}%` : ''}
+                        </div>
+                    )}
+                    {!isFlashSale && hasPromotion && (
+                        <div className="absolute top-2 left-2 bg-primary text-on-primary px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-lg z-10">
+                            KM {percent ? `-${percent}%` : ''}
+                        </div>
+                    )}
                     {item.trendingBadge && (
-                        <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest shadow-sm">
+                        <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest shadow-sm z-10">
                             {item.trendingBadge}
                         </div>
                     )}
-                    {item.stockQuantity <= 5 && (
-                        <div className="absolute top-2 left-2 bg-primary/90 text-on-primary px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest">
-                            Chỉ còn {item.stockQuantity} sản phẩm
+                    {item.stockQuantity <= 5 && item.stockQuantity > 0 && (
+                        <div className="absolute bottom-2 left-2 bg-primary/90 text-on-primary px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest z-10">
+                            Chỉ còn {item.stockQuantity}
                         </div>
                     )}
                 </div>
@@ -116,14 +129,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                         loading="lazy"
                     />
                 </Link>
+                {isFlashSale && (
+                    <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 shadow-lg z-10 animate-pulse">
+                        <span className="material-symbols-outlined text-[12px] font-bold">bolt</span>
+                        Flash Sale {percent ? `-${percent}%` : ''}
+                    </div>
+                )}
+                {!isFlashSale && hasPromotion && (
+                    <div className="absolute top-2 left-2 bg-primary text-on-primary px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-lg z-10">
+                        KM {percent ? `-${percent}%` : ''}
+                    </div>
+                )}
                 {item.trendingBadge && (
-                    <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest shadow-sm">
+                    <div className="absolute top-2 right-2 bg-amber-500/90 text-white px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest shadow-sm z-10">
                         {item.trendingBadge}
                     </div>
                 )}
-                {item.stockQuantity <= 5 && (
-                    <div className="absolute top-2 left-2 bg-primary/90 text-on-primary px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest">
-                        Chỉ còn {item.stockQuantity} sản phẩm
+                {item.stockQuantity <= 5 && item.stockQuantity > 0 && (
+                    <div className="absolute bottom-2 left-2 bg-primary/90 text-on-primary px-2 py-1 rounded text-[10px] font-label-sm uppercase tracking-widest z-10">
+                        Chỉ còn {item.stockQuantity}
                     </div>
                 )}
             </div>

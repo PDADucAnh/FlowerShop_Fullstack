@@ -23,6 +23,12 @@ namespace Flower.Backend.Models.DTOs
         public decimal? PromotionPercent { get; set; }
         public string? PromotionType { get; set; }
         public bool HasFlashSale { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public decimal CurrentPrice { get; set; }
+        public decimal? DiscountPercent { get; set; }
+        public decimal? DiscountAmount { get; set; }
+        public bool IsFlashSale { get; set; }
+        public string? PromotionName { get; set; }
     }
 
     public class CreateProductDTO

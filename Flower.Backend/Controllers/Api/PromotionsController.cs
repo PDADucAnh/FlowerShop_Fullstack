@@ -13,11 +13,13 @@ namespace Flower.Backend.Controllers.Api
     {
         private readonly IPromotionService _promotionService;
         private readonly ICouponService _couponService;
+        private readonly IPriceCalculationService _priceCalculationService;
 
-        public PromotionsController(IPromotionService promotionService, ICouponService couponService)
+        public PromotionsController(IPromotionService promotionService, ICouponService couponService, IPriceCalculationService priceCalculationService)
         {
             _promotionService = promotionService;
             _couponService = couponService;
+            _priceCalculationService = priceCalculationService;
         }
 
         [AllowAnonymous]
@@ -34,7 +36,27 @@ namespace Flower.Backend.Controllers.Api
         {
             var item = await _promotionService.GetBestPromotionForProduct(productId);
             if (item == null) return Ok(new { });
-            return Ok(item);
+
+            var calc = await _priceCalculationService.CalculateProductPrice(productId);
+
+            return Ok(new {
+                promotionId = item.PromotionId,
+                name = item.Name,
+                promotionType = item.PromotionType.ToString(),
+                discountType = item.DiscountType.ToString(),
+                discountValue = item.DiscountValue,
+                priority = item.Priority,
+                isStackable = item.IsStackable,
+                bannerImage = item.BannerImage,
+                productIds = item.ProductIds,
+                
+                // Calculated price fields
+                promotionPrice = calc.PromotionPrice,
+                promotionPercent = calc.PromotionPercent,
+                hasFlashSale = calc.HasFlashSale,
+                discountAmount = calc.DiscountAmount,
+                originalPrice = calc.OriginalPrice
+            });
         }
 
         [Authorize(Policy = "StaffOnly")]
