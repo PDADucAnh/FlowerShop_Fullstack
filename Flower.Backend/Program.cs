@@ -143,6 +143,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderDetailServic
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.INotificationService, Flower.Backend.Services.NotificationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdminNotificationService, Flower.Backend.Services.AdminNotificationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ISystemSettingService, Flower.Backend.Services.SystemSettingService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IShippingService, Flower.Backend.Services.ShippingService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdvertisementService, Flower.Backend.Services.AdvertisementService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IDeliverySlotService, Flower.Backend.Services.DeliverySlotService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPaymentService, Flower.Backend.Services.PaymentService>();
@@ -159,6 +160,7 @@ var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSett
 builder.Services.AddSingleton(timeSettings);
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IEmailService, Flower.Backend.Services.EmailService>();
 builder.Services.AddMemoryCache();
+builder.Services.AddDataProtection();
 builder.Services.AddScoped<Flower.Backend.Services.StockLockService>();
 builder.Services.AddHostedService<Flower.Backend.Services.OrderExpiryBackgroundService>();
 builder.Services.AddHttpContextAccessor();

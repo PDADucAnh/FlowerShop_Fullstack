@@ -1,4 +1,5 @@
 using Flower.Backend.Services.Interfaces;
+using Flower.Backend.Models.DTOs;
 using Flower.Data;
 using Flower.Data.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -51,11 +52,16 @@ namespace Flower.Backend.Services
             {
                 var context = scope.ServiceProvider.GetRequiredService<IApplicationDbContext>();
                 var orderService = scope.ServiceProvider.GetRequiredService<IOrderService>();
+                var settingService = scope.ServiceProvider.GetRequiredService<ISystemSettingService>();
+
+                var orderSettings = await settingService.GetSetting<OrderSettings>("Order");
+                int cancelMins = orderSettings?.AutoCancelMinutes ?? 30;
+                int onlineMins = Math.Max(1, cancelMins / 2);
 
                 var now = DateTime.UtcNow;
-                var codCutoff = now.AddMinutes(-30);
-                var onlineCutoff = now.AddMinutes(-15);
-                var pendingCutoff = now.AddMinutes(-15);
+                var codCutoff = now.AddMinutes(-cancelMins);
+                var onlineCutoff = now.AddMinutes(-onlineMins);
+                var pendingCutoff = now.AddMinutes(-onlineMins);
 
                 var expiredOrders = await context.Orders
                     .Include(o => o.OrderDetails)
@@ -75,15 +81,11 @@ namespace Flower.Backend.Services
                         string reason;
                         if (order.PaymentMethod == PaymentMethod.COD)
                         {
-                            reason = "Tự động hủy đơn COD quá hạn 30 phút chưa xác minh";
-                        }
-                        else if (order.Status == OrderStatus.PendingPayment)
-                        {
-                            reason = "Tự động hủy đơn hàng quá hạn thanh toán 15 phút";
+                            reason = $"Tự động hủy đơn COD quá hạn {cancelMins} phút chưa xác minh";
                         }
                         else
                         {
-                            reason = "Tự động hủy đơn hàng quá hạn thanh toán 15 phút";
+                            reason = $"Tự động hủy đơn hàng quá hạn thanh toán {onlineMins} phút";
                         }
 
                         if (order.PaymentMethod == PaymentMethod.OnlinePayment)

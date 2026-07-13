@@ -31,6 +31,7 @@ namespace Flower.Backend.Services
         private readonly IPromotionService _promotionService;
         private readonly ICouponService _couponService;
         private readonly IAdminNotificationService _adminNotificationService;
+        private readonly IShippingService _shippingService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -47,6 +48,28 @@ namespace Flower.Backend.Services
             IPromotionService promotionService,
             ICouponService couponService,
             IAdminNotificationService adminNotificationService)
+            : this(context, logger, httpContextAccessor, deliverySlotService, paymentService,
+                   fraudDetectionService, stockLockService, emailService, timeSettings, memoryCache,
+                   orderCancellationService, promotionService, couponService, adminNotificationService, null!)
+        {
+        }
+
+        public OrderService(
+            IApplicationDbContext context,
+            ILogger<OrderService> logger,
+            IHttpContextAccessor httpContextAccessor,
+            IDeliverySlotService deliverySlotService,
+            IPaymentService paymentService,
+            IFraudDetectionService fraudDetectionService,
+            StockLockService stockLockService,
+            IEmailService emailService,
+            TimeSettings timeSettings,
+            IMemoryCache memoryCache,
+            IOrderCancellationService orderCancellationService,
+            IPromotionService promotionService,
+            ICouponService couponService,
+            IAdminNotificationService adminNotificationService,
+            IShippingService shippingService)
         {
             _context = context;
             _logger = logger;
@@ -62,6 +85,7 @@ namespace Flower.Backend.Services
             _promotionService = promotionService;
             _couponService = couponService;
             _adminNotificationService = adminNotificationService;
+            _shippingService = shippingService;
         }
 
         private async Task<int?> GetCurrentCustomerId()
@@ -329,7 +353,12 @@ namespace Flower.Backend.Services
                 }
 
                 var totalDiscount = promotionDiscount + couponDiscount;
-                var finalAmount = originalAmount - totalDiscount;
+                decimal shippingFee = 0;
+                if (_shippingService != null)
+                {
+                    shippingFee = await _shippingService.CalculateShippingFee(originalAmount - totalDiscount);
+                }
+                var finalAmount = originalAmount - totalDiscount + shippingFee;
                 if (finalAmount < 0) finalAmount = 0;
 
                 var newOrder = new Order

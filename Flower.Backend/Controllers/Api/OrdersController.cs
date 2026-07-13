@@ -1,5 +1,6 @@
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
+using Flower.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
@@ -14,10 +15,17 @@ namespace Flower.Backend.Controllers.Api
     public class OrdersController : ControllerBase
     {
         private readonly IOrderService _orderService;
+        private readonly ISystemSettingService _settingService;
 
         public OrdersController(IOrderService orderService)
+            : this(orderService, null!)
+        {
+        }
+
+        public OrdersController(IOrderService orderService, ISystemSettingService settingService)
         {
             _orderService = orderService;
+            _settingService = settingService;
         }
 
         [HttpPost]
@@ -28,6 +36,22 @@ namespace Flower.Backend.Controllers.Api
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            if (_settingService != null)
+            {
+                var orderSettings = await _settingService.GetSetting<OrderSettings>("Order");
+                if (orderSettings != null)
+                {
+                    if (input.PaymentMethod == PaymentMethod.COD && !orderSettings.EnableCOD)
+                    {
+                        return StatusCode(403, new { message = "Phương thức thanh toán COD hiện đang bị tắt." });
+                    }
+                    if (input.PaymentMethod == PaymentMethod.OnlinePayment && !orderSettings.EnableOnlinePayment)
+                    {
+                        return StatusCode(403, new { message = "Phương thức thanh toán trực tuyến hiện đang bị tắt." });
+                    }
+                }
+            }
 
             var items = input.Items?.Select(i => new OrderItemInput
             {
@@ -59,6 +83,22 @@ namespace Flower.Backend.Controllers.Api
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            if (_settingService != null)
+            {
+                var orderSettings = await _settingService.GetSetting<OrderSettings>("Order");
+                if (orderSettings != null)
+                {
+                    if (request.PaymentMethod == PaymentMethod.COD && !orderSettings.EnableCOD)
+                    {
+                        return StatusCode(403, new { message = "Phương thức thanh toán COD hiện đang bị tắt." });
+                    }
+                    if (request.PaymentMethod == PaymentMethod.OnlinePayment && !orderSettings.EnableOnlinePayment)
+                    {
+                        return StatusCode(403, new { message = "Phương thức thanh toán trực tuyến hiện đang bị tắt." });
+                    }
+                }
+            }
 
             var items = request.Items?.Select(i => new OrderItemInput
             {

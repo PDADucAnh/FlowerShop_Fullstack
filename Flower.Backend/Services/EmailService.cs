@@ -6,6 +6,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using Flower.Backend.Models;
+using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Flower.Data;
 using Flower.Data.Entities;
@@ -16,15 +17,63 @@ namespace Flower.Backend.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly EmailSettings _settings;
         private readonly ILogger<EmailService> _logger;
         private readonly IApplicationDbContext _context;
+        private readonly ISystemSettingService _settingService;
+        private readonly EmailSettings _fallbackSettings;
 
         public EmailService(IOptions<EmailSettings> settings, ILogger<EmailService> logger, IApplicationDbContext context)
+            : this(settings, logger, context, null!)
         {
-            _settings = settings.Value;
+        }
+
+        public EmailService(
+            IOptions<EmailSettings> settings,
+            ILogger<EmailService> logger,
+            IApplicationDbContext context,
+            ISystemSettingService settingService)
+        {
+            _fallbackSettings = settings.Value;
             _logger = logger;
             _context = context;
+            _settingService = settingService;
+        }
+
+        private EmailSettings _settings
+        {
+            get
+            {
+                if (_settingService != null)
+                {
+                    var smtp = _settingService.GetSetting<SmtpSettings>("Smtp").GetAwaiter().GetResult();
+                    if (smtp != null && !string.IsNullOrEmpty(smtp.Host))
+                    {
+                        return new EmailSettings
+                        {
+                            SmtpHost = smtp.Host,
+                            SmtpPort = smtp.Port,
+                            SenderEmail = smtp.SenderEmail,
+                            SenderName = smtp.SenderName,
+                            EnableSsl = true,
+                            Username = smtp.Username,
+                            Password = smtp.Password
+                        };
+                    }
+                }
+                return _fallbackSettings;
+            }
+        }
+
+        private StoreInfoSettings StoreInfo
+        {
+            get
+            {
+                if (_settingService != null)
+                {
+                    return _settingService.GetSetting<StoreInfoSettings>("StoreInfo").GetAwaiter().GetResult();
+                }
+                return new StoreInfoSettings();
+            }
         }
 
         private SmtpClient CreateSmtpClient()
@@ -59,7 +108,7 @@ namespace Flower.Backend.Services
                 using var message = new MailMessage
                 {
                     From = new MailAddress(senderEmail, _settings.SenderName),
-                    Subject = $"Xác nhận đơn hàng #{order.Id} - FlowerShop",
+                    Subject = $"Xác nhận đơn hàng #{order.Id} - {StoreInfo.StoreName}",
                     Body = body,
                     IsBodyHtml = true
                 };
@@ -76,7 +125,7 @@ namespace Flower.Backend.Services
             }
         }
 
-        private static string BuildOrderConfirmationBody(Order order, string customerName)
+        private string BuildOrderConfirmationBody(Order order, string customerName)
         {
             var parsedNotes = ParseNotes(order.Notes);
 
@@ -150,7 +199,7 @@ namespace Flower.Backend.Services
             sb.AppendLine("<div class='header'><h1>Xác nhận đơn hàng</h1></div>");
             sb.AppendLine("<div class='content'>");
             sb.AppendLine($"<p>Kính gửi {encodedCustomerName},</p>");
-            sb.AppendLine("<p>Cảm ơn bạn đã đặt hàng tại FlowerShop. Đơn hàng của bạn đã được ghi nhận và đang được xử lý.</p>");
+            sb.AppendLine($"<p>Cảm ơn bạn đã đặt hàng tại {StoreInfo.StoreName}. Đơn hàng của bạn đã được ghi nhận và đang được xử lý.</p>");
             sb.AppendLine($"<div class='order-id'>Mã đơn hàng: #{order.Id}</div>");
 
             // Sections
@@ -196,8 +245,8 @@ namespace Flower.Backend.Services
             sb.AppendLine($"<p><strong>Phương thức thanh toán:</strong> {methodStr}</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");
-            sb.AppendLine("<p>FlowerShop — Trân trọng cảm ơn quý khách!</p>");
-            sb.AppendLine("<p>Mọi thắc mắc xin vui lòng liên hệ: support@flowershop.com</p>");
+            sb.AppendLine($"<p>{StoreInfo.StoreName} — Trân trọng cảm ơn quý khách!</p>");
+            sb.AppendLine($"<p>Mọi thắc mắc xin vui lòng liên hệ: {StoreInfo.Email}</p>");
             sb.AppendLine("</div></div></body></html>");
             return sb.ToString();
         }
@@ -498,7 +547,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
             }
         }
 
-        private static string BuildCancellationEmailBody(Order order, string customerName, string title, string reason, decimal refundAmount, decimal? feePercent, decimal? feeAmount)
+        private string BuildCancellationEmailBody(Order order, string customerName, string title, string reason, decimal refundAmount, decimal? feePercent, decimal? feeAmount)
         {
             var total = order.OrderDetails?.Sum(d => d.Quantity * d.UnitPrice) ?? 0;
 
@@ -536,13 +585,13 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
             sb.AppendLine("<p>Xin lỗi vì sự bất tiện này.</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");
-            sb.AppendLine("<p>FlowerShop — Trân trọng!</p>");
-            sb.AppendLine("<p>Mọi thắc mắc xin vui lòng liên hệ: support@flowershop.com</p>");
+            sb.AppendLine($"<p>{StoreInfo.StoreName} — Trân trọng!</p>");
+            sb.AppendLine($"<p>Mọi thắc mắc xin vui lòng liên hệ: {StoreInfo.Email}</p>");
             sb.AppendLine("</div></div></body></html>");
             return sb.ToString();
         }
 
-        private static string BuildOrderEmailBody(Order order, string customerName, string title, string statusText)
+        private string BuildOrderEmailBody(Order order, string customerName, string title, string statusText)
         {
             var parsedNotes = ParseNotes(order.Notes);
 
@@ -664,8 +713,8 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
             sb.AppendLine($"<p><strong>Phương thức thanh toán:</strong> {methodStr}</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");
-            sb.AppendLine("<p>FlowerShop — Trân trọng cảm ơn quý khách!</p>");
-            sb.AppendLine("<p>Mọi thắc mắc xin vui lòng liên hệ: pdahoctap@gmail.com</p>");
+            sb.AppendLine($"<p>{StoreInfo.StoreName} — Trân trọng cảm ơn quý khách!</p>");
+            sb.AppendLine($"<p>Mọi thắc mắc xin vui lòng liên hệ: {StoreInfo.Email}</p>");
             sb.AppendLine("</div></div></body></html>");
             return sb.ToString();
         }
@@ -745,10 +794,10 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 sb.AppendLine(".footer { padding: 20px; background: #f5f2ed; text-align: center; font-size: 11px; color: #666; }");
                 sb.AppendLine("</style></head><body>");
                 sb.AppendLine("<div class='container'>");
-                sb.AppendLine("<div class='header'><h1>FlowerShop</h1></div>");
+                sb.AppendLine($"<div class='header'><h1>{StoreInfo.StoreName}</h1></div>");
                 sb.AppendLine("<div class='content'>");
                 sb.AppendLine($"<p>Xin chào <strong>{WebUtility.HtmlEncode(name)}</strong>,</p>");
-                sb.AppendLine("<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình tại FlowerShop.</p>");
+                sb.AppendLine($"<p>Bạn đã yêu cầu đặt lại mật khẩu cho tài khoản của mình tại {StoreInfo.StoreName}.</p>");
 
                 if (!string.IsNullOrEmpty(rawToken))
                 {
@@ -764,7 +813,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 sb.AppendLine($"<a class='btn' href='{resetLink}'>ĐẶT LẠI MẬT KHẨU</a>");
                 sb.AppendLine("<p style='color: #888; font-size: 12px;'>Nếu bạn không yêu cầu hành động này, vui lòng bỏ qua email.</p>");
                 sb.AppendLine("</div>");
-                sb.AppendLine("<div class='footer'><p>© 2026 FlowerShop. All rights reserved.</p></div>");
+                sb.AppendLine($"<div class='footer'><p>© {DateTime.UtcNow.Year} {StoreInfo.StoreName}. All rights reserved.</p></div>");
                 sb.AppendLine("</div></body></html>");
 
                 var body = sb.ToString();
@@ -775,7 +824,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 using var message = new MailMessage
                 {
                     From = new MailAddress(senderEmail, _settings.SenderName),
-                    Subject = "Đặt lại mật khẩu của bạn - FlowerShop",
+                    Subject = $"Đặt lại mật khẩu của bạn - {StoreInfo.StoreName}",
                     Body = body,
                     IsBodyHtml = true
                 };
@@ -807,7 +856,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 sb.AppendLine(".footer { padding: 20px; background: #f5f2ed; font-size: 11px; color: #666; }");
                 sb.AppendLine("</style></head><body>");
                 sb.AppendLine("<div class='container'>");
-                sb.AppendLine("<div class='header'><h1>FlowerShop</h1></div>");
+                sb.AppendLine($"<div class='header'><h1>{StoreInfo.StoreName}</h1></div>");
                 sb.AppendLine("<div class='content'>");
                 sb.AppendLine($"<p>Xin chào <strong>{WebUtility.HtmlEncode(name)}</strong>,</p>");
                 sb.AppendLine("<p>Mã xác thực đơn hàng của bạn là:</p>");
@@ -815,7 +864,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 sb.AppendLine("<p>Vui lòng nhập mã này để xác nhận đơn hàng. Mã có hiệu lực trong 10 phút.</p>");
                 sb.AppendLine("<p style='color: #888; font-size: 12px;'>Nếu bạn không thực hiện đặt hàng, vui lòng bỏ qua email này.</p>");
                 sb.AppendLine("</div>");
-                sb.AppendLine("<div class='footer'><p>© 2026 FlowerShop. All rights reserved.</p></div>");
+                sb.AppendLine($"<div class='footer'><p>© {DateTime.UtcNow.Year} {StoreInfo.StoreName}. All rights reserved.</p></div>");
                 sb.AppendLine("</div></body></html>");
 
                 var body = sb.ToString();
@@ -826,7 +875,7 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 using var message = new MailMessage
                 {
                     From = new MailAddress(senderEmail, _settings.SenderName),
-                    Subject = "Mã xác thực đơn hàng - FlowerShop",
+                    Subject = $"Mã xác thực đơn hàng - {StoreInfo.StoreName}",
                     Body = body,
                     IsBodyHtml = true
                 };

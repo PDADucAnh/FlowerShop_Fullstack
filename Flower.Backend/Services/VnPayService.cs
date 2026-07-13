@@ -10,42 +10,75 @@ namespace Flower.Backend.Services
     public class VnPayService : IVnPayService
     {
         private readonly IConfiguration _configuration;
+        private readonly ISystemSettingService _settingService;
 
         public VnPayService(IConfiguration configuration)
+            : this(configuration, null!)
+        {
+        }
+
+        public VnPayService(IConfiguration configuration, ISystemSettingService settingService)
         {
             _configuration = configuration;
+            _settingService = settingService;
+        }
+
+        private VNPaySettings GetVNPaySettings()
+        {
+            if (_settingService != null)
+            {
+                var vnpay = _settingService.GetSetting<VNPaySettings>("VNPay").GetAwaiter().GetResult();
+                if (vnpay != null && !string.IsNullOrEmpty(vnpay.TmnCode))
+                {
+                    return vnpay;
+                }
+            }
+
+            var configSection = _configuration.GetSection("Vnpay");
+            return new VNPaySettings
+            {
+                TmnCode = configSection["TmnCode"] ?? "",
+                HashSecret = configSection["HashSecret"] ?? "",
+                ReturnUrl = configSection["PaymentBackReturnUrl"] ?? "",
+                IsSandbox = true,
+                EnablePayment = true
+            };
         }
 
         public string CreatePaymentUrl(VnPaymentRequestModel model, HttpContext context)
         {
+            var vnpay = GetVNPaySettings();
             var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_configuration["TimeZoneId"] ?? "SE Asia Standard Time");
             var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
             var tick = DateTime.Now.Ticks.ToString();
 
             var pay = new VnPayLibrary();
-            var urlCallBack = _configuration["Vnpay:PaymentBackReturnUrl"];
+            var urlCallBack = vnpay.ReturnUrl;
 
-            pay.AddRequestData("vnp_Version", _configuration["Vnpay:Version"] ?? "2.1.0");
-            pay.AddRequestData("vnp_Command", _configuration["Vnpay:Command"] ?? "pay");
-            pay.AddRequestData("vnp_TmnCode", _configuration["Vnpay:TmnCode"] ?? "");
+            pay.AddRequestData("vnp_Version", "2.1.0");
+            pay.AddRequestData("vnp_Command", "pay");
+            pay.AddRequestData("vnp_TmnCode", vnpay.TmnCode);
             pay.AddRequestData("vnp_Amount", ((int)(model.Amount * 100)).ToString());
             pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
-            pay.AddRequestData("vnp_CurrCode", _configuration["Vnpay:CurrCode"] ?? "VND");
+            pay.AddRequestData("vnp_CurrCode", "VND");
             pay.AddRequestData("vnp_IpAddr", VnPayLibrary.GetIpAddress(context));
-            pay.AddRequestData("vnp_Locale", _configuration["Vnpay:Locale"] ?? "vn");
+            pay.AddRequestData("vnp_Locale", "vn");
             pay.AddRequestData("vnp_OrderInfo", $"Thanh toán đơn hàng {model.OrderId}");
             pay.AddRequestData("vnp_OrderType", "other");
             pay.AddRequestData("vnp_ReturnUrl", urlCallBack ?? "");
             pay.AddRequestData("vnp_TxnRef", $"{model.OrderId}_{model.PaymentId}");
             pay.AddRequestData("vnp_ExpireDate", timeNow.AddMinutes(15).ToString("yyyyMMddHHmmss"));
 
-            return pay.CreateRequestUrl(
-                _configuration["Vnpay:BaseUrl"] ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html",
-                _configuration["Vnpay:HashSecret"] ?? "");
+            var baseUrl = vnpay.IsSandbox 
+                ? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html" 
+                : "https://pay.vnpayment.vn/vpcpay.html";
+
+            return pay.CreateRequestUrl(baseUrl, vnpay.HashSecret);
         }
 
         public VnPaymentResponseModel PaymentExecute(IQueryCollection collections)
         {
+            var vnpay = GetVNPaySettings();
             var pay = new VnPayLibrary();
             foreach (var (key, value) in collections)
             {
@@ -61,7 +94,7 @@ namespace Flower.Backend.Services
             var vnpResponseCode = pay.GetResponseData("vnp_ResponseCode");
             var vnpSecureHash = collections.FirstOrDefault(k => k.Key == "vnp_SecureHash").Value;
             var orderInfo = pay.GetResponseData("vnp_OrderInfo");
-            var hashSecret = _configuration["Vnpay:HashSecret"] ?? "";
+            var hashSecret = vnpay.HashSecret;
 
             var checkSignature = pay.ValidateSignature(vnpSecureHash, hashSecret);
 
