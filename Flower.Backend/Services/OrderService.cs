@@ -30,6 +30,7 @@ namespace Flower.Backend.Services
         private readonly IOrderCancellationService _orderCancellationService;
         private readonly IPromotionService _promotionService;
         private readonly ICouponService _couponService;
+        private readonly IAdminNotificationService _adminNotificationService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -44,7 +45,8 @@ namespace Flower.Backend.Services
             IMemoryCache memoryCache,
             IOrderCancellationService orderCancellationService,
             IPromotionService promotionService,
-            ICouponService couponService)
+            ICouponService couponService,
+            IAdminNotificationService adminNotificationService)
         {
             _context = context;
             _logger = logger;
@@ -59,6 +61,7 @@ namespace Flower.Backend.Services
             _orderCancellationService = orderCancellationService;
             _promotionService = promotionService;
             _couponService = couponService;
+            _adminNotificationService = adminNotificationService;
         }
 
         private async Task<int?> GetCurrentCustomerId()
@@ -459,6 +462,20 @@ namespace Flower.Backend.Services
                         }
                     }
                 }
+            }
+
+            try
+            {
+                await _adminNotificationService.CreateNotification(
+                    "Đơn hàng mới",
+                    $"Đơn hàng #{newOrder.Id} vừa được tạo bởi khách hàng {customer?.FullName ?? "Unknown"}.",
+                    "Order",
+                    newOrder.Id.ToString()
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create admin notification for order {OrderId}", newOrder.Id);
             }
 
             return (true, "Đặt hàng thành công!", newOrder.Id);

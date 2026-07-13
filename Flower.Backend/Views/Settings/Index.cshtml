@@ -1,0 +1,296 @@
+@model Flower.Backend.Models.DTOs.AllSystemSettingsViewModel
+@{
+    ViewData["Title"] = "Cấu hình hệ thống";
+    Layout = "_LayoutAdmin";
+    var isAdmin = User.IsInRole("Admin");
+}
+
+<div class="space-y-stack-lg">
+    <div>
+        <h2 class="font-display-lg text-display-lg text-on-background mb-2">Cấu hình hệ thống</h2>
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">
+            Quản lý các thiết lập cửa hàng, máy chủ gửi thư, cổng thanh toán VNPay và quy định đơn hàng.
+        </p>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="border-b border-outline-variant/35 flex gap-4 overflow-x-auto py-1">
+        <button onclick="switchTab('store-tab')" id="store-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-primary border-b-2 border-b-primary font-bold bg-transparent cursor-pointer transition-all">Thông tin cửa hàng</button>
+        <button onclick="switchTab('smtp-tab')" id="smtp-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">SMTP Email</button>
+        <button onclick="switchTab('vnpay-tab')" id="vnpay-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Cổng VNPay</button>
+        <button onclick="switchTab('shipping-tab')" id="shipping-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Giao nhận</button>
+        <button onclick="switchTab('order-tab')" id="order-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Đơn hàng</button>
+    </div>
+
+    <!-- Tab contents -->
+    <div class="tab-content" id="store-tab">
+        <form asp-action="SaveStoreInfo" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Thông tin cửa hàng</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Tên cửa hàng</label>
+                        <input name="StoreName" value="@Model.Store.StoreName" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Đường dẫn Logo</label>
+                        <input name="Logo" value="@Model.Store.Logo" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Hotline</label>
+                        <input name="Hotline" value="@Model.Store.Hotline" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Email hỗ trợ</label>
+                        <input name="Email" type="email" value="@Model.Store.Email" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Địa chỉ cửa hàng</label>
+                        <input name="Address" value="@Model.Store.Address" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Liên kết Facebook</label>
+                        <input name="Facebook" value="@Model.Store.Facebook" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Số điện thoại Zalo</label>
+                        <input name="Zalo" value="@Model.Store.Zalo" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Giờ hoạt động</label>
+                        <input name="OpenHours" value="@Model.Store.OpenHours" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
+                    </div>
+                </div>
+                @if (isAdmin)
+                {
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="tab-content hidden" id="smtp-tab">
+        <form asp-action="SaveSmtp" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Cấu hình SMTP gửi Email</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">SMTP Host</label>
+                        <input name="Host" value="@Model.Smtp.Host" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">SMTP Port</label>
+                        <input name="Port" type="number" value="@Model.Smtp.Port" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Tên tài khoản (Email)</label>
+                        <input name="Username" value="@Model.Smtp.Username" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Mật khẩu</label>
+                        <input name="Password" type="password" value="@(string.IsNullOrEmpty(Model.Smtp.Password) ? "" : "••••••••••••")" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Tên người gửi hiển thị</label>
+                        <input name="SenderName" value="@Model.Smtp.SenderName" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Email người gửi</label>
+                        <input name="SenderEmail" type="email" value="@Model.Smtp.SenderEmail" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                </div>
+
+                @if (isAdmin)
+                {
+                    <div class="p-4 bg-surface-container-low rounded-xl flex items-center justify-between gap-4 mt-6">
+                        <div class="flex-1">
+                            <h4 class="font-headline-sm text-sm font-bold text-on-surface mb-1">Kiểm thử hệ thống gửi Email</h4>
+                            <p class="text-xs text-on-surface-variant">Nhập một email bất kỳ để gửi thử thư nghiệm xác thực cấu hình.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="email" id="test-email-to" placeholder="nhan-email@example.com" class="px-3 py-2 bg-surface-container-lowest border border-outline-variant/30 rounded-lg text-xs w-48 focus:outline-none" />
+                            <button type="button" id="btn-test-email" class="px-4 py-2 bg-secondary text-on-secondary rounded-lg font-label-sm text-xs border-0 hover:bg-secondary/95 cursor-pointer">Gửi thử</button>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="tab-content hidden" id="vnpay-tab">
+        <form asp-action="SaveVNPay" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Cấu hình Cổng thanh toán VNPay</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Mã định danh (TmnCode)</label>
+                        <input name="TmnCode" value="@Model.VNPay.TmnCode" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Khóa bảo mật (Hash Secret)</label>
+                        <input name="HashSecret" type="password" value="@(string.IsNullOrEmpty(Model.VNPay.HashSecret) ? "" : "••••••••••••")" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Đường dẫn phản hồi kết quả (ReturnUrl)</label>
+                        <input name="ReturnUrl" value="@Model.VNPay.ReturnUrl" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Chế độ Sandbox (Kiểm thử)</label>
+                        <select name="IsSandbox" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled")>
+                            <option value="true" selected="@(Model.VNPay.IsSandbox == true)">Kích hoạt (Sandbox)</option>
+                            <option value="false" selected="@(Model.VNPay.IsSandbox == false)">Vô hiệu (Production)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Bật thanh toán trực tuyến qua VNPay</label>
+                        <select name="EnablePayment" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled")>
+                            <option value="true" selected="@(Model.VNPay.EnablePayment == true)">Kích hoạt</option>
+                            <option value="false" selected="@(Model.VNPay.EnablePayment == false)">Tạm tắt</option>
+                        </select>
+                    </div>
+                </div>
+                @if (isAdmin)
+                {
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="tab-content hidden" id="shipping-tab">
+        <form asp-action="SaveShipping" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Cấu hình Vận chuyển & Giao nhận</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Phí giao hàng mặc định (VNĐ)</label>
+                        <input name="DefaultFee" type="number" min="0" value="@((int)Model.Shipping.DefaultFee)" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Miễn phí giao hàng từ ngưỡng (VNĐ)</label>
+                        <input name="FreeShipFrom" type="number" min="0" value="@((int)Model.Shipping.FreeShipFrom)" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Khoảng cách giao hàng tối đa (km)</label>
+                        <input name="MaxDistance" type="number" step="0.1" min="0" value="@Model.Shipping.MaxDistance" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Thời gian ước lượng hiển thị</label>
+                        <input name="DeliveryTime" value="@Model.Shipping.DeliveryTime" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                </div>
+                @if (isAdmin)
+                {
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="tab-content hidden" id="order-tab">
+        <form asp-action="SaveOrder" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Thiết lập quy trình Đơn hàng</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Tự động hủy đơn hàng chưa thanh toán sau (phút)</label>
+                        <input name="AutoCancelMinutes" type="number" min="1" max="1440" value="@Model.Order.AutoCancelMinutes" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div class="hidden md:block"></div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Cho phép Thanh toán khi nhận hàng (COD)</label>
+                        <select name="EnableCOD" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled")>
+                            <option value="true" selected="@(Model.Order.EnableCOD == true)">Có</option>
+                            <option value="false" selected="@(Model.Order.EnableCOD == false)">Không</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Cho phép Thanh toán trực tuyến (Online Payment)</label>
+                        <select name="EnableOnlinePayment" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled")>
+                            <option value="true" selected="@(Model.Order.EnableOnlinePayment == true)">Có</option>
+                            <option value="false" selected="@(Model.Order.EnableOnlinePayment == false)">Không</option>
+                        </select>
+                    </div>
+                </div>
+                @if (isAdmin)
+                {
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Remove active style from all tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('text-primary', 'border-b-primary', 'font-bold');
+                btn.classList.add('text-on-surface-variant', 'border-b-transparent');
+            });
+
+            // Show selected content
+            document.getElementById(tabId).classList.remove('hidden');
+            // Add active style to selected button
+            const activeBtn = document.getElementById(tabId + '-btn');
+            activeBtn.classList.remove('text-on-surface-variant', 'border-b-transparent');
+            activeBtn.classList.add('text-primary', 'border-b-primary', 'font-bold');
+        }
+
+        // AJAX Test Email
+        const testBtn = document.getElementById('btn-test-email');
+        if (testBtn) {
+            testBtn.addEventListener('click', async function() {
+                const emailInput = document.getElementById('test-email-to');
+                const toEmail = emailInput.value.trim();
+                if (!toEmail) {
+                    alert('Vui lòng nhập địa chỉ email nhận!');
+                    return;
+                }
+
+                testBtn.disabled = true;
+                testBtn.textContent = 'Đang gửi...';
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    const formData = new FormData();
+                    formData.append('toEmail', toEmail);
+                    formData.append('__RequestVerificationToken', token);
+
+                    const res = await fetch('/Settings/TestEmail', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await res.json();
+                    alert(data.message);
+                } catch(e) {
+                    alert('Lỗi kết nối kiểm thử email.');
+                } finally {
+                    testBtn.disabled = false;
+                    testBtn.textContent = 'Gửi thử';
+                }
+            });
+        }
+    </script>
+}

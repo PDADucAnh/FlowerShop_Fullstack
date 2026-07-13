@@ -222,15 +222,25 @@
                 Quảng cáo
             </a>
 
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Hệ thống</p>
             @if (User.IsInRole("Admin"))
             {
-                <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Hệ thống</p>
                 <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "User" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
                    asp-controller="User" asp-action="Index">
                     <span class="material-symbols-outlined @(controller == "User" ? "text-primary" : "")">manage_accounts</span>
                     Người dùng
                 </a>
             }
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Settings" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Settings" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Settings" ? "text-primary" : "")">settings</span>
+                Cấu hình
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Notification" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Notification" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Notification" ? "text-primary" : "")">notifications</span>
+                Thông báo
+            </a>
         </div>
 
         <div class="mt-auto px-base pt-stack-md border-t border-outline-variant/20 space-y-1">
@@ -263,12 +273,31 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer">
-                    <span class="material-symbols-outlined">notifications</span>
-                </button>
-                <button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer">
+                <!-- Notification Bell & Dropdown -->
+                <div class="relative" id="notification-bell-container">
+                    <button id="notification-bell-btn" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer relative">
+                        <span class="material-symbols-outlined">notifications</span>
+                        <!-- Unread badge -->
+                        <span id="notification-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-error text-on-error text-[10px] font-bold flex items-center justify-center rounded-full hidden">0</span>
+                    </button>
+                    <!-- Dropdown Panel -->
+                    <div id="notification-dropdown" class="absolute right-0 mt-2 w-80 bg-surface rounded-2xl petal-shadow-2 border border-outline-variant/30 hidden z-50 overflow-hidden">
+                        <div class="p-4 border-b border-outline-variant/20 flex justify-between items-center bg-surface-container-lowest">
+                            <h4 class="font-headline-sm text-sm font-bold text-on-surface">Thông báo</h4>
+                            <button id="mark-all-read-btn" class="text-xs text-primary hover:underline bg-transparent border-0 cursor-pointer font-label-sm">Đã đọc tất cả</button>
+                        </div>
+                        <div id="notification-list" class="max-h-64 overflow-y-auto divide-y divide-outline-variant/10">
+                            <div class="p-4 text-center text-on-surface-variant text-xs">Không có thông báo mới</div>
+                        </div>
+                        <div class="p-3 border-t border-outline-variant/20 text-center bg-surface-container-lowest">
+                            <a asp-controller="Notification" asp-action="Index" class="text-xs text-primary font-bold hover:underline no-underline">Xem tất cả thông báo</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <a asp-controller="Settings" asp-action="Index" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant border-0 bg-transparent cursor-pointer no-underline">
                     <span class="material-symbols-outlined">settings</span>
-                </button>
+                </a>
                 <div class="w-px h-6 bg-outline-variant/30 mx-2"></div>
                 @if (User.Identity.IsAuthenticated)
                 {
@@ -414,6 +443,132 @@
                 ClassicEditor.create(el, { toolbar: toolbar }).catch(console.error);
             });
         });
+    </script>
+    <script>
+        (function() {
+            // === Notification Bell System ===
+            const badge = document.getElementById('notification-badge');
+            const dropdown = document.getElementById('notification-dropdown');
+            const bellBtn = document.getElementById('notification-bell-btn');
+            const listContainer = document.getElementById('notification-list');
+            const markAllBtn = document.getElementById('mark-all-read-btn');
+
+            async function updateUnreadCount() {
+                try {
+                    const res = await fetch('/Notification/GetUnreadCount');
+                    const data = await res.json();
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                } catch (e) {
+                    console.error('Failed to load notifications count', e);
+                }
+            }
+
+            async function loadLatestNotifications() {
+                try {
+                    const res = await fetch('/Notification/GetLatest');
+                    const notifications = await res.json();
+                    listContainer.innerHTML = '';
+
+                    if (notifications.length === 0) {
+                        listContainer.innerHTML = '<div class="p-4 text-center text-on-surface-variant text-xs">Không có thông báo mới</div>';
+                        return;
+                    }
+
+                    notifications.forEach(n => {
+                        const date = new Date(n.createdAt);
+                        const timeStr = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' ' + date.toLocaleDateString('vi-VN');
+                        const isReadClass = n.isRead ? 'opacity-60 bg-transparent' : 'bg-primary-container/10 font-medium';
+                        
+                        const item = document.createElement('div');
+                        item.className = `p-4 transition-colors hover:bg-surface-container-low flex flex-col gap-1 cursor-pointer ${isReadClass}`;
+                        item.innerHTML = `
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="text-xs font-bold text-primary uppercase tracking-wider text-[10px] bg-primary-container/20 px-1.5 py-0.5 rounded">${n.type}</span>
+                                <span class="text-[10px] text-on-surface-variant">${timeStr}</span>
+                            </div>
+                            <h5 class="text-xs text-on-surface mt-1">${n.title}</h5>
+                            <p class="text-[11px] text-on-surface-variant line-clamp-2">${n.message}</p>
+                            ${!n.isRead ? `<button data-id="${n.id}" class="mark-read-item-btn text-[10px] text-primary hover:underline bg-transparent border-0 cursor-pointer self-start p-0 mt-1 font-label-sm">Đánh dấu đã đọc</button>` : ''}
+                        `;
+
+                        // Mark as read click event
+                        const markBtn = item.querySelector('.mark-read-item-btn');
+                        if (markBtn) {
+                            markBtn.addEventListener('click', async (e) => {
+                                e.stopPropagation();
+                                await markAsRead(n.id);
+                            });
+                        }
+
+                        // Clicking item marks as read and redirects if applicable
+                        item.addEventListener('click', async () => {
+                            if (!n.isRead) {
+                                await markAsRead(n.id);
+                            }
+                            if (n.type === 'Order' && n.referenceId) {
+                                window.location.href = `/Order/Details/${n.referenceId}`;
+                            } else {
+                                window.location.href = '/Notification/Index';
+                            }
+                        });
+
+                        listContainer.appendChild(item);
+                    });
+                } catch (e) {
+                    console.error('Failed to load latest notifications', e);
+                }
+            }
+
+            async function markAsRead(id) {
+                try {
+                    const res = await fetch(`/Notification/MarkAsRead?id=${id}`, { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        await updateUnreadCount();
+                        await loadLatestNotifications();
+                    }
+                } catch (e) {
+                    console.error('Failed to mark notification as read', e);
+                }
+            }
+
+            bellBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('hidden');
+                if (!dropdown.classList.contains('hidden')) {
+                    loadLatestNotifications();
+                }
+            });
+
+            markAllBtn.addEventListener('click', async function(e) {
+                e.stopPropagation();
+                try {
+                    const res = await fetch('/Notification/MarkAllAsRead', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        await updateUnreadCount();
+                        await loadLatestNotifications();
+                    }
+                } catch (e) {
+                    console.error('Failed to mark all as read', e);
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!dropdown.classList.contains('hidden') && !dropdown.contains(e.target) && e.target !== bellBtn) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Initial checks
+            updateUnreadCount();
+            setInterval(updateUnreadCount, 60000); // Check every minute
+        })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

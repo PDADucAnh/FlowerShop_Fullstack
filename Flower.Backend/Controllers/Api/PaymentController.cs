@@ -21,19 +21,22 @@ namespace Flower.Backend.Controllers.Api
         private readonly IOrderService _orderService;
         private readonly IMemoryCache _memoryCache;
         private readonly ILogger<PaymentController> _logger;
+        private readonly IAdminNotificationService _adminNotificationService;
 
         public PaymentController(
             IPaymentService paymentService,
             IVnPayService vnPayService,
             IOrderService orderService,
             IMemoryCache memoryCache,
-            ILogger<PaymentController> logger)
+            ILogger<PaymentController> logger,
+            IAdminNotificationService adminNotificationService)
         {
             _paymentService = paymentService;
             _vnPayService = vnPayService;
             _orderService = orderService;
             _memoryCache = memoryCache;
             _logger = logger;
+            _adminNotificationService = adminNotificationService;
         }
 
         [AllowAnonymous]
@@ -112,6 +115,20 @@ namespace Flower.Backend.Controllers.Api
 
                 await _paymentService.MarkPaymentFailed(orderId, response.VnPayResponseCode, ipAddress, userAgent);
 
+                try
+                {
+                    await _adminNotificationService.CreateNotification(
+                        "Thanh toán thất bại",
+                        $"Thanh toán cho đơn hàng #{orderId} thất bại qua VNPay (Mã phản hồi: {response.VnPayResponseCode}).",
+                        "Payment",
+                        orderId.ToString()
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to create payment failure notification for order {OrderId}", orderId);
+                }
+
                 return Redirect($"{GetClientUrl()}/order-confirmation?orderId={orderId}&payment={response.VnPayResponseCode}");
             }
 
@@ -142,6 +159,20 @@ namespace Flower.Backend.Controllers.Api
 
             _logger.LogInformation("Payment Success: OrderId={OrderId}, TransactionId={TransactionId}",
                 orderId, response.TransactionId);
+
+            try
+            {
+                await _adminNotificationService.CreateNotification(
+                    "Thanh toán VNPay thành công",
+                    $"Đơn hàng #{orderId} đã được thanh toán thành công qua VNPay số tiền {response.Amount / 100:#,##0} VNĐ (Mã giao dịch: {response.TransactionId}).",
+                    "Payment",
+                    orderId.ToString()
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create payment success notification for order {OrderId}", orderId);
+            }
 
             return Redirect($"{GetClientUrl()}/order-confirmation?orderId={orderId}&payment=success");
         }

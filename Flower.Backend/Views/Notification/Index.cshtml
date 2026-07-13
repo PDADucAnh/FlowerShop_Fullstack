@@ -1,0 +1,158 @@
+@model IEnumerable<Flower.Data.Entities.AdminNotification>
+@{
+    ViewData["Title"] = "Trung tâm thông báo";
+    Layout = "_LayoutAdmin";
+    var currentType = ViewBag.Type as string;
+    var currentSearch = ViewBag.Search as string;
+    var currentPage = (int)ViewBag.Page;
+    var totalPages = (int)ViewBag.TotalPages;
+}
+
+<div class="space-y-stack-lg">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+            <h2 class="font-display-lg text-display-lg text-on-background mb-2">Trung tâm thông báo</h2>
+            <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Xem và quản lý các thông báo từ hệ thống, đơn hàng, thanh toán và khuyến mãi.</p>
+        </div>
+        <div>
+            <button id="page-mark-all-read" class="flex items-center gap-2 px-4 py-2 border border-outline text-primary rounded-lg font-label-md text-label-md hover:bg-primary-container/10 transition-colors shadow-sm cursor-pointer bg-transparent">
+                <span class="material-symbols-outlined text-[18px]">done_all</span>
+                Đánh dấu tất cả đã đọc
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+        <form method="get" class="flex flex-col md:flex-row items-center gap-4 w-full">
+            <div class="relative w-full md:w-72">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                <input name="search" value="@currentSearch" class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/70 transition-colors" placeholder="Tìm kiếm thông báo..." type="text" />
+            </div>
+
+            <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto py-1">
+                <a href="@Url.Action("Index", new { search = currentSearch })" class="px-4 py-1.5 rounded-full font-label-sm text-label-sm no-underline transition-colors @(string.IsNullOrEmpty(currentType) ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface hover:bg-surface-container-high")">Tất cả</a>
+                @foreach (var type in new[] { "Order", "Payment", "Promotion", "Review", "System" })
+                {
+                    <a href="@Url.Action("Index", new { type = type, search = currentSearch })" class="px-4 py-1.5 rounded-full font-label-sm text-label-sm no-underline transition-colors @(currentType == type ? "bg-primary text-on-primary" : "bg-surface-container-low text-on-surface hover:bg-surface-container-high")">@type</a>
+                }
+            </div>
+        </form>
+    </div>
+
+    <!-- Notification List -->
+    <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm overflow-hidden divide-y divide-outline-variant/15">
+        @if (!Model.Any())
+        {
+            <div class="p-8 text-center text-on-surface-variant">
+                <span class="material-symbols-outlined text-4xl mb-2 opacity-40">notifications_off</span>
+                <p class="font-body-lg">Không tìm thấy thông báo nào.</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var notification in Model)
+            {
+                var isReadClass = notification.IsRead ? "opacity-75 bg-transparent" : "bg-primary-container/5 font-semibold border-l-4 border-l-primary";
+                var typeColor = notification.Type switch
+                {
+                    "Order" => "bg-blue-100 text-blue-800",
+                    "Payment" => "bg-green-100 text-green-800",
+                    "Promotion" => "bg-pink-100 text-pink-800",
+                    "Review" => "bg-amber-100 text-amber-800",
+                    _ => "bg-gray-100 text-gray-800"
+                };
+
+                <div class="p-5 flex items-start gap-4 hover:bg-surface-container-low/30 transition-all @isReadClass notification-item cursor-pointer" data-id="@notification.Id" data-ref-id="@notification.ReferenceId" data-type="@notification.Type">
+                    <div class="flex-1 space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider @typeColor">@notification.Type</span>
+                            <span class="text-xs text-on-surface-variant">@notification.CreatedAt.AddHours(7).ToString("dd/MM/yyyy HH:mm:ss")</span>
+                        </div>
+                        <h4 class="font-headline-sm text-base text-on-surface">@notification.Title</h4>
+                        <p class="font-body-md text-body-md text-on-surface-variant">@notification.Message</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if (!notification.IsRead)
+                        {
+                            <button class="mark-read-btn text-xs text-primary hover:underline bg-transparent border-0 cursor-pointer font-label-sm flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">done</span>
+                                Đã đọc
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1)
+    {
+        <div class="flex items-center justify-between p-4 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm">
+            <span class="text-xs font-label-sm text-on-surface-variant">Trang @currentPage / @totalPages (Tổng số @ViewBag.TotalCount thông báo)</span>
+            <div class="flex items-center gap-2">
+                @if (currentPage > 1)
+                {
+                    <a href="@Url.Action("Index", new { type = currentType, search = currentSearch, page = currentPage - 1 })" class="px-3 py-1.5 border border-outline rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Trước</a>
+                }
+                @if (currentPage < totalPages)
+                {
+                    <a href="@Url.Action("Index", new { type = currentType, search = currentSearch, page = currentPage + 1 })" class="px-3 py-1.5 border border-outline rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sau</a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Click to mark as read
+            document.querySelectorAll('.mark-read-btn').forEach(button => {
+                button.addEventListener('click', async function (e) {
+                    e.stopPropagation();
+                    const item = this.closest('.notification-item');
+                    const id = item.dataset.id;
+                    const res = await fetch(`/Notification/MarkAsRead?id=${id}`, { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        item.classList.remove('bg-primary-container/5', 'font-semibold', 'border-l-4', 'border-l-primary');
+                        item.classList.add('opacity-75');
+                        this.remove();
+                    }
+                });
+            });
+
+            // Click notification to redirect
+            document.querySelectorAll('.notification-item').forEach(item => {
+                item.addEventListener('click', async function () {
+                    const id = this.dataset.id;
+                    const refId = this.dataset.refId;
+                    const type = this.dataset.type;
+                    const markBtn = this.querySelector('.mark-read-btn');
+
+                    if (markBtn) {
+                        await fetch(`/Notification/MarkAsRead?id=${id}`, { method: 'POST' });
+                    }
+
+                    if (type === 'Order' && refId) {
+                        window.location.href = `/Order/Details/${refId}`;
+                    }
+                });
+            });
+
+            // Mark all as read button
+            const markAllBtn = document.getElementById('page-mark-all-read');
+            if (markAllBtn) {
+                markAllBtn.addEventListener('click', async function () {
+                    const res = await fetch('/Notification/MarkAllAsRead', { method: 'POST' });
+                    const data = await res.json();
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    </script>
+}

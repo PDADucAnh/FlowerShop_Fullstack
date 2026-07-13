@@ -36,6 +36,8 @@ namespace Flower.Data
         public DbSet<CouponUsage> CouponUsages { get; set; }
         public DbSet<FlashSale> FlashSales { get; set; }
         public DbSet<FlashSaleProduct> FlashSaleProducts { get; set; }
+        public DbSet<AdminNotification> AdminNotifications { get; set; }
+        public DbSet<SystemSetting> SystemSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
