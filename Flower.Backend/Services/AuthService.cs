@@ -37,7 +37,8 @@ namespace Flower.Backend.Services
             Phone = user.Phone,
             Address = user.Address,
             Role = user.Role,
-            AuthType = "User"
+            AuthType = "User",
+            IsActive = user.IsActive
         };
 
         private static LoginResult MapCustomerToResult(Customer customer) => new()
@@ -49,7 +50,8 @@ namespace Flower.Backend.Services
             Phone = customer.Phone,
             Address = customer.Address,
             Role = "Customer",
-            AuthType = "Customer"
+            AuthType = "Customer",
+            IsActive = customer.IsActive
         };
 
         public async Task<LoginResult?> Login(string identifier, string password)

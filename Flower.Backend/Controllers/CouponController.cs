@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "StaffOnly")]
     public class CouponController : Controller
     {
         private readonly ICouponService _couponService;

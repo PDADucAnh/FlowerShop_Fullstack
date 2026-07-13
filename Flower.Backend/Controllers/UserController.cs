@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize(Roles = "Admin,Administrator")]
+    [Authorize(Policy = "AdminOnly")]
     public class UserController : Controller
     {
         private readonly IUserService _userService;

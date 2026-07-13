@@ -10,5 +10,6 @@ namespace Flower.Backend.Models.DTOs
         public string? Address { get; set; }
         public string Role { get; set; } = string.Empty;
         public string AuthType { get; set; } = string.Empty;
+        public bool IsActive { get; set; } = true;
     }
 }

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "StaffOnly")]
     public class ProductController : Controller
     {
         private readonly IProductService _productService;

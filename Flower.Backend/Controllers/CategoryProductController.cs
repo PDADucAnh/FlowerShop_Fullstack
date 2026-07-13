@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "StaffOnly")]
     public class CategoryProductController : Controller
     {
         private readonly ICategoryProductService _categoryProductService;

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize]
+    [Authorize(Policy = "StaffOnly")]
     public class PostController : Controller
     {
         private readonly IPostService _postService;

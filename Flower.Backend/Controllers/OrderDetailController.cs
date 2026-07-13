@@ -4,8 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Threading.Tasks;
 
+using Microsoft.AspNetCore.Authorization;
+
 namespace Flower.Backend.Controllers
 {
+    [Authorize(Policy = "StaffOnly")]
     public class OrderDetailController : Controller
     {
         private readonly IOrderDetailService _orderDetailService;

@@ -25,37 +25,62 @@ public class AccountController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Login(string username, string password)
+    public async Task<IActionResult> Login(string username, string password, bool rememberMe = false)
     {
         var user = await _authService.Login(username, password);
 
         if (user != null)
         {
+            if (user.AuthType != "User" || (user.Role != "Admin" && user.Role != "Staff"))
+            {
+                ViewBag.Error = "Tài khoản không có quyền truy cập trang quản trị!";
+                return View();
+            }
+
+            if (!user.IsActive)
+            {
+                ViewBag.Error = "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động!";
+                return View();
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.Role, user.Role),
                 new Claim("FullName", user.FullName),
+                new Claim("AuthType", user.AuthType),
                 new Claim("LoginTime", DateTime.UtcNow.ToString("o"))
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
+            var authProperties = new AuthenticationProperties
+            {
+                IsPersistent = rememberMe,
+                ExpiresUtc = rememberMe ? DateTimeOffset.UtcNow.AddDays(30) : null
+            };
+
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(claimsIdentity));
+                new ClaimsPrincipal(claimsIdentity), authProperties);
 
             var rawToken = await _authService.CreateRefreshTokenAsync(user.Id,
                 HttpContext.Connection.RemoteIpAddress?.ToString());
 
-            Response.Cookies.Append("X-Refresh-Token", rawToken, new CookieOptions
+            var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddDays(30),
                 Path = "/"
-            });
+            };
+
+            if (rememberMe)
+            {
+                cookieOptions.Expires = DateTimeOffset.UtcNow.AddDays(30);
+            }
+
+            Response.Cookies.Append("X-Refresh-Token", rawToken, cookieOptions);
 
             return RedirectToAction("Index", "Home");
         }

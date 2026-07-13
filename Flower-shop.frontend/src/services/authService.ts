@@ -1,9 +1,9 @@
 import axiosClient from '../api/axiosClient';
 
 const authService = {
-    login: async (username: string, password: string) => {
+    login: async (username: string, password: string, rememberMe = false) => {
         try {
-            const data: any = await axiosClient.post('/Auth/login', { username, password });
+            const data: any = await axiosClient.post('/Auth/login', { username, password, rememberMe });
             return data;
         } catch (error) {
             console.error("Lỗi đăng nhập:", error);

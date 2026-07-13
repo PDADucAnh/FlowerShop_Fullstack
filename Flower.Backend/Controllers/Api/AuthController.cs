@@ -45,11 +45,10 @@ namespace Flower.Backend.Controllers.Api
 
             if (result != null)
             {
-                var claimsIdentity = new ClaimsIdentity(
-                    BuildUserClaims(result), CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(claimsIdentity));
+                if (!result.IsActive)
+                {
+                    return StatusCode(403, new { message = "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động!" });
+                }
 
                 // NOTE: Jwt:SecretKey must be >= 32 characters (256 bits) for HS256
                 var jwtKey = _configuration["Jwt:SecretKey"]

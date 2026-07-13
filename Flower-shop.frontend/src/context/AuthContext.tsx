@@ -36,10 +36,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
     }, []);
 
-    const login = useCallback(async (username: string, password: string) => {
-        const response = await authService.login(username, password);
+    const login = useCallback(async (username: string, password: string, rememberMe = false) => {
+        const response = await authService.login(username, password, rememberMe);
         if (response.token) {
-            tokenService.setToken(response.token);
+            tokenService.setToken(response.token, rememberMe);
             setUser({
                 id: response.id,
                 username: response.username,

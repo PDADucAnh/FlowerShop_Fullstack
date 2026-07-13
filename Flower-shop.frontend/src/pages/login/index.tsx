@@ -20,7 +20,7 @@ const LoginPage: React.FC = () => {
         setError('');
         setLoading(true);
         try {
-            await login(data.username, data.password);
+            await login(data.username, data.password, data.rememberMe || false);
             navigate('/');
         } catch {
             setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
@@ -90,6 +90,18 @@ const LoginPage: React.FC = () => {
                             {errors.password && (
                                 <p className="font-label-sm text-label-sm text-error mt-1">{errors.password.message}</p>
                             )}
+                        </div>
+
+                        {/* Remember Me */}
+                        <div className="flex items-center">
+                            <label className="flex items-center space-x-2 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    {...register('rememberMe')}
+                                    className="rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0"
+                                />
+                                <span className="font-label-sm text-label-sm text-on-surface-variant">Ghi nhớ đăng nhập</span>
+                            </label>
                         </div>
 
                         {/* Error */}

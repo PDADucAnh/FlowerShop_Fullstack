@@ -15,7 +15,7 @@ export interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (username: string, password: string) => Promise<any>;
+  login: (username: string, password: string, rememberMe?: boolean) => Promise<any>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
   updateProfile: (fullName: string, phone: string, address: string) => Promise<any>;

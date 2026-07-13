@@ -161,6 +161,14 @@
                            placeholder="Nhập mật khẩu" required autocomplete="current-password" />
                 </div>
 
+                <!-- Remember Me -->
+                <div class="flex items-center">
+                    <label class="flex items-center space-x-2 cursor-pointer">
+                        <input type="checkbox" name="rememberMe" value="true" class="rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0" />
+                        <span class="font-label-sm text-label-sm text-on-surface-variant">Ghi nhớ đăng nhập</span>
+                    </label>
+                </div>
+
                 <!-- Error -->
                 @if (ViewBag.Error != null)
                 {
