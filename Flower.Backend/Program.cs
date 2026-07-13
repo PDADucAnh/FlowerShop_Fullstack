@@ -5,7 +5,7 @@
  * Mô tả:   1.Xác thức Authentication và phân quyền Authorization
  *          2. Cấu hình hệ thống để sử dụng Cookie Authentication trong ASP.NET Core
  *          3. Thiết lập các middleware cần thiết để bảo vệ các trang quản trị và đảm bảo chỉ người dùng đã đăng nhập mới có thể truy cập vào các chức năng quản lý trong CMS
- *          4. Tạo tài khoản người dùng với vai trò Admin và Editor để kiểm tra chức năng phân quyền trong hệ thống CMS
+ *          4. Tạo tài khoản người dùng với vai trò Admin và Staff để kiểm tra chức năng phân quyền trong hệ thống CMS
  *          5. Xử lý bảo mật: Không hiển thị mật khẩu trong danh sách thành viên, và có chức năng đổi mật khẩu riêng biệt trong UserController
  *          6. Áp dụng chính sách CORS để cho phép các ứng dụng frontend (ví dụ: React, Angular) có thể gọi API của hệ thống CMS một cách an toàn và hiệu quả
  *          7. Sử dụng Swagger để tạo tài liệu API tự động cho các endpoint trong hệ thống CMS, giúp cho việc phát triển và tích hợp với frontend trở nên dễ dàng hơn
@@ -198,7 +198,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminOnly", policy =>
         policy.RequireRole("Admin"));
     options.AddPolicy("StaffOnly", policy =>
-        policy.RequireRole("Admin", "Editor"));
+        policy.RequireRole("Admin", "Staff"));
 });
 
 var app = builder.Build();

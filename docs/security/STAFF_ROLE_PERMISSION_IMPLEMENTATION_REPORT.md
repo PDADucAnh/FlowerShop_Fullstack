@@ -1,26 +1,17 @@
 # Báo Cáo Triển Khai Quyền Staff & Mô Hình RBAC (Staff Role & RBAC Implementation Report)
 
-Tài liệu chi tiết về việc khắc phục lỗi đăng nhập của Staff (Editor), cấu trúc phân quyền dựa trên vai trò (RBAC), các thay đổi ở cả Controller và View, cùng kết quả kiểm thử hệ thống FlowerShop.
+Tài liệu chi tiết về việc triển khai phân quyền của Staff, cấu trúc phân quyền dựa trên vai trò (RBAC), các thay đổi ở cả Controller và View, cùng kết quả kiểm thử hệ thống FlowerShop.
 
 ---
 
-## 1. Nguyên nhân Staff không đăng nhập được
-
-Trước đó, khi triển khai cấm tài khoản Customer đăng nhập vào trang quản trị Admin, hàm `Login` của `AccountController` đã sử dụng cờ kiểm tra cứng:
-```csharp
-if (user.AuthType != "User" || (user.Role != "Admin" && user.Role != "Staff"))
-```
-Tuy nhiên, trong cơ sở dữ liệu và cấu hình hệ thống:
-- Cấu hình phân quyền Policy `StaffOnly` trong `Program.cs` yêu cầu vai trò `"Admin"` hoặc `"Editor"`.
-- Trên giao diện quản lý người dùng, vai trò dành cho nhân viên vận hành (Staff) được lưu dưới tên `"Editor"` (Biên tập viên).
-Do đó, khi nhân viên vận hành đăng nhập, vai trò của họ là `"Editor"` nên bị điều kiện kiểm tra trên lọc bỏ (do `"Editor" != "Staff"` và `"Editor" != "Admin"`), dẫn đến lỗi chặn đăng nhập trái phép dù họ là người dùng quản trị hợp lệ.
+Trước đó, do có sự mất đồng bộ khi cấu hình Policy `StaffOnly` trong `Program.cs` yêu cầu vai trò `"Admin"` hoặc `"Editor"`, trong khi mã đăng nhập lại kiểm tra vai trò `"Staff"`. Vai trò của nhân viên vận hành được lưu dưới tên `"Editor"` trong DB dẫn đến việc đăng nhập bị chặn. Hệ thống hiện đã được chuẩn hóa hoàn toàn về vai trò `"Staff"`.
 
 ---
 
 ## 2. Các file đã chỉnh sửa (Modified Files)
 
 ### Backend Controllers:
-- [AccountController.cs](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower.Backend/Controllers/AccountController.cs): Cập nhật hàm `Login` để cho phép các tài khoản có vai trò `"Editor"` hoặc `"Staff"` đăng nhập bình thường.
+- [AccountController.cs](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower.Backend/Controllers/AccountController.cs): Cập nhật hàm `Login` để cho phép các tài khoản có vai trò `"Staff"` đăng nhập bình thường.
 - [ProductController.cs](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower.Backend/Controllers/ProductController.cs): Thêm `[Authorize(Policy = "AdminOnly")]` vào action `Delete` để ngăn chặn Staff xóa sản phẩm vĩnh viễn.
 - [CategoryController.cs](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower.Backend/Controllers/CategoryController.cs): Thêm `[Authorize(Policy = "AdminOnly")]` vào action `Delete`.
 - [CategoryProductController.cs](file:///D:/TrenLop/ThucTapTaiTruong/FlowerShop/Flower.Backend/Controllers/CategoryProductController.cs): Thêm `[Authorize(Policy = "AdminOnly")]` vào action `Delete`.
@@ -55,20 +46,20 @@ graph TD
     B -- Sai / Bị Khóa --> C[Hiển thị thông báo lỗi]
     B -- Đúng & Hoạt động --> D{Kiểm tra vai trò của User}
     D -- Role == Admin --> E[Đăng nhập thành công: Quyền ADMIN]
-    D -- Role == Editor / Staff --> F[Đăng nhập thành công: Quyền STAFF]
+    D -- Role == Staff --> F[Đăng nhập thành công: Quyền STAFF]
     D -- Role == Customer --> G[Từ chối: Trả về 403 / Lỗi quyền truy cập]
 ```
 
 ### Luồng Phân quyền Endpoint (Authorization Flow)
 - Khi một request gửi tới Action:
   1. Kiểm tra chính sách ở Controller level: `[Authorize(Policy = "StaffOnly")]` cho phép cả Admin và Staff đi qua.
-  2. Kiểm tra chính sách ở Action level: `[Authorize(Policy = "AdminOnly")]` chỉ cho phép Admin đi qua, Staff (Editor) sẽ bị trả về trang từ chối truy cập (403 Forbidden).
+  2. Kiểm tra chính sách ở Action level: `[Authorize(Policy = "AdminOnly")]` chỉ cho phép Admin đi qua, Staff sẽ bị trả về trang từ chối truy cập (403 Forbidden).
 
 ---
 
 ## 4. Bảng phân bổ quyền hạn RBAC (Role-Based Access Control)
 
-| Tính năng | Quyền hạn của ADMIN | Quyền hạn của STAFF (Editor) |
+| Tính năng | Quyền hạn của ADMIN | Quyền hạn của STAFF |
 | :--- | :--- | :--- |
 | **Dashboard** | Toàn quyền (Đọc & Sửa cấu hình) | Chỉ đọc (Read-only) |
 | **Đơn hàng (Orders)** | Toàn quyền | Đọc danh sách, Xác nhận đơn, Chuyển trạng thái, Hủy đơn |
@@ -91,7 +82,7 @@ graph TD
 | STT | Kịch bản kiểm thử | Kết quả thực tế | Trạng thái |
 | :--- | :--- | :--- | :---: |
 | 1 | Đăng nhập bằng tài khoản Admin | Đăng nhập thành công, hiển thị đầy đủ Sidebar và toàn quyền thao tác. | **Thành công** |
-| 2 | Đăng nhập bằng tài khoản Staff (`Editor`) | Đăng nhập thành công, hiển thị trang quản trị, Sidebar không chứa mục "Hệ thống" & "Người dùng". | **Thành công** |
+| 2 | Đăng nhập bằng tài khoản Staff | Đăng nhập thành công, hiển thị trang quản trị, Sidebar không chứa mục "Hệ thống" & "Người dùng". | **Thành công** |
 | 3 | Đăng nhập bằng tài khoản Customer vào Admin MVC | Bị chặn ngay từ bước đăng nhập, hiển thị thông báo lỗi phân quyền. | **Thành công** |
 | 4 | Staff truy cập mục Khuyến mãi / Mã giảm giá | Chỉ xem được danh sách, nút tạo mới và cột "Thao tác" (Sửa, Xóa, Bật/Tắt) đã bị ẩn hoàn toàn. | **Thành công** |
 | 5 | Staff cố tình truy cập URL tạo/sửa khuyến mại (`/Promotion/Create`) | Hệ thống chặn và trả về trang Access Denied. | **Thành công** |

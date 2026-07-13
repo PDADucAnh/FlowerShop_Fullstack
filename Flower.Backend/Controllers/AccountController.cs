@@ -31,7 +31,7 @@ public class AccountController : Controller
 
         if (user != null)
         {
-            if (user.AuthType != "User" || (user.Role != "Admin" && user.Role != "Editor" && user.Role != "Staff"))
+            if (user.AuthType != "User" || (user.Role != "Admin" && user.Role != "Staff"))
             {
                 ViewBag.Error = "Tài khoản không có quyền truy cập trang quản trị!";
                 return View();

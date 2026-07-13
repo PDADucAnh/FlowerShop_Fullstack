@@ -77,7 +77,7 @@ Browser (React SPA) ───Axios───→ Flower.Backend (Web API + MVC)
 
 | Table | Description |
 |:------|:------------|
-| **Users** | Admin/Editor management, role-based authorization |
+| **Users** | Admin/Staff management, role-based authorization |
 | **Categories** | Blog news categories (hierarchical via ParentId) |
 | **Posts** | Blog articles with rich HTML content (CKEditor 5) |
 | **CategoriesProducts** | Product categories |
@@ -116,9 +116,9 @@ Browser (React SPA) ───Axios───→ Flower.Backend (Web API + MVC)
 - **Order Management** — Approval, confirmation, status update, cancellation
 - **Post Management** — Rich text editing with CKEditor 5
 - **Category Management** — Blog & product categories
-- **User Management** — Admins/Editors and customers
+- **User Management** — Admins/Staff and customers
 - **Advertisement Management** — Banner slider, positions, validity periods
-- **Authorization** — Admin (full) / Staff (Editor — limited)
+- **Authorization** — Admin (full) / Staff (limited)
 
 ### Advanced
 

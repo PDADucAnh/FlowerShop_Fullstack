@@ -42,7 +42,7 @@ namespace Flower.Tests
             using var context = CreateInMemoryDbContext();
             context.Users.AddRange(
                 new User { Username = "admin", FullName = "Admin User", Role = "Admin", PasswordHash = "h1" },
-                new User { Username = "editor", FullName = "Editor User", Role = "Editor", PasswordHash = "h2" }
+                new User { Username = "staff", FullName = "Staff User", Role = "Staff", PasswordHash = "h2" }
             );
             await context.SaveChangesAsync();
             var service = new UserService(context);
@@ -51,7 +51,7 @@ namespace Flower.Tests
 
             Assert.Equal(2, result.Count);
             Assert.Contains(result, u => u.Username == "admin" && u.FullName == "Admin User" && u.Role == "Admin");
-            Assert.Contains(result, u => u.Username == "editor" && u.FullName == "Editor User" && u.Role == "Editor");
+            Assert.Contains(result, u => u.Username == "staff" && u.FullName == "Staff User" && u.Role == "Staff");
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace Flower.Tests
                 Username = "newuser",
                 Password = "PlainText123!",
                 FullName = "New User",
-                Role = "Editor"
+                Role = "Staff"
             };
 
             var result = await service.Create(dto);
@@ -102,7 +102,7 @@ namespace Flower.Tests
             Assert.NotEqual(0, result.Id);
             Assert.Equal("newuser", result.Username);
             Assert.Equal("New User", result.FullName);
-            Assert.Equal("Editor", result.Role);
+            Assert.Equal("Staff", result.Role);
 
             var saved = await context.Users.FindAsync(result.Id);
             Assert.NotNull(saved);
@@ -309,7 +309,7 @@ namespace Flower.Tests
             using var context = CreateInMemoryDbContext();
             context.Users.AddRange(
                 new User { Username = "a", FullName = "A", Role = "Admin", PasswordHash = "h1" },
-                new User { Username = "b", FullName = "B", Role = "Editor", PasswordHash = "h2" }
+                new User { Username = "b", FullName = "B", Role = "Staff", PasswordHash = "h2" }
             );
             await context.SaveChangesAsync();
             var service = new UserService(context);

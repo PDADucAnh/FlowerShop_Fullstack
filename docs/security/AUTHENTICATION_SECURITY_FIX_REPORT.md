@@ -102,7 +102,7 @@ sequenceDiagram
   2. Xác định danh tính của người dùng và trích xuất các claims: `Role` và `AuthType`.
   3. Đối chiếu Claims với các Policy đã đăng ký:
      - `AdminOnly`: Yêu cầu claim `Role` phải bằng `"Admin"`.
-     - `StaffOnly`: Yêu cầu claim `Role` phải thuộc `"Admin"` hoặc `"Editor"`.
+     - `StaffOnly`: Yêu cầu claim `Role` phải thuộc `"Admin"` hoặc `"Staff"`.
   4. Nếu không thỏa mãn chính sách, ASP.NET Core tự động từ chối yêu cầu và trả về:
      - MVC: Chuyển hướng đến trang `/Account/AccessDenied` (mã trạng thái 403).
      - API: Trả về JSON lỗi với mã trạng thái `403 Forbidden`.

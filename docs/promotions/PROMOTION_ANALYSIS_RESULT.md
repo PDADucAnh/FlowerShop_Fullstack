@@ -53,8 +53,8 @@ FlowerShop/
 ### 1.3. Authentication & Authorization
 
 - **Dual Auth Scheme**: JWT Bearer cho API `/api/*`, Cookie Authentication cho MVC Admin
-- **Policy**: `AdminOnly` (Admin), `StaffOnly` (Admin, Editor)
-- **User types**: `User` (admin/editor) + `Customer` (khách hàng)
+- **Policy**: `AdminOnly` (Admin), `StaffOnly` (Admin, Staff)
+- **User types**: `User` (admin/staff) + `Customer` (khách hàng)
 - **Claims**: NameIdentifier, Name, Role, FullName, AuthType, LoginTime
 
 ### 1.4. Dependency Injection Pattern
@@ -98,7 +98,7 @@ Mỗi Service:
 
 | Entity | Ghi chú |
 |--------|---------|
-| User | Admin/Editor |
+| User | Admin/Staff |
 | Customer | Khách hàng |
 | Product | Sản phẩm (có `DiscountPrice` field sẵn) |
 | ProductVariant | Biến thể sản phẩm |
@@ -548,8 +548,8 @@ Cần thêm vào `OnModelCreating`:
 
 ### 8.7. Authorization
 
-- Promotion management: `StaffOnly` (Admin + Editor)
-- Coupon management: `StaffOnly` (Admin + Editor)
+- Promotion management: `StaffOnly` (Admin + Staff)
+- Coupon management: `StaffOnly` (Admin + Staff)
 - Coupon usage/history: `AdminOnly`
 - Customer apply coupon: `Customer` role (authenticated customer)
 
