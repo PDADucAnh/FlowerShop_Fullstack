@@ -46,6 +46,25 @@ const CheckoutPage: React.FC = () => {
   const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; discountAmount: number; finalTotal: number } | null>(null);
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [checkoutSettings, setCheckoutSettings] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res: any = await axiosClient.get('/settings/checkout');
+        setCheckoutSettings(res);
+      } catch (err) {
+        console.error('Failed to fetch checkout settings', err);
+      }
+    };
+    fetchSettings();
+  }, []);
+
+  const subtotalAfterDiscounts = originalTotal - promotionDiscountTotal - (appliedCoupon?.discountAmount || 0);
+  const shippingFee = checkoutSettings && subtotalAfterDiscounts < checkoutSettings.shipping.freeShipFrom 
+    ? checkoutSettings.shipping.defaultFee 
+    : 0;
+  const finalTotal = Math.max(0, subtotalAfterDiscounts + shippingFee);
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -210,7 +229,7 @@ const CheckoutPage: React.FC = () => {
           window.location.href = res.url;
         }
       } else {
-        navigate(`/order-confirmation?orderId=${result.orderId}`);
+        navigate(`/order-confirmation?orderId=${result.orderId}&payment=success`);
       }
     } catch (err: any) {
       const errorMsg = err?.response?.data?.message || err?.message || "";
@@ -598,7 +617,15 @@ const CheckoutPage: React.FC = () => {
                 )}
                 <div className="flex justify-between">
                   <span>Phí vận chuyển</span>
-                  <span className="text-primary font-medium">Miễn phí</span>
+                  {checkoutSettings ? (
+                    shippingFee === 0 ? (
+                      <span className="text-primary font-medium">Miễn phí</span>
+                    ) : (
+                      <span className="font-medium">{formatCurrency(shippingFee)}</span>
+                    )
+                  ) : (
+                    <span className="text-on-surface-variant italic">Đang tính...</span>
+                  )}
                 </div>
               </div>
               {/* Coupon Code */}
@@ -649,7 +676,7 @@ const CheckoutPage: React.FC = () => {
               <div className="flex justify-between items-end mb-8">
                 <span className="font-label-md text-label-md text-on-surface">Tổng thanh toán</span>
                 <span className="font-headline-md text-headline-sm text-primary">
-                  {formatCurrency(appliedCoupon ? appliedCoupon.finalTotal : originalTotal - promotionDiscountTotal)}
+                  {formatCurrency(finalTotal)}
                 </span>
               </div>
               {/* Checkout Button */}

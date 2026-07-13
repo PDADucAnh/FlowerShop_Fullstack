@@ -607,8 +607,11 @@ td {{ padding: 8px 0; border-bottom: 1px solid #e8e4dd; font-size: 14px; }}
                 sb.AppendLine($"<tr><td class='label'>Phí hủy ({feePercent:N0}%):</td><td class='value'>{feeAmount:N0} VNĐ</td></tr>");
             }
             sb.AppendLine("</table>");
-            sb.AppendLine($"<div class='amount-box'>Số tiền hoàn: {refundAmount:N0} VNĐ</div>");
-            sb.AppendLine("<p>Tiền sẽ được hoàn trong vòng 24 giờ.</p>");
+            if (refundAmount > 0)
+            {
+                sb.AppendLine($"<div class='amount-box'>Số tiền hoàn: {refundAmount:N0} VNĐ</div>");
+                sb.AppendLine("<p>Tiền sẽ được hoàn trong vòng 24 giờ.</p>");
+            }
             sb.AppendLine("<p>Xin lỗi vì sự bất tiện này.</p>");
             sb.AppendLine("</div>");
             sb.AppendLine("<div class='footer'>");

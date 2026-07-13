@@ -22,5 +22,13 @@ namespace Flower.Backend.Controllers.Api
             var storeInfo = await _settingService.GetSetting<StoreInfoSettings>("StoreInfo");
             return Ok(storeInfo);
         }
+
+        [HttpGet("checkout")]
+        public async Task<IActionResult> GetCheckoutSettings()
+        {
+            var shipping = await _settingService.GetSetting<ShippingSettings>("Shipping") ?? new ShippingSettings();
+            var order = await _settingService.GetSetting<OrderSettings>("Order") ?? new OrderSettings();
+            return Ok(new { shipping, order });
+        }
     }
 }

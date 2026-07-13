@@ -24,8 +24,8 @@ export interface Order {
   recipientName?: string;
   recipientPhone?: string;
   orderDetails?: OrderDetail[];
-  paymentMethod: number;
-  paymentStatus: number;
+  paymentMethod: number | string;
+  paymentStatus: number | string;
   paymentTransactionId?: string;
   paymentPaidAt?: string;
   deliveryDate?: string;

@@ -440,7 +440,7 @@ namespace Flower.Backend.Services
             if (order.Status != OrderStatus.PendingPayment)
                 return (false, "Đơn hàng không ở trạng thái chờ thanh toán", 0, null);
 
-            var totalAmount = order.OrderDetails?.Sum(od => od.Quantity * od.UnitPrice) ?? 0;
+            var totalAmount = order.FinalAmount;
             if (totalAmount <= 0)
                 return (false, "Số tiền thanh toán không hợp lệ", 0, null);
 

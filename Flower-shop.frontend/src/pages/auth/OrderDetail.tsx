@@ -166,20 +166,20 @@ const OrderDetailPage: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
                   <div className="space-y-1">
                     <p className="font-label-md text-on-surface-variant">Thanh toán</p>
-                    <p className="font-body-md">{order.paymentMethod === 1 ? 'COD (tiền mặt)' : 'Chuyển khoản / Online'}</p>
+                    <p className="font-body-md">{order.paymentMethod === 1 || order.paymentMethod === 'COD' ? 'COD (tiền mặt)' : 'Chuyển khoản / Online'}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="font-label-md text-on-surface-variant">Trạng thái thanh toán</p>
                     <p className="font-body-md">
-                      {order.paymentStatus === 1 ? 'Đã thanh toán' :
-                       order.paymentStatus === 2 ? 'Thất bại' :
-                       order.paymentStatus === 3 ? 'Đã hoàn tiền' :
-                       order.paymentStatus === 4 ? 'Hoàn tiền một phần' :
-                       order.paymentStatus === 5 ? 'Hết hạn' :
-                       order.paymentStatus === 6 ? 'Đã hủy' :
-                       order.paymentStatus === 7 ? 'Chờ hoàn tiền' :
-                       order.paymentStatus === 8 ? 'Chờ hoàn tiền một phần' :
-                       order.paymentStatus === 9 ? 'Đã hoàn tiền một phần' :
+                      {order.paymentStatus === 1 || order.paymentStatus === 'Completed' ? 'Đã thanh toán' :
+                       order.paymentStatus === 2 || order.paymentStatus === 'Failed' ? 'Thất bại' :
+                       order.paymentStatus === 3 || order.paymentStatus === 'Refunded' ? 'Đã hoàn tiền' :
+                       order.paymentStatus === 4 || order.paymentStatus === 'PartialRefund' ? 'Hoàn tiền một phần' :
+                       order.paymentStatus === 5 || order.paymentStatus === 'Expired' ? 'Hết hạn' :
+                       order.paymentStatus === 6 || order.paymentStatus === 'Cancelled' ? 'Đã hủy' :
+                       order.paymentStatus === 7 || order.paymentStatus === 'RefundPending' ? 'Chờ hoàn tiền' :
+                       order.paymentStatus === 8 || order.paymentStatus === 'PartialRefundPending' ? 'Chờ hoàn tiền một phần' :
+                       order.paymentStatus === 9 || order.paymentStatus === 'PartialRefunded' ? 'Đã hoàn tiền một phần' :
                        'Chưa thanh toán'}
                     </p>
                   </div>
