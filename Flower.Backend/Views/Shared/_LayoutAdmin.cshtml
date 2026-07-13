@@ -444,6 +444,7 @@
             });
         });
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.12/signalr.min.js"></script>
     <script>
         (function() {
             // === Notification Bell System ===
@@ -567,7 +568,43 @@
 
             // Initial checks
             updateUnreadCount();
-            setInterval(updateUnreadCount, 60000); // Check every minute
+            
+            // === SignalR Real-time Connection ===
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/hubs/notifications")
+                .withAutomaticReconnect()
+                .build();
+
+            connection.on("AdminUnreadCountChanged", function(count) {
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+
+            connection.on("ReceiveAdminNotification", function(notification) {
+                // If dropdown is open, reload list
+                if (!dropdown.classList.contains('hidden')) {
+                    loadLatestNotifications();
+                }
+                
+                // Show browser toast/notification if supported
+                if (Notification.permission === "granted") {
+                    new Notification(notification.title, { body: notification.message });
+                } else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission === "granted") {
+                            new Notification(notification.title, { body: notification.message });
+                        }
+                    });
+                }
+            });
+
+            connection.start().catch(function(err) {
+                return console.error(err.toString());
+            });
         })();
     </script>
     @await RenderSectionAsync("Scripts", required: false)

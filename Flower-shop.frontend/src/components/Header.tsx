@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useProductCategories } from '../hooks/useCategories';
+import { NotificationBell } from './NotificationBell';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -130,6 +131,7 @@ const Header: React.FC = () => {
               </span>
             )}
           </Link>
+          <NotificationBell />
 
           {isAuthenticated ? (
             <div className="relative group py-2">

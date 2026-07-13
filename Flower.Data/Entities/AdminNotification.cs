@@ -25,11 +25,27 @@ namespace Flower.Data.Entities
 
         public int? UserId { get; set; } // Nullable, if null it's for all admins/staff
 
+        [MaxLength(50)]
+        public string? ReferenceType { get; set; }
+
+        [MaxLength(50)]
+        public string? Icon { get; set; }
+
+        [MaxLength(20)]
+        public string? Priority { get; set; }
+
         public bool IsRead { get; set; }
+
+        public DateTime? ReadAt { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [MaxLength(100)]
         public string? CreatedBy { get; set; }
+
+        [MaxLength(500)]
+        public string? NavigationUrl { get; set; }
+
+        public string? Metadata { get; set; }
     }
 }

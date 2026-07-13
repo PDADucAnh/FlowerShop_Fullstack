@@ -32,6 +32,7 @@ namespace Flower.Backend.Services
         private readonly ICouponService _couponService;
         private readonly IAdminNotificationService _adminNotificationService;
         private readonly IShippingService _shippingService;
+        private readonly INotificationService _notificationService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -48,7 +49,8 @@ namespace Flower.Backend.Services
             IPromotionService promotionService,
             ICouponService couponService,
             IAdminNotificationService adminNotificationService,
-            IShippingService shippingService)
+            IShippingService shippingService,
+            INotificationService notificationService)
         {
             _context = context;
             _logger = logger;
@@ -65,6 +67,7 @@ namespace Flower.Backend.Services
             _couponService = couponService;
             _adminNotificationService = adminNotificationService;
             _shippingService = shippingService;
+            _notificationService = notificationService;
         }
 
         private async Task<int?> GetCurrentCustomerId()
@@ -480,6 +483,21 @@ namespace Flower.Backend.Services
                     "Order",
                     newOrder.Id.ToString()
                 );
+
+                if (customer != null)
+                {
+                    await _notificationService.CreateCustomerNotification(
+                        customerId: customer.Id,
+                        title: "Đặt hàng thành công",
+                        content: $"Đơn hàng #{newOrder.Id} của bạn đã được tiếp nhận.",
+                        type: "Order",
+                        orderId: newOrder.Id,
+                        referenceType: "OrderCreated",
+                        icon: "ShoppingBag",
+                        priority: "High",
+                        navigationUrl: $"/customer/orders/{newOrder.Id}"
+                    );
+                }
             }
             catch (Exception ex)
             {

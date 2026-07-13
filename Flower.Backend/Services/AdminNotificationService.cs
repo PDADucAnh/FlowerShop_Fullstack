@@ -1,6 +1,8 @@
+using Flower.Backend.Hubs;
 using Flower.Backend.Services.Interfaces;
 using Flower.Data;
 using Flower.Data.Entities;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -12,10 +14,12 @@ namespace Flower.Backend.Services
     public class AdminNotificationService : IAdminNotificationService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public AdminNotificationService(ApplicationDbContext context)
+        public AdminNotificationService(ApplicationDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
 
         public async Task CreateNotification(string title, string message, string type, string? referenceId = null, int? userId = null)
@@ -34,6 +38,18 @@ namespace Flower.Backend.Services
 
             _context.AdminNotifications.Add(notification);
             await _context.SaveChangesAsync();
+            
+            // Push Real-time update to AdminGroup
+            await _hubContext.Clients.Group("AdminGroup").SendAsync("ReceiveAdminNotification", new {
+                id = notification.Id,
+                title = notification.Title,
+                message = notification.Message,
+                type = notification.Type,
+                isRead = notification.IsRead,
+                createdAt = notification.CreatedAt
+            });
+            var unreadCount = await GetUnreadCount();
+            await _hubContext.Clients.Group("AdminGroup").SendAsync("AdminUnreadCountChanged", unreadCount);
         }
 
         public async Task<List<AdminNotification>> GetLatestNotifications(int limit = 10)
@@ -53,10 +69,13 @@ namespace Flower.Backend.Services
         public async Task MarkAsRead(int id)
         {
             var notification = await _context.AdminNotifications.FindAsync(id);
-            if (notification != null)
+            if (notification != null && !notification.IsRead)
             {
                 notification.IsRead = true;
                 await _context.SaveChangesAsync();
+                
+                var unreadCount = await GetUnreadCount();
+                await _hubContext.Clients.Group("AdminGroup").SendAsync("AdminUnreadCountChanged", unreadCount);
             }
         }
 
@@ -67,7 +86,11 @@ namespace Flower.Backend.Services
             {
                 n.IsRead = true;
             }
-            await _context.SaveChangesAsync();
+            if (unread.Any())
+            {
+                await _context.SaveChangesAsync();
+                await _hubContext.Clients.Group("AdminGroup").SendAsync("AdminUnreadCountChanged", 0);
+            }
         }
 
         public async Task<(List<AdminNotification> Items, int TotalCount)> GetAllNotifications(string? type, string? search, int page, int pageSize)
