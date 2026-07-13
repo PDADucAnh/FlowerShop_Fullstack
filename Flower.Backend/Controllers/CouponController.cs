@@ -23,12 +23,14 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateCouponDTO model)
         {
             if (!ModelState.IsValid)
@@ -51,6 +53,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(int id)
         {
             var item = await _couponService.GetById(id);
@@ -77,6 +80,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(UpdateCouponDTO model)
         {
             if (!ModelState.IsValid)
@@ -103,6 +107,7 @@ namespace Flower.Backend.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             try
@@ -117,6 +122,7 @@ namespace Flower.Backend.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> ToggleActive(int id)
         {
             var item = await _couponService.GetById(id);

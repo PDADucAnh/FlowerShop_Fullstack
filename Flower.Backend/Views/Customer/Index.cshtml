@@ -10,10 +10,13 @@
             <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Quản lý khách hàng</h3>
             <p class="serif text-3xl font-bold">Khách hàng</p>
         </div>
-        <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
-            <span class="material-symbols-outlined text-lg">person_add</span>
-            Thêm khách hàng
-        </a>
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Create" class="bg-primary text-on-primary px-lg py-3 text-label-sm uppercase tracking-widest flex items-center gap-2 hover:bg-neutral-800 transition-all">
+                <span class="material-symbols-outlined text-lg">person_add</span>
+                Thêm khách hàng
+            </a>
+        }
     </div>
 
     <div class="bg-surface-container-lowest border border-outline-variant overflow-hidden">
@@ -24,7 +27,10 @@
                         <th class="px-lg py-4">Khách hàng</th>
                         <th class="px-lg py-4">Liên hệ</th>
                         <th class="px-lg py-4">Địa chỉ</th>
-                        <th class="px-lg py-4 text-right">Thao tác</th>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <th class="px-lg py-4 text-right">Thao tác</th>
+                        }
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-outline-variant">
@@ -46,10 +52,13 @@
                                 </div>
                             </td>
                             <td class="px-lg py-5 text-body-md text-on-surface-variant">@(c.Address ?? "N/A")</td>
-                            <td class="px-lg py-5 text-right space-x-4">
-                                <a asp-action="Edit" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
-                                <a asp-action="Delete" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa khách hàng này?')">Xóa</a>
-                            </td>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <td class="px-lg py-5 text-right space-x-4">
+                                    <a asp-action="Edit" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@c.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa khách hàng này?')">Xóa</a>
+                                </td>
+                            }
                         </tr>
                     }
                 </tbody>

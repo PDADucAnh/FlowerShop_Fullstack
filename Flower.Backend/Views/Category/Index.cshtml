@@ -37,7 +37,10 @@
                             <td class="px-lg py-5 text-right space-x-4">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold border-b border-primary pb-0.5">Chi tiết</a>
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-secondary hover:text-primary transition-colors">Sửa</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa danh mục này?')">Xóa</a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="text-label-sm uppercase tracking-widest font-bold text-error" onclick="return confirm('Xóa danh mục này?')">Xóa</a>
+                                }
                             </td>
                         </tr>
                     }

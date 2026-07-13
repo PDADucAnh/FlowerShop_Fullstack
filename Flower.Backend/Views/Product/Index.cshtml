@@ -46,7 +46,10 @@
                     <div class="flex gap-2 pt-3 border-t border-outline-variant/10">
                         <a asp-action="Details" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Xem</a>
                         <a asp-action="Edit" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa sản phẩm này?')">Xóa</a>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Delete" asp-route-id="@product.Id" class="flex-1 text-center px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa sản phẩm này?')">Xóa</a>
+                        }
                     </div>
                 </div>
             </div>

@@ -35,7 +35,7 @@ namespace Flower.Backend.Controllers.Api
             return Ok(item);
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateCouponDTO dto)
         {
@@ -52,7 +52,7 @@ namespace Flower.Backend.Controllers.Api
             }
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCouponDTO dto)
         {
@@ -86,7 +86,7 @@ namespace Flower.Backend.Controllers.Api
             }
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPatch("{id}/enable")]
         public async Task<IActionResult> Enable(int id)
         {
@@ -95,7 +95,7 @@ namespace Flower.Backend.Controllers.Api
             return NoContent();
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPatch("{id}/disable")]
         public async Task<IActionResult> Disable(int id)
         {

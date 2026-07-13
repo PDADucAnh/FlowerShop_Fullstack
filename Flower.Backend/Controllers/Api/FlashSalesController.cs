@@ -43,7 +43,7 @@ namespace Flower.Backend.Controllers.Api
             return Ok(item);
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateFlashSaleDTO dto)
         {
@@ -60,7 +60,7 @@ namespace Flower.Backend.Controllers.Api
             }
         }
 
-        [Authorize(Policy = "StaffOnly")]
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateFlashSaleDTO dto)
         {

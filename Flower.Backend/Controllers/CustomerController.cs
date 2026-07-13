@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "StaffOnly")]
     public class CustomerController : Controller
     {
         private readonly ICustomerService _customerService;
@@ -27,12 +27,14 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public IActionResult Create()
         {
             return View();
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Create(CreateCustomerDTO model)
         {
             if (!ModelState.IsValid)
@@ -43,6 +45,7 @@ namespace Flower.Backend.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             await _customerService.Delete(id);
@@ -51,6 +54,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpGet]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(int id)
         {
             var customer = await _customerService.GetById(id);
@@ -69,6 +73,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Edit(UpdateCustomerDTO model)
         {
             if (!ModelState.IsValid)

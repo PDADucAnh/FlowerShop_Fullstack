@@ -51,6 +51,7 @@ namespace Flower.Backend.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
             await _categoryProductService.Delete(id);

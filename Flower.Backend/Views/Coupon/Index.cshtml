@@ -12,12 +12,15 @@
             <h2 class="font-display-lg text-display-lg text-on-background mb-2">Mã giảm giá</h2>
             <p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Quản lý mã giảm giá và voucher cho khách hàng.</p>
         </div>
-        <div>
-            <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
-                <span class="material-symbols-outlined text-[18px]">add</span>
-                Thêm mã giảm giá
-            </a>
-        </div>
+        @if (User.IsInRole("Admin"))
+        {
+            <div>
+                <a asp-action="Create" class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-sm no-underline">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    Thêm mã giảm giá
+                </a>
+            </div>
+        }
     </div>
 
     <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden">
@@ -29,7 +32,10 @@
                     <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Đã dùng / Giới hạn</th>
                     <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Hạn sử dụng</th>
                     <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest">Trạng thái</th>
-                    <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-right">Thao tác</th>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <th class="px-4 py-4 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest text-right">Thao tác</th>
+                    }
                 </tr>
             </thead>
             <tbody>
@@ -107,15 +113,18 @@
                                 </span>
                             }
                         </td>
-                        <td class="px-4 py-4 text-right">
-                            <div class="flex gap-2 justify-end">
-                                <a asp-action="ToggleActive" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">
-                                    @(item.IsActive ? "Tắt" : "Bật")
-                                </a>
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
-                                <a asp-action="Delete" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa mã giảm giá này?')">Xóa</a>
-                            </div>
-                        </td>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <td class="px-4 py-4 text-right">
+                                <div class="flex gap-2 justify-end">
+                                    <a asp-action="ToggleActive" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">
+                                        @(item.IsActive ? "Tắt" : "Bật")
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-primary font-label-sm text-label-sm hover:bg-primary-container/10 transition-colors no-underline">Sửa</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="px-3 py-2 border border-outline-variant rounded-lg text-error font-label-sm text-label-sm hover:bg-error-container/30 transition-colors no-underline" onclick="return confirm('Xóa mã giảm giá này?')">Xóa</a>
+                                </div>
+                            </td>
+                        }
                     </tr>
                 }
                 @if (!Model.Any())
