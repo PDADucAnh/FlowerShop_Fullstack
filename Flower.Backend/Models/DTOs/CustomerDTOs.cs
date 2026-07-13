@@ -15,6 +15,7 @@ namespace Flower.Backend.Models.DTOs
         public int FailedDeliveries { get; set; }
         public bool IsBlacklisted { get; set; }
         public int FraudScore { get; set; }
+        public bool IsActive { get; set; }
     }
 
     public class CreateCustomerDTO
@@ -42,5 +43,6 @@ namespace Flower.Backend.Models.DTOs
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? PasswordHash { get; set; }
+        public bool IsActive { get; set; }
     }
 }

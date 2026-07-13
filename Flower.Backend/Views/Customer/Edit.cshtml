@@ -43,9 +43,14 @@
         </div>
 
         <div class="space-y-md">
-            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mật khẩu hiện tại</label>
-            <input asp-for="PasswordHash" type="text" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-body-md font-mono" required />
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mật khẩu mới (để trống nếu không đổi)</label>
+            <input asp-for="PasswordHash" type="password" placeholder="Để trống nếu không muốn thay đổi mật khẩu" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-3 text-body-md font-mono" />
             <span asp-validation-for="PasswordHash" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <input asp-for="IsActive" type="checkbox" class="size-5 rounded border-outline-variant text-primary focus:ring-primary bg-surface-container-low" />
+            <label asp-for="IsActive" class="text-body-md font-bold text-on-surface">Kích hoạt tài khoản</label>
         </div>
 
         <div class="pt-lg border-t border-outline-variant flex gap-md">

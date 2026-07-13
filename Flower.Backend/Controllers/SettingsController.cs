@@ -14,11 +14,17 @@ namespace Flower.Backend.Controllers
     {
         private readonly ISystemSettingService _settingService;
         private readonly ILogger<SettingsController> _logger;
+        private readonly IEmailService _emailService;
 
-        public SettingsController(ISystemSettingService settingService, ILogger<SettingsController> logger)
+
+        public SettingsController(
+            ISystemSettingService settingService,
+            ILogger<SettingsController> logger,
+            IEmailService emailService)
         {
             _settingService = settingService;
             _logger = logger;
+            _emailService = emailService;
         }
 
         // GET: Settings
@@ -170,18 +176,29 @@ namespace Flower.Backend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TestEmail(string toEmail)
         {
-            if (string.IsNullOrEmpty(toEmail))
-            {
-                return Json(new { success = false, message = "Email nhận không hợp lệ." });
-            }
+            var smtpSettings = await _settingService.GetSetting<SmtpSettings>("Smtp");
+            var host = smtpSettings?.Host ?? "N/A";
+            var port = smtpSettings?.Port.ToString() ?? "N/A";
 
             try
             {
-                return Json(new { success = true, message = $"Gửi email thử nghiệm tới {toEmail} thành công!" });
+                if (_emailService == null)
+                {
+                    throw new InvalidOperationException("EmailService chưa được cấu hình.");
+                }
+
+                await _emailService.SendTestEmailAsync(toEmail);
+                _logger.LogInformation("SMTP Test Email Success: Sent to={Email}, Host={Host}, Port={Port}, SentAt={Time}",
+                    toEmail, host, port, DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss"));
+
+                return Json(new { success = true, message = "Đã gửi email thử nghiệm thành công." });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Lỗi gửi email: {ex.Message}" });
+                _logger.LogError(ex, "SMTP Test Email Failed: Sent to={Email}, Host={Host}, Port={Port}, SentAt={Time}",
+                    toEmail, host, port, DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss"));
+
+                return Json(new { success = false, message = "Không thể gửi email. Chi tiết xem log hệ thống." });
             }
         }
     }

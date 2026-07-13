@@ -21,5 +21,7 @@ namespace Flower.Backend.Services.Interfaces
         Task SendOrderCannotCancelEmailAsync(Order order, string customerEmail, string customerName);
 
         Task SendRefundCompletedEmailAsync(Order order, string customerEmail, string customerName, decimal refundAmount, string? paymentMethod = null, string? refundTransactionId = null);
+
+        Task SendTestEmailAsync(string toEmail);
     }
 }

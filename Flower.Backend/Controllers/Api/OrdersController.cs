@@ -17,11 +17,6 @@ namespace Flower.Backend.Controllers.Api
         private readonly IOrderService _orderService;
         private readonly ISystemSettingService _settingService;
 
-        public OrdersController(IOrderService orderService)
-            : this(orderService, null!)
-        {
-        }
-
         public OrdersController(IOrderService orderService, ISystemSettingService settingService)
         {
             _orderService = orderService;

@@ -97,6 +97,33 @@ namespace Flower.Backend.Services
             return client;
         }
 
+        public async Task SendTestEmailAsync(string toEmail)
+        {
+            var senderEmail = !string.IsNullOrEmpty(_settings.SenderEmail)
+                ? _settings.SenderEmail
+                : _settings.Username ?? "noreply@flowershop.com";
+
+            using var message = new MailMessage
+            {
+                From = new MailAddress(senderEmail, _settings.SenderName ?? "FlowerShop"),
+                Subject = "Kiểm tra cấu hình SMTP FlowerShop",
+                Body = $"Xin chào,\n\n" +
+                       $"Đây là email kiểm tra được gửi từ hệ thống FlowerShop.\n\n" +
+                       $"Nếu bạn nhận được email này nghĩa là cấu hình SMTP đang hoạt động bình thường.\n\n" +
+                       $"Thời gian gửi:\n" +
+                       $"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")}\n\n" +
+                       $"Đây là email tự động.\n" +
+                       $"Vui lòng không trả lời.",
+                IsBodyHtml = false,
+                BodyEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8
+            };
+            message.To.Add(new MailAddress(toEmail));
+
+            using var client = CreateSmtpClient();
+            await client.SendMailAsync(message);
+        }
+
         public async Task SendOrderConfirmationAsync(Order order, string customerEmail, string customerName)
         {
             try

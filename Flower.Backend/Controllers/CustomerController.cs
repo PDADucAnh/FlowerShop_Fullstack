@@ -66,7 +66,8 @@ namespace Flower.Backend.Controllers
                 FullName = customer.FullName,
                 Email = customer.Email,
                 Phone = customer.Phone,
-                Address = customer.Address
+                Address = customer.Address,
+                IsActive = customer.IsActive
             };
 
             return View(model);

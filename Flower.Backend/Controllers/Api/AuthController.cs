@@ -41,57 +41,64 @@ namespace Flower.Backend.Controllers.Api
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest login)
         {
-            var result = await _authService.Login(login.Username, login.Password);
-
-            if (result != null)
+            try
             {
-                if (!result.IsActive)
+                var result = await _authService.Login(login.Username, login.Password);
+
+                if (result != null)
                 {
-                    return StatusCode(403, new { message = "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động!" });
+                    if (!result.IsActive)
+                    {
+                        return StatusCode(403, new { success = false, message = "Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động." });
+                    }
+
+                    // NOTE: Jwt:SecretKey must be >= 32 characters (256 bits) for HS256
+                    var jwtKey = _configuration["Jwt:SecretKey"]
+                        ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
+                    var issuer = _configuration["Jwt:Issuer"]
+                        ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+                    var audience = _configuration["Jwt:Audience"]
+                        ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+                    if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
+                        expiryMinutes = 60;
+
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.UTF8.GetBytes(jwtKey);
+                    var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(BuildUserClaims(result)),
+                        Expires = expiration,
+                        Issuer = issuer,
+                        Audience = audience,
+                        SigningCredentials = new SigningCredentials(
+                            new SymmetricSecurityKey(key),
+                            SecurityAlgorithms.HmacSha256)
+                    };
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
+
+                    return Ok(new
+                    {
+                        token = tokenString,
+                        expiresAt = expiration.ToString("o"),
+                        id = result.Id,
+                        username = result.Username,
+                        fullName = result.FullName,
+                        email = result.Email,
+                        phone = result.Phone,
+                        address = result.Address,
+                        role = result.Role,
+                        message = "Login successful"
+                    });
                 }
 
-                // NOTE: Jwt:SecretKey must be >= 32 characters (256 bits) for HS256
-                var jwtKey = _configuration["Jwt:SecretKey"]
-                    ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
-                var issuer = _configuration["Jwt:Issuer"]
-                    ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
-                var audience = _configuration["Jwt:Audience"]
-                    ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
-                if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
-                    expiryMinutes = 60;
-
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.UTF8.GetBytes(jwtKey);
-                var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
-                var tokenDescriptor = new SecurityTokenDescriptor
-                {
-                    Subject = new ClaimsIdentity(BuildUserClaims(result)),
-                    Expires = expiration,
-                    Issuer = issuer,
-                    Audience = audience,
-                    SigningCredentials = new SigningCredentials(
-                        new SymmetricSecurityKey(key),
-                        SecurityAlgorithms.HmacSha256)
-                };
-                var token = tokenHandler.CreateToken(tokenDescriptor);
-                var tokenString = tokenHandler.WriteToken(token);
-
-                return Ok(new
-                {
-                    token = tokenString,
-                    expiresAt = expiration.ToString("o"),
-                    id = result.Id,
-                    username = result.Username,
-                    fullName = result.FullName,
-                    email = result.Email,
-                    phone = result.Phone,
-                    address = result.Address,
-                    role = result.Role,
-                    message = "Login successful"
-                });
+                return Unauthorized(new { success = false, message = "Email hoặc mật khẩu không đúng." });
             }
-
-            return Unauthorized(new { message = "Invalid username or password!" });
+            catch (Exception)
+            {
+                return StatusCode(500, new { success = false, message = "Có lỗi xảy ra trong quá trình đăng nhập." });
+            }
         }
 
         [Authorize]

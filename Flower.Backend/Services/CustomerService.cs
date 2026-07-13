@@ -72,11 +72,6 @@ namespace Flower.Backend.Services
 
             dto.UpdateEntity(customer);
 
-            if (!string.IsNullOrEmpty(dto.PasswordHash))
-            {
-                customer.PasswordHash = _passwordHasher.HashPassword(customer, dto.PasswordHash);
-            }
-
             try
             {
                 await _context.SaveChangesAsync();

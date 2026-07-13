@@ -163,7 +163,8 @@ namespace Flower.Backend.Models.DTOs
                 SuccessfulDeliveries = customer.SuccessfulDeliveries,
                 FailedDeliveries = customer.FailedDeliveries,
                 IsBlacklisted = customer.IsBlacklisted,
-                FraudScore = customer.FraudScore
+                FraudScore = customer.FraudScore,
+                IsActive = customer.IsActive
             };
         }
 
@@ -187,9 +188,11 @@ namespace Flower.Backend.Models.DTOs
             entity.Email = dto.Email;
             entity.Phone = dto.Phone;
             entity.Address = dto.Address;
-            if (!string.IsNullOrEmpty(dto.PasswordHash))
+            entity.IsActive = dto.IsActive;
+            if (!string.IsNullOrWhiteSpace(dto.PasswordHash))
             {
-                entity.PasswordHash = dto.PasswordHash;
+                var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Customer>();
+                entity.PasswordHash = hasher.HashPassword(entity, dto.PasswordHash);
             }
         }
 

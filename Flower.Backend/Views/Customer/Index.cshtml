@@ -27,6 +27,7 @@
                         <th class="px-lg py-4">Khách hàng</th>
                         <th class="px-lg py-4">Liên hệ</th>
                         <th class="px-lg py-4">Địa chỉ</th>
+                        <th class="px-lg py-4">Trạng thái</th>
                         @if (User.IsInRole("Admin"))
                         {
                             <th class="px-lg py-4 text-right">Thao tác</th>
@@ -52,6 +53,16 @@
                                 </div>
                             </td>
                             <td class="px-lg py-5 text-body-md text-on-surface-variant">@(c.Address ?? "N/A")</td>
+                            <td class="px-lg py-5">
+                                @if (c.IsActive)
+                                {
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Đã khóa</span>
+                                }
+                            </td>
                             @if (User.IsInRole("Admin"))
                             {
                                 <td class="px-lg py-5 text-right space-x-4">

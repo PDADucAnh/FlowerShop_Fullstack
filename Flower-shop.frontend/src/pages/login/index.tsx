@@ -22,8 +22,9 @@ const LoginPage: React.FC = () => {
         try {
             await login(data.username, data.password, data.rememberMe || false);
             navigate('/');
-        } catch {
-            setError('Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+        } catch (err: any) {
+            const backendMessage = err?.response?.data?.message;
+            setError(backendMessage || 'Đăng nhập thất bại. Vui lòng thử lại.');
         } finally {
             setLoading(false);
         }

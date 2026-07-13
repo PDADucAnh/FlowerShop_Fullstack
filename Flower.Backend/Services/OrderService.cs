@@ -47,27 +47,6 @@ namespace Flower.Backend.Services
             IOrderCancellationService orderCancellationService,
             IPromotionService promotionService,
             ICouponService couponService,
-            IAdminNotificationService adminNotificationService)
-            : this(context, logger, httpContextAccessor, deliverySlotService, paymentService,
-                   fraudDetectionService, stockLockService, emailService, timeSettings, memoryCache,
-                   orderCancellationService, promotionService, couponService, adminNotificationService, null!)
-        {
-        }
-
-        public OrderService(
-            IApplicationDbContext context,
-            ILogger<OrderService> logger,
-            IHttpContextAccessor httpContextAccessor,
-            IDeliverySlotService deliverySlotService,
-            IPaymentService paymentService,
-            IFraudDetectionService fraudDetectionService,
-            StockLockService stockLockService,
-            IEmailService emailService,
-            TimeSettings timeSettings,
-            IMemoryCache memoryCache,
-            IOrderCancellationService orderCancellationService,
-            IPromotionService promotionService,
-            ICouponService couponService,
             IAdminNotificationService adminNotificationService,
             IShippingService shippingService)
         {
