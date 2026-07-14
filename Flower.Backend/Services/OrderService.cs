@@ -570,6 +570,11 @@ namespace Flower.Backend.Services
                     }
                 }
 
+                if (oldStatus != order.Status && order.CustomerId > 0)
+                {
+                    await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
+                }
+
                 return true;
             }
             catch (DbUpdateConcurrencyException)
@@ -620,7 +625,7 @@ namespace Flower.Backend.Services
                 return (false, "Đơn hàng không phải COD");
 
             if (order.Status != OrderStatus.PendingVerification)
-                return (false, "Đơn hàng không ở trạng thái chờ xác minh");
+                return (false, "Đơn hàng không ở trạng thái chờ xác nhận");
 
             if (order.Customer != null)
             {
@@ -640,6 +645,11 @@ namespace Flower.Backend.Services
                     if (!string.IsNullOrEmpty(order.Customer.Email))
                     {
                         await _emailService.SendOrderConfirmedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
+                    }
+
+                    if (order.CustomerId > 0)
+                    {
+                        await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
                     }
 
                     if (!requiresVerification)

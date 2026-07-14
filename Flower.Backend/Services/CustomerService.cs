@@ -14,10 +14,12 @@ namespace Flower.Backend.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly PasswordHasher<Customer> _passwordHasher;
+        private readonly INotificationService _notificationService;
 
-        public CustomerService(IApplicationDbContext context)
+        public CustomerService(IApplicationDbContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
             _passwordHasher = new PasswordHasher<Customer>();
         }
 
@@ -70,11 +72,18 @@ namespace Flower.Backend.Services
             if (customer == null)
                 return false;
 
+            var wasActive = customer.IsActive;
             dto.UpdateEntity(customer);
 
             try
             {
                 await _context.SaveChangesAsync();
+
+                if (wasActive && !customer.IsActive)
+                {
+                    await _notificationService.NotifyCustomerEvent(customer.Id, "CustomerLocked", new { reason = "Admin locked account" });
+                }
+
                 return true;
             }
             catch (DbUpdateConcurrencyException)

@@ -47,7 +47,7 @@ namespace Flower.Backend.Models.DTOs
             OrderStatus.PendingPayment => "Chờ thanh toán",
             OrderStatus.Paid => "Đã thanh toán",
             OrderStatus.Pending => "Chờ xử lý",
-            OrderStatus.PendingVerification => "Chờ xác minh",
+            OrderStatus.PendingVerification => "Chờ xác nhận",
             OrderStatus.Confirmed => "Đã xác nhận",
             OrderStatus.Preparing => "Đang cắm hoa",
             OrderStatus.Shipping => "Đang giao",

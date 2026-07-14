@@ -91,7 +91,7 @@ const CheckoutPage: React.FC = () => {
     const todayStr = getVietnamTodayString();
     if (selectedDate === todayStr) {
       const now = new Date();
-      const formatter = new Intl.DateTimeFormat('en-US', {
+      const formatter = new Intl.DateTimeFormat('vi-VN', {
         timeZone: 'Asia/Ho_Chi_Minh',
         hour: 'numeric',
         minute: 'numeric',

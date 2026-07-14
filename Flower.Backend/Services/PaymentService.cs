@@ -21,6 +21,7 @@ namespace Flower.Backend.Services
         private readonly IDeliverySlotService _deliverySlotService;
         private readonly IEmailService _emailService;
         private readonly ILogger<PaymentService> _logger;
+        private readonly INotificationService _notificationService;
         private readonly string _webhookSecret;
 
         public PaymentService(
@@ -30,6 +31,7 @@ namespace Flower.Backend.Services
             IDeliverySlotService deliverySlotService,
             IEmailService emailService,
             ILogger<PaymentService> logger,
+            INotificationService notificationService,
             IConfiguration configuration)
         {
             _context = context;
@@ -38,6 +40,7 @@ namespace Flower.Backend.Services
             _deliverySlotService = deliverySlotService;
             _emailService = emailService;
             _logger = logger;
+            _notificationService = notificationService;
             _webhookSecret = configuration["WebhookSettings:SecretKey"] ?? "flowershop-webhook-secret-change-in-production";
         }
 
@@ -59,6 +62,12 @@ namespace Flower.Backend.Services
             if (order != null)
             {
                 order.PaymentStatus = PaymentStatus.Completed;
+                order.Status = OrderStatus.Paid;
+                
+                if (order.CustomerId > 0)
+                {
+                    await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, paymentStatus = "Completed" });
+                }
                 order.PaymentTransactionId = transactionId;
                 order.PaymentPaidAt = DateTime.UtcNow;
                 order.Status = OrderStatus.Confirmed;
@@ -158,6 +167,10 @@ namespace Flower.Backend.Services
             if (request.Status == "failed" || request.Status == "cancelled")
             {
                 orderWithDetails.PaymentStatus = PaymentStatus.Failed;
+                if (orderWithDetails.CustomerId > 0)
+                {
+                    await _notificationService.NotifyCustomerEvent(orderWithDetails.CustomerId, "OrderChanged", new { orderId = orderWithDetails.Id, paymentStatus = "Failed" });
+                }
                 await _context.SaveChangesAsync();
 
                 // OrderCancellationService handles both cache/lock releasing and slot releasing centrally
@@ -225,7 +238,13 @@ namespace Flower.Backend.Services
                 pendingPayment.PaidAt = DateTime.UtcNow;
 
                 orderWithDetails.PaymentStatus = PaymentStatus.Completed;
-                orderWithDetails.Status = OrderStatus.Confirmed;
+                orderWithDetails.Status = OrderStatus.Paid;
+                
+                if (orderWithDetails.CustomerId > 0)
+                {
+                    await _notificationService.NotifyCustomerEvent(orderWithDetails.CustomerId, "OrderChanged", new { orderId = orderWithDetails.Id, paymentStatus = "Completed" });
+                }
+
                 orderWithDetails.IsVerified = true;
                 orderWithDetails.VerifiedAt = DateTime.UtcNow;
                 orderWithDetails.PaymentTransactionId = transactionId;

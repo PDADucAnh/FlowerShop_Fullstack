@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMyOrders, useCancelOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
-import { CancelModal, OrderSkeleton, AccountSidebar, statusStyles, statusConfig } from '../../components/OrderComponents';
+import { CancelModal, OrderSkeleton, AccountSidebar, statusStyles } from '../../components/OrderComponents';
+import { getOrderStatusText } from '../../utils/statusMappers';
 import type { Order } from '../../types/order';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import SEO from '../../components/SEO';
@@ -152,7 +153,7 @@ const MyOrders: React.FC = () => {
                           <td className="py-stack-md px-base font-semibold text-primary">{formatCurrency(displayTotal)}</td>
                           <td className="py-stack-md px-base">
                             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusClass}`}>
-                              {statusConfig[order.status]?.label || order.status}
+                              {getOrderStatusText(order.status)}
                             </span>
                           </td>
                           <td className="py-stack-md px-base text-right whitespace-nowrap">

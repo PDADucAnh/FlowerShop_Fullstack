@@ -90,7 +90,7 @@ const BlogDetail: React.FC = () => {
                         <div className="mt-lg flex items-center justify-center gap-xs text-white/60 font-label-sm text-[10px] uppercase tracking-[0.2em] font-bold">
                             <span>Ban biên tập</span>
                             <span className="mx-2">/</span>
-                            <span>{new Date(post.createdDate || Date.now()).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                            <span>{new Date(post.createdDate || Date.now()).toLocaleDateString('vi-VN')}</span>
                         </div>
                     </div>
                 </section>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useOrderDetail, useCancelOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
+import { getPaymentMethodText, getPaymentStatusText } from '../../utils/statusMappers';
 import { StatusBadge, CancelModal, AccountSidebar } from '../../components/OrderComponents';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import SEO from '../../components/SEO';
@@ -165,22 +166,16 @@ const OrderDetailPage: React.FC = () => {
               {(order.paymentMethod !== undefined || order.paymentStatus !== undefined) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
                   <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Thanh toán</p>
-                    <p className="font-body-md">{order.paymentMethod === 1 || order.paymentMethod === 'COD' ? 'COD (tiền mặt)' : 'Chuyển khoản / Online'}</p>
+                    <p className="font-label-md text-on-surface-variant">Phương thức</p>
+                    <p className="font-body-md">{getPaymentMethodText(order.paymentMethod)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="font-label-md text-on-surface-variant">Trạng thái thanh toán</p>
-                    <p className="font-body-md">
-                      {order.paymentStatus === 1 || order.paymentStatus === 'Completed' ? 'Đã thanh toán' :
-                       order.paymentStatus === 2 || order.paymentStatus === 'Failed' ? 'Thất bại' :
-                       order.paymentStatus === 3 || order.paymentStatus === 'Refunded' ? 'Đã hoàn tiền' :
-                       order.paymentStatus === 4 || order.paymentStatus === 'PartialRefund' ? 'Hoàn tiền một phần' :
-                       order.paymentStatus === 5 || order.paymentStatus === 'Expired' ? 'Hết hạn' :
-                       order.paymentStatus === 6 || order.paymentStatus === 'Cancelled' ? 'Đã hủy' :
-                       order.paymentStatus === 7 || order.paymentStatus === 'RefundPending' ? 'Chờ hoàn tiền' :
-                       order.paymentStatus === 8 || order.paymentStatus === 'PartialRefundPending' ? 'Chờ hoàn tiền một phần' :
-                       order.paymentStatus === 9 || order.paymentStatus === 'PartialRefunded' ? 'Đã hoàn tiền một phần' :
-                       'Chưa thanh toán'}
+                    <p className={`font-body-md font-bold uppercase tracking-widest text-xs ${
+                      order.paymentStatus === 1 || order.paymentStatus === 'Completed' ? 'text-primary' : 
+                      order.paymentStatus === 2 || order.paymentStatus === 'Failed' ? 'text-error' : 'text-on-surface-variant'
+                    }`}>
+                      {getPaymentStatusText(order.paymentStatus)}
                     </p>
                   </div>
                 </div>

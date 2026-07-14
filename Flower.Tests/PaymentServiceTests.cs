@@ -49,6 +49,7 @@ namespace Flower.Tests
                 _deliverySlotMock.Object,
                 _emailServiceMock.Object,
                 Mock.Of<ILogger<PaymentService>>(),
+                Mock.Of<INotificationService>(),
                 CreateConfig());
         }
 

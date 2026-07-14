@@ -15,16 +15,18 @@ namespace Flower.Backend.Controllers
         private readonly ISystemSettingService _settingService;
         private readonly ILogger<SettingsController> _logger;
         private readonly IEmailService _emailService;
-
+        private readonly INotificationService _notificationService;
 
         public SettingsController(
             ISystemSettingService settingService,
             ILogger<SettingsController> logger,
-            IEmailService emailService)
+            IEmailService emailService,
+            INotificationService notificationService)
         {
             _settingService = settingService;
             _logger = logger;
             _emailService = emailService;
+            _notificationService = notificationService;
         }
 
         // GET: Settings
@@ -52,6 +54,8 @@ namespace Flower.Backend.Controllers
 
             _logger.LogInformation("AUDIT LOG: User {User} updated Store Info. Old Value: {Old}, New Value: {New}", 
                 username, JsonSerializer.Serialize(oldSetting), JsonSerializer.Serialize(model));
+
+            await _notificationService.NotifyEntityChanged("SystemSettings");
 
             TempData["Success"] = "Cập nhật thông tin cửa hàng thành công.";
             return RedirectToAction(nameof(Index));
@@ -85,6 +89,8 @@ namespace Flower.Backend.Controllers
 
             _logger.LogInformation("AUDIT LOG: User {User} updated SMTP Settings. Old Value: {Old}, New Value: {New}", 
                 username, JsonSerializer.Serialize(auditOld), JsonSerializer.Serialize(auditNew));
+
+            await _notificationService.NotifyEntityChanged("SystemSettings");
 
             TempData["Success"] = "Cập nhật cấu hình SMTP thành công.";
             return RedirectToAction(nameof(Index));
@@ -120,6 +126,8 @@ namespace Flower.Backend.Controllers
             _logger.LogInformation("AUDIT LOG: User {User} updated VNPay Settings. Old Value: {Old}, New Value: {New}", 
                 username, JsonSerializer.Serialize(auditOld), JsonSerializer.Serialize(auditNew));
 
+            await _notificationService.NotifyEntityChanged("SystemSettings");
+
             TempData["Success"] = "Cập nhật cấu hình VNPay thành công.";
             return RedirectToAction(nameof(Index));
         }
@@ -143,6 +151,8 @@ namespace Flower.Backend.Controllers
             _logger.LogInformation("AUDIT LOG: User {User} updated Shipping Settings. Old Value: {Old}, New Value: {New}", 
                 username, JsonSerializer.Serialize(oldSetting), JsonSerializer.Serialize(model));
 
+            await _notificationService.NotifyEntityChanged("SystemSettings");
+
             TempData["Success"] = "Cập nhật cấu hình giao hàng thành công.";
             return RedirectToAction(nameof(Index));
         }
@@ -165,6 +175,8 @@ namespace Flower.Backend.Controllers
 
             _logger.LogInformation("AUDIT LOG: User {User} updated Order Settings. Old Value: {Old}, New Value: {New}", 
                 username, JsonSerializer.Serialize(oldSetting), JsonSerializer.Serialize(model));
+
+            await _notificationService.NotifyEntityChanged("SystemSettings");
 
             TempData["Success"] = "Cập nhật cấu hình đơn hàng thành công.";
             return RedirectToAction(nameof(Index));

@@ -46,7 +46,7 @@ const BlogSidebar = ({ onCategoryChange, activeId }: BlogSidebarProps) => {
           {latestPosts.map((p: any) => (
             <div key={p.id} className="group cursor-pointer">
               <Link to={`/blog/${p.id}`} className="text-body-md font-bold uppercase tracking-tight text-primary group-hover:text-secondary transition-colors text-decoration-none block mb-1 leading-tight">{p.title}</Link>
-              <span className="text-[10px] text-outline uppercase tracking-widest font-bold">{p.createdDate ? new Date(p.createdDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</span>
+              <span className="text-[10px] text-outline uppercase tracking-widest font-bold">{p.createdDate ? new Date(p.createdDate).toLocaleDateString('vi-VN') : ''}</span>
             </div>
           ))}
         </div>

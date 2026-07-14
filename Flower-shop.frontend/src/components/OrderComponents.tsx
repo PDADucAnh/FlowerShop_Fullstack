@@ -16,28 +16,31 @@ export const statusStyles: Record<string, string> = {
   Refunded: 'bg-purple-100 text-purple-700',
 };
 
-export const statusConfig: Record<string, { label: string; dot: string; bg: string; border: string }> = {
-  Pending: { label: 'Chờ xử lý', dot: 'bg-tertiary', bg: 'bg-surface-variant text-on-surface-variant', border: 'border-outline-variant/30' },
-  PendingPayment: { label: 'Chờ thanh toán', dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700', border: 'border-amber-300/50' },
-  PendingVerification: { label: 'Chờ xác minh', dot: 'bg-warning', bg: 'bg-warning/10 text-warning', border: 'border-warning/30' },
-  Confirmed: { label: 'Đã xác nhận', dot: 'bg-info', bg: 'bg-info/10 text-info', border: 'border-info/30' },
-  Paid: { label: 'Đã thanh toán', dot: 'bg-teal-500', bg: 'bg-teal-50 text-teal-700', border: 'border-teal-300/50' },
-  Preparing: { label: 'Đang cắm hoa', dot: 'bg-secondary', bg: 'bg-secondary/10 text-secondary', border: 'border-secondary/30' },
-  Shipping: { label: 'Đang giao', dot: 'bg-[#1E88E5]', bg: 'bg-[#E3F2FD] text-[#1565C0]', border: 'border-[#90CAF9]/50' },
-  ReadyForDelivery: { label: 'Sẵn sàng giao', dot: 'bg-indigo-500', bg: 'bg-indigo-50 text-indigo-700', border: 'border-indigo-300/50' },
-  Completed: { label: 'Hoàn thành', dot: 'bg-[#43A047]', bg: 'bg-[#E8F5E9] text-[#2E7D32]', border: 'border-[#A5D6A7]/50' },
-  Cancelled: { label: 'Đã hủy', dot: 'bg-[#E53935]', bg: 'bg-[#FFEBEE] text-[#C62828]', border: 'border-[#EF9A9A]/50' },
-  Refunded: { label: 'Đã hoàn tiền', dot: 'bg-purple-500', bg: 'bg-purple-50 text-purple-700', border: 'border-purple-300/50' },
+export const statusConfig: Record<string, { dot: string; bg: string; border: string }> = {
+  Pending: { dot: 'bg-tertiary', bg: 'bg-surface-variant text-on-surface-variant', border: 'border-outline-variant/30' },
+  PendingPayment: { dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700', border: 'border-amber-300/50' },
+  PendingVerification: { dot: 'bg-warning', bg: 'bg-warning/10 text-warning', border: 'border-warning/30' },
+  Confirmed: { dot: 'bg-info', bg: 'bg-info/10 text-info', border: 'border-info/30' },
+  Paid: { dot: 'bg-teal-500', bg: 'bg-teal-50 text-teal-700', border: 'border-teal-300/50' },
+  Preparing: { dot: 'bg-secondary', bg: 'bg-secondary/10 text-secondary', border: 'border-secondary/30' },
+  Shipping: { dot: 'bg-[#1E88E5]', bg: 'bg-[#E3F2FD] text-[#1565C0]', border: 'border-[#90CAF9]/50' },
+  ReadyForDelivery: { dot: 'bg-indigo-500', bg: 'bg-indigo-50 text-indigo-700', border: 'border-indigo-300/50' },
+  Completed: { dot: 'bg-[#43A047]', bg: 'bg-[#E8F5E9] text-[#2E7D32]', border: 'border-[#A5D6A7]/50' },
+  Cancelled: { dot: 'bg-[#E53935]', bg: 'bg-[#FFEBEE] text-[#C62828]', border: 'border-[#EF9A9A]/50' },
+  Refunded: { dot: 'bg-purple-500', bg: 'bg-purple-50 text-purple-700', border: 'border-purple-300/50' },
 };
+
+import { getOrderStatusText } from '../utils/statusMappers';
 
 export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const s = statusConfig[status] || statusConfig.Pending;
+  const label = getOrderStatusText(status);
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${s.bg} ${s.border} transition-all duration-300 hover:scale-[1.02] cursor-default`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot} transition-transform duration-300`} />
-      {s.label}
+      {label}
     </span>
   );
 };

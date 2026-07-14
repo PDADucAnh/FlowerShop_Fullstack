@@ -8,6 +8,7 @@ const entityQueryMap: Record<string, string[]> = {
   Post: ['posts'],
   PromotionCampaign: ['promotions'],
   Coupon: ['coupons'],
+  SystemSettings: ['settings'],
 };
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7224';

@@ -231,7 +231,7 @@ namespace Flower.Backend.Services
             var policies = new List<CancellationPolicy>
             {
                 new() { OrderStatus = nameof(OrderStatus.Pending), RefundPercent = 100, CancellationFeePercent = 0, Description = "Chưa xử lý", IsActive = true },
-                new() { OrderStatus = nameof(OrderStatus.PendingVerification), RefundPercent = 100, CancellationFeePercent = 0, Description = "Chờ xác minh", IsActive = true },
+                new() { OrderStatus = nameof(OrderStatus.PendingVerification), RefundPercent = 100, CancellationFeePercent = 0, Description = "Chờ xác nhận", IsActive = true },
                 new() { OrderStatus = nameof(OrderStatus.PendingPayment), RefundPercent = 100, CancellationFeePercent = 0, Description = "Chờ thanh toán", IsActive = true },
                 new() { OrderStatus = nameof(OrderStatus.Paid), RefundPercent = 100, CancellationFeePercent = 0, Description = "Đã thanh toán - chưa chuẩn bị", IsActive = true },
                 new() { OrderStatus = nameof(OrderStatus.Confirmed), RefundPercent = 80, CancellationFeePercent = 20, Description = "Đã xác nhận - đã chuẩn bị nguyên liệu", IsActive = true },

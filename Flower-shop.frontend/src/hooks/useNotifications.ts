@@ -2,23 +2,28 @@ import { useState, useEffect, useCallback } from 'react';
 import * as signalR from '@microsoft/signalr';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { useQueryClient } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 
 export const useNotifications = () => {
-    const { token, isAuthenticated } = useAuth();
+    const { token, isAuthenticated, logout } = useAuth();
+    const queryClient = useQueryClient();
     const [notifications, setNotifications] = useState<any[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [isConnected, setIsConnected] = useState(false);
+
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7224';
 
     // API to fetch notifications
     const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.get('http://localhost:5000/api/notifications', {
+            const res = await axios.get(`${apiUrl}/api/notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(res.data.items);
             
-            const countRes = await axios.get('http://localhost:5000/api/notifications/unread-count', {
+            const countRes = await axios.get(`${apiUrl}/api/notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUnreadCount(countRes.data.count);
@@ -31,8 +36,10 @@ export const useNotifications = () => {
     useEffect(() => {
         if (!isAuthenticated || !token) return;
 
+        const hubUrl = `${apiUrl.replace('/api', '')}/hubs/notifications`;
+
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("http://localhost:5000/hubs/notifications", {
+            .withUrl(hubUrl, {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
@@ -41,6 +48,15 @@ export const useNotifications = () => {
         connection.on("ReceiveNotification", (notification: any) => {
             setNotifications(prev => [notification, ...prev]);
             
+            toast(notification.title, {
+                icon: '🔔',
+                style: {
+                    borderRadius: '10px',
+                    background: '#333',
+                    color: '#fff',
+                },
+            });
+
             // Show browser notification
             if (Notification.permission === "granted") {
                 new Notification(notification.title, { body: notification.content });
@@ -49,6 +65,31 @@ export const useNotifications = () => {
 
         connection.on("UnreadCountChanged", (count: number) => {
             setUnreadCount(count);
+        });
+
+        connection.on("OrderChanged", (data: any) => {
+            console.log("SignalR OrderChanged", data);
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            queryClient.invalidateQueries({ queryKey: ['order', data.orderId] });
+            queryClient.invalidateQueries({ queryKey: ['orderDetail', data.orderId] });
+        });
+
+        connection.on("CustomerLocked", (data: any) => {
+            console.log("SignalR CustomerLocked", data);
+            alert("Tài khoản của bạn đã bị khóa bởi quản trị viên.");
+            logout();
+        });
+
+        connection.on("AdminAnnouncement", (data: any) => {
+            console.log("SignalR AdminAnnouncement", data);
+            toast(data.title || "Thông báo từ quản trị viên", {
+                icon: '📢',
+                style: {
+                    borderRadius: '10px',
+                    background: '#1a73e8',
+                    color: '#fff',
+                },
+            });
         });
 
         connection.start()
@@ -65,7 +106,7 @@ export const useNotifications = () => {
     // Actions
     const markAsRead = async (id: number) => {
         try {
-            await axios.put(`http://localhost:5000/api/notifications/${id}/read`, {}, {
+            await axios.put(`${apiUrl}/api/notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => 
@@ -78,7 +119,7 @@ export const useNotifications = () => {
 
     const markAllAsRead = async () => {
         try {
-            await axios.put('http://localhost:5000/api/notifications/read-all', {}, {
+            await axios.put(`${apiUrl}/api/notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => 

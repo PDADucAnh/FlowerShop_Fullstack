@@ -24,8 +24,17 @@ namespace Flower.Backend.Services
 
         public async Task NotifyEntityChanged(string entityName)
         {
-            // Backward compatibility for Admin
-            await _hubContext.Clients.Group("AdminGroup").SendAsync("EntityChanged", entityName);
+            await _hubContext.Clients.All.SendAsync("EntityChanged", entityName);
+        }
+
+        public async Task NotifyCustomerEvent(int customerId, string eventName, object data = null)
+        {
+            await _hubContext.Clients.Group($"Customer_{customerId}").SendAsync(eventName, data);
+        }
+
+        public async Task NotifyBroadcastEvent(string eventName, object data = null)
+        {
+            await _hubContext.Clients.All.SendAsync(eventName, data);
         }
 
         public async Task CreateCustomerNotification(int customerId, string title, string content, string type, 
