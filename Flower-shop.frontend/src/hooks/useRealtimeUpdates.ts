@@ -35,9 +35,9 @@ export function useRealtimeUpdates() {
       .build();
 
     connection.on('EntityChanged', (entityName: string) => {
-      const queryKey = entityQueryMap[entityName];
-      if (queryKey) {
-        queryClient.invalidateQueries({ queryKey });
+      const queryKeys = entityQueryMap[entityName];
+      if (queryKeys) {
+        queryKeys.forEach(key => queryClient.invalidateQueries({ queryKey: [key] }));
       }
     });
 
