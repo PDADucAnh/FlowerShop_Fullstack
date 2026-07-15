@@ -21,7 +21,9 @@ namespace Flower.Backend.Controllers.Api
 
         private int GetCustomerId()
         {
-            var customerIdClaim = User.FindFirst("CustomerId") ?? User.FindFirst(ClaimTypes.NameIdentifier);
+            var customerIdClaim = User.FindFirst("CustomerId")
+                ?? User.FindFirst("Id")
+                ?? User.FindFirst(ClaimTypes.NameIdentifier);
             if (customerIdClaim != null && int.TryParse(customerIdClaim.Value, out int id))
             {
                 return id;

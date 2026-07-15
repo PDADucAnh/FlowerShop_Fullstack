@@ -67,6 +67,17 @@ namespace Flower.Backend.Services
                 if (order.CustomerId > 0)
                 {
                     await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, paymentStatus = "Completed" });
+                    await _notificationService.CreateCustomerNotification(
+                        customerId: order.CustomerId,
+                        title: $"Thanh toán đơn hàng #{order.Id} thành công",
+                        content: $"Đơn hàng #{order.Id} đã được thanh toán {amount:N0} VNĐ.",
+                        type: "PaymentCompleted",
+                        orderId: order.Id,
+                        referenceType: "PaymentCompleted",
+                        icon: "Payment",
+                        priority: "High",
+                        navigationUrl: $"/my-orders/{order.Id}"
+                    );
                 }
                 order.PaymentTransactionId = transactionId;
                 order.PaymentPaidAt = DateTime.UtcNow;
@@ -170,6 +181,17 @@ namespace Flower.Backend.Services
                 if (orderWithDetails.CustomerId > 0)
                 {
                     await _notificationService.NotifyCustomerEvent(orderWithDetails.CustomerId, "OrderChanged", new { orderId = orderWithDetails.Id, paymentStatus = "Failed" });
+                    await _notificationService.CreateCustomerNotification(
+                        customerId: orderWithDetails.CustomerId,
+                        title: $"Thanh toán đơn hàng #{orderWithDetails.Id} thất bại",
+                        content: "Giao dịch thanh toán không thành công. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.",
+                        type: "PaymentFailed",
+                        orderId: orderWithDetails.Id,
+                        referenceType: "PaymentFailed",
+                        icon: "PaymentError",
+                        priority: "High",
+                        navigationUrl: $"/my-orders/{orderWithDetails.Id}"
+                    );
                 }
                 await _context.SaveChangesAsync();
 
@@ -243,6 +265,17 @@ namespace Flower.Backend.Services
                 if (orderWithDetails.CustomerId > 0)
                 {
                     await _notificationService.NotifyCustomerEvent(orderWithDetails.CustomerId, "OrderChanged", new { orderId = orderWithDetails.Id, paymentStatus = "Completed" });
+                    await _notificationService.CreateCustomerNotification(
+                        customerId: orderWithDetails.CustomerId,
+                        title: $"Thanh toán đơn hàng #{orderWithDetails.Id} thành công",
+                        content: $"Đơn hàng #{orderWithDetails.Id} đã được thanh toán {amount:N0} VNĐ.",
+                        type: "PaymentCompleted",
+                        orderId: orderWithDetails.Id,
+                        referenceType: "PaymentCompleted",
+                        icon: "Payment",
+                        priority: "High",
+                        navigationUrl: $"/my-orders/{orderWithDetails.Id}"
+                    );
                 }
 
                 orderWithDetails.IsVerified = true;
@@ -387,17 +420,22 @@ namespace Flower.Backend.Services
 
             try
             {
-                _context.Notifications.Add(new Notification
+                if (order.CustomerId > 0)
                 {
-                    CustomerId = order.CustomerId,
-                    OrderId = order.Id,
-                    Title = $"Hoàn tiền đơn hàng #{order.Id} thành công",
-                    Content = $"Số tiền đã hoàn: {order.RefundAmount:N0} VNĐ.",
-                    Type = "RefundCompleted",
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
+                    await _notificationService.CreateCustomerNotification(
+                        customerId: order.CustomerId,
+                        title: $"Hoàn tiền đơn hàng #{order.Id} thành công",
+                        content: $"Số tiền đã hoàn: {order.RefundAmount:N0} VNĐ.",
+                        type: "RefundCompleted",
+                        orderId: order.Id,
+                        referenceType: "RefundCompleted",
+                        icon: "MoneyOff",
+                        priority: "High",
+                        navigationUrl: $"/my-orders/{order.Id}"
+                    );
+
+                    await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
+                }
             }
             catch (Exception ex)
             {

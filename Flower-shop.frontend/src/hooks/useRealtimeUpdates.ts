@@ -8,6 +8,8 @@ const entityQueryMap: Record<string, string[]> = {
   Post: ['posts'],
   PromotionCampaign: ['promotions'],
   Coupon: ['coupons'],
+  FlashSale: ['flashsales'],
+  Advertisement: ['advertisements', 'banners'],
   SystemSettings: ['settings'],
 };
 

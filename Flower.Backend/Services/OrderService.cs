@@ -488,7 +488,7 @@ namespace Flower.Backend.Services
                         referenceType: "OrderCreated",
                         icon: "ShoppingBag",
                         priority: "High",
-                        navigationUrl: $"/customer/orders/{newOrder.Id}"
+                        navigationUrl: $"/my-orders/{newOrder.Id}"
                     );
                 }
             }
@@ -560,6 +560,27 @@ namespace Flower.Backend.Services
                         {
                             await _emailService.SendOrderCompletedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
                         }
+                    }
+
+                    if (order.CustomerId > 0)
+                    {
+                        var (notifTitle, notifType, notifIcon) = statusChangedToConfirmed
+                            ? ($"Đơn hàng #{order.Id} đã được xác nhận", "OrderConfirmed", "Verified")
+                            : statusChangedToShipping
+                                ? ($"Đơn hàng #{order.Id} đang được giao", "OrderShipping", "LocalShipping")
+                                : ($"Đơn hàng #{order.Id} đã hoàn thành", "OrderCompleted", "CheckCircle");
+
+                        await _notificationService.CreateCustomerNotification(
+                            customerId: order.CustomerId,
+                            title: notifTitle,
+                            content: $"Trạng thái đơn hàng #{order.Id} đã được cập nhật.",
+                            type: notifType,
+                            orderId: order.Id,
+                            referenceType: "OrderStatusChanged",
+                            icon: notifIcon,
+                            priority: "High",
+                            navigationUrl: $"/my-orders/{order.Id}"
+                        );
                     }
                 }
 
@@ -643,6 +664,18 @@ namespace Flower.Backend.Services
                     if (order.CustomerId > 0)
                     {
                         await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
+
+                        await _notificationService.CreateCustomerNotification(
+                            customerId: order.CustomerId,
+                            title: $"Đơn hàng #{order.Id} đã được xác nhận",
+                            content: "Đơn hàng COD của bạn đã được xác nhận và đang được chuẩn bị.",
+                            type: "OrderConfirmed",
+                            orderId: order.Id,
+                            referenceType: "CODConfirmed",
+                            icon: "Verified",
+                            priority: "High",
+                            navigationUrl: $"/my-orders/{order.Id}"
+                        );
                     }
 
                     if (!requiresVerification)

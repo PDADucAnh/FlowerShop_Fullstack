@@ -20,6 +20,12 @@ namespace Flower.Backend.Middleware
 
         public async Task InvokeAsync(HttpContext context, IAuthService authService, IMemoryCache cache, IApplicationDbContext dbContext)
         {
+            if (context.Request.Path.StartsWithSegments("/hubs"))
+            {
+                await _next(context);
+                return;
+            }
+
             if (context.User.Identity?.IsAuthenticated == true)
             {
                 var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value

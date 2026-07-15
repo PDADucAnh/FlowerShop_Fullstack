@@ -12,11 +12,13 @@ namespace Flower.Backend.Controllers
     {
         private readonly IAdvertisementService _advertisementService;
         private readonly IWebHostEnvironment _env;
+        private readonly INotificationService _notificationService;
 
-        public AdvertisementController(IAdvertisementService advertisementService, IWebHostEnvironment env)
+        public AdvertisementController(IAdvertisementService advertisementService, IWebHostEnvironment env, INotificationService notificationService)
         {
             _advertisementService = advertisementService;
             _env = env;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -47,6 +49,7 @@ namespace Flower.Backend.Controllers
             }
 
             await _advertisementService.Create(model);
+            await _notificationService.NotifyEntityChanged("Advertisement");
             TempData["Success"] = "Banner quảng cáo đã được tạo thành công.";
             return RedirectToAction("Index");
         }
@@ -106,6 +109,7 @@ namespace Flower.Backend.Controllers
                 return View(model);
             }
 
+            await _notificationService.NotifyEntityChanged("Advertisement");
             TempData["Success"] = "Banner quảng cáo đã được cập nhật.";
             return RedirectToAction("Index");
         }
@@ -117,6 +121,7 @@ namespace Flower.Backend.Controllers
                 ImageHelper.DeleteImage(existing.ImageUrl, _env.WebRootPath);
 
             await _advertisementService.Delete(id);
+            await _notificationService.NotifyEntityChanged("Advertisement");
             TempData["Success"] = "Banner quảng cáo đã được xóa.";
             return RedirectToAction("Index");
         }

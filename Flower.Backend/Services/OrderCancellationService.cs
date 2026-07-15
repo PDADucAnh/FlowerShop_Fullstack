@@ -18,6 +18,7 @@ namespace Flower.Backend.Services
         private readonly IEmailService _emailService;
         private readonly ILogger<OrderCancellationService> _logger;
         private readonly ICouponService _couponService;
+        private readonly INotificationService _notificationService;
 
         public OrderCancellationService(
             IApplicationDbContext context,
@@ -25,7 +26,8 @@ namespace Flower.Backend.Services
             StockLockService stockLockService,
             IEmailService emailService,
             ILogger<OrderCancellationService> logger,
-            ICouponService couponService)
+            ICouponService couponService,
+            INotificationService notificationService)
         {
             _context = context;
             _deliverySlotService = deliverySlotService;
@@ -33,6 +35,7 @@ namespace Flower.Backend.Services
             _emailService = emailService;
             _logger = logger;
             _couponService = couponService;
+            _notificationService = notificationService;
         }
 
         public async Task<bool> CancelWithReason(int id, string? reason)
@@ -194,21 +197,26 @@ namespace Flower.Backend.Services
                     ? $"Số tiền hoàn: {refundAmount:N0} VNĐ. Tiền sẽ được hoàn trong vòng 24 giờ."
                     : "Đơn hàng đã được hủy.";
 
-                _context.Notifications.Add(new Notification
+                await _notificationService.CreateCustomerNotification(
+                    customerId: order.CustomerId,
+                    title: notifTitle,
+                    content: notifContent,
+                    type: "OrderCancelled",
+                    orderId: order.Id,
+                    referenceType: "OrderCancelled",
+                    icon: cancelledBy == "Shop" ? "CancelScheduleSend" : "Cancel",
+                    priority: "High",
+                    navigationUrl: $"/my-orders/{order.Id}"
+                );
+
+                if (order.CustomerId > 0)
                 {
-                    CustomerId = order.CustomerId,
-                    OrderId = order.Id,
-                    Title = notifTitle,
-                    Content = notifContent,
-                    Type = "OrderCancelled",
-                    IsRead = false,
-                    CreatedAt = DateTime.UtcNow
-                });
-                await _context.SaveChangesAsync();
+                    await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to create notification for order {OrderId}", order.Id);
+                _logger.LogWarning(ex, "Failed to send notification for order {OrderId}", order.Id);
             }
 
             if (refundAmount > 0)

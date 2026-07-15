@@ -164,7 +164,7 @@ namespace Flower.Backend.Controllers.Api
             {
                 await _adminNotificationService.CreateNotification(
                     "Thanh toán VNPay thành công",
-                    $"Đơn hàng #{orderId} đã được thanh toán thành công qua VNPay số tiền {response.Amount / 100:#,##0} VNĐ (Mã giao dịch: {response.TransactionId}).",
+                    $"Đơn hàng #{orderId} đã được thanh toán thành công qua VNPay số tiền {response.Amount:#,##0} VNĐ (Mã giao dịch: {response.TransactionId}).",
                     "Payment",
                     orderId.ToString()
                 );

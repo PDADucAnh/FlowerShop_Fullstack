@@ -11,10 +11,12 @@ namespace Flower.Backend.Controllers.Api
     public class AdvertisementsController : ControllerBase
     {
         private readonly IAdvertisementService _advertisementService;
+        private readonly INotificationService _notificationService;
 
-        public AdvertisementsController(IAdvertisementService advertisementService)
+        public AdvertisementsController(IAdvertisementService advertisementService, INotificationService notificationService)
         {
             _advertisementService = advertisementService;
+            _notificationService = notificationService;
         }
 
         [AllowAnonymous]
@@ -51,6 +53,7 @@ namespace Flower.Backend.Controllers.Api
                 return BadRequest(ModelState);
 
             var created = await _advertisementService.Create(dto);
+            await _notificationService.NotifyEntityChanged("Advertisement");
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
@@ -68,6 +71,7 @@ namespace Flower.Backend.Controllers.Api
             if (!updated)
                 return NotFound();
 
+            await _notificationService.NotifyEntityChanged("Advertisement");
             return NoContent();
         }
 
@@ -78,6 +82,7 @@ namespace Flower.Backend.Controllers.Api
             var deleted = await _advertisementService.Delete(id);
             if (!deleted)
                 return NotFound();
+            await _notificationService.NotifyEntityChanged("Advertisement");
             return NoContent();
         }
     }

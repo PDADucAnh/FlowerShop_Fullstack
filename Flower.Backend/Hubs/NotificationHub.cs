@@ -19,7 +19,7 @@ namespace Flower.Backend.Hubs
                 }
                 
                 // Also check if they are a customer (JWT claims or NameIdentifier)
-                var customerIdClaim = user.FindFirst("CustomerId") ?? user.FindFirst(ClaimTypes.NameIdentifier);
+                var customerIdClaim = user.FindFirst("CustomerId") ?? user.FindFirst("Id") ?? user.FindFirst(ClaimTypes.NameIdentifier);
                 if (customerIdClaim != null)
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, $"Customer_{customerIdClaim.Value}");
@@ -39,7 +39,7 @@ namespace Flower.Backend.Hubs
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, "AdminGroup");
                 }
                 
-                var customerIdClaim = user.FindFirst("CustomerId") ?? user.FindFirst(ClaimTypes.NameIdentifier);
+                var customerIdClaim = user.FindFirst("CustomerId") ?? user.FindFirst("Id") ?? user.FindFirst(ClaimTypes.NameIdentifier);
                 if (customerIdClaim != null)
                 {
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"Customer_{customerIdClaim.Value}");
