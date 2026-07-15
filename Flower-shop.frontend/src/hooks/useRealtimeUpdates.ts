@@ -16,14 +16,6 @@ const entityQueryMap: Record<string, string[]> = {
 const apiUrl = import.meta.env.VITE_API_URL || 'https://localhost:7224';
 const hubUrl = `${apiUrl.replace('/api', '')}/hubs/notifications`;
 
-const signalRLogger: signalR.ILogger = {
-  log: (logLevel: signalR.LogLevel, message: string) => {
-    if (logLevel < signalR.LogLevel.Warning) return;
-    if (message.includes('Failed to start the connection') || message.includes('was stopped during negotiation')) return;
-    console.warn(`[SignalR] ${message}`);
-  },
-};
-
 export function useRealtimeUpdates() {
   const queryClient = useQueryClient();
 
@@ -31,7 +23,7 @@ export function useRealtimeUpdates() {
     const connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl)
       .withAutomaticReconnect()
-      .configureLogging(signalRLogger)
+      .configureLogging(signalR.LogLevel.Warning)
       .build();
 
     connection.on('EntityChanged', (entityName: string) => {
