@@ -43,6 +43,7 @@ export const useNotifications = () => {
                 accessTokenFactory: () => token
             })
             .withAutomaticReconnect()
+            .configureLogging(signalR.LogLevel.Warning)
             .build();
 
         connection.on("ReceiveNotification", (notification: any) => {
