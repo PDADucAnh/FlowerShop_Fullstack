@@ -93,14 +93,14 @@ export const useNotifications = () => {
             });
         });
 
-        connection.start()
+        const startPromise = connection.start()
             .then(() => setIsConnected(true))
             .catch(err => console.error('SignalR Connection Error: ', err));
 
         fetchNotifications();
 
         return () => {
-            connection.stop();
+            startPromise.then(() => connection.stop());
         };
     }, [isAuthenticated, token, fetchNotifications]);
 

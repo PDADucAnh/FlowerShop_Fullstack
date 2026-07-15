@@ -36,12 +36,12 @@ export function useRealtimeUpdates() {
       }
     });
 
-    connection.start().catch(() => {
+    const startPromise = connection.start().catch(() => {
       // SignalR connection failed — will retry automatically
     });
 
     return () => {
-      connection.stop();
+      startPromise.then(() => connection.stop());
     };
   }, [queryClient]);
 }
