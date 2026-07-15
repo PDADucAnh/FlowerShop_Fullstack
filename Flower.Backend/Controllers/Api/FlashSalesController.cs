@@ -3,7 +3,7 @@ using Flower.Backend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
-using System;
+using System.Collections.Generic;
 
 namespace Flower.Backend.Controllers.Api
 {
@@ -12,10 +12,12 @@ namespace Flower.Backend.Controllers.Api
     public class FlashSalesController : ControllerBase
     {
         private readonly IFlashSaleService _flashSaleService;
+        private readonly INotificationService _notificationService;
 
-        public FlashSalesController(IFlashSaleService flashSaleService)
+        public FlashSalesController(IFlashSaleService flashSaleService, INotificationService notificationService)
         {
             _flashSaleService = flashSaleService;
+            _notificationService = notificationService;
         }
 
         [AllowAnonymous]
@@ -52,6 +54,7 @@ namespace Flower.Backend.Controllers.Api
             try
             {
                 var item = await _flashSaleService.Create(dto);
+                await _notificationService.NotifyEntityChanged("FlashSale");
                 return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
             }
             catch (InvalidOperationException ex)
@@ -70,6 +73,7 @@ namespace Flower.Backend.Controllers.Api
             {
                 var result = await _flashSaleService.Update(id, dto);
                 if (!result) return NotFound();
+                await _notificationService.NotifyEntityChanged("FlashSale");
                 return NoContent();
             }
             catch (InvalidOperationException ex)
@@ -84,6 +88,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _flashSaleService.Delete(id);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("FlashSale");
             return NoContent();
         }
     }

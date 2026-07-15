@@ -14,6 +14,7 @@ import { Toaster } from 'react-hot-toast';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './api/queryClient';
 import { HelmetProvider } from './components/SEO';
+import { useRealtimeUpdates } from './hooks/useRealtimeUpdates';
 
 const Home = lazy(() => import('./pages/home/index'));
 const Shop = lazy(() => import('./pages/shop/index'));
@@ -70,10 +71,16 @@ const NotFound: React.FC = () => (
   </div>
 );
 
+const RealtimeUpdatesInner: React.FC = () => {
+  useRealtimeUpdates();
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <HelmetProvider>
     <QueryClientProvider client={queryClient}>
+      <RealtimeUpdatesInner />
     <AuthProvider>
       <CartProvider>
         <WishlistProvider>

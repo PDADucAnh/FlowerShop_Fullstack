@@ -449,14 +449,7 @@ namespace Flower.Backend.Services
             if (method == PaymentMethod.COD && customer != null)
             {
                 var requiresVerification = await _fraudDetectionService.RequiresVerification(customer);
-                if (!requiresVerification)
-                {
-                    newOrder.Status = OrderStatus.Confirmed;
-                    newOrder.IsVerified = true;
-                    newOrder.VerifiedAt = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
-                }
-                else
+                if (requiresVerification)
                 {
                     var otp = new Random().Next(100000, 999999).ToString();
                     _memoryCache.Set("otp_" + newOrder.Id, otp, TimeSpan.FromMinutes(10));

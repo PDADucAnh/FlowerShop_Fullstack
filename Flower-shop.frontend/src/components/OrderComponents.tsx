@@ -13,7 +13,10 @@ export const statusStyles: Record<string, string> = {
   ReadyForDelivery: 'bg-indigo-100 text-indigo-700',
   Completed: 'bg-green-100 text-green-700',
   Cancelled: 'bg-red-100 text-red-600',
+  CancelledByCustomer: 'bg-orange-100 text-orange-700',
+  CancelledByShop: 'bg-red-100 text-red-600',
   Refunded: 'bg-purple-100 text-purple-700',
+  RefundPending: 'bg-yellow-100 text-yellow-700',
 };
 
 export const statusConfig: Record<string, { dot: string; bg: string; border: string }> = {
@@ -27,7 +30,10 @@ export const statusConfig: Record<string, { dot: string; bg: string; border: str
   ReadyForDelivery: { dot: 'bg-indigo-500', bg: 'bg-indigo-50 text-indigo-700', border: 'border-indigo-300/50' },
   Completed: { dot: 'bg-[#43A047]', bg: 'bg-[#E8F5E9] text-[#2E7D32]', border: 'border-[#A5D6A7]/50' },
   Cancelled: { dot: 'bg-[#E53935]', bg: 'bg-[#FFEBEE] text-[#C62828]', border: 'border-[#EF9A9A]/50' },
+  CancelledByCustomer: { dot: 'bg-orange-500', bg: 'bg-orange-50 text-orange-700', border: 'border-orange-300/50' },
+  CancelledByShop: { dot: 'bg-[#E53935]', bg: 'bg-[#FFEBEE] text-[#C62828]', border: 'border-[#EF9A9A]/50' },
   Refunded: { dot: 'bg-purple-500', bg: 'bg-purple-50 text-purple-700', border: 'border-purple-300/50' },
+  RefundPending: { dot: 'bg-yellow-500', bg: 'bg-yellow-50 text-yellow-700', border: 'border-yellow-300/50' },
 };
 
 import { getOrderStatusText } from '../utils/statusMappers';

@@ -10,10 +10,12 @@ namespace Flower.Backend.Controllers
     public class PromotionController : Controller
     {
         private readonly IPromotionService _promotionService;
+        private readonly INotificationService _notificationService;
 
-        public PromotionController(IPromotionService promotionService)
+        public PromotionController(IPromotionService promotionService, INotificationService notificationService)
         {
             _promotionService = promotionService;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -51,6 +53,7 @@ namespace Flower.Backend.Controllers
             try
             {
                 await _promotionService.Create(model);
+                await _notificationService.NotifyEntityChanged("PromotionCampaign");
                 TempData["Success"] = "Đợt khuyến mãi đã được tạo thành công.";
                 return RedirectToAction("Index");
             }
@@ -124,6 +127,7 @@ namespace Flower.Backend.Controllers
                 return View(model);
             }
 
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             TempData["Success"] = "Đợt khuyến mãi đã được cập nhật.";
             return RedirectToAction("Index");
         }
@@ -132,6 +136,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await _promotionService.Delete(id);
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             TempData["Success"] = "Đợt khuyến mãi đã được xóa.";
             return RedirectToAction("Index");
         }
@@ -143,6 +148,7 @@ namespace Flower.Backend.Controllers
             if (item == null) return NotFound();
 
             await _promotionService.SetActive(id, !item.IsActive);
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             TempData["Success"] = item.IsActive ? "Đã tắt đợt khuyến mãi." : "Đã bật đợt khuyến mãi.";
             return RedirectToAction("Index");
         }

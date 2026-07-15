@@ -4,10 +4,8 @@ import BestSellingProducts from './BestSellingProducts';
 import ProductGrid from './ProductGrid';
 import LatestBlog from './LatestBlog';
 import SEO from '../../components/SEO';
-import { useRealtimeUpdates } from '../../hooks/useRealtimeUpdates';
 
 function Home() {
-    useRealtimeUpdates();
 
     return (
         <div className="bg-surface text-on-surface font-body-md antialiased min-h-screen flex flex-col pt-20">

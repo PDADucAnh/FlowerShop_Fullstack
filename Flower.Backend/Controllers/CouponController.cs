@@ -10,10 +10,12 @@ namespace Flower.Backend.Controllers
     public class CouponController : Controller
     {
         private readonly ICouponService _couponService;
+        private readonly INotificationService _notificationService;
 
-        public CouponController(ICouponService couponService)
+        public CouponController(ICouponService couponService, INotificationService notificationService)
         {
             _couponService = couponService;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -42,6 +44,7 @@ namespace Flower.Backend.Controllers
             try
             {
                 await _couponService.Create(model);
+                await _notificationService.NotifyEntityChanged("Coupon");
                 TempData["Success"] = "Mã giảm giá đã được tạo thành công.";
                 return RedirectToAction("Index");
             }
@@ -103,6 +106,7 @@ namespace Flower.Backend.Controllers
                 return View(model);
             }
 
+            await _notificationService.NotifyEntityChanged("Coupon");
             TempData["Success"] = "Mã giảm giá đã được cập nhật.";
             return RedirectToAction("Index");
         }
@@ -113,6 +117,7 @@ namespace Flower.Backend.Controllers
             try
             {
                 await _couponService.Delete(id);
+                await _notificationService.NotifyEntityChanged("Coupon");
                 TempData["Success"] = "Mã giảm giá đã được xóa.";
             }
             catch (System.InvalidOperationException ex)
@@ -129,6 +134,7 @@ namespace Flower.Backend.Controllers
             if (item == null) return NotFound();
 
             await _couponService.SetActive(id, !item.IsActive);
+            await _notificationService.NotifyEntityChanged("Coupon");
             TempData["Success"] = item.IsActive ? "Đã tắt mã giảm giá." : "Đã bật mã giảm giá.";
             return RedirectToAction("Index");
         }

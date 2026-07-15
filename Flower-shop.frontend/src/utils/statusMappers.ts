@@ -36,13 +36,13 @@ export const getOrderStatusText = (status: string | number | undefined): string 
     case 'Refunded':
       return 'Đã hoàn tiền';
     case '11':
-    case 'CustomerCancelled':
+    case 'CancelledByCustomer':
       return 'Khách hủy';
     case '12':
-    case 'ShopCancelled':
+    case 'CancelledByShop':
       return 'Shop hủy';
     case '13':
-    case 'PendingRefund':
+    case 'RefundPending':
       return 'Chờ hoàn tiền';
     default:
       return s;

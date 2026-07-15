@@ -14,12 +14,14 @@ namespace Flower.Backend.Controllers.Api
         private readonly IPromotionService _promotionService;
         private readonly ICouponService _couponService;
         private readonly IPriceCalculationService _priceCalculationService;
+        private readonly INotificationService _notificationService;
 
-        public PromotionsController(IPromotionService promotionService, ICouponService couponService, IPriceCalculationService priceCalculationService)
+        public PromotionsController(IPromotionService promotionService, ICouponService couponService, IPriceCalculationService priceCalculationService, INotificationService notificationService)
         {
             _promotionService = promotionService;
             _couponService = couponService;
             _priceCalculationService = priceCalculationService;
+            _notificationService = notificationService;
         }
 
         [AllowAnonymous]
@@ -85,6 +87,7 @@ namespace Flower.Backend.Controllers.Api
             try
             {
                 var item = await _promotionService.Create(dto);
+                await _notificationService.NotifyEntityChanged("PromotionCampaign");
                 return CreatedAtAction(nameof(GetById), new { id = item.Id }, item);
             }
             catch (InvalidOperationException ex)
@@ -103,6 +106,7 @@ namespace Flower.Backend.Controllers.Api
             {
                 var result = await _promotionService.Update(id, dto);
                 if (!result) return NotFound();
+                await _notificationService.NotifyEntityChanged("PromotionCampaign");
                 return NoContent();
             }
             catch (InvalidOperationException ex)
@@ -117,6 +121,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _promotionService.Delete(id);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             return NoContent();
         }
 
@@ -126,6 +131,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _promotionService.SetActive(id, true);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             return NoContent();
         }
 
@@ -135,6 +141,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _promotionService.SetActive(id, false);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             return NoContent();
         }
 
@@ -144,6 +151,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _promotionService.AddProductToPromotion(id, request.ProductId);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             return NoContent();
         }
 
@@ -153,6 +161,7 @@ namespace Flower.Backend.Controllers.Api
         {
             var result = await _promotionService.RemoveProductFromPromotion(id, productId);
             if (!result) return NotFound();
+            await _notificationService.NotifyEntityChanged("PromotionCampaign");
             return NoContent();
         }
 
