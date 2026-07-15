@@ -6,9 +6,9 @@ const entityQueryMap: Record<string, string[]> = {
   CategoryProduct: ['categories', 'products'],
   Product: ['products'],
   Post: ['posts'],
-  PromotionCampaign: ['promotions'],
+  PromotionCampaign: ['promotions', 'products'],
   Coupon: ['coupons'],
-  FlashSale: ['flashsales'],
+  FlashSale: ['flashsales', 'products'],
   Advertisement: ['advertisements', 'banners'],
   SystemSettings: ['settings'],
 };
