@@ -41,6 +41,7 @@ namespace Flower.Backend.Models.DTOs
         public decimal OriginalAmount { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal FinalAmount { get; set; }
+        public decimal ShippingFee { get; set; }
 
         public string StatusDisplay => Status switch
         {

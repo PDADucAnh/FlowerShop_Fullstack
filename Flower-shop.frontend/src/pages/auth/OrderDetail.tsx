@@ -81,8 +81,7 @@ const OrderDetailPage: React.FC = () => {
   }
 
   const items = order.orderDetails ?? [];
-  const subtotal = items.reduce((sum: number, item: any) => sum + item.unitPrice * item.quantity, 0);
-  const totalAfterDiscount = order.finalAmount > 0 ? order.finalAmount : subtotal - order.discountAmount;
+  const totalAfterDiscount = order.finalAmount > 0 ? order.finalAmount : items.reduce((sum: number, item: any) => sum + item.originalPrice * item.quantity, 0) - order.discountAmount;
 
   return (
     <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
@@ -222,7 +221,7 @@ const OrderDetailPage: React.FC = () => {
                     <tfoot>
                       <tr className="border-t border-outline-variant/50">
                         <td colSpan={3} className="py-5 px-stack-lg text-right font-bold text-sm uppercase tracking-[0.2em]">Tạm tính</td>
-                        <td className="py-5 px-stack-lg text-right font-bold text-xl serif">{formatCurrency(subtotal)}</td>
+                        <td className="py-5 px-stack-lg text-right font-bold text-xl serif">{formatCurrency(order.originalAmount)}</td>
                       </tr>
                       {order.discountAmount > 0 && (
                         <tr>
@@ -230,6 +229,13 @@ const OrderDetailPage: React.FC = () => {
                           <td className="py-3 px-stack-lg text-right font-body-md text-error">-{formatCurrency(order.discountAmount)}</td>
                         </tr>
                       )}
+                      <tr>
+                        <td colSpan={3} className="py-3 px-stack-lg text-right font-body-md text-sm">
+                          <span className="material-symbols-outlined text-[16px] text-outline align-middle mr-1">local_shipping</span>
+                          Phí giao hàng
+                        </td>
+                        <td className="py-3 px-stack-lg text-right font-body-md">{order.shippingFee > 0 ? formatCurrency(order.shippingFee) : 'Miễn phí'}</td>
+                      </tr>
                       <tr className="border-t border-outline-variant/30">
                         <td colSpan={3} className="py-5 px-stack-lg text-right font-bold text-sm uppercase tracking-[0.2em]">Tổng cộng</td>
                         <td className="py-5 px-stack-lg text-right font-bold text-xl serif text-primary">{formatCurrency(totalAfterDiscount)}</td>

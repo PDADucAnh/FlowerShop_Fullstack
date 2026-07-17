@@ -265,9 +265,6 @@ const CheckoutPage: React.FC = () => {
         {/* Header */}
         <div className="mb-stack-lg text-center md:text-left border-b border-outline-variant pb-stack-md flex justify-between items-end">
           <div>
-            <Link className="font-headline-md text-headline-md text-primary mb-2 inline-block no-underline" to="/">
-              FlowerShop
-            </Link>
             <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mt-4">
               Thanh toán
             </h1>

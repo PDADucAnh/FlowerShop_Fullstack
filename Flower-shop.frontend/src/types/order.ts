@@ -48,6 +48,7 @@ export interface Order {
   originalAmount: number;
   discountAmount: number;
   finalAmount: number;
+  shippingFee: number;
 }
 
 export interface OrderInput {

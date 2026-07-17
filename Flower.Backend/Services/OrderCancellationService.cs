@@ -130,8 +130,8 @@ namespace Flower.Backend.Services
                     : "Hủy đơn thành công. Tiền sẽ được hoàn lại 100%.";
             }
 
-            bool isCOD = order.PaymentMethod == PaymentMethod.COD;
-            var refundAmount = isCOD ? 0 : totalAmount * refundPercent / 100;
+            bool isPaid = order.PaymentMethod == PaymentMethod.OnlinePayment && order.PaymentStatus == PaymentStatus.Completed;
+            var refundAmount = isPaid ? totalAmount * refundPercent / 100 : 0;
             var cancellationFee = totalAmount * cancellationFeePercent / 100;
 
             order.Status = cancelledBy == "Shop" ? OrderStatus.CancelledByShop : OrderStatus.CancelledByCustomer;

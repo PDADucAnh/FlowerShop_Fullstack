@@ -244,7 +244,8 @@ namespace Flower.Backend.Models.DTOs
                 CouponCode = order.Coupon?.Code,
                 OriginalAmount = order.OriginalAmount,
                 DiscountAmount = order.DiscountAmount,
-                FinalAmount = order.FinalAmount
+                FinalAmount = order.FinalAmount,
+                ShippingFee = order.ShippingFee
             };
         }
 

@@ -362,7 +362,8 @@ namespace Flower.Backend.Services
                     CouponId = appliedCouponId,
                     OriginalAmount = originalAmount,
                     DiscountAmount = totalDiscount,
-                    FinalAmount = finalAmount
+                    FinalAmount = finalAmount,
+                    ShippingFee = shippingFee
                 };
 
                 if (items != null && items.Count > 0)

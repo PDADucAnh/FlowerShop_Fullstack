@@ -260,7 +260,7 @@ namespace Flower.Backend.Services
                 pendingPayment.PaidAt = DateTime.UtcNow;
 
                 orderWithDetails.PaymentStatus = PaymentStatus.Completed;
-                orderWithDetails.Status = OrderStatus.Paid;
+                orderWithDetails.Status = OrderStatus.Confirmed;
                 
                 if (orderWithDetails.CustomerId > 0)
                 {

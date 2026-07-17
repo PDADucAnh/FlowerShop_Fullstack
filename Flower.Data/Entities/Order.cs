@@ -124,6 +124,9 @@ namespace Flower.Data.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal CancellationFee { get; set; }
 
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal ShippingFee { get; set; }
+
         public DateTime? RefundRequestedAt { get; set; }
 
         public DateTime? RefundCompletedAt { get; set; }

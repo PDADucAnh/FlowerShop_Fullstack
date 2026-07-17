@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useProductCategories } from '../hooks/useCategories';
 import { NotificationBell } from './NotificationBell';
+import settingsService, { StoreInfo } from '../services/settingsService';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -15,12 +16,21 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
+  const [storeInfo, setStoreInfo] = useState<StoreInfo | null>(null);
+
+  useEffect(() => {
+    settingsService.getStoreInfo().then((res) => {
+      setStoreInfo(res as unknown as StoreInfo);
+    });
+  }, []);
+
+  const s = storeInfo;
 
   if (location.pathname === '/order-confirmation') {
     return (
-      <header className="w-full bg-surface py-base px-margin-desktop flex justify-between items-center shadow-sm max-w-container-max mx-auto pt-20 md:pt-4">
+      <header className="w-full bg-surface py-base px-margin-desktop flex justify-between items-center shadow-sm max-w-[1400px] mx-auto pt-20 md:pt-4">
         <Link className="font-display-lg text-display-lg text-primary tracking-tight md:text-display-lg text-display-lg-mobile no-underline" to="/">
-          FlowerShop
+          {s?.storeName ?? 'FlowerShop'}
         </Link>
         <div className="flex items-center gap-2 text-on-surface-variant">
           <span className="material-symbols-outlined">person</span>
@@ -46,11 +56,12 @@ const Header: React.FC = () => {
 
   return (
     <header className="sticky top-0 z-50 shadow-sm bg-surface w-full shadow-[0px_4px_20px_rgba(171,44,93,0.02)]">
-      <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto w-full">
-        <Link className="font-headline-md text-headline-md text-primary tracking-tight no-underline" to="/">
-          FlowerShop
-        </Link>
-        <nav className="hidden md:flex space-x-gutter items-center">
+      <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-[1400px] mx-auto w-full">
+        <div className="flex items-center gap-10">
+          <Link className="font-headline-md text-headline-md text-primary tracking-tight no-underline whitespace-nowrap" to="/">
+            {s?.storeName ?? 'FlowerShop'}
+          </Link>
+          <nav className="hidden md:flex space-x-gutter items-center">
           <Link className={navLinkClass('/')} to="/">Trang chủ</Link>
           <Link className={navLinkClass('/shop')} to="/shop">Cửa hàng</Link>
           
@@ -79,6 +90,7 @@ const Header: React.FC = () => {
           <Link className={navLinkClass('/about')} to="/about">Giới thiệu</Link>
           <Link className={navLinkClass('/contact')} to="/contact">Liên hệ</Link>
         </nav>
+        </div>
 
         <div className="hidden md:flex items-center flex-grow max-w-xs mx-gutter">
           <div className="relative w-full group">
