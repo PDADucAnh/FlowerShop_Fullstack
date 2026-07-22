@@ -34,26 +34,39 @@ namespace Flower.Backend.Services
 
         public async Task<string?> UploadPhotoAsync(IFormFile file)
         {
-            if (file.Length > 0)
+            if (file.Length <= 0)
             {
-                var cloudinary = await GetCloudinaryAsync();
-                using var stream = file.OpenReadStream();
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(file.FileName, stream),
-                    Folder = _settings!.Folder
-                };
-
-                var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK && uploadResult.SecureUrl != null)
-                    return uploadResult.SecureUrl.ToString();
-
-                _logger.LogError("Cloudinary upload failed: StatusCode={StatusCode}, Error={Error}, CloudName={CloudName}",
-                    uploadResult.StatusCode,
-                    uploadResult.Error?.Message,
-                    _settings?.CloudName);
+                _logger.LogWarning("UploadPhotoAsync: file is empty");
                 return null;
             }
+
+            var cloudinary = await GetCloudinaryAsync();
+            _logger.LogInformation("UploadPhotoAsync: FileName={Name}, Length={Length}, CloudName={CloudName}, Folder={Folder}",
+                file.FileName, file.Length, _settings?.CloudName, _settings?.Folder);
+
+            using var stream = file.OpenReadStream();
+            _logger.LogInformation("UploadPhotoAsync: StreamPosition={Position}, StreamLength={Length}, CanSeek={CanSeek}",
+                stream.Position, stream.Length, stream.CanSeek);
+
+            var uploadParams = new ImageUploadParams
+            {
+                File = new FileDescription(file.FileName, stream),
+                Folder = _settings!.Folder
+            };
+
+            var uploadResult = await cloudinary.UploadAsync(uploadParams);
+            _logger.LogInformation("UploadPhotoAsync: ResultStatusCode={StatusCode}, SecureUrl={Url}, Error={Error}",
+                uploadResult.StatusCode,
+                uploadResult.SecureUrl?.ToString(),
+                uploadResult.Error?.Message);
+
+            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK && uploadResult.SecureUrl != null)
+                return uploadResult.SecureUrl.ToString();
+
+            _logger.LogError("Cloudinary upload failed: StatusCode={StatusCode}, Error={Error}, CloudName={CloudName}",
+                uploadResult.StatusCode,
+                uploadResult.Error?.Message,
+                _settings?.CloudName);
             return null;
         }
 
