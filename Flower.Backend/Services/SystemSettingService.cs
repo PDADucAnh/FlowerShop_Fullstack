@@ -191,6 +191,22 @@ namespace Flower.Backend.Services
                 };
                 return (T)(object)vnpay;
             }
+            if (key == "Cloudinary" && typeof(T) == typeof(CloudinarySettings))
+            {
+                var configSection = _configuration.GetSection("CloudinarySettings");
+                var cloudinary = new CloudinarySettings
+                {
+                    CloudName = Environment.GetEnvironmentVariable("CLOUDINARY__CLOUDNAME")
+                        ?? configSection["CloudName"] ?? "",
+                    ApiKey = Environment.GetEnvironmentVariable("CLOUDINARY__APIKEY")
+                        ?? configSection["ApiKey"] ?? "",
+                    ApiSecret = Environment.GetEnvironmentVariable("CLOUDINARY__APISECRET")
+                        ?? configSection["ApiSecret"] ?? "",
+                    Folder = configSection["Folder"] ?? "flowershop_products"
+                };
+                return (T)(object)cloudinary;
+            }
+
             if (key == "Order" && typeof(T) == typeof(OrderSettings))
             {
                 var timeSection = _configuration.GetSection("TimeSettings");

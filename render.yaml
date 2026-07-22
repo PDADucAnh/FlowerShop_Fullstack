@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: flowershop-api
+    env: docker
+    dockerfilePath: ./Flower.Backend/Dockerfile
+    repo: https://github.com/your-username/FlowerShop
+    branch: main
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: DB_PROVIDER
+        value: PostgreSQL
+      - key: CONNECTIONSTRINGS__DEFAULTCONNECTION
+        fromDatabase:
+          name: flowershop-db
+          property: ConnectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: WEBHOOK_SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://flowershop.vercel.app
+      - key: CLOUDINARY__CLOUDNAME
+        sync: false
+      - key: CLOUDINARY__APIKEY
+        sync: false
+      - key: CLOUDINARY__APISECRET
+        sync: false
+
+databases:
+  - name: flowershop-db
+    type: postgresql
+    plan: free

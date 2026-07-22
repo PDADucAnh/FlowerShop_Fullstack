@@ -18,6 +18,7 @@
         <button onclick="switchTab('store-tab')" id="store-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-primary border-b-2 border-b-primary font-bold bg-transparent cursor-pointer transition-all">Thông tin cửa hàng</button>
         <button onclick="switchTab('smtp-tab')" id="smtp-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">SMTP Email</button>
         <button onclick="switchTab('vnpay-tab')" id="vnpay-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Cổng VNPay</button>
+        <button onclick="switchTab('cloudinary-tab')" id="cloudinary-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Cloudinary</button>
         <button onclick="switchTab('shipping-tab')" id="shipping-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Giao nhận</button>
         <button onclick="switchTab('order-tab')" id="order-tab-btn" class="tab-btn px-4 py-2 font-label-md text-label-md text-on-surface-variant border-b-2 border-b-transparent hover:text-primary bg-transparent cursor-pointer transition-all">Đơn hàng</button>
     </div>
@@ -155,6 +156,39 @@
                             <option value="true" selected="@(Model.VNPay.EnablePayment == true)">Kích hoạt</option>
                             <option value="false" selected="@(Model.VNPay.EnablePayment == false)">Tạm tắt</option>
                         </select>
+                    </div>
+                </div>
+                @if (isAdmin)
+                {
+                    <div class="flex justify-end gap-3 pt-4 border-t border-outline-variant/15">
+                        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent font-label-md hover:bg-primary-container/10 cursor-pointer">Làm lại</button>
+                        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg font-label-md hover:bg-primary/95 cursor-pointer">Lưu cấu hình</button>
+                    </div>
+                }
+            </div>
+        </form>
+    </div>
+
+    <div class="tab-content hidden" id="cloudinary-tab">
+        <form asp-action="SaveCloudinary" method="post">
+            <div class="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-sm space-y-6">
+                <h3 class="font-headline-sm text-lg text-on-surface font-bold border-b border-outline-variant/15 pb-3">Cấu hình Cloudinary (Lưu trữ ảnh)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Cloud Name</label>
+                        <input name="CloudName" value="@Model.Cloudinary.CloudName" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div>
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">API Key</label>
+                        <input name="ApiKey" value="@Model.Cloudinary.ApiKey" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">API Secret</label>
+                        <input name="ApiSecret" type="password" value="@(string.IsNullOrEmpty(Model.Cloudinary.ApiSecret) ? "" : "••••••••••••")" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") required />
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Thư mục lưu trữ (Folder)</label>
+                        <input name="Folder" value="@Model.Cloudinary.Folder" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
                     </div>
                 </div>
                 @if (isAdmin)

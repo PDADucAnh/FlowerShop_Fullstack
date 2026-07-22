@@ -124,9 +124,17 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection");
+var dbProvider = Environment.GetEnvironmentVariable("DB_PROVIDER") ?? "SqlServer";
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    if (dbProvider == "PostgreSQL")
+        options.UseNpgsql(connectionString);
+    else
+        options.UseSqlServer(connectionString);
+});
 
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
 
@@ -154,6 +162,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPromotionService,
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICouponService, Flower.Backend.Services.CouponService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPriceCalculationService, Flower.Backend.Services.PriceCalculationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IFlashSaleService, Flower.Backend.Services.FlashSaleService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPhotoService, Flower.Backend.Services.PhotoService>();
 builder.Services.AddHostedService<Flower.Backend.Services.PromotionScheduler>();
 builder.Services.Configure<Flower.Backend.Models.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSettings>() ?? new TimeSettings();
@@ -185,15 +194,16 @@ builder.Services.AddRateLimiter(options =>
     options.RejectionStatusCode = 429;
 });
 
-// ---- CẤU HÌNH CORS (THÊM VÀO TRƯỚC builder.Build()) ----
+// ---- CẤU HÌNH CORS ----
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
+    options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:3000") // Cho phép ReactJS ở port 3000 gọi tới
-              .AllowAnyHeader()                     // Cho phép mọi loại Header (Content-Type, Authorization...)
-              .AllowAnyMethod()                     // Cho phép mọi phương thức HTTP (GET, POST, PUT, DELETE)
-              .AllowCredentials();                  // Hỗ trợ truyền Cookie/Session nếu cần sau này
+        var origins = Environment.GetEnvironmentVariable("CORS_ORIGINS") ?? "http://localhost:3000";
+        policy.WithOrigins(origins.Split(';', StringSplitOptions.RemoveEmptyEntries))
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -207,11 +217,19 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Auto-apply pending migrations (dev only) or run manually via update-database
+// Auto-apply pending migrations (dev: SQL Server) or ensure schema (prod: PostgreSQL)
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     if (app.Environment.IsDevelopment())
+    {
+        await context.Database.MigrateAsync();
+    }
+    else if (dbProvider == "PostgreSQL")
+    {
+        await context.Database.EnsureCreatedAsync();
+    }
+    else
     {
         await context.Database.MigrateAsync();
     }
@@ -246,7 +264,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseCors("AllowReactApp");
+app.UseCors("AllowFrontend");
 app.UseRateLimiter();
 
 app.Use(async (context, next) =>

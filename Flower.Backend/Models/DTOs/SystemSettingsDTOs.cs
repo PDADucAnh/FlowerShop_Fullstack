@@ -59,6 +59,17 @@ namespace Flower.Backend.Models.DTOs
         public string DeliveryTime { get; set; } = "2-4 giờ";
     }
 
+    public class CloudinarySettings
+    {
+        [Required(ErrorMessage = "CloudName không được để trống")]
+        public string CloudName { get; set; } = string.Empty;
+        [Required(ErrorMessage = "ApiKey không được để trống")]
+        public string ApiKey { get; set; } = string.Empty;
+        [Required(ErrorMessage = "ApiSecret không được để trống")]
+        public string ApiSecret { get; set; } = string.Empty;
+        public string Folder { get; set; } = "flowershop_products";
+    }
+
     public class OrderSettings
     {
         [Range(1, 1440, ErrorMessage = "Thời gian tự động hủy phải từ 1 đến 1440 phút")]
@@ -74,5 +85,6 @@ namespace Flower.Backend.Models.DTOs
         public VNPaySettings VNPay { get; set; } = new();
         public ShippingSettings Shipping { get; set; } = new();
         public OrderSettings Order { get; set; } = new();
+        public CloudinarySettings Cloudinary { get; set; } = new();
     }
 }

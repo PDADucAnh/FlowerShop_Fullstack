@@ -132,6 +132,29 @@ namespace Flower.Backend.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // POST: Settings/SaveCloudinary
+        [HttpPost]
+        [Authorize(Policy = "AdminOnly")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveCloudinary(CloudinarySettings model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Dữ liệu cấu hình Cloudinary không hợp lệ.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var oldSetting = await _settingService.GetSetting<CloudinarySettings>("Cloudinary");
+            var username = User.Identity?.Name ?? "Admin";
+            await _settingService.SaveSetting("Cloudinary", model, username);
+
+            _logger.LogInformation("AUDIT LOG: User {User} updated Cloudinary Settings. Old Value: {Old}, New Value: {New}",
+                username, JsonSerializer.Serialize(oldSetting), JsonSerializer.Serialize(model));
+
+            TempData["Success"] = "Cập nhật cấu hình Cloudinary thành công.";
+            return RedirectToAction(nameof(Index));
+        }
+
         // POST: Settings/SaveShipping
         [HttpPost]
         [Authorize(Policy = "AdminOnly")]
