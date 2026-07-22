@@ -239,15 +239,11 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Auto-apply pending migrations (dev: SQL Server) or ensure schema (prod: PostgreSQL)
+// Auto-apply pending migrations (SQL Server) or ensure schema (PostgreSQL)
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    if (app.Environment.IsDevelopment())
-    {
-        await context.Database.MigrateAsync();
-    }
-    else if (dbProvider == "PostgreSQL")
+    if (dbProvider == "PostgreSQL")
     {
         await context.Database.EnsureCreatedAsync();
     }
