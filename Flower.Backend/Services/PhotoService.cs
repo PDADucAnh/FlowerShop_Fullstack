@@ -3,17 +3,20 @@ using CloudinaryDotNet.Actions;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace Flower.Backend.Services
 {
     public class PhotoService : IPhotoService
     {
         private readonly ISystemSettingService _settingService;
+        private readonly ILogger<PhotoService> _logger;
         private Cloudinary? _cloudinary;
 
-        public PhotoService(ISystemSettingService settingService)
+        public PhotoService(ISystemSettingService settingService, ILogger<PhotoService> logger)
         {
             _settingService = settingService;
+            _logger = logger;
         }
 
         private CloudinarySettings? _settings;
@@ -44,6 +47,11 @@ namespace Flower.Backend.Services
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
                 if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK && uploadResult.SecureUrl != null)
                     return uploadResult.SecureUrl.ToString();
+
+                _logger.LogError("Cloudinary upload failed: StatusCode={StatusCode}, Error={Error}, CloudName={CloudName}",
+                    uploadResult.StatusCode,
+                    uploadResult.Error?.Message,
+                    _settings?.CloudName);
                 return null;
             }
             return null;
