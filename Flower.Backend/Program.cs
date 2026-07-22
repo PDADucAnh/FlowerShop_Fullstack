@@ -29,6 +29,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var cultureInfo = new CultureInfo("vi-VN");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
