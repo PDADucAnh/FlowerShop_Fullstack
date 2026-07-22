@@ -238,11 +238,10 @@ namespace Flower.Backend.Services
                 return (false, "Không tìm thấy yêu cầu thanh toán");
             }
 
-            var expectedTotal = orderWithDetails.OrderDetails?.Sum(od => od.Quantity * od.UnitPrice) ?? 0;
-            if (expectedTotal != amount)
+            if (orderWithDetails.FinalAmount != amount)
             {
-                _logger.LogWarning("ConfirmOnlinePayment: amount mismatch, OrderId={OrderId}, Expected={Expected}, Got={Got}",
-                    orderId, expectedTotal, amount);
+                _logger.LogWarning("ConfirmOnlinePayment: amount mismatch, OrderId={OrderId}, FinalAmount={FinalAmount}, Got={Got}",
+                    orderId, orderWithDetails.FinalAmount, amount);
                 return (false, "Số tiền thanh toán không khớp");
             }
 
@@ -458,6 +457,12 @@ namespace Flower.Backend.Services
 
             pendingPayment.Status = PaymentStatus.Failed;
             pendingPayment.GatewayResponseCode = gatewayResponse;
+
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order != null)
+            {
+                order.PaymentStatus = PaymentStatus.Failed;
+            }
 
             var attemptCount = await _context.PaymentAttempts
                 .CountAsync(pa => pa.PaymentId == pendingPayment.Id);

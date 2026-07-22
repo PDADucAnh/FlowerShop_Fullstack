@@ -1,5 +1,6 @@
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
@@ -16,6 +17,7 @@ namespace Flower.Backend.Controllers.Api
             _settingService = settingService;
         }
 
+        [AllowAnonymous]
         [HttpGet("store-info")]
         public async Task<IActionResult> GetStoreInfo()
         {
@@ -23,6 +25,7 @@ namespace Flower.Backend.Controllers.Api
             return Ok(storeInfo);
         }
 
+        [AllowAnonymous]
         [HttpGet("checkout")]
         public async Task<IActionResult> GetCheckoutSettings()
         {

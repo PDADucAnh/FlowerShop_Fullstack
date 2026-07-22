@@ -116,7 +116,6 @@ const Header: React.FC = () => {
               className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/40 hover:text-primary transition-colors flex items-center justify-center border-0 bg-transparent cursor-pointer"
               aria-label="Search"
             >
-              <span className="material-symbols-outlined text-[20px]">search</span>
             </button>
           </div>
         </div>
