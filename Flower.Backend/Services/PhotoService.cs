@@ -27,6 +27,11 @@ namespace Flower.Backend.Services
                 return _cloudinary;
 
             _settings = await _settingService.GetSetting<CloudinarySettings>("Cloudinary");
+            _logger.LogInformation("GetCloudinaryAsync: CloudName={Name}, ApiKeyPrefix={KeyPrefix}, ApiSecretLen={SecretLen}, Folder={Folder}",
+                _settings.CloudName,
+                _settings.ApiKey.Length >= 6 ? _settings.ApiKey[..6] + "..." : "too-short",
+                _settings.ApiSecret.Length,
+                _settings.Folder);
             var acc = new Account(_settings.CloudName, _settings.ApiKey, _settings.ApiSecret);
             _cloudinary = new Cloudinary(acc);
             return _cloudinary;
