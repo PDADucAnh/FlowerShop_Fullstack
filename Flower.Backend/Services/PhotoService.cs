@@ -49,22 +49,56 @@ namespace Flower.Backend.Services
                 return null;
             }
 
+            const long maxBytes = 10_485_760; // 10MB
+
             using var compressedStream = new MemoryStream();
             using (var sourceStream = file.OpenReadStream())
             using (var image = await Image.LoadAsync(sourceStream))
             {
-                var maxDimension = 1920;
-                if (image.Width > maxDimension || image.Height > maxDimension)
-                {
-                    image.Mutate(x => x.Resize(new ResizeOptions
-                    {
-                        Mode = ResizeMode.Max,
-                        Size = new SixLabors.ImageSharp.Size(maxDimension, maxDimension)
-                    }));
-                }
                 image.Mutate(x => x.AutoOrient());
-                var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder { Quality = 80 };
-                await image.SaveAsJpegAsync(compressedStream, encoder);
+                var maxDimension = 1920;
+                var quality = 80;
+
+                while (true)
+                {
+                    compressedStream.SetLength(0);
+                    compressedStream.Position = 0;
+
+                    if (image.Width > maxDimension || image.Height > maxDimension)
+                    {
+                        using var clone = image.Clone(x =>
+                            x.Resize(new ResizeOptions
+                            {
+                                Mode = ResizeMode.Max,
+                                Size = new SixLabors.ImageSharp.Size(maxDimension, maxDimension)
+                            }));
+                        var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder { Quality = quality };
+                        await clone.SaveAsJpegAsync(compressedStream, encoder);
+                    }
+                    else
+                    {
+                        var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder { Quality = quality };
+                        await image.SaveAsJpegAsync(compressedStream, encoder);
+                    }
+
+                    if (compressedStream.Length <= maxBytes)
+                        break;
+
+                    if (quality > 10)
+                    {
+                        quality -= 10;
+                    }
+                    else if (maxDimension > 400)
+                    {
+                        maxDimension -= 200;
+                        quality = 80;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+
                 compressedStream.Position = 0;
             }
 
