@@ -16,6 +16,8 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Flower.Backend.dll"]
