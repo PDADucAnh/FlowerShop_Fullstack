@@ -17,6 +17,7 @@
     </div>
 
     <form asp-action="Edit" method="post" enctype="multipart/form-data" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <div asp-validation-summary="ModelOnly" class="text-error text-sm space-y-sm"></div>
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="ImageUrl" />
 
@@ -50,6 +51,7 @@
                     </div>
                 }
                 <input type="file" name="uploadImage" class="w-full text-label-sm uppercase tracking-widest file:mr-lg file:py-2 file:px-lg file:border-0 file:bg-primary file:text-on-primary hover:file:bg-neutral-800" />
+                @Html.ValidationMessage("uploadImage", new { @class = "text-error text-xs uppercase tracking-widest" })
                 <p class="text-[10px] text-outline uppercase tracking-widest italic">Để trống nếu muốn giữ ảnh hiện tại.</p>
             </div>
         </div>

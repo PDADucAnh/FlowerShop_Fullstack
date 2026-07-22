@@ -148,6 +148,7 @@ namespace Flower.Backend.Services
                 Store = await GetSetting<StoreInfoSettings>("StoreInfo"),
                 Smtp = await GetSetting<SmtpSettings>("Smtp"),
                 VNPay = await GetSetting<VNPaySettings>("VNPay"),
+                Cloudinary = await GetSetting<CloudinarySettings>("Cloudinary"),
                 Shipping = await GetSetting<ShippingSettings>("Shipping"),
                 Order = await GetSetting<OrderSettings>("Order")
             };

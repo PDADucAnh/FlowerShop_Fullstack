@@ -17,6 +17,7 @@
     </div>
 
     <form asp-action="Create" method="post" enctype="multipart/form-data" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <div asp-validation-summary="ModelOnly" class="text-error text-sm space-y-sm"></div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-xl">
             <div class="space-y-md">
                 <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">SKU</label>
@@ -41,6 +42,7 @@
             <div class="space-y-md">
                 <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Hình ảnh</label>
                 <input type="file" name="uploadImage" class="w-full text-label-sm uppercase tracking-widest file:mr-lg file:py-2 file:px-lg file:border-0 file:bg-primary file:text-on-primary hover:file:bg-neutral-800" />
+                @Html.ValidationMessage("uploadImage", new { @class = "text-error text-xs uppercase tracking-widest" })
             </div>
         </div>
 

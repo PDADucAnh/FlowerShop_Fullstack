@@ -55,6 +55,7 @@ namespace Flower.Backend.Controllers
         {
             if (!ModelState.IsValid)
             {
+                TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
                 var categories = await _categoryProductService.GetAll();
                 ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
                 return View(model);
@@ -70,6 +71,7 @@ namespace Flower.Backend.Controllers
                 catch
                 {
                     ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
+                    TempData["Error"] = "File ảnh không hợp lệ.";
                     var categories = await _categoryProductService.GetAll();
                     ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
                     return View(model);
@@ -79,6 +81,7 @@ namespace Flower.Backend.Controllers
                 if (string.IsNullOrEmpty(model.ImageUrl))
                 {
                     ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
+                    TempData["Error"] = "Upload ảnh thất bại. Vui lòng thử lại hoặc kiểm tra cấu hình Cloudinary.";
                     var categories = await _categoryProductService.GetAll();
                     ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
                     return View(model);
@@ -154,6 +157,7 @@ namespace Flower.Backend.Controllers
                 catch
                 {
                     ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
+                    TempData["Error"] = "File ảnh không hợp lệ.";
                     var categories = await _categoryProductService.GetAll();
                     ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
                     return View(model);
@@ -163,6 +167,7 @@ namespace Flower.Backend.Controllers
                 if (string.IsNullOrEmpty(model.ImageUrl))
                 {
                     ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
+                    TempData["Error"] = "Upload ảnh thất bại. Vui lòng thử lại hoặc kiểm tra cấu hình Cloudinary.";
                     var categories = await _categoryProductService.GetAll();
                     ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
                     return View(model);
