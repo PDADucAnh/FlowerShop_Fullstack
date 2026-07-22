@@ -75,7 +75,6 @@ namespace Flower.Backend.Controllers
                 {
                     var validateStream = uploadImage.OpenReadStream();
                     using var _ = Image.Load(validateStream);
-                    validateStream.Position = 0;
                 }
                 catch (Exception ex)
                 {
@@ -164,7 +163,6 @@ namespace Flower.Backend.Controllers
                 {
                     var validateStream = uploadImage.OpenReadStream();
                     using var _ = Image.Load(validateStream);
-                    validateStream.Position = 0;
                 }
                 catch
                 {

@@ -4,6 +4,10 @@ using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Flower.Backend.Services
 {
@@ -45,17 +49,32 @@ namespace Flower.Backend.Services
                 return null;
             }
 
-            var cloudinary = await GetCloudinaryAsync();
-            _logger.LogInformation("UploadPhotoAsync: FileName={Name}, Length={Length}, CloudName={CloudName}, Folder={Folder}",
-                file.FileName, file.Length, _settings?.CloudName, _settings?.Folder);
+            using var compressedStream = new MemoryStream();
+            using (var sourceStream = file.OpenReadStream())
+            using (var image = await Image.LoadAsync(sourceStream))
+            {
+                var maxDimension = 1920;
+                if (image.Width > maxDimension || image.Height > maxDimension)
+                {
+                    image.Mutate(x => x.Resize(new ResizeOptions
+                    {
+                        Mode = ResizeMode.Max,
+                        Size = new SixLabors.ImageSharp.Size(maxDimension, maxDimension)
+                    }));
+                }
+                image.Mutate(x => x.AutoOrient());
+                var encoder = new SixLabors.ImageSharp.Formats.Jpeg.JpegEncoder { Quality = 80 };
+                await image.SaveAsJpegAsync(compressedStream, encoder);
+                compressedStream.Position = 0;
+            }
 
-            using var stream = file.OpenReadStream();
-            _logger.LogInformation("UploadPhotoAsync: StreamPosition={Position}, StreamLength={Length}, CanSeek={CanSeek}",
-                stream.Position, stream.Length, stream.CanSeek);
+            var cloudinary = await GetCloudinaryAsync();
+            _logger.LogInformation("UploadPhotoAsync: FileName={Name}, OriginalLength={OriginalLength}, CompressedLength={CompressedLength}, CloudName={CloudName}, Folder={Folder}",
+                file.FileName, file.Length, compressedStream.Length, _settings?.CloudName, _settings?.Folder);
 
             var uploadParams = new ImageUploadParams
             {
-                File = new FileDescription(file.FileName, stream),
+                File = new FileDescription(file.FileName, compressedStream),
                 Folder = _settings!.Folder
             };
 
