@@ -76,6 +76,13 @@ namespace Flower.Backend.Controllers
                 }
 
                 model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                if (string.IsNullOrEmpty(model.ImageUrl))
+                {
+                    ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
+                    var categories = await _categoryProductService.GetAll();
+                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    return View(model);
+                }
             }
 
             await _productService.Create(model);
@@ -153,6 +160,13 @@ namespace Flower.Backend.Controllers
                 }
 
                 model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                if (string.IsNullOrEmpty(model.ImageUrl))
+                {
+                    ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
+                    var categories = await _categoryProductService.GetAll();
+                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    return View(model);
+                }
             }
             else
             {

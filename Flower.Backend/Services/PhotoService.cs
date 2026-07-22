@@ -42,7 +42,9 @@ namespace Flower.Backend.Services
                 };
 
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                return uploadResult.SecureUrl.ToString();
+                if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK && uploadResult.SecureUrl != null)
+                    return uploadResult.SecureUrl.ToString();
+                return null;
             }
             return null;
         }
