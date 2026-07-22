@@ -26,6 +26,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -191,7 +192,19 @@ var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSett
 builder.Services.AddSingleton(timeSettings);
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IEmailService, Flower.Backend.Services.EmailService>();
 builder.Services.AddMemoryCache();
-builder.Services.AddDataProtection();
+var renderDiskPath = Environment.GetEnvironmentVariable("RENDER_DISK_PATH");
+if (!string.IsNullOrEmpty(renderDiskPath))
+{
+    var keyDir = new DirectoryInfo(Path.Combine(renderDiskPath, "DataProtectionKeys"));
+    keyDir.Create();
+    builder.Services.AddDataProtection()
+        .PersistKeysToFileSystem(keyDir)
+        .SetApplicationName("FlowerShop");
+}
+else
+{
+    builder.Services.AddDataProtection();
+}
 builder.Services.AddScoped<Flower.Backend.Services.StockLockService>();
 builder.Services.AddHostedService<Flower.Backend.Services.OrderExpiryBackgroundService>();
 builder.Services.AddHttpContextAccessor();
