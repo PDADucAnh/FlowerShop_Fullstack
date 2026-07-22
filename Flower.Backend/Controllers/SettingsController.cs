@@ -138,18 +138,28 @@ namespace Flower.Backend.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveCloudinary(CloudinarySettings model)
         {
+            var oldSetting = await _settingService.GetSetting<CloudinarySettings>("Cloudinary");
+
+            if (model.ApiSecret == "••••••••••••")
+            {
+                model.ApiSecret = oldSetting.ApiSecret;
+                ModelState.Remove("ApiSecret");
+            }
+
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Dữ liệu cấu hình Cloudinary không hợp lệ.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var oldSetting = await _settingService.GetSetting<CloudinarySettings>("Cloudinary");
             var username = User.Identity?.Name ?? "Admin";
             await _settingService.SaveSetting("Cloudinary", model, username);
 
+            var auditOld = new CloudinarySettings { CloudName = oldSetting.CloudName, ApiKey = oldSetting.ApiKey, ApiSecret = "Redacted", Folder = oldSetting.Folder };
+            var auditNew = new CloudinarySettings { CloudName = model.CloudName, ApiKey = model.ApiKey, ApiSecret = "Redacted", Folder = model.Folder };
+
             _logger.LogInformation("AUDIT LOG: User {User} updated Cloudinary Settings. Old Value: {Old}, New Value: {New}",
-                username, JsonSerializer.Serialize(oldSetting), JsonSerializer.Serialize(model));
+                username, JsonSerializer.Serialize(auditOld), JsonSerializer.Serialize(auditNew));
 
             TempData["Success"] = "Cập nhật cấu hình Cloudinary thành công.";
             return RedirectToAction(nameof(Index));
