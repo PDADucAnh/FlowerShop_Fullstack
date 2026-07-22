@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,13 +21,15 @@ namespace Flower.Backend.Controllers
         private readonly ICategoryProductService _categoryProductService;
         private readonly INotificationService _notificationService;
         private readonly IApplicationDbContext _context;
+        private readonly IPhotoService _photoService;
 
-        public ProductController(IProductService productService, ICategoryProductService categoryProductService, INotificationService notificationService, IApplicationDbContext context)
+        public ProductController(IProductService productService, ICategoryProductService categoryProductService, INotificationService notificationService, IApplicationDbContext context, IPhotoService photoService)
         {
             _productService = productService;
             _categoryProductService = categoryProductService;
             _notificationService = notificationService;
             _context = context;
+            _photoService = photoService;
         }
 
         public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
@@ -61,9 +62,6 @@ namespace Flower.Backend.Controllers
 
             if (uploadImage != null && uploadImage.Length > 0)
             {
-                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
                 try
                 {
                     using var validateStream = uploadImage.OpenReadStream();
@@ -77,15 +75,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
-                string filePath = Path.Combine(folder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await uploadImage.CopyToAsync(stream);
-                }
-
-                model.ImageUrl = "/uploads/products/" + fileName;
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
             }
 
             await _productService.Create(model);
@@ -149,9 +139,6 @@ namespace Flower.Backend.Controllers
 
             if (uploadImage != null && uploadImage.Length > 0)
             {
-                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
                 try
                 {
                     using var validateStream = uploadImage.OpenReadStream();
@@ -165,15 +152,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
-                string filePath = Path.Combine(folder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await uploadImage.CopyToAsync(stream);
-                }
-
-                model.ImageUrl = "/uploads/products/" + fileName;
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
             }
             else
             {

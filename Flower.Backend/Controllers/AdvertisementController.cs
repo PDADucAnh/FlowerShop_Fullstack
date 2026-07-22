@@ -1,6 +1,5 @@
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
-using Flower.Backend.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -11,14 +10,14 @@ namespace Flower.Backend.Controllers
     public class AdvertisementController : Controller
     {
         private readonly IAdvertisementService _advertisementService;
-        private readonly IWebHostEnvironment _env;
         private readonly INotificationService _notificationService;
+        private readonly IPhotoService _photoService;
 
-        public AdvertisementController(IAdvertisementService advertisementService, IWebHostEnvironment env, INotificationService notificationService)
+        public AdvertisementController(IAdvertisementService advertisementService, INotificationService notificationService, IPhotoService photoService)
         {
             _advertisementService = advertisementService;
-            _env = env;
             _notificationService = notificationService;
+            _photoService = photoService;
         }
 
         public async Task<IActionResult> Index()
@@ -43,9 +42,7 @@ namespace Flower.Backend.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "herobars");
-                Directory.CreateDirectory(uploadsDir);
-                model.ImageUrl = await ImageHelper.SaveHeroImageAsync(imageFile, uploadsDir);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile);
             }
 
             await _advertisementService.Create(model);
@@ -91,11 +88,7 @@ namespace Flower.Backend.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                ImageHelper.DeleteImage(existing.ImageUrl, _env.WebRootPath);
-
-                var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "herobars");
-                Directory.CreateDirectory(uploadsDir);
-                model.ImageUrl = await ImageHelper.SaveHeroImageAsync(imageFile, uploadsDir);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile);
             }
             else
             {
@@ -116,10 +109,6 @@ namespace Flower.Backend.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var existing = await _advertisementService.GetById(id);
-            if (existing != null)
-                ImageHelper.DeleteImage(existing.ImageUrl, _env.WebRootPath);
-
             await _advertisementService.Delete(id);
             await _notificationService.NotifyEntityChanged("Advertisement");
             TempData["Success"] = "Banner quảng cáo đã được xóa.";

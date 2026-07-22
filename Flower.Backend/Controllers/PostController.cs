@@ -1,6 +1,5 @@
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
-using Flower.Backend.Utils;
 using Flower.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
 using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -22,13 +20,15 @@ namespace Flower.Backend.Controllers
         private readonly ICategoryService _categoryService;
         private readonly INotificationService _notificationService;
         private readonly IApplicationDbContext _context;
+        private readonly IPhotoService _photoService;
 
-        public PostController(IPostService postService, ICategoryService categoryService, INotificationService notificationService, IApplicationDbContext context)
+        public PostController(IPostService postService, ICategoryService categoryService, INotificationService notificationService, IApplicationDbContext context, IPhotoService photoService)
         {
             _postService = postService;
             _categoryService = categoryService;
             _notificationService = notificationService;
             _context = context;
+            _photoService = photoService;
         }
 
         public async Task<IActionResult> Index(int? id, int page = 1, int pageSize = 12)
@@ -68,18 +68,10 @@ namespace Flower.Backend.Controllers
                 return Json(new { error = new { message = "File không hợp lệ. Chỉ chấp nhận file ảnh." } });
             }
 
-            string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "ckeditor");
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+            var url = await _photoService.UploadPhotoAsync(upload);
+            if (string.IsNullOrEmpty(url))
+                return Json(new { error = new { message = "Upload thất bại." } });
 
-            string fileName = Guid.NewGuid().ToString() + Path.GetExtension(upload.FileName);
-            string filePath = Path.Combine(folder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await upload.CopyToAsync(stream);
-            }
-
-            var url = "/uploads/ckeditor/" + fileName;
             return Json(new { url, uploaded = true });
         }
 
@@ -113,9 +105,6 @@ namespace Flower.Backend.Controllers
 
             if (uploadImage != null && uploadImage.Length > 0)
             {
-                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
                 try
                 {
                     using var validateStream = uploadImage.OpenReadStream();
@@ -129,15 +118,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
-                string filePath = Path.Combine(folder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await uploadImage.CopyToAsync(stream);
-                }
-
-                model.ImageUrl = "/uploads/" + fileName;
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
             }
 
             await _postService.Create(model);
@@ -191,18 +172,7 @@ namespace Flower.Backend.Controllers
 
             if (uploadImage != null && uploadImage.Length > 0)
             {
-                string folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-
-                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(uploadImage.FileName);
-                string filePath = Path.Combine(folder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await uploadImage.CopyToAsync(stream);
-                }
-
-                model.ImageUrl = "/uploads/" + fileName;
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
             }
             else
             {
