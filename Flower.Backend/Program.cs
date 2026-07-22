@@ -124,9 +124,29 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION")
-    ?? builder.Configuration.GetConnectionString("DefaultConnection");
 var dbProvider = Environment.GetEnvironmentVariable("DB_PROVIDER") ?? "SqlServer";
+
+string GetConnectionString()
+{
+    var raw = Environment.GetEnvironmentVariable("CONNECTIONSTRINGS__DEFAULTCONNECTION");
+    if (!string.IsNullOrEmpty(raw))
+        return raw;
+
+    if (dbProvider == "PostgreSQL")
+    {
+        var pgHost = Environment.GetEnvironmentVariable("PGHOST");
+        var pgPort = Environment.GetEnvironmentVariable("PGPORT") ?? "5432";
+        var pgDb = Environment.GetEnvironmentVariable("PGDATABASE");
+        var pgUser = Environment.GetEnvironmentVariable("PGUSER");
+        var pgPass = Environment.GetEnvironmentVariable("PGPASSWORD");
+        if (!string.IsNullOrEmpty(pgHost) && !string.IsNullOrEmpty(pgDb))
+            return $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPass};SSL Mode=Require;Trust Server Certificate=true";
+    }
+
+    return builder.Configuration.GetConnectionString("DefaultConnection");
+}
+
+var connectionString = GetConnectionString();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
