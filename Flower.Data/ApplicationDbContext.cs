@@ -8,6 +8,8 @@ namespace Flower.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options) { }
 
+        private bool IsPostgres => Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
+
         public DbSet<Category> Categories { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
@@ -54,12 +56,12 @@ namespace Flower.Data
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.ResetToken)
                 .HasDatabaseName("IX_Customers_ResetToken")
-                .HasFilter("[ResetToken] IS NOT NULL");
+                .HasFilter(IsPostgres ? "\"ResetToken\" IS NOT NULL" : "[ResetToken] IS NOT NULL");
 
             modelBuilder.Entity<Product>()
                 .HasIndex(p => p.Sku)
                 .IsUnique()
-                .HasFilter("[Sku] IS NOT NULL");
+                .HasFilter(IsPostgres ? "\"Sku\" IS NOT NULL" : "[Sku] IS NOT NULL");
 
             modelBuilder.Entity<Post>()
                 .HasOne(p => p.Category)
@@ -126,7 +128,7 @@ namespace Flower.Data
             modelBuilder.Entity<CustomerAddress>()
                 .HasIndex(ca => new { ca.CustomerId, ca.IsDefault })
                 .HasDatabaseName("IX_CustomerAddresses_CustomerId_IsDefault")
-                .HasFilter("[IsDefault] = 1");
+                .HasFilter(IsPostgres ? "\"IsDefault\" = true" : "[IsDefault] = 1");
 
             modelBuilder.Entity<PaymentMethodDefinition>()
                 .HasIndex(pm => pm.Code)
