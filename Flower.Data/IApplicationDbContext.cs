@@ -40,6 +40,8 @@ namespace Flower.Data
         DbSet<FlashSaleProduct> FlashSaleProducts { get; set; }
         DbSet<AdminNotification> AdminNotifications { get; set; }
         DbSet<SystemSetting> SystemSettings { get; set; }
+        DbSet<Page> Pages { get; set; }
+        DbSet<Contact> Contacts { get; set; }
 
         EntityEntry Entry(object entity);
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;

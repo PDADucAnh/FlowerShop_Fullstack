@@ -40,6 +40,8 @@ namespace Flower.Data
         public DbSet<FlashSaleProduct> FlashSaleProducts { get; set; }
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
+        public DbSet<Page> Pages { get; set; }
+        public DbSet<Contact> Contacts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

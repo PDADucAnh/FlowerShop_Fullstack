@@ -535,5 +535,57 @@ namespace Flower.Backend.Models.DTOs
             entity.ImageUrl = dto.ImageUrl;
             entity.CategoryId = dto.CategoryId;
         }
+
+        public static PageDTO ToDTO(this Page entity) => new()
+        {
+            Id = entity.Id,
+            Title = entity.Title,
+            Slug = entity.Slug,
+            Content = entity.Content,
+            IsActive = entity.IsActive,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt
+        };
+
+        public static Page ToEntity(this CreatePageDTO dto) => new()
+        {
+            Title = dto.Title,
+            Slug = dto.Slug,
+            Content = dto.Content,
+            IsActive = dto.IsActive,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        public static void UpdateEntity(this UpdatePageDTO dto, Page entity)
+        {
+            entity.Title = dto.Title;
+            entity.Slug = dto.Slug;
+            entity.Content = dto.Content;
+            entity.IsActive = dto.IsActive;
+            entity.UpdatedAt = DateTime.UtcNow;
+        }
+
+        public static ContactDTO ToDTO(this Contact entity) => new()
+        {
+            Id = entity.Id,
+            Name = entity.Name,
+            Email = entity.Email,
+            Phone = entity.Phone,
+            Subject = entity.Subject,
+            Message = entity.Message,
+            IsRead = entity.IsRead,
+            ReadAt = entity.ReadAt,
+            CreatedAt = entity.CreatedAt
+        };
+
+        public static Contact ToEntity(this CreateContactDTO dto) => new()
+        {
+            Name = dto.Name,
+            Email = dto.Email,
+            Phone = dto.Phone,
+            Subject = dto.Subject,
+            Message = dto.Message,
+            CreatedAt = DateTime.UtcNow
+        };
     }
 }

@@ -17,6 +17,7 @@ namespace Flower.Backend.Models.DTOs
         public string Facebook { get; set; } = "https://facebook.com/flowershop";
         public string Zalo { get; set; } = "0123456789";
         public string OpenHours { get; set; } = "08:00 - 21:00";
+        public string GoogleMapsEmbedUrl { get; set; } = string.Empty;
     }
 
     public class SmtpSettings

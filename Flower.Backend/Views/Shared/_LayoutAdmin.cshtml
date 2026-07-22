@@ -192,6 +192,11 @@
                 <span class="material-symbols-outlined @(controller == "Customer" ? "text-primary" : "")">group</span>
                 Khách hàng
             </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Contact" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Contact" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Contact" ? "text-primary" : "")">mail</span>
+                Liên hệ
+            </a>
 
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Nội dung</p>
             <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Post" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
@@ -203,6 +208,11 @@
                asp-controller="Category" asp-action="Index">
                 <span class="material-symbols-outlined @(controller == "Category" ? "text-primary" : "")">grid_view</span>
                 Danh mục blog
+            </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Page" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Page" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Page" ? "text-primary" : "")">description</span>
+                Trang
             </a>
 
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Tiếp thị</p>

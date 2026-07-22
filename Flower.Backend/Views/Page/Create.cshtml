@@ -1,0 +1,47 @@
+@model CreatePageDTO
+@{
+    ViewData["Title"] = "Thêm trang";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Nội dung tĩnh</h3>
+            <p class="serif text-3xl font-bold">Thêm trang mới</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl">
+        <div asp-validation-summary="ModelOnly" class="text-error text-sm space-y-sm"></div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tiêu đề</label>
+            <input asp-for="Title" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 serif text-xl font-bold" placeholder="Tiêu đề trang..." required />
+            <span asp-validation-for="Title" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Slug (URL)</label>
+            <input asp-for="Slug" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4" placeholder="gioi-thieu" />
+            <p class="text-secondary text-xs">Để trống để tự động tạo từ tiêu đề.</p>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Nội dung</label>
+            <textarea asp-for="Content" class="w-full bg-surface-container-low border-none focus:ring-1 focus:ring-primary px-lg py-4 min-h-[400px]" data-rich-editor></textarea>
+            <span asp-validation-for="Content" class="text-error text-xs uppercase tracking-widest"></span>
+        </div>
+
+        <div class="flex items-center gap-lg">
+            <input asp-for="IsActive" type="checkbox" class="w-5 h-5" checked />
+            <label class="text-label-sm uppercase tracking-widest font-bold">Kích hoạt</label>
+        </div>
+
+        <button type="submit" class="bg-primary text-on-primary px-xl py-3 rounded-lg font-label-md hover:opacity-90 transition-opacity">Lưu</button>
+    </form>
+</div>

@@ -61,6 +61,10 @@
                         <label class="block font-label-md text-label-md text-on-surface mb-2">Giờ hoạt động</label>
                         <input name="OpenHours" value="@Model.Store.OpenHours" class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
                     </div>
+                    <div class="col-span-2">
+                        <label class="block font-label-md text-label-md text-on-surface mb-2">Google Maps Embed URL</label>
+                        <input name="GoogleMapsEmbedUrl" value="@Model.Store.GoogleMapsEmbedUrl" placeholder="https://www.google.com/maps/embed?pb=..." class="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant/30 rounded-lg text-body-md text-on-surface focus:outline-none focus:border-primary" @(isAdmin ? "" : "disabled") />
+                    </div>
                 </div>
                 @if (isAdmin)
                 {

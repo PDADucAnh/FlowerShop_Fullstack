@@ -12,8 +12,9 @@ export interface StoreInfo {
 }
 
 const settingsService = {
-  getStoreInfo: () => {
-    return axiosClient.get<StoreInfo>('/settings/store-info');
+  getStoreInfo: async () => {
+    const response = await axiosClient.get<StoreInfo>('/settings/store-info');
+    return response.data || response;
   },
 };
 

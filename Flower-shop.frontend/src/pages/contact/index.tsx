@@ -1,110 +1,85 @@
-import SEO from '../../components/SEO';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
+import settingsService, { StoreInfo } from '../../services/settingsService';
+import contactService from '../../services/contactService';
 
-const ContactPage: React.FC = () => {
+const ContactPage = () => {
+  const [storeInfo, setStoreInfo] = useState<StoreInfo | null>(null);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState('');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    settingsService.getStoreInfo().then(res => setStoreInfo(res)).catch(() => {});
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setSuccess('');
+    setError('');
+    try {
+      await contactService.submit(form);
+      setSuccess('Cảm ơn bạn đã gửi liên hệ. Chúng tôi sẽ phản hồi sớm nhất.');
+      setForm({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch {
+      setError('Gửi liên hệ thất bại. Vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
-      <SEO title="Liên hệ" description="Liên hệ với chúng tôi" />
-      <main className="max-w-[1440px] mx-auto px-margin py-xl">
-        <header className="mb-xl text-center space-y-md">
-          <h3 className="text-label-sm uppercase tracking-[0.3em] text-secondary">Liên hệ</h3>
-          <h2 className="font-display-xl text-display-xl uppercase tracking-tighter text-primary">Liên hệ</h2>
-          <div className="w-12 h-0.5 bg-primary mx-auto"></div>
-        </header>
+    <>
+      <Helmet><title>Liên hệ - FlowerShop</title></Helmet>
+      <section className="py-16 px-4 max-w-6xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-4">Liên hệ</h1>
+        <p className="text-gray-500 text-center mb-12 max-w-xl mx-auto">
+          Hãy gửi cho chúng tôi bất kỳ câu hỏi hoặc thắc mắc nào. Chúng tôi luôn sẵn lòng hỗ trợ bạn.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-xl max-w-5xl mx-auto">
-          <div className="space-y-lg">
-            <div className="flex items-start gap-4 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-primary text-2xl">location_on</span>
-              <div>
-                <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary mb-1">Địa chỉ</h3>
-                <p className="text-secondary font-body-md">123 Đường Hoa, Quận 1, TP. Hồ Chí Minh</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-primary text-2xl">phone</span>
-              <div>
-                <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary mb-1">Điện thoại</h3>
-                <p className="text-secondary font-body-md">+84 123 456 789</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-primary text-2xl">mail</span>
-              <div>
-                <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary mb-1">Email</h3>
-                <p className="text-secondary font-body-md">hello@pdaflower.com</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4 p-4 bg-surface-container-lowest rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-primary text-2xl">schedule</span>
-              <div>
-                <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary mb-1">Giờ làm việc</h3>
-                <p className="text-secondary font-body-md">Thứ 2 - Thứ 7: 7:00 - 21:00</p>
-                <p className="text-secondary font-body-md">Chủ Nhật: 8:00 - 18:00</p>
-              </div>
-            </div>
-            <div className="pt-4">
-              <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary mb-3">Theo dõi</h3>
-              <div className="flex gap-3">
-                 <a href="#" className="size-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary transition-all" aria-label="Facebook (mạng xã hội)">
-                  <span className="material-symbols-outlined text-[20px]">facebook</span>
-                </a>
-                 <a href="#" className="size-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary transition-all" aria-label="Instagram (mạng xã hội)">
-                  <span className="material-symbols-outlined text-[20px]">photo_camera</span>
-                </a>
-                 <a href="#" className="size-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary transition-all" aria-label="TikTok (mạng xã hội)">
-                  <span className="material-symbols-outlined text-[20px]">music_note</span>
-                </a>
-                 <a href="#" className="size-10 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface-variant hover:bg-primary hover:text-on-primary transition-all" aria-label="Zalo (mạng xã hội)">
-                  <span className="material-symbols-outlined text-[20px]">chat</span>
-                </a>
-              </div>
-            </div>
+        <div className="grid md:grid-cols-2 gap-12">
+          <div className="space-y-6">
+            {storeInfo && (
+              <>
+                <div className="flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-primary">location_on</span>
+                  <div><p className="font-semibold">Địa chỉ</p><p className="text-gray-500">{storeInfo.address}</p></div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-primary">phone</span>
+                  <div><p className="font-semibold">Hotline</p><p className="text-gray-500">{storeInfo.hotline}</p></div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-primary">mail</span>
+                  <div><p className="font-semibold">Email</p><p className="text-gray-500">{storeInfo.email}</p></div>
+                </div>
+                <div className="flex gap-4 items-start">
+                  <span className="material-symbols-outlined text-primary">schedule</span>
+                  <div><p className="font-semibold">Giờ làm việc</p><p className="text-gray-500">{storeInfo.openHours}</p></div>
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="space-y-md">
-            <div className="text-center mb-md">
-              <h3 className="font-label-md text-label-md uppercase tracking-widest text-primary">Gửi tin nhắn</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {success && <div className="bg-green-100 text-green-700 px-4 py-3 rounded-lg">{success}</div>}
+            {error && <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg">{error}</div>}
+            <div className="grid grid-cols-2 gap-4">
+              <input placeholder="Họ tên *" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+              <input placeholder="Email *" type="email" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
             </div>
-            <form className="space-y-md">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-                <input
-                  className="w-full bg-surface-container-low border border-outline-variant text-on-surface font-body-md text-body-md rounded px-4 py-3 outline-none focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline"
-                  placeholder="Tên của bạn"
-                  type="text"
-                />
-                <input
-                  className="w-full bg-surface-container-low border border-outline-variant text-on-surface font-body-md text-body-md rounded px-4 py-3 outline-none focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline"
-                  placeholder="Email của bạn"
-                  type="email"
-                />
-              </div>
-              <input
-                className="w-full bg-surface-container-low border border-outline-variant text-on-surface font-body-md text-body-md rounded px-4 py-3 outline-none focus:ring-1 focus:ring-primary transition-colors placeholder:text-outline"
-                placeholder="Chủ đề"
-                type="text"
-              />
-              <textarea
-                className="w-full bg-surface-container-low border border-outline-variant text-on-surface font-body-md text-body-md rounded px-4 py-3 outline-none focus:ring-1 focus:ring-primary transition-colors resize-none placeholder:text-outline"
-                placeholder="Lời nhắn"
-                rows={5}
-              ></textarea>
-              <button
-                type="button"
-                className="w-full bg-primary text-on-primary font-label-sm text-label-sm uppercase tracking-widest py-4 border border-primary btn-luxury btn-primary-luxury"
-              >
-                Gửi tin nhắn
-              </button>
-            </form>
-          </div>
+            <input placeholder="Số điện thoại" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+            <input placeholder="Chủ đề *" value={form.subject} onChange={e => setForm({...form, subject: e.target.value})} required className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none" />
+            <textarea placeholder="Nội dung *" rows={5} value={form.message} onChange={e => setForm({...form, message: e.target.value})} required className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"></textarea>
+            <button type="submit" disabled={submitting} className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:opacity-90 disabled:opacity-50">
+              {submitting ? 'Đang gửi...' : 'Gửi liên hệ'}
+            </button>
+          </form>
         </div>
-
-        <div className="text-center mt-xl">
-          <Link to="/" className="text-primary font-label-sm uppercase tracking-widest text-decoration-none btn-link-luxury">Về trang chủ</Link>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 };
 

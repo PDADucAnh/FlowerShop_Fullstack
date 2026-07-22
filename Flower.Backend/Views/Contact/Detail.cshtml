@@ -1,0 +1,49 @@
+@model ContactDTO
+@{
+    ViewData["Title"] = "Chi tiết liên hệ";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Liên hệ</h3>
+            <p class="serif text-3xl font-bold">Chi tiết liên hệ</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Quay lại
+        </a>
+    </div>
+
+    <div class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl rounded-xl">
+        <div class="grid grid-cols-2 gap-xl">
+            <div>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Người gửi</label>
+                <p class="serif text-xl font-bold mt-sm">@Model.Name</p>
+            </div>
+            <div>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Ngày gửi</label>
+                <p class="serif text-xl font-bold mt-sm">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+            </div>
+            <div>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Email</label>
+                <p class="mt-sm"><a href="mailto:@Model.Email" class="text-primary hover:underline">@Model.Email</a></p>
+            </div>
+            <div>
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Điện thoại</label>
+                <p class="mt-sm">@(Model.Phone ?? "—")</p>
+            </div>
+        </div>
+
+        <div>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Chủ đề</label>
+            <p class="serif text-xl font-bold mt-sm">@Model.Subject</p>
+        </div>
+
+        <div>
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Nội dung</label>
+            <div class="mt-sm bg-surface-container-low p-lg rounded-lg whitespace-pre-wrap">@Model.Message</div>
+        </div>
+    </div>
+</div>
