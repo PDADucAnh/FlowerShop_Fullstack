@@ -9,7 +9,7 @@
     <input type="hidden" name="jsonPayload" id="headerJsonPayload" />
 
     <!-- Section 1: Top Bar -->
-    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg mb-stack-md">
         <h3 class="text-lg font-bold mb-4">Thanh thông báo</h3>
         <label class="flex items-center gap-2 mb-4">
             <input type="checkbox" id="topBarActive" @(Model.TopBar.IsActive ? "checked" : "") class="w-4 h-4" />
@@ -28,9 +28,9 @@
     </div>
 
     <!-- Section 2: Zones -->
-    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg mb-stack-md">
         <h3 class="text-lg font-bold mb-4">Vùng hiển thị</h3>
-        <div class="grid grid-cols-3 gap-6">
+        <div class="grid grid-cols-3 gap-lg">
             @foreach (var zone in zoneNames)
             {
                 var items = zone == "left" ? Model.Zones.Left : zone == "center" ? Model.Zones.Center : Model.Zones.Right;
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Section 3: Component Configs -->
-    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg mb-stack-md">
         <h3 class="text-lg font-bold mb-4">Cấu hình component</h3>
 
         <!-- Hotline config -->
@@ -101,7 +101,7 @@
     </div>
 
     <!-- Section 4: Menu Tree -->
-    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg mb-stack-md">
         <h3 class="text-lg font-bold mb-4">Menu điều hướng</h3>
         <div id="menuTree" class="dd">
             <ol class="dd-list">
