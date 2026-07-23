@@ -6,6 +6,7 @@ import { useWishlist } from '../context/WishlistContext';
 import { useProductCategories } from '../hooks/useCategories';
 import { NotificationBell } from './NotificationBell';
 import settingsService, { StoreInfo } from '../services/settingsService';
+import layoutService, { HeaderLayout, MenuItem } from '../services/layoutService';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -17,10 +18,17 @@ const Header: React.FC = () => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [storeInfo, setStoreInfo] = useState<StoreInfo | null>(null);
+  const [layout, setLayout] = useState<HeaderLayout | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   useEffect(() => {
     settingsService.getStoreInfo().then((res) => {
       setStoreInfo(res as unknown as StoreInfo);
+    });
+    layoutService.getLayout().then((res) => {
+      setLayout(res.header);
+    }).catch(() => {
+      // layout fetch failed, keep defaults
     });
   }, []);
 
@@ -54,7 +62,152 @@ const Header: React.FC = () => {
     }`;
   };
 
+  const getMenuUrl = (item: MenuItem): string => {
+    if (item.isExternal) return item.url;
+    if (item.url.startsWith('/')) return item.url;
+    return `/${item.url}`;
+  };
+
+  const renderMenuItem = (item: MenuItem, depth: number = 0) => {
+    if (depth >= 3) return null;
+    const hasChildren = item.children && item.children.length > 0;
+    const url = getMenuUrl(item);
+
+    if (hasChildren) {
+      return (
+        <div key={item.id} className="relative group py-2">
+          <span className="text-on-surface-variant font-label-md text-label-md hover:text-primary transition-colors duration-300 flex items-center gap-1 cursor-pointer">
+            {item.label}
+            <span className="material-symbols-outlined text-[18px]">expand_more</span>
+          </span>
+          <div className="absolute left-0 top-full w-48 bg-surface-container-lowest shadow-lg rounded-lg border border-outline-variant/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden transform origin-top-left scale-95 group-hover:scale-100">
+            {item.children.map((child, index) => (
+              <div key={child.id}>
+                {child.children && child.children.length > 0 ? (
+                  <div className="relative group/sub">
+                    <Link
+                      className={`flex items-center justify-between px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors no-underline ${index > 0 ? 'border-t border-outline-variant/10' : ''}`}
+                      to={getMenuUrl(child)}
+                      target={child.isExternal ? '_blank' : undefined}
+                      rel={child.isExternal ? 'noopener noreferrer' : undefined}
+                    >
+                      {child.label}
+                      <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                    </Link>
+                    <div className="absolute left-full top-0 w-48 bg-surface-container-lowest shadow-lg rounded-lg border border-outline-variant/20 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-300 z-50 overflow-hidden">
+                      {child.children.map((subChild, subIndex) => (
+                        <Link
+                          key={subChild.id}
+                          className={`block px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors no-underline ${subIndex > 0 ? 'border-t border-outline-variant/10' : ''}`}
+                          to={getMenuUrl(subChild)}
+                          target={subChild.isExternal ? '_blank' : undefined}
+                          rel={subChild.isExternal ? 'noopener noreferrer' : undefined}
+                        >
+                          {subChild.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <Link
+                    className={`block px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors no-underline ${index > 0 ? 'border-t border-outline-variant/10' : ''}`}
+                    to={getMenuUrl(child)}
+                    target={child.isExternal ? '_blank' : undefined}
+                    rel={child.isExternal ? 'noopener noreferrer' : undefined}
+                  >
+                    {child.label}
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.id}
+        className={navLinkClass(url)}
+        to={url}
+        target={item.isExternal ? '_blank' : undefined}
+        rel={item.isExternal ? 'noopener noreferrer' : undefined}
+      >
+        {item.label}
+      </Link>
+    );
+  };
+
+  const renderMobileMenuItem = (item: MenuItem) => {
+    const hasChildren = item.children && item.children.length > 0;
+    const url = getMenuUrl(item);
+
+    if (hasChildren) {
+      return (
+        <div key={item.id}>
+          <div className="flex items-center justify-between py-2">
+            <span className="font-label-md text-label-md text-on-surface-variant">{item.label}</span>
+            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+          </div>
+          <div className="pl-4">
+            {item.children.map((child) => (
+              <Link
+                key={child.id}
+                className="block font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline py-2"
+                to={getMenuUrl(child)}
+                target={child.isExternal ? '_blank' : undefined}
+                rel={child.isExternal ? 'noopener noreferrer' : undefined}
+                onClick={() => {
+                  const nav = document.querySelector('.mobile-nav');
+                  if (nav) nav.classList.add('hidden');
+                }}
+              >
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <Link
+        key={item.id}
+        className="block font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline py-2"
+        to={url}
+        target={item.isExternal ? '_blank' : undefined}
+        rel={item.isExternal ? 'noopener noreferrer' : undefined}
+        onClick={() => {
+          const nav = document.querySelector('.mobile-nav');
+          if (nav) nav.classList.add('hidden');
+        }}
+      >
+        {item.label}
+      </Link>
+    );
+  };
+
+  const hotlineText = layout?.hotline.useDefault
+    ? s?.hotline
+    : (layout?.hotline.customText ?? s?.hotline);
+
+  const ctaVariantClass = layout?.ctaButton.variant === 'outlined'
+    ? 'border border-primary text-primary'
+    : 'bg-primary text-on-primary';
+
   return (
+    <>
+      {layout?.topBar.isActive && (
+        <div className="w-full bg-primary text-on-primary text-center py-1 text-xs">
+          {layout.topBar.url ? (
+            <a href={layout.topBar.url} className="text-on-primary no-underline hover:underline">
+              {layout.topBar.text}
+            </a>
+          ) : (
+            <span>{layout.topBar.text}</span>
+          )}
+        </div>
+      )}
     <header className="sticky top-0 z-50 shadow-sm bg-surface w-full shadow-[0px_4px_20px_rgba(171,44,93,0.02)]">
       <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-[1400px] mx-auto w-full">
         <div className="flex items-center gap-10">

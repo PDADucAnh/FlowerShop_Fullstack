@@ -1,3 +1,13 @@
+### Task 5: Admin View — Footer Tab
+
+**Files:**
+- Create: `Flower.Backend/Views/Layout/_FooterTab.cshtml`
+
+**Consumes:** `List<FooterColumnDTO>` (Task 1), `ViewBag.Pages` (Task 3)
+
+- [ ] **Step 1: Create _FooterTab.cshtml**
+
+```html
 @model List<FooterColumnDTO>
 @{
     var pages = ViewBag.Pages as List<PageDTO> ?? new();
@@ -17,18 +27,18 @@
                         <span class="drag-handle cursor-move text-gray-400">⠿</span>
                         <input type="text" class="col-title font-bold px-3 py-2 border rounded-lg flex-1" value="@col.Title" placeholder="Tiêu đề cột" />
                         <select class="col-align px-3 py-2 border rounded-lg">
-                            <option value="left" selected="@(col.Align == "left" ? "selected" : null)">Trái</option>
-                            <option value="center" selected="@(col.Align == "center" ? "selected" : null)">Giữa</option>
-                            <option value="right" selected="@(col.Align == "right" ? "selected" : null)">Phải</option>
+                            <option value="left" @(col.Align == "left" ? "selected" : "")>Trái</option>
+                            <option value="center" @(col.Align == "center" ? "selected" : "")>Giữa</option>
+                            <option value="right" @(col.Align == "right" ? "selected" : "")>Phải</option>
                         </select>
                         <input type="number" class="col-sort-order w-16 px-3 py-2 border rounded-lg" value="@col.SortOrder" placeholder="TT" />
                         <select class="col-type px-3 py-2 border rounded-lg">
-                            <option value="links" selected="@(col.Type == "links" ? "selected" : null)">Links</option>
-                            <option value="social_icons" selected="@(col.Type == "social_icons" ? "selected" : null)">Social Icons</option>
-                            <option value="text_block" selected="@(col.Type == "text_block" ? "selected" : null)">Text Block</option>
+                            <option value="links" @(col.Type == "links" ? "selected" : "")>Links</option>
+                            <option value="social_icons" @(col.Type == "social_icons" ? "selected" : "")>Social Icons</option>
+                            <option value="text_block" @(col.Type == "text_block" ? "selected" : "")>Text Block</option>
                         </select>
                         <label class="flex items-center gap-1 text-sm">
-                            <input type="checkbox" class="col-active" @(col.IsActive ? "checked" : null) />
+                            <input type="checkbox" class="col-active" @(col.IsActive ? "checked" : "") />
                             Bật
                         </label>
                     </div>
@@ -43,9 +53,9 @@
                             <span class="drag-handle cursor-move text-gray-400">⠿</span>
                             <input type="text" class="link-label flex-1 px-3 py-2 border rounded-lg text-sm" value="@link.Label" placeholder="Nhãn" />
                             <select class="link-type px-3 py-2 border rounded-lg text-sm">
-                                <option value="custom" selected="@(link.Type == "custom" ? "selected" : null)">URL tùy chỉnh</option>
-                                <option value="page" selected="@(link.Type == "page" ? "selected" : null)">Bài viết</option>
-                                <option value="text_block" selected="@(link.Type == "text_block" ? "selected" : null)">Văn bản</option>
+                                <option value="custom" @(link.Type == "custom" ? "selected" : "")>URL tùy chỉnh</option>
+                                <option value="page" @(link.Type == "page" ? "selected" : "")>Bài viết</option>
+                                <option value="text_block" @(link.Type == "text_block" ? "selected" : "")>Văn bản</option>
                             </select>
                             @if (link.Type == "page")
                             {
@@ -53,7 +63,7 @@
                                     <option value="">Chọn bài viết...</option>
                                     @foreach (var p in pages)
                                     {
-                                        <option value="@p.Id" selected="@(link.PageId == p.Id ? "selected" : null)">@p.Title</option>
+                                        <option value="@p.Id" @(link.PageId == p.Id ? "selected" : "")>@p.Title</option>
                                     }
                                 </select>
                             }
@@ -80,8 +90,6 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
-        const pagesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pages.Select(p => new { id = p.Id, title = p.Title })));
-
         // SortableJS for columns and links
         new Sortable(document.getElementById('footerColumns'), {
             handle: '.drag-handle',
@@ -95,14 +103,6 @@
             });
         });
 
-        // Wire remove handlers for pre-existing elements
-        document.querySelectorAll('.remove-column').forEach(btn => {
-            btn.onclick = () => btn.closest('.footer-column').remove();
-        });
-        document.querySelectorAll('.remove-link').forEach(btn => {
-            btn.onclick = () => btn.closest('.link-item').remove();
-        });
-
         // Add column
         document.getElementById('addColumn').addEventListener('click', function() {
             const col = document.createElement('div');
@@ -114,7 +114,7 @@
                         <input type="text" class="col-title font-bold px-3 py-2 border rounded-lg flex-1" placeholder="Tiêu đề cột" />
                         <select class="col-align px-3 py-2 border rounded-lg"><option value="left">Trái</option><option value="center">Giữa</option><option value="right">Phải</option></select>
                         <input type="number" class="col-sort-order w-16 px-3 py-2 border rounded-lg" value="0" />
-                        <select class="col-type px-3 py-2 border rounded-lg"><option value="links">Links</option><option value="social_icons">Social Icons</option><option value="text_block">Text Block</option></select>
+                        <select class="col-type px-3 py-2 border rounded-lg"><option value="links">Links</option><option value="social_icons">Social Icons</option></select>
                         <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="col-active" checked /> Bật</label>
                     </div>
                     <button type="button" class="remove-column text-red-500 hover:text-red-700 ml-2">×</button>
@@ -150,34 +150,6 @@
             btn.addEventListener('click', addLinkHandler);
         });
 
-        // Toggle link URL / page selector
-        function toggleLinkUrl(selectEl) {
-            const type = selectEl.value;
-            const linkItem = selectEl.closest('.link-item');
-            const existingUrl = linkItem.querySelector('.link-url');
-            const existingPageId = linkItem.querySelector('.link-page-id');
-
-            if (type === 'page') {
-                if (existingUrl) existingUrl.remove();
-                if (!linkItem.querySelector('.link-page-id')) {
-                    const sel = document.createElement('select');
-                    sel.className = 'link-page-id px-3 py-2 border rounded-lg text-sm';
-                    sel.innerHTML = '<option value="">Chọn bài viết...</option>' +
-                        pagesData.map(p => '<option value="' + p.id + '">' + p.title + '</option>').join('');
-                    selectEl.parentNode.insertBefore(sel, selectEl.nextSibling);
-                }
-            } else {
-                if (existingPageId) existingPageId.remove();
-                if (!linkItem.querySelector('.link-url')) {
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'link-url flex-1 px-3 py-2 border rounded-lg text-sm';
-                    input.placeholder = 'URL';
-                    selectEl.parentNode.insertBefore(input, selectEl.nextSibling);
-                }
-            }
-        }
-
         // Serialize on submit
         document.getElementById('footerForm').addEventListener('submit', function(e) {
             const columns = [];
@@ -206,3 +178,20 @@
         });
     </script>
 }
+```
+
+- [ ] **Step 2: Build to verify**
+
+Run: `cd Flower.Backend && dotnet build`
+Expected: `Build succeeded`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add Flower.Backend/Views/Layout/_FooterTab.cshtml
+git commit -m "feat: add admin layout footer tab with SortableJS column/link editor"
+```
+
+---
+
+

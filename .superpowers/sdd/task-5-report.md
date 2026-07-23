@@ -1,0 +1,1 @@
+Created Views/Layout/_FooterTab.cshtml with SortableJS columns and link editor. Build succeeded.

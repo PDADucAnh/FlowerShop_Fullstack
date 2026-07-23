@@ -1,0 +1,1 @@
+Created Flower.Backend/Controllers/Api/LayoutApiController.cs with GET /api/layout, zones null-safety, default config fallback. Build succeeded.
