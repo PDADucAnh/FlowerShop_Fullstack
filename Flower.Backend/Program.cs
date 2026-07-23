@@ -354,6 +354,36 @@ using (var scope = app.Services.CreateScope())
         db.Database.EnsureDeleted();
         db.Database.Migrate();
     }
+
+    if (!db.Users.Any())
+    {
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
+        var admin = new Flower.Data.Entities.User
+        {
+            Username = "admin",
+            FullName = "Administrator",
+            Email = "admin@flowershop.com",
+            Role = "Admin",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        admin.PasswordHash = hasher.HashPassword(admin, "admin123");
+        db.Users.Add(admin);
+
+        var staff = new Flower.Data.Entities.User
+        {
+            Username = "staff",
+            FullName = "Staff",
+            Email = "staff@flowershop.com",
+            Role = "Staff",
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        staff.PasswordHash = hasher.HashPassword(staff, "staff123");
+        db.Users.Add(staff);
+
+        db.SaveChanges();
+    }
 }
 
 app.Run();
