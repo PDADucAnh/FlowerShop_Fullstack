@@ -43,7 +43,7 @@ namespace Flower.Backend.Controllers
             if (string.IsNullOrEmpty(jsonPayload))
                 return BadRequest("Payload is empty");
 
-            var header = System.Text.Json.JsonSerializer.Deserialize<HeaderLayoutDTO>(jsonPayload);
+            var header = System.Text.Json.JsonSerializer.Deserialize<HeaderLayoutDTO>(jsonPayload, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (header == null)
                 return BadRequest("Invalid header data");
 
@@ -61,7 +61,7 @@ namespace Flower.Backend.Controllers
             if (string.IsNullOrEmpty(jsonPayload))
                 return BadRequest("Payload is empty");
 
-            var footer = System.Text.Json.JsonSerializer.Deserialize<List<FooterColumnDTO>>(jsonPayload);
+            var footer = System.Text.Json.JsonSerializer.Deserialize<List<FooterColumnDTO>>(jsonPayload, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
             if (footer == null)
                 return BadRequest("Invalid footer data");
 

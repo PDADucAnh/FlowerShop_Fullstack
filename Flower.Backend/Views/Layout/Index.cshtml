@@ -140,13 +140,15 @@
             var li = document.createElement('li');
             li.className = 'dd-item';
             li.dataset.id = id;
-            li.innerHTML = '<div class="dd-handle flex justify-between items-center px-3 py-2 border rounded-lg mb-1 bg-white"><span class="menu-label">Mục mới</span><div class="flex gap-2"><button type="button" class="edit-menu-item text-blue-500 text-sm">Sửa</button><button type="button" class="remove-menu-item text-red-500 text-sm">Xoá</button></div></div>';
+            li.innerHTML = '<div class="dd-handle flex justify-between items-center px-3 py-2 border rounded-lg mb-1 bg-white"><span class="menu-label">Mục mới</span></div><div class="flex gap-2 px-3 pb-2"><button type="button" class="edit-menu-item text-blue-500 text-sm" data-id="' + id + '">Sửa</button><button type="button" class="remove-menu-item text-red-500 text-sm" data-id="' + id + '">Xoá</button></div>';
             ol.appendChild(li);
             if (typeof jQuery !== 'undefined') {
                 jQuery('#menuTree').nestable('destroy');
                 jQuery('#menuTree').nestable({ maxDepth: 3, group: 1 });
             }
         });
+
+        var currentEditItem = null;
 
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-menu-item')) {
@@ -158,7 +160,40 @@
                         jQuery('#menuTree').nestable({ maxDepth: 3, group: 1 });
                     }
                 }
+                return;
+            }
+
+            if (e.target.classList.contains('edit-menu-item')) {
+                var li = e.target.closest('.dd-item');
+                if (!li) return;
+                currentEditItem = li;
+                document.getElementById('editLabel').value = li.querySelector('.menu-label').textContent;
+                document.getElementById('editUrl').value = li.dataset.url || '';
+                document.getElementById('menuEditModal').classList.remove('hidden');
+                document.getElementById('menuEditModal').classList.add('flex');
             }
         });
+
+        document.getElementById('editSave').addEventListener('click', function() {
+            if (!currentEditItem) return;
+            var label = document.getElementById('editLabel').value.trim();
+            var url = document.getElementById('editUrl').value.trim();
+            if (!label) return;
+            currentEditItem.querySelector('.menu-label').textContent = label;
+            currentEditItem.dataset.url = url;
+            closeEditModal();
+        });
+
+        document.getElementById('editCancel').addEventListener('click', closeEditModal);
+
+        document.getElementById('menuEditModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+
+        function closeEditModal() {
+            document.getElementById('menuEditModal').classList.add('hidden');
+            document.getElementById('menuEditModal').classList.remove('flex');
+            currentEditItem = null;
+        }
     </script>
 }
