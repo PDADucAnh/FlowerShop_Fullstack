@@ -1,0 +1,143 @@
+@model HeaderLayoutDTO
+@{
+    var allComponents = new[] { "logo", "menu", "categories", "search", "cart", "wishlist", "account", "notification", "hotline", "ctaButton" };
+    var zoneNames = new[] { "left", "center", "right" };
+}
+
+<form id="headerForm" method="post" action="@Url.Action("SaveHeader")">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="jsonPayload" id="headerJsonPayload" />
+
+    <!-- Section 1: Top Bar -->
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+        <h3 class="text-lg font-bold mb-4">Thanh thông báo</h3>
+        <label class="flex items-center gap-2 mb-4">
+            <input type="checkbox" id="topBarActive" @(Model.TopBar.IsActive ? "checked" : "") class="w-4 h-4" />
+            <span>Hiển thị thanh thông báo</span>
+        </label>
+        <div class="grid grid-cols-2 gap-4 topBar-fields" style="@(Model.TopBar.IsActive ? "" : "display:none")">
+            <div>
+                <label class="block font-label-md text-sm mb-1">Nội dung</label>
+                <input type="text" id="topBarText" value="@Model.TopBar.Text" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+            </div>
+            <div>
+                <label class="block font-label-md text-sm mb-1">Link (tùy chọn)</label>
+                <input type="text" id="topBarUrl" value="@Model.TopBar.Url" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Zones -->
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+        <h3 class="text-lg font-bold mb-4">Vùng hiển thị</h3>
+        <div class="grid grid-cols-3 gap-6">
+            @foreach (var zone in zoneNames)
+            {
+                var items = zone == "left" ? Model.Zones.Left : zone == "center" ? Model.Zones.Center : Model.Zones.Right;
+                <div>
+                    <label class="block font-label-md font-semibold mb-2">@(zone == "left" ? "Bên trái" : zone == "center" ? "Ở giữa" : "Bên phải")</label>
+                    <div class="zone-sortable min-h-[120px] border-2 border-dashed border-outline-variant/30 rounded-lg p-3 space-y-2"
+                         data-zone="@zone">
+                        @foreach (var comp in items)
+                        {
+                            <div class="drag-item bg-primary-container text-primary px-3 py-2 rounded-lg text-sm cursor-move flex justify-between items-center" data-component="@comp">
+                                <span>@comp</span>
+                                <button type="button" class="remove-component text-red-500 hover:text-red-700">&times;</button>
+                            </div>
+                        }
+                    </div>
+                    <select class="add-component mt-2 w-full px-3 py-1.5 border border-outline-variant/30 rounded-lg text-sm bg-surface">
+                        <option value="">+ Thêm component</option>
+                        @foreach (var comp in allComponents)
+                        {
+                            if (!items.Contains(comp))
+                            {
+                                <option value="@comp">@comp</option>
+                            }
+                        }
+                    </select>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Section 3: Component Configs -->
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+        <h3 class="text-lg font-bold mb-4">Cấu hình component</h3>
+
+        <!-- Hotline config -->
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2">Hotline</h4>
+            <label class="flex items-center gap-2 mb-2">
+                <input type="checkbox" id="hotlineUseDefault" @(Model.Hotline.UseDefault ? "checked" : "") class="w-4 h-4" />
+                <span>Dùng số mặc định từ Thông tin cửa hàng</span>
+            </label>
+            <input type="text" id="hotlineCustom" value="@Model.Hotline.CustomText" placeholder="Số điện thoại riêng cho Header" class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+        </div>
+
+        <!-- Search config -->
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2">Tìm kiếm</h4>
+            <label class="mr-4"><input type="radio" name="searchMode" value="popup" @(Model.Search.Mode == "popup" ? "checked" : "") class="mr-1" /> Popup</label>
+            <label><input type="radio" name="searchMode" value="input" @(Model.Search.Mode == "input" ? "checked" : "") class="mr-1" /> Input inline</label>
+        </div>
+
+        <!-- CTA Button config -->
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2">Button CTA</h4>
+            <label class="flex items-center gap-2 mb-2">
+                <input type="checkbox" id="ctaActive" @(Model.CtaButton.IsActive ? "checked" : "") class="w-4 h-4" />
+                <span>Bật</span>
+            </label>
+            <div class="grid grid-cols-3 gap-4 cta-fields" style="@(Model.CtaButton.IsActive ? "" : "display:none")">
+                <input type="text" id="ctaText" value="@Model.CtaButton.Text" placeholder="Nội dung" class="px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+                <input type="text" id="ctaUrl" value="@Model.CtaButton.Url" placeholder="Link" class="px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+                <select id="ctaVariant" class="px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface">
+                    <option value="filled" selected="@(Model.CtaButton.Variant == "filled" ? "selected" : null)">Filled</option>
+                    <option value="outlined" selected="@(Model.CtaButton.Variant == "outlined" ? "selected" : null)">Outlined</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Menu Tree -->
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-6 mb-6">
+        <h3 class="text-lg font-bold mb-4">Menu điều hướng</h3>
+        <div id="menuTree" class="dd">
+            <ol class="dd-list">
+                @foreach (var item in Model.MenuItems)
+                {
+                    <li class="dd-item" data-id="@item.Id">
+                        <div class="dd-handle flex justify-between items-center px-3 py-2 border border-outline-variant/30 rounded-lg mb-1 bg-surface">
+                            <span class="menu-label">@item.Label</span>
+                            <div class="flex gap-2">
+                                <button type="button" class="edit-menu-item text-blue-500 text-sm">Sửa</button>
+                                <button type="button" class="remove-menu-item text-red-500 text-sm">Xoá</button>
+                            </div>
+                        </div>
+                        @if (item.Children.Any())
+                        {
+                            <ol class="dd-list">
+                                @foreach (var child in item.Children)
+                                {
+                                    <li class="dd-item" data-id="@child.Id">
+                                        <div class="dd-handle flex justify-between items-center px-3 py-2 border border-outline-variant/30 rounded-lg mb-1 bg-surface ml-4">
+                                            <span class="menu-label">@child.Label</span>
+                                            <button type="button" class="remove-menu-item text-red-500 text-sm">Xoá</button>
+                                        </div>
+                                    </li>
+                                }
+                            </ol>
+                        }
+                    </li>
+                }
+            </ol>
+        </div>
+        <button type="button" id="addMenuItem" class="mt-3 px-4 py-2 bg-primary text-on-primary rounded-lg text-sm">+ Thêm mục menu</button>
+    </div>
+
+    <div class="flex justify-end gap-3">
+        <button type="reset" class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent">Làm lại</button>
+        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg">Lưu cấu hình</button>
+    </div>
+</form>

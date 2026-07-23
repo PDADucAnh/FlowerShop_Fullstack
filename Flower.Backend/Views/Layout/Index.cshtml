@@ -1,0 +1,160 @@
+@model LayoutViewModel
+@{
+    ViewData["Title"] = "Quản lý giao diện";
+    var activeTab = ViewBag.ActiveTab as string ?? "header";
+}
+
+<div class="max-w-6xl mx-auto">
+    <h1 class="text-headline-md font-headline-md mb-6">Quản lý giao diện</h1>
+
+    <div class="flex border-b border-outline-variant/30 mb-6">
+        <a href="@Url.Action("Index", new { tab = "header" })"
+           class="px-6 py-3 font-label-md text-label-md @(activeTab == "header" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Trình đơn</a>
+        <a href="@Url.Action("Index", new { tab = "footer" })"
+           class="px-6 py-3 font-label-md text-label-md @(activeTab == "footer" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Chân trang</a>
+    </div>
+
+    @if (activeTab == "header")
+    {
+        @await Html.PartialAsync("_HeaderTab", Model.Header)
+    }
+    else
+    {
+        @await Html.PartialAsync("_FooterTab", Model.Footer)
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/nestable2@1.6.0/jquery.nestable.min.js"></script>
+    <script>
+        document.querySelectorAll('.zone-sortable').forEach(function(el) {
+            new Sortable(el, {
+                group: 'zones',
+                animation: 150,
+                onEnd: updateAddComponentDropdowns
+            });
+        });
+
+        document.querySelectorAll('.add-component').forEach(function(select) {
+            select.addEventListener('change', function() {
+                var zone = this.closest('div').querySelector('.zone-sortable');
+                var comp = this.value;
+                if (!comp) return;
+                var div = document.createElement('div');
+                div.className = 'drag-item bg-primary-container text-primary px-3 py-2 rounded-lg text-sm cursor-move flex justify-between items-center';
+                div.dataset.component = comp;
+                div.innerHTML = '<span>' + comp + '</span><button type="button" class="remove-component text-red-500 hover:text-red-700">&times;</button>';
+                zone.appendChild(div);
+                div.querySelector('.remove-component').addEventListener('click', function() {
+                    div.remove();
+                    updateAddComponentDropdowns();
+                });
+                this.value = '';
+                updateAddComponentDropdowns();
+            });
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-component')) {
+                var item = e.target.closest('.drag-item');
+                if (item) {
+                    item.remove();
+                    updateAddComponentDropdowns();
+                }
+            }
+        });
+
+        function updateAddComponentDropdowns() {
+            document.querySelectorAll('.zone-sortable').forEach(function(zone) {
+                var select = zone.closest('div').querySelector('.add-component');
+                var existing = new Set([].slice.call(zone.querySelectorAll('.drag-item')).map(function(el) { return el.dataset.component; }));
+                [].slice.call(select.querySelectorAll('option')).forEach(function(opt) {
+                    if (opt.value) opt.style.display = existing.has(opt.value) ? 'none' : '';
+                });
+            });
+        }
+
+        if (typeof jQuery !== 'undefined' && jQuery('#menuTree').length) {
+            jQuery('#menuTree').nestable({ maxDepth: 3, group: 1 });
+        }
+
+        document.getElementById('headerForm').addEventListener('submit', function(e) {
+            var payload = {
+                topBar: { isActive: document.getElementById('topBarActive').checked, text: document.getElementById('topBarText').value, url: document.getElementById('topBarUrl').value || null },
+                zones: {
+                    left: [].slice.call(document.querySelector('.zone-sortable[data-zone="left"]').querySelectorAll('.drag-item')).map(function(el) { return el.dataset.component; }),
+                    center: [].slice.call(document.querySelector('.zone-sortable[data-zone="center"]').querySelectorAll('.drag-item')).map(function(el) { return el.dataset.component; }),
+                    right: [].slice.call(document.querySelector('.zone-sortable[data-zone="right"]').querySelectorAll('.drag-item')).map(function(el) { return el.dataset.component; })
+                },
+                ctaButton: { isActive: document.getElementById('ctaActive').checked, text: document.getElementById('ctaText').value || null, url: document.getElementById('ctaUrl').value || null, variant: document.getElementById('ctaVariant').value },
+                hotline: { useDefault: document.getElementById('hotlineUseDefault').checked, customText: document.getElementById('hotlineCustom').value || null },
+                search: { mode: document.querySelector('input[name="searchMode"]:checked').value },
+                menuItems: buildMenuItemsFromTree()
+            };
+            document.getElementById('headerJsonPayload').value = JSON.stringify(payload);
+        });
+
+        function buildMenuItemsFromTree() {
+            var items = [];
+            var root = document.querySelector('#menuTree > ol.dd-list');
+            if (!root) return items;
+            root.querySelectorAll(':scope > li.dd-item').forEach(function(li) {
+                items.push(buildMenuItem(li));
+            });
+            return items;
+        }
+
+        function buildMenuItem(li) {
+            var labelEl = li.querySelector('.menu-label');
+            var children = [];
+            li.querySelectorAll(':scope > ol.dd-list > li.dd-item').forEach(function(childLi) {
+                children.push(buildMenuItem(childLi));
+            });
+            return {
+                id: li.dataset.id || crypto.randomUUID(),
+                label: labelEl ? labelEl.textContent : '',
+                url: li.dataset.url || '/',
+                isExternal: li.dataset.external === 'true',
+                children: children
+            };
+        }
+
+        document.getElementById('topBarActive').addEventListener('change', function() {
+            var fields = document.querySelector('.topBar-fields');
+            if (fields) fields.style.display = this.checked ? '' : 'none';
+        });
+
+        document.getElementById('ctaActive').addEventListener('change', function() {
+            var fields = document.querySelector('.cta-fields');
+            if (fields) fields.style.display = this.checked ? '' : 'none';
+        });
+
+        document.getElementById('addMenuItem').addEventListener('click', function() {
+            var id = crypto.randomUUID();
+            var ol = document.querySelector('#menuTree > ol.dd-list');
+            var li = document.createElement('li');
+            li.className = 'dd-item';
+            li.dataset.id = id;
+            li.innerHTML = '<div class="dd-handle flex justify-between items-center px-3 py-2 border rounded-lg mb-1 bg-white"><span class="menu-label">Mục mới</span><div class="flex gap-2"><button type="button" class="edit-menu-item text-blue-500 text-sm">Sửa</button><button type="button" class="remove-menu-item text-red-500 text-sm">Xoá</button></div></div>';
+            ol.appendChild(li);
+            if (typeof jQuery !== 'undefined') {
+                jQuery('#menuTree').nestable('destroy');
+                jQuery('#menuTree').nestable({ maxDepth: 3, group: 1 });
+            }
+        });
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-menu-item')) {
+                var li = e.target.closest('.dd-item');
+                if (li) {
+                    li.remove();
+                    if (typeof jQuery !== 'undefined') {
+                        jQuery('#menuTree').nestable('destroy');
+                        jQuery('#menuTree').nestable({ maxDepth: 3, group: 1 });
+                    }
+                }
+            }
+        });
+    </script>
+}
