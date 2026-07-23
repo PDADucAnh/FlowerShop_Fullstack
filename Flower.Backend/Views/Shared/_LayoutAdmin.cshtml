@@ -216,15 +216,10 @@
             </a>
 
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Giao diện</p>
-            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Layout" && (string.IsNullOrEmpty(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "header") ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
-               asp-controller="Layout" asp-action="Index" asp-route-tab="header">
-                <span class="material-symbols-outlined @(controller == "Layout" && (string.IsNullOrEmpty(Context.Request.Query["tab"]) || Context.Request.Query["tab"] == "header") ? "text-primary" : "")">menu</span>
-                Trình đơn
-            </a>
-            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Layout" && Context.Request.Query["tab"] == "footer" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
-               asp-controller="Layout" asp-action="Index" asp-route-tab="footer">
-                <span class="material-symbols-outlined @(controller == "Layout" && Context.Request.Query["tab"] == "footer" ? "text-primary" : "")">grid_view</span>
-                Chân trang
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Layout" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Layout" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Layout" ? "text-primary" : "")">view_quilt</span>
+                Bố cục Trang
             </a>
 
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Tiếp thị</p>
