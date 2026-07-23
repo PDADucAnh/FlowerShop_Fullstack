@@ -1,17 +1,21 @@
 @model LayoutViewModel
 @{
     ViewData["Title"] = "Quản lý giao diện";
+    Layout = "_LayoutAdmin";
     var activeTab = ViewBag.ActiveTab as string ?? "header";
 }
 
 <div class="max-w-6xl mx-auto">
-    <h1 class="text-headline-md font-headline-md mb-6">Quản lý giao diện</h1>
+    <div>
+        <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Tùy chỉnh</h3>
+        <p class="serif text-3xl font-bold">Quản lý giao diện</p>
+    </div>
 
     <div class="flex border-b border-outline-variant/30 mb-6">
         <a href="@Url.Action("Index", new { tab = "header" })"
-           class="px-6 py-3 font-label-md text-label-md @(activeTab == "header" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Trình đơn</a>
+           class="px-lg py-3 font-label-md text-label-md @(activeTab == "header" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Trình đơn</a>
         <a href="@Url.Action("Index", new { tab = "footer" })"
-           class="px-6 py-3 font-label-md text-label-md @(activeTab == "footer" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Chân trang</a>
+           class="px-lg py-3 font-label-md text-label-md @(activeTab == "footer" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Chân trang</a>
     </div>
 
     @if (activeTab == "header")
