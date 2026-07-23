@@ -11,7 +11,7 @@
         <p class="serif text-3xl font-bold">Quản lý giao diện</p>
     </div>
 
-    <div class="flex border-b border-outline-variant/30 mb-6">
+    <div class="flex border-b border-outline-variant/30 mb-stack-md">
         <a href="@Url.Action("Index", new { tab = "header" })"
            class="px-lg py-3 font-label-md text-label-md @(activeTab == "header" ? "text-primary border-b-2 border-primary" : "text-on-surface-variant")">Trình đơn</a>
         <a href="@Url.Action("Index", new { tab = "footer" })"
