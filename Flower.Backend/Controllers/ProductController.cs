@@ -104,15 +104,6 @@ namespace Flower.Backend.Controllers
             return RedirectToAction("Index");
         }
 
-        [AllowAnonymous]
-        public IActionResult DownloadTemplate()
-        {
-            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "product_import_template.xlsx");
-            if (!System.IO.File.Exists(filePath))
-                return NotFound();
-            return PhysicalFile(filePath, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "product_import_template.xlsx");
-        }
-
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> Delete(int id)
         {
