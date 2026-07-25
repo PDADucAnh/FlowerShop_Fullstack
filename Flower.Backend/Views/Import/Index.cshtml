@@ -1,0 +1,111 @@
+@model ImportViewModel
+@{
+    ViewData["Title"] = "Nhập hàng loạt";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="max-w-4xl mx-auto">
+    <div class="mb-6">
+        <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Sản phẩm</h3>
+        <p class="serif text-3xl font-bold">Nhập hàng loạt</p>
+    </div>
+
+    <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg mb-stack-md">
+        <form method="post" enctype="multipart/form-data" asp-action="Index">
+            @Html.AntiForgeryToken()
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block font-label-md text-sm mb-1">File Excel (.xlsx)</label>
+                    <input type="file" name="excelFile" accept=".xlsx" required
+                           class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+                </div>
+
+                <div>
+                    <label class="block font-label-md text-sm mb-1">File ảnh (.zip)</label>
+                    <input type="file" name="zipFile" accept=".zip"
+                           class="w-full px-3 py-2 border border-outline-variant/30 rounded-lg bg-surface" />
+                    <p class="text-xs text-on-surface-variant mt-1">Không bắt buộc. Ảnh sẽ được upload lên Cloudinary.</p>
+                </div>
+
+                <div>
+                    <label class="block font-label-md text-sm mb-2">Khi trùng mã sản phẩm (SKU)</label>
+                    <div class="flex gap-6">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="onDuplicate" value="skip" checked class="w-4 h-4" />
+                            <span>Bỏ qua</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="onDuplicate" value="update" class="w-4 h-4" />
+                            <span>Cập nhật</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-3 mt-6">
+                <a asp-action="DownloadTemplate"
+                   class="px-5 py-2.5 border border-outline rounded-lg text-primary bg-transparent text-sm no-underline inline-flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    Tải file Excel mẫu (.xlsx)
+                </a>
+                <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg">
+                    Import sản phẩm
+                </button>
+            </div>
+        </form>
+    </div>
+
+    @if (Model?.Result != null)
+    {
+        var r = Model.Result;
+        <div class="bg-surface rounded-xl shadow-sm border border-outline-variant/20 p-lg">
+            <h4 class="text-lg font-bold mb-4">Kết quả import</h4>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div class="bg-primary-container/30 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-primary">@r.TotalRows</p>
+                    <p class="text-sm text-on-surface-variant">Tổng số dòng</p>
+                </div>
+                <div class="bg-green-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-green-600">@r.SuccessCount</p>
+                    <p class="text-sm text-green-700">Thành công</p>
+                </div>
+                <div class="bg-red-50 rounded-lg p-4 text-center">
+                    <p class="text-2xl font-bold text-red-600">@r.FailureCount</p>
+                    <p class="text-sm text-red-700">Thất bại</p>
+                </div>
+            </div>
+
+            @if (r.Errors.Count > 0)
+            {
+                <div>
+                    <h5 class="font-semibold mb-2 text-red-600">Chi tiết lỗi</h5>
+                    <div class="max-h-60 overflow-y-auto border border-outline-variant/30 rounded-lg">
+                        <table class="w-full text-sm">
+                            <thead class="bg-surface-variant/50 sticky top-0">
+                                <tr>
+                                    <th class="px-3 py-2 text-left">Dòng</th>
+                                    <th class="px-3 py-2 text-left">Mã SP</th>
+                                    <th class="px-3 py-2 text-left">Tên SP</th>
+                                    <th class="px-3 py-2 text-left">Lỗi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var err in r.Errors)
+                                {
+                                    <tr class="border-t border-outline-variant/20">
+                                        <td class="px-3 py-2">@err.RowIndex</td>
+                                        <td class="px-3 py-2">@err.ProductCode</td>
+                                        <td class="px-3 py-2">@err.ProductName</td>
+                                        <td class="px-3 py-2 text-red-600">@err.ErrorMessage</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
