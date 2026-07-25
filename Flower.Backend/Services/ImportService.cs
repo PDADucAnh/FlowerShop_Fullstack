@@ -77,7 +77,6 @@ public class ImportService : IImportService
                 .Where(c => c.Slug != null)
                 .ToDictionaryAsync(c => c.Slug!, c => c.Id, StringComparer.OrdinalIgnoreCase);
 
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using var excelStream = new MemoryStream();
             await excelFile.CopyToAsync(excelStream);
             excelStream.Position = 0;
