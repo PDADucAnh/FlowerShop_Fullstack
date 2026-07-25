@@ -189,6 +189,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IFlashSaleService,
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPhotoService, Flower.Backend.Services.PhotoService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPageService, Flower.Backend.Services.PageService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IContactService, Flower.Backend.Services.ContactService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IImportService, Flower.Backend.Services.ImportService>();
 builder.Services.AddHostedService<Flower.Backend.Services.PromotionScheduler>();
 builder.Services.Configure<Flower.Backend.Models.EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 var timeSettings = builder.Configuration.GetSection("TimeSettings").Get<TimeSettings>() ?? new TimeSettings();
