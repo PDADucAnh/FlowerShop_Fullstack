@@ -6,7 +6,9 @@ const productService = {
         pageSize: number, 
         minPrice?: number | null, 
         maxPrice?: number | null, 
-        categoryProductId?: number | null
+        categoryProductId?: number | null,
+        sortBy?: string | null,
+        promotionOnly?: boolean | null
     ) => {
         try {
             const searchParams = new URLSearchParams();
@@ -15,6 +17,8 @@ const productService = {
             if (minPrice !== undefined && minPrice !== null) searchParams.set('minPrice', minPrice.toString());
             if (maxPrice !== undefined && maxPrice !== null) searchParams.set('maxPrice', maxPrice.toString());
             if (categoryProductId !== undefined && categoryProductId !== null) searchParams.set('categoryProductId', categoryProductId.toString());
+            if (sortBy) searchParams.set('sortBy', sortBy);
+            if (promotionOnly) searchParams.set('promotionOnly', 'true');
             
             const response = await axiosClient.get(`/Products/paged?${searchParams.toString()}`);
             return response.data || response;

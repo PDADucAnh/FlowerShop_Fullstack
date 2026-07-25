@@ -7,6 +7,8 @@ interface ShopSidebarProps {
   onPriceChange: (min: number | null, max: number | null) => void;
   activePricePreset: string | null;
   setActivePricePreset: (preset: string | null) => void;
+  onPromotionFilterChange: (value: boolean) => void;
+  activePromotionOnly: boolean;
 }
 
 const ShopSidebar = ({ 
@@ -14,7 +16,9 @@ const ShopSidebar = ({
   activeCategoryId, 
   onPriceChange,
   activePricePreset,
-  setActivePricePreset
+  setActivePricePreset,
+  onPromotionFilterChange,
+  activePromotionOnly
 }: ShopSidebarProps) => {
   const { data: categories = [] } = useProductCategories();
   const [minInput, setMinInput] = useState('');
@@ -129,6 +133,21 @@ const ShopSidebar = ({
             Áp dụng
           </button>
         </form>
+      </div>
+
+      <div className="flex flex-col gap-stack-sm">
+        <h3 className="font-label-md text-label-md text-on-surface uppercase tracking-widest">Khuyến mãi</h3>
+        <label className="flex items-center gap-3 cursor-pointer group">
+          <input
+            type="checkbox"
+            checked={activePromotionOnly}
+            onChange={(e) => onPromotionFilterChange(e.target.checked)}
+            className="border-outline-variant text-primary focus:ring-primary/20 w-4 h-4 rounded transition-colors"
+          />
+          <span className={`font-body-md text-body-md transition-colors ${activePromotionOnly ? 'text-primary font-semibold' : 'text-on-surface-variant group-hover:text-primary'}`}>
+            Đang khuyến mãi
+          </span>
+        </label>
       </div>
     </div>
   );

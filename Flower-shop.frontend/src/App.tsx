@@ -34,6 +34,7 @@ const About = lazy(() => import('./pages/about/index'));
 const Contact = lazy(() => import('./pages/contact/index'));
 const OrderConfirmation = lazy(() => import('./pages/order-confirmation/index'));
 const OrderDetail = lazy(() => import('./pages/auth/OrderDetail'));
+const FlashSale = lazy(() => import('./pages/flash-sale/index'));
 const Search = lazy(() => import('./pages/search/index'));
 const ReturnPolicy = lazy(() => import('./pages/return-policy/index'));
 const PrivacyPolicy = lazy(() => import('./pages/privacy-policy/index'));
@@ -119,6 +120,7 @@ const App: React.FC = () => {
                     <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
                     <Route path="/my-orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
                     <Route path="/wishlist" element={<Wishlist />} />
+                    <Route path="/flash-sale" element={<FlashSale />} />
                     <Route path="/search" element={<Search />} />
 
                     <Route path="/return-policy" element={<ReturnPolicy />} />

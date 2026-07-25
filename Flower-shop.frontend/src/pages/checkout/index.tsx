@@ -9,6 +9,7 @@ import { formatCurrency } from '../../utils/currency';
 import { getImageUrl } from '../../utils/apiUtils';
 import { checkoutSchema, type CheckoutFormData } from '../../schemas/checkoutSchema';
 import axiosClient from '../../api/axiosClient';
+import couponService from '../../services/couponService';
 import SEO from '../../components/SEO';
 import toast from 'react-hot-toast';
 
@@ -165,7 +166,7 @@ const CheckoutPage: React.FC = () => {
       const subtotal = cartItems.reduce((sum, item) => {
         return sum + (item.promotionPrice ?? item.discountPrice ?? item.price) * item.quantity;
       }, 0);
-      const res: any = await axiosClient.post('/Promotions/apply', {
+      const res: any = await couponService.apply({
         code: couponCode.trim(),
         customerId: user?.id || 0,
         orderTotal: subtotal

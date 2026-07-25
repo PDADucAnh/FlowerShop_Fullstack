@@ -25,6 +25,8 @@ const ShopPage: React.FC = () => {
     max: searchParams.get('max') ? parseInt(searchParams.get('max')!, 10) : null,
   }));
   const [activePricePreset, setActivePricePreset] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [promotionOnly, setPromotionOnly] = useState(false);
 
   // Debounced API state
   const [debouncedMin, setDebouncedMin] = useState<number | null>(null);
@@ -46,10 +48,12 @@ const ShopPage: React.FC = () => {
     if (selectedCategoryId) params.category = String(selectedCategoryId);
     if (priceRange.min) params.min = String(priceRange.min);
     if (priceRange.max) params.max = String(priceRange.max);
+    if (sortBy) params.sortBy = sortBy;
+    if (promotionOnly) params.promotionOnly = 'true';
     setSearchParams(params, { replace: true });
-  }, [page, selectedCategoryId, priceRange, setSearchParams]);
+  }, [page, selectedCategoryId, priceRange, sortBy, promotionOnly, setSearchParams]);
 
-  const { data: paged, isLoading, error } = useProductsPaged(page, pageSize, debouncedMin, debouncedMax, selectedCategoryId);
+  const { data: paged, isLoading, error } = useProductsPaged(page, pageSize, debouncedMin, debouncedMax, selectedCategoryId, sortBy, promotionOnly);
 
   const products = paged?.items ?? [];
 
@@ -72,10 +76,12 @@ const ShopPage: React.FC = () => {
           onPriceChange={handlePriceChange}
           activePricePreset={activePricePreset}
           setActivePricePreset={setActivePricePreset}
+          onPromotionFilterChange={setPromotionOnly}
+          activePromotionOnly={promotionOnly}
         />
       </aside>
       <section className="flex-grow">
-        <ShopHeader count={paged?.totalCount ?? 0} page={paged?.page} pageSize={paged?.pageSize} />
+        <ShopHeader count={paged?.totalCount ?? 0} page={paged?.page} pageSize={paged?.pageSize} sortBy={sortBy} onSortChange={setSortBy} />
         <ProductList products={products} isLoading={isLoading} error={error ? "Không thể tải bộ sưu tập vào lúc này." : null} />
         {paged && paged.totalPages > 1 && (
           <Pagination

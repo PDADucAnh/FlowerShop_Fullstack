@@ -27,6 +27,7 @@ const ShopHeader = ({ count, page = 1, pageSize = 9, sortBy, onSortChange }: Sho
           <option value="price_asc">Giá thấp đến cao</option>
           <option value="price_desc">Giá cao đến thấp</option>
           <option value="newest">Hàng mới</option>
+          <option value="discount_desc">Giảm nhiều nhất</option>
         </select>
       </div>
     </div>
