@@ -2,6 +2,7 @@ import SEO from '../../components/SEO';
 import React, { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useOrderDetail } from '../../hooks/useOrders';
+import { formatCurrency } from '../../utils/currency';
 
 const OrderConfirmationPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -117,6 +118,38 @@ const OrderConfirmationPage: React.FC = () => {
             <span className={`font-headline-lg text-headline-lg-mobile md:text-headline-lg font-bold block ${isError ? 'text-error' : 'text-primary'}`}>
               #{orderId}
             </span>
+          </div>
+        )}
+
+        {order && (
+          <div className="border border-outline-variant bg-surface-container-low rounded-lg p-6 max-w-md mx-auto mb-8 space-y-3 relative z-10 text-left">
+            <span className="text-[10px] uppercase tracking-widest text-secondary block font-bold mb-3">Chi tiết đơn hàng</span>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-on-surface-variant">Phương thức thanh toán</span>
+                <span className="font-medium">{order.paymentMethod === 0 || order.paymentMethod === 'OnlinePayment' || order.paymentMethod === 'VNPay' ? 'VNPay' : 'COD'}</span>
+              </div>
+              {(order as any).originalAmount != null && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-on-surface-variant">Tạm tính</span>
+                  <span>{formatCurrency((order as any).originalAmount)}</span>
+                </div>
+              )}
+              {(order as any).discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Giảm giá {(order as any).couponCode ? `(${(order as any).couponCode})` : ''}</span>
+                  <span>-{formatCurrency((order as any).discountAmount)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-on-surface-variant">Phí vận chuyển</span>
+                <span className="text-primary">Miễn phí</span>
+              </div>
+              <div className="border-t border-outline-variant/30 pt-2 flex justify-between font-bold">
+                <span>Tổng cộng</span>
+                <span className="text-primary">{formatCurrency((order as any).finalAmount ?? order.totalAmount ?? 0)}</span>
+              </div>
+            </div>
           </div>
         )}
 

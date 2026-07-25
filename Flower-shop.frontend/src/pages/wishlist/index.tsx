@@ -63,6 +63,11 @@ const WishlistPage: React.FC = () => {
                             loading="lazy"
                           />
                         </Link>
+                        {(product.promotionPrice || product.discountPrice) && (
+                          <div className="absolute top-2 left-2 bg-primary text-on-primary px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-lg z-10">
+                            KM {product.promotionPercent ? `-${product.promotionPercent}%` : ''}
+                          </div>
+                        )}
                         <button
                           onClick={() => removeFavorite(product.id)}
                           className="absolute top-3 right-3 bg-white/80 backdrop-blur text-primary p-1.5 rounded-full shadow-sm border-0 cursor-pointer hover:bg-white transition-colors"
@@ -75,7 +80,12 @@ const WishlistPage: React.FC = () => {
                         <Link to={`/product/${product.id}`} className="text-decoration-none">
                           <h3 className="font-headline-sm text-[18px] text-on-surface leading-tight mb-1">{product.name}</h3>
                         </Link>
-                        <p className="text-primary font-bold">{formatCurrency(product.discountPrice || product.price)}</p>
+                        <p className="text-primary font-bold">
+                          {formatCurrency(product.promotionPrice ?? product.discountPrice ?? product.price)}
+                          {(product.promotionPrice || product.discountPrice) && (
+                            <span className="text-on-surface-variant line-through text-xs ml-2">{formatCurrency(product.price)}</span>
+                          )}
+                        </p>
                         <Link
                           to={`/product/${product.id}`}
                           className="mt-base w-full py-1.5 border border-primary text-primary rounded-lg text-sm font-label-md hover:bg-primary hover:text-white transition-colors block text-decoration-none"

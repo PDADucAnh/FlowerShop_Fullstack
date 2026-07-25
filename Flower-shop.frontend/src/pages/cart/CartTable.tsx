@@ -70,6 +70,16 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
               </div>
               <div>
                 <h3 className="font-headline-sm text-headline-sm text-on-surface mb-1">{item.name}</h3>
+                {item.hasFlashSale ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 rounded text-[10px] font-bold uppercase tracking-wider">
+                    <span className="material-symbols-outlined text-[12px]">bolt</span>
+                    Flash Sale
+                  </span>
+                ) : item.promotionPrice ? (
+                  <span className="inline-flex items-center px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-bold uppercase tracking-wider">
+                    KM {item.promotionPercent ? `-${item.promotionPercent}%` : ''}
+                  </span>
+                ) : null}
                 <p className="font-body-md text-on-surface-variant text-sm">
                   {item.description ? item.description.substring(0, 50) + (item.description.length > 50 ? '...' : '') : 'Sắp xếp hoa cao cấp'}
                 </p>
@@ -84,7 +94,12 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
 
             <div className="col-span-1 md:col-span-2 text-center font-body-md text-on-surface">
               <span className="md:hidden font-label-md text-on-surface-variant">Giá: </span>
-              {formatCurrency(item.promotionPrice ?? item.discountPrice ?? item.price)}
+              {item.promotionPrice || item.discountPrice ? (
+                <>
+                  <span className="text-error font-bold">{formatCurrency(item.promotionPrice ?? item.discountPrice)}</span>
+                  <br /><span className="line-through text-on-surface-variant text-xs">{formatCurrency(item.price)}</span>
+                </>
+              ) : formatCurrency(item.price)}
             </div>
 
             <div className="col-span-1 md:col-span-2 flex justify-center">

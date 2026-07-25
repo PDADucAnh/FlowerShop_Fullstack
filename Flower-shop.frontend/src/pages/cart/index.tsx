@@ -40,6 +40,24 @@ const ShoppingCartPage: React.FC = () => {
           <div className="w-16 h-1 bg-primary rounded-full"></div>
         </div>
 
+        {(() => {
+          const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+          const savings = originalTotal - cartTotal;
+          return savings > 0 ? (
+            <div className="mb-stack-lg p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+              <span className="material-symbols-outlined text-green-600">redeem</span>
+              <div>
+                <p className="font-label-md text-green-800">
+                  Bạn tiết kiệm <strong>{formatCurrency(savings)}</strong> nhờ khuyến mãi
+                </p>
+                <p className="text-sm text-green-600">
+                  Tổng gốc: {formatCurrency(originalTotal)} | Tổng sau giảm: {formatCurrency(cartTotal)}
+                </p>
+              </div>
+            </div>
+          ) : null;
+        })()}
+
         {/* Checkout Layout */}
         <div className="flex flex-col lg:flex-row gap-gutter">
           {/* Left Column: Cart Items (70%) */}
