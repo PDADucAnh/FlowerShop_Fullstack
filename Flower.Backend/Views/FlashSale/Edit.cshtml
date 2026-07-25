@@ -1,0 +1,93 @@
+@model UpdateFlashSaleDTO
+@{
+    ViewData["Title"] = "Sửa Flash Sale";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto pb-12">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Flash Sale</h3>
+            <p class="serif text-3xl font-bold">Sửa Flash Sale</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Edit" method="post" id="flashsale-form" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl rounded-xl shadow-sm">
+        <input asp-for="Id" type="hidden" />
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tên chương trình</label>
+            <input asp-for="Name" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" required />
+            <span asp-validation-for="Name" class="text-error text-xs uppercase tracking-widest block mt-1"></span>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mô tả</label>
+            <textarea asp-for="Description" rows="3" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Trạng thái</label>
+                <select asp-for="IsActive" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3">
+                    <option value="true">Active (Hoạt động)</option>
+                    <option value="false">Draft (Bản nháp)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Bắt đầu</label>
+                <input asp-for="StartDate" type="datetime-local" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3" />
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Kết thúc</label>
+                <input asp-for="EndDate" type="datetime-local" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3" />
+            </div>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" id="submit-btn" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1 rounded-lg">
+                Cập nhật
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all rounded-lg">
+                Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            if ($.validator) {
+                $.validator.addMethod("endDateAfterStartDate", function(value, element) {
+                    var startDate = $('#StartDate').val();
+                    if (!startDate || !value) return true;
+                    return new Date(value) > new Date(startDate);
+                }, "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+                $('#EndDate').rules('add', { endDateAfterStartDate: true });
+                $('#StartDate').on('change', function() {
+                    if ($('#EndDate').val()) { $('#EndDate').valid(); }
+                });
+            }
+
+            $('#flashsale-form').on('submit', function (e) {
+                var form = $(this);
+                if (form.valid()) {
+                    var btn = $('#submit-btn');
+                    btn.prop('disabled', true);
+                    btn.addClass('opacity-70 cursor-not-allowed');
+                    btn.html('<span class="flex items-center justify-center gap-2"><span class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span> Đang cập nhật...</span>');
+                }
+            });
+        });
+    </script>
+}

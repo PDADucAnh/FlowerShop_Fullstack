@@ -1,0 +1,204 @@
+@model CreateFlashSaleDTO
+@{
+    ViewData["Title"] = "Thêm Flash Sale";
+    Layout = "_LayoutAdmin";
+}
+
+<div class="space-y-lg max-w-4xl mx-auto pb-12">
+    <div class="flex justify-between items-center">
+        <div>
+            <h3 class="text-label-sm uppercase tracking-[0.3em] text-secondary">Flash Sale</h3>
+            <p class="serif text-3xl font-bold">Flash Sale mới</p>
+        </div>
+        <a asp-action="Index" class="text-label-sm uppercase tracking-widest font-bold flex items-center gap-2 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-lg">arrow_back</span>
+            Quay lại
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post" id="flashsale-form" class="bg-surface-container-lowest border border-outline-variant p-xl space-y-xl rounded-xl shadow-sm">
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Tên chương trình</label>
+            <input asp-for="Name" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-4 serif text-2xl font-bold placeholder:text-outline-variant" placeholder="Flash Sale Cuối Tuần..." required />
+            <span asp-validation-for="Name" class="text-error text-xs uppercase tracking-widest block mt-1"></span>
+        </div>
+
+        <div class="space-y-md">
+            <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Mô tả</label>
+            <textarea asp-for="Description" rows="3" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-4 text-body-md italic leading-relaxed placeholder:text-outline-variant" placeholder="Mô tả chương trình Flash Sale..."></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Trạng thái</label>
+                <select asp-for="IsActive" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3">
+                    <option value="true">Active (Hoạt động)</option>
+                    <option value="false">Draft (Bản nháp)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Bắt đầu</label>
+                <input asp-for="StartDate" type="datetime-local" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3" />
+                <span asp-validation-for="StartDate" class="text-error text-xs uppercase tracking-widest block mt-1"></span>
+            </div>
+            <div class="space-y-md">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Kết thúc</label>
+                <input asp-for="EndDate" type="datetime-local" class="w-full bg-surface-container-low border border-outline-variant/30 rounded-lg focus:ring-1 focus:ring-primary px-lg py-3" />
+                <span asp-validation-for="EndDate" class="text-error text-xs uppercase tracking-widest block mt-1"></span>
+            </div>
+        </div>
+
+        <div class="space-y-md">
+            <div class="flex justify-between items-center">
+                <label class="text-label-sm uppercase tracking-widest text-secondary font-bold">Sản phẩm áp dụng</label>
+            </div>
+            <input type="hidden" id="productIdsCsv" name="productIdsCsv" value="" />
+            <div id="product-selection-container" class="space-y-sm">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                    <input type="text" id="product-search-input" class="w-full pl-10 pr-4 py-3 bg-surface-container-low border border-outline-variant/30 rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary placeholder:text-outline-variant" placeholder="Nhập tên sản phẩm hoặc SKU để tìm..." />
+                    <div id="product-search-results" class="absolute left-0 right-0 mt-1 max-h-60 overflow-y-auto bg-surface border border-outline-variant rounded-lg shadow-lg z-30 hidden no-scrollbar"></div>
+                </div>
+                <div class="bg-surface-container-low/60 border border-outline-variant/30 rounded-lg p-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <p class="text-xs text-on-surface-variant/80 font-bold uppercase tracking-wider">Sản phẩm đã chọn (<span id="selected-count">0</span>)</p>
+                        <button type="button" id="clear-all-products" class="text-error hover:text-error/80 text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-colors hidden">
+                            <span class="material-symbols-outlined text-sm">close</span> Xóa tất cả
+                        </button>
+                    </div>
+                    <div id="selected-products-list" class="divide-y divide-outline-variant/20 max-h-80 overflow-y-auto no-scrollbar">
+                        <p id="no-products-placeholder" class="text-sm text-on-surface-variant/60 italic py-3 text-center">Chưa có sản phẩm nào được chọn.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-lg border-t border-outline-variant flex gap-md">
+            <button type="submit" id="submit-btn" class="bg-primary text-on-primary px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-neutral-800 transition-all flex-1 rounded-lg">
+                Tạo Flash Sale
+            </button>
+            <a asp-action="Index" class="border border-outline px-xl py-4 text-label-sm uppercase tracking-[0.2em] font-bold hover:bg-surface-container transition-all rounded-lg">
+                Hủy
+            </a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $(document).ready(function () {
+            if ($.validator) {
+                $.validator.addMethod("endDateAfterStartDate", function(value, element) {
+                    var startDate = $('#StartDate').val();
+                    if (!startDate || !value) return true;
+                    return new Date(value) > new Date(startDate);
+                }, "Ngày kết thúc phải lớn hơn ngày bắt đầu.");
+                $('#EndDate').rules('add', { endDateAfterStartDate: true });
+                $('#StartDate').on('change', function() {
+                    if ($('#EndDate').val()) { $('#EndDate').valid(); }
+                });
+            }
+
+            $('#flashsale-form').on('submit', function (e) {
+                var form = $(this);
+                if (form.valid()) {
+                    var btn = $('#submit-btn');
+                    btn.prop('disabled', true);
+                    btn.addClass('opacity-70 cursor-not-allowed');
+                    btn.html('<span class="flex items-center justify-center gap-2"><span class="animate-spin inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full"></span> Đang tạo...</span>');
+                }
+            });
+
+            var allProducts = [];
+            var selectedProductIds = [];
+            var initialCsv = $('#productIdsCsv').val().trim();
+            if (initialCsv) {
+                selectedProductIds = initialCsv.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x) && x > 0);
+            }
+
+            fetch('/api/Products').then(res => res.json()).then(data => { allProducts = data; renderSelectedProducts(); }).catch(err => console.error(err));
+
+            var searchInput = $('#product-search-input');
+            var searchResults = $('#product-search-results');
+            searchInput.on('input focus', function () {
+                var query = $(this).val().trim().toLowerCase();
+                if (!query) { searchResults.addClass('hidden').empty(); return; }
+                var matches = allProducts.filter(p => (p.name.toLowerCase().includes(query) || (p.sku && p.sku.toLowerCase().includes(query))) && !selectedProductIds.includes(p.id));
+                renderSearchResults(matches);
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.relative').length) { searchResults.addClass('hidden'); }
+            });
+
+            function renderSearchResults(items) {
+                searchResults.empty();
+                if (items.length === 0) {
+                    searchResults.append('<div class="p-3 text-sm text-on-surface-variant/60 italic text-center">Không tìm thấy sản phẩm phù hợp.</div>');
+                    searchResults.removeClass('hidden'); return;
+                }
+                items.forEach(p => {
+                    var priceFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
+                    var imgHtml = p.imageUrl ? `<img src="${p.imageUrl}" class="w-8 h-8 rounded object-cover" />` : `<div class="w-8 h-8 rounded bg-secondary-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-sm">local_florist</span></div>`;
+                    var skuText = p.sku ? `<span class="bg-surface-container-high px-1.5 py-0.5 rounded text-[10px] text-on-surface-variant/80 font-mono font-bold">SKU: ${p.sku}</span>` : '';
+                    searchResults.append(`
+                        <div class="flex items-center gap-3 p-3 hover:bg-primary-container/20 cursor-pointer transition-colors border-b border-outline-variant/10" data-id="${p.id}">
+                            ${imgHtml}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold truncate text-on-surface">${p.name}</p>
+                                <div class="flex items-center gap-2 mt-0.5">${skuText}<span class="text-xs text-secondary font-bold">${priceFormatted}</span></div>
+                            </div>
+                            <span class="material-symbols-outlined text-primary text-lg">add_circle</span>
+                        </div>
+                    `);
+                });
+                searchResults.removeClass('hidden');
+                searchResults.find('[data-id]').on('click', function () {
+                    var id = parseInt($(this).data('id'));
+                    if (id && !selectedProductIds.includes(id)) { selectedProductIds.push(id); updateProductIdsCsv(); renderSelectedProducts(); }
+                    searchInput.val(''); searchResults.addClass('hidden').empty();
+                });
+            }
+
+            function renderSelectedProducts() {
+                var container = $('#selected-products-list');
+                var placeholder = $('#no-products-placeholder');
+                var countSpan = $('#selected-count');
+                var clearBtn = $('#clear-all-products');
+                container.find('.product-selected-item').remove();
+                countSpan.text(selectedProductIds.length);
+                if (selectedProductIds.length === 0) { placeholder.removeClass('hidden'); clearBtn.addClass('hidden'); return; }
+                placeholder.addClass('hidden'); clearBtn.removeClass('hidden');
+                selectedProductIds.forEach(id => {
+                    var p = allProducts.find(x => x.id === id); if (!p) return;
+                    var priceFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
+                    var imgHtml = p.imageUrl ? `<img src="${p.imageUrl}" class="w-10 h-10 rounded object-cover" />` : `<div class="w-10 h-10 rounded bg-secondary-container flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[18px]">local_florist</span></div>`;
+                    var skuText = p.sku ? `<span class="bg-surface-container-high px-1.5 py-0.5 rounded text-[10px] text-on-surface-variant/80 font-mono font-bold">SKU: ${p.sku}</span>` : '';
+                    container.append(`
+                        <div class="product-selected-item flex items-center gap-3 py-3 border-b border-outline-variant/10" data-selected-id="${p.id}">
+                            ${imgHtml}
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-on-surface truncate">${p.name}</p>
+                                <div class="flex items-center gap-2 mt-0.5">${skuText}<span class="text-xs text-secondary font-bold">${priceFormatted}</span></div>
+                            </div>
+                            <button type="button" class="remove-product-btn text-error hover:text-error/80 transition-colors p-1" data-remove-id="${p.id}"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+                        </div>
+                    `);
+                });
+                $('.remove-product-btn').on('click', function () {
+                    var removeId = parseInt($(this).data('remove-id'));
+                    selectedProductIds = selectedProductIds.filter(id => id !== removeId);
+                    updateProductIdsCsv(); renderSelectedProducts();
+                });
+            }
+
+            $('#clear-all-products').on('click', function () { selectedProductIds = []; updateProductIdsCsv(); renderSelectedProducts(); });
+            function updateProductIdsCsv() { $('#productIdsCsv').val(selectedProductIds.join(',')); }
+        });
+    </script>
+}
