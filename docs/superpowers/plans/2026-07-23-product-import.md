@@ -1,6 +1,6 @@
 # Product Import Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Allow Admin to bulk import products via Excel (.xlsx) + product images via ZIP archive.
 
@@ -28,7 +28,7 @@
 - Modify: `Flower.Backend/Flower.Backend.csproj`
 - Create: `Flower.Backend/wwwroot/templates/product_import_template.xlsx`
 
-- [ ] **Step 1: Add EPPlus package**
+- [x] **Step 1: Add EPPlus package**
 
 ```bash
 cd D:\TrenLop\ThucTapTaiTruong\FlowerShop
@@ -37,20 +37,20 @@ dotnet add Flower.Backend/Flower.Backend.csproj package EPPlus
 
 Expected output: `PackageReference for 'EPPlus' added to file 'Flower.Backend/Flower.Backend.csproj'`
 
-- [ ] **Step 2: Create template directory**
+- [x] **Step 2: Create template directory**
 
 ```bash
 New-Item -ItemType Directory -Path "D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\wwwroot\templates" -Force
 ```
 
-- [ ] **Step 3: Create the Excel template programmatically via a small script**
+- [x] **Step 3: Create the Excel template programmatically via a small script**
 
 Create `Flower.Backend/wwwroot/templates/product_import_template.xlsx` using EPPlus with headers:
 `STT`, `TenSanPham`, `MaSanPham`, `GiaBan`, `SoLuongKho`, `DanhMucSlug`, `TenFileAnh`, `MoTa`
 
 - In the controller, add a `DownloadTemplate` action that serves this file.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Flower.Backend/Flower.Backend.csproj Flower.Backend/wwwroot/templates/product_import_template.xlsx
@@ -68,7 +68,7 @@ git commit -m "chore: add EPPlus package and product import Excel template"
 **Interfaces:**
 - Produces: `IImportService` (interface), `ImportResult`, `ImportError` (models)
 
-- [ ] **Step 1: Create ImportDTOs**
+- [x] **Step 1: Create ImportDTOs**
 
 `Flower.Backend/Models/DTOs/ImportDTOs.cs`:
 
@@ -98,7 +98,7 @@ public class ImportViewModel
 }
 ```
 
-- [ ] **Step 2: Create IImportService interface**
+- [x] **Step 2: Create IImportService interface**
 
 `Flower.Backend/Services/Interfaces/IImportService.cs`:
 
@@ -117,7 +117,7 @@ public interface IImportService
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Flower.Backend/Services/Interfaces/IImportService.cs Flower.Backend/Models/DTOs/ImportDTOs.cs
@@ -136,7 +136,7 @@ git commit -m "feat: add IImportService interface and ImportResult models"
 - Consumes: `IImportService` (interface from Task 2), `IApplicationDbContext` (existing), `IPhotoService` (existing), `ICategoryProductService` (existing)
 - Produces: `ImportService` (implementation)
 
-- [ ] **Step 1: Create ImportService**
+- [x] **Step 1: Create ImportService**
 
 `Flower.Backend/Services/ImportService.cs`:
 
@@ -455,14 +455,14 @@ public class ImportService : IImportService
 }
 ```
 
-- [ ] **Step 2: Register service in Program.cs**
+- [x] **Step 2: Register service in Program.cs**
 
 Add after existing service registrations (~line 180):
 ```csharp
 builder.Services.AddScoped<IImportService, ImportService>();
 ```
 
-- [ ] **Step 3: Build to verify compilation**
+- [x] **Step 3: Build to verify compilation**
 
 ```bash
 dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backend.csproj
@@ -470,7 +470,7 @@ dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backen
 
 Expected: Build succeeded with 0 errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Flower.Backend/Services/ImportService.cs Flower.Backend/Program.cs
@@ -487,7 +487,7 @@ git commit -m "feat: implement ImportService with Excel+ZIP product import pipel
 **Interfaces:**
 - Consumes: `IImportService` (from Task 3)
 
-- [ ] **Step 1: Create ImportController**
+- [x] **Step 1: Create ImportController**
 
 `Flower.Backend/Controllers/ImportController.cs`:
 
@@ -543,7 +543,7 @@ public class ImportController : Controller
 }
 ```
 
-- [ ] **Step 2: Build to verify**
+- [x] **Step 2: Build to verify**
 
 ```bash
 dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backend.csproj
@@ -551,7 +551,7 @@ dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backen
 
 Expected: Build succeeded with 0 errors
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add Flower.Backend/Controllers/ImportController.cs
@@ -566,13 +566,13 @@ git commit -m "feat: add ImportController with GET/POST and template download"
 - Create: `Flower.Backend/Views/Import/Index.cshtml`
 - Create: `Flower.Backend/Views/Import/Index.cshtml` directory
 
-- [ ] **Step 1: Create directory**
+- [x] **Step 1: Create directory**
 
 ```bash
 New-Item -ItemType Directory -Path "D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Views\Import" -Force
 ```
 
-- [ ] **Step 2: Create the view**
+- [x] **Step 2: Create the view**
 
 `Flower.Backend/Views/Import/Index.cshtml`:
 
@@ -693,7 +693,7 @@ New-Item -ItemType Directory -Path "D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flowe
 </div>
 ```
 
-- [ ] **Step 3: Build to verify**
+- [x] **Step 3: Build to verify**
 
 ```bash
 dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backend.csproj
@@ -701,7 +701,7 @@ dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backen
 
 Expected: Build succeeded with 0 errors
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add Flower.Backend/Views/Import/Index.cshtml
@@ -715,7 +715,7 @@ git commit -m "feat: add Import view with form and result display"
 **Files:**
 - Modify: `Flower.Backend/Views/Shared/_LayoutAdmin.cshtml` (after line 177)
 
-- [ ] **Step 1: Add sidebar link**
+- [x] **Step 1: Add sidebar link**
 
 After line 177 (`Danh mục sản phẩm` link, before the `Bán hàng` section header at line 179), insert:
 
@@ -727,7 +727,7 @@ After line 177 (`Danh mục sản phẩm` link, before the `Bán hàng` section 
             </a>
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add Flower.Backend/Views/Shared/_LayoutAdmin.cshtml
@@ -738,7 +738,7 @@ git commit -m "feat: add 'Nhập hàng loạt' link to admin sidebar"
 
 ### Task 7: Final Build and Verify
 
-- [ ] **Step 1: Full build**
+- [x] **Step 1: Full build**
 
 ```bash
 dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backend.csproj 2>&1
@@ -746,7 +746,7 @@ dotnet build D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\Flower.Backen
 
 Expected: `Build succeeded` with 0 errors
 
-- [ ] **Step 2: Run existing tests (if any)**
+- [x] **Step 2: Run existing tests (if any)**
 
 ```bash
 # Check if tests exist
@@ -755,7 +755,7 @@ if (Test-Path "D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Tests") {
 }
 ```
 
-- [ ] **Step 3: Final commit**
+- [x] **Step 3: Final commit**
 
 ```bash
 git add -A
@@ -764,7 +764,7 @@ git status
 
 If all clean, no need for additional commit.
 
-- [ ] **Step 4: Push**
+- [x] **Step 4: Push**
 
 ```bash
 git push

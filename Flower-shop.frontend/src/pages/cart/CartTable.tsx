@@ -96,7 +96,7 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
               <span className="md:hidden font-label-md text-on-surface-variant">Giá: </span>
               {item.promotionPrice || item.discountPrice ? (
                 <>
-                  <span className="text-error font-bold">{formatCurrency(item.promotionPrice ?? item.discountPrice)}</span>
+                  <span className="text-error font-bold">{formatCurrency(item.promotionPrice ?? item.discountPrice ?? 0)}</span>
                   <br /><span className="line-through text-on-surface-variant text-xs">{formatCurrency(item.price)}</span>
                 </>
               ) : formatCurrency(item.price)}
@@ -113,11 +113,11 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
                 <input
                   type="number"
                   min={1}
-                  max={item.stockQuantity}
+                  max={item.stockQuantity ?? 999}
                   value={inputValues[item.id] ?? item.quantity}
                   onChange={(e) => handleInputChange(item.id, e.target.value)}
-                  onBlur={() => handleInputBlur(item.id, item.stockQuantity)}
-                  onKeyDown={(e) => handleInputKeyDown(e, item.id, item.stockQuantity)}
+                  onBlur={() => handleInputBlur(item.id, item.stockQuantity ?? 999)}
+                  onKeyDown={(e) => handleInputKeyDown(e, item.id, item.stockQuantity ?? 999)}
                   className="w-14 text-center font-label-md border-0 bg-transparent outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <button

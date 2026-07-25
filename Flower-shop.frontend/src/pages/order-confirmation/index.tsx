@@ -147,7 +147,7 @@ const OrderConfirmationPage: React.FC = () => {
               </div>
               <div className="border-t border-outline-variant/30 pt-2 flex justify-between font-bold">
                 <span>Tổng cộng</span>
-                <span className="text-primary">{formatCurrency((order as any).finalAmount ?? order.totalAmount ?? 0)}</span>
+                <span className="text-primary">{formatCurrency((order as any).finalAmount ?? (order as any).totalAmount ?? 0)}</span>
               </div>
             </div>
           </div>

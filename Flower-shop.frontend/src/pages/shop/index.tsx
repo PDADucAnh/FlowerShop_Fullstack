@@ -81,7 +81,7 @@ const ShopPage: React.FC = () => {
         />
       </aside>
       <section className="flex-grow">
-        <ShopHeader count={paged?.totalCount ?? 0} page={paged?.page} pageSize={paged?.pageSize} sortBy={sortBy} onSortChange={setSortBy} />
+        <ShopHeader count={paged?.totalCount ?? 0} page={paged?.page} pageSize={paged?.pageSize} sortBy={sortBy || undefined} onSortChange={setSortBy} />
         <ProductList products={products} isLoading={isLoading} error={error ? "Không thể tải bộ sưu tập vào lúc này." : null} />
         {paged && paged.totalPages > 1 && (
           <Pagination

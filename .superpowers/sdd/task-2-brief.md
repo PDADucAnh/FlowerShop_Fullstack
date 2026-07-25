@@ -1,125 +1,66 @@
-### Task 2: Backend API — LayoutApiController
+### Task 2: Create IImportService + ImportResult Models
 
 **Files:**
-- Create: `Flower.Backend/Controllers/Api/LayoutApiController.cs`
+- Create: `Flower.Backend/Services/Interfaces/IImportService.cs`
+- Create: `Flower.Backend/Models/DTOs/ImportDTOs.cs`
 
-**Consumes:** `HeaderLayoutDTO`, `FooterColumnDTO` (Task 1), `SystemSettingService`, `StoreInfoSettings`
+**Interfaces:**
+- Produces: `IImportService` (interface), `ImportResult`, `ImportError` (models)
 
-- [ ] **Step 1: Create LayoutApiController.cs**
+- [ ] **Step 1: Create ImportDTOs**
+
+`Flower.Backend/Models/DTOs/ImportDTOs.cs`:
 
 ```csharp
-using Flower.Backend.Models.DTOs;
-using Flower.Backend.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+namespace Flower.Backend.Models.DTOs;
 
-namespace Flower.Backend.Controllers.Api;
-
-[Route("api/layout")]
-[ApiController]
-public class LayoutApiController : ControllerBase
+public class ImportResult
 {
-    private readonly ISystemSettingService _settingService;
+    public int TotalRows { get; set; }
+    public int SuccessCount { get; set; }
+    public int FailureCount { get; set; }
+    public List<ImportError> Errors { get; set; } = new();
+    public List<string> SkippedSkus { get; set; } = new();
+}
 
-    public LayoutApiController(ISystemSettingService settingService)
-    {
-        _settingService = settingService;
-    }
+public class ImportError
+{
+    public int RowIndex { get; set; }
+    public string? ProductCode { get; set; }
+    public string? ProductName { get; set; }
+    public string ErrorMessage { get; set; } = string.Empty;
+}
 
-    [AllowAnonymous]
-    [HttpGet]
-    public async Task<IActionResult> GetLayout()
-    {
-        var header = await _settingService.GetSetting<HeaderLayoutDTO>("HeaderLayout");
-        if (header == null)
-        {
-            header = GetDefaultHeader();
-        }
-        else
-        {
-            header.Zones ??= new ZonesDTO();
-            header.Zones.Left ??= new List<string>();
-            header.Zones.Center ??= new List<string>();
-            header.Zones.Right ??= new List<string>();
-        }
-
-        var footer = await _settingService.GetSetting<List<FooterColumnDTO>>("FooterLayout");
-        footer ??= GetDefaultFooter();
-
-        var storeInfo = await _settingService.GetSetting<StoreInfoSettings>("StoreInfo")
-                        ?? new StoreInfoSettings();
-
-        return Ok(new { header, footer, storeInfo });
-    }
-
-    private static HeaderLayoutDTO GetDefaultHeader()
-    {
-        return new HeaderLayoutDTO
-        {
-            TopBar = new TopBarDTO { IsActive = false },
-            Zones = new ZonesDTO
-            {
-                Left = new List<string>(),
-                Center = new List<string> { "logo" },
-                Right = new List<string> { "search", "cart", "account" }
-            },
-            CtaButton = new CtaButtonDTO { IsActive = false },
-            Hotline = new HotlineConfigDTO { UseDefault = true },
-            Search = new SearchConfigDTO { Mode = "popup" },
-            MenuItems = new List<MenuItemDTO>
-            {
-                new() { Label = "Trang chủ", Url = "/" },
-                new() { Label = "Cửa hàng", Url = "/shop" },
-                new() { Label = "Bài viết", Url = "/blog" },
-                new() { Label = "Giới thiệu", Url = "/about" },
-                new() { Label = "Liên hệ", Url = "/contact" }
-            }
-        };
-    }
-
-    private static List<FooterColumnDTO> GetDefaultFooter()
-    {
-        return new List<FooterColumnDTO>
-        {
-            new()
-            {
-                Title = "Về chúng tôi", Align = "left", SortOrder = 1, Type = "links",
-                Links = new List<FooterLinkDTO>
-                {
-                    new() { Label = "Thương hiệu hoa tươi nghệ thuật...", Type = "text_block" },
-                    new() { Label = "Giới thiệu", Type = "page", PageId = 1 }
-                }
-            },
-            new()
-            {
-                Title = "Chính sách", Align = "left", SortOrder = 2, Type = "links",
-                Links = new List<FooterLinkDTO>
-                {
-                    new() { Label = "Giao hàng", Type = "custom", Url = "/delivery-policy" },
-                    new() { Label = "Đổi trả", Type = "custom", Url = "/return-policy" },
-                    new() { Label = "Bảo mật", Type = "custom", Url = "/privacy-policy" }
-                }
-            },
-            new()
-            {
-                Title = "Kết nối", Align = "left", SortOrder = 3, Type = "social_icons",
-                Links = new List<FooterLinkDTO>()
-            }
-        };
-    }
+public class ImportViewModel
+{
+    public ImportResult? Result { get; set; }
 }
 ```
 
-- [ ] **Step 2: Build to verify**
+- [ ] **Step 2: Create IImportService interface**
 
-Run: `cd Flower.Backend && dotnet build`
-Expected: `Build succeeded`
+`Flower.Backend/Services/Interfaces/IImportService.cs`:
+
+```csharp
+using Flower.Backend.Models.DTOs;
+using Microsoft.AspNetCore.Http;
+
+namespace Flower.Backend.Services.Interfaces;
+
+public interface IImportService
+{
+    Task<ImportResult> ImportProductsAsync(
+        IFormFile excelFile,
+        IFormFile? zipFile,
+        string onDuplicate);
+}
+```
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add Flower.Backend/Controllers/Api/LayoutApiController.cs
-git commit -m "feat: add GET /api/layout endpoint with default config fallback"
+git add Flower.Backend/Services/Interfaces/IImportService.cs Flower.Backend/Models/DTOs/ImportDTOs.cs
+git commit -m "feat: add IImportService interface and ImportResult models"
 ```
 
 ---
