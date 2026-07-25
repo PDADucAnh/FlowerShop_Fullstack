@@ -175,6 +175,11 @@
                 <span class="material-symbols-outlined @(controller == "CategoryProduct" ? "text-primary" : "")">category</span>
                 Danh mục sản phẩm
             </a>
+            <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Import" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
+               asp-controller="Import" asp-action="Index">
+                <span class="material-symbols-outlined @(controller == "Import" ? "text-primary" : "")">file_upload</span>
+                Nhập hàng loạt
+            </a>
 
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em] font-medium px-4 pt-4 pb-1">Bán hàng</p>
             <a class="flex items-center gap-3 px-4 py-3 rounded-lg font-label-md text-label-md @(controller == "Order" ? "text-primary bg-secondary-container" : "text-on-surface-variant hover:text-primary hover:bg-primary-container/20") transition-all duration-200 no-underline"
