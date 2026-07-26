@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { useScrollReveal } from '../hooks/useScrollReveal';
 
 export const statusStyles: Record<string, string> = {
-  Pending: 'bg-tertiary-fixed/40 text-tertiary',
+  Pending: 'bg-amber-100 text-amber-800',
   PendingPayment: 'bg-amber-100 text-amber-700',
-  PendingVerification: 'bg-warning/10 text-warning',
+  PendingVerification: 'bg-amber-100 text-amber-800',
   Confirmed: 'bg-info/10 text-info',
   Paid: 'bg-teal-100 text-teal-700',
   Preparing: 'bg-secondary/10 text-secondary',
@@ -20,9 +20,9 @@ export const statusStyles: Record<string, string> = {
 };
 
 export const statusConfig: Record<string, { dot: string; bg: string; border: string }> = {
-  Pending: { dot: 'bg-tertiary', bg: 'bg-surface-variant text-on-surface-variant', border: 'border-outline-variant/30' },
+  Pending: { dot: 'bg-amber-500', bg: 'bg-amber-100 text-amber-800', border: 'border-amber-200' },
   PendingPayment: { dot: 'bg-amber-500', bg: 'bg-amber-50 text-amber-700', border: 'border-amber-300/50' },
-  PendingVerification: { dot: 'bg-warning', bg: 'bg-warning/10 text-warning', border: 'border-warning/30' },
+  PendingVerification: { dot: 'bg-amber-500', bg: 'bg-amber-100 text-amber-800', border: 'border-amber-200' },
   Confirmed: { dot: 'bg-info', bg: 'bg-info/10 text-info', border: 'border-info/30' },
   Paid: { dot: 'bg-teal-500', bg: 'bg-teal-50 text-teal-700', border: 'border-teal-300/50' },
   Preparing: { dot: 'bg-secondary', bg: 'bg-secondary/10 text-secondary', border: 'border-secondary/30' },
@@ -43,7 +43,7 @@ export const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const label = getOrderStatusText(status);
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${s.bg} ${s.border} transition-all duration-300 hover:scale-[1.02] cursor-default`}
+      className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full border ${s.bg} ${s.border} transition-all duration-300 hover:scale-[1.02] cursor-default`}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${s.dot} transition-transform duration-300`} />
       {label}

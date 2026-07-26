@@ -41,14 +41,14 @@ const OrderDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
-        <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
-          <div className="flex flex-col md:flex-row gap-stack-lg">
+      <div className="bg-gray-50 min-h-screen pt-20">
+        <main className="max-w-container-max mx-auto px-4 md:px-6 py-6 min-h-[calc(100vh-200px)]">
+          <div className="flex flex-col md:flex-row gap-6">
             <AccountSidebar />
             <section className="flex-grow">
-              <div className="bg-surface-container-lowest p-stack-lg rounded-xl petal-shadow space-y-lg">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 space-y-4">
                 {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-6 bg-surface-container-low rounded relative overflow-hidden">
+                  <div key={i} className="h-6 bg-gray-100 rounded relative overflow-hidden">
                     <div style={shimmerStyle} className="absolute inset-0" />
                   </div>
                 ))}
@@ -62,15 +62,15 @@ const OrderDetailPage: React.FC = () => {
 
   if (isError || !order) {
     return (
-      <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
-        <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
-          <div className="flex flex-col md:flex-row gap-stack-lg">
+      <div className="bg-gray-50 min-h-screen pt-20">
+        <main className="max-w-container-max mx-auto px-4 md:px-6 py-6 min-h-[calc(100vh-200px)]">
+          <div className="flex flex-col md:flex-row gap-6">
             <AccountSidebar />
-            <section className="flex-grow text-center py-xl max-w-md mx-auto">
-              <span className="material-symbols-outlined text-5xl text-outline mb-md">search_off</span>
-              <h2 className="font-headline-sm text-headline-sm text-secondary uppercase tracking-widest mb-sm">Không tìm thấy đơn hàng</h2>
-              <p className="font-body-md text-body-md text-secondary mb-lg">Đơn hàng này không tồn tại hoặc bạn không có quyền truy cập.</p>
-              <Link to="/my-orders" className="group inline-flex items-center gap-2 bg-primary text-on-primary px-8 py-3 font-label-sm text-label-sm uppercase tracking-widest border border-primary text-decoration-none rounded-lg btn-luxury btn-primary-luxury">
+            <section className="flex-grow text-center py-12 max-w-md mx-auto">
+              <span className="material-symbols-outlined text-5xl text-gray-300 mb-4 inline-block">search_off</span>
+              <h2 className="text-lg font-semibold text-gray-900 mb-2">Không tìm thấy đơn hàng</h2>
+              <p className="text-sm text-gray-500 mb-6">Đơn hàng này không tồn tại hoặc bạn không có quyền truy cập.</p>
+              <Link to="/my-orders" className="inline-flex items-center gap-2 bg-[#9f224e] text-white px-6 py-2.5 text-sm font-semibold rounded-lg hover:bg-[#7d1b3d] transition-colors no-underline">
                 Quay lại đơn hàng
               </Link>
             </section>
@@ -84,10 +84,10 @@ const OrderDetailPage: React.FC = () => {
   const totalAfterDiscount = order.finalAmount > 0 ? order.finalAmount : items.reduce((sum: number, item: any) => sum + item.originalPrice * item.quantity, 0) - order.discountAmount;
 
   return (
-    <div className="bg-background text-on-background font-body-md antialiased pt-20 min-h-screen">
+    <div className="bg-gray-50 min-h-screen pt-20">
       <SEO title="Chi tiết đơn hàng" description="Chi tiết đơn hàng" />
-      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-[calc(100vh-200px)]">
-        <div className="flex flex-col md:flex-row gap-stack-lg">
+      <main className="max-w-container-max mx-auto px-4 md:px-6 py-6 min-h-[calc(100vh-200px)]">
+        <div className="flex flex-col md:flex-row gap-6">
           <AccountSidebar />
 
           <section
@@ -101,78 +101,78 @@ const OrderDetailPage: React.FC = () => {
           >
             <Link
               to="/my-orders"
-              className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-stack-md font-label-md text-decoration-none"
+              className="inline-flex items-center gap-1.5 text-gray-500 hover:text-[#9f224e] transition-colors mb-4 text-sm font-medium no-underline"
             >
               <span className="material-symbols-outlined text-lg">arrow_back</span>
               Quay lại đơn hàng
             </Link>
 
-            <div className="bg-surface-container-lowest p-stack-lg rounded-xl petal-shadow space-y-stack-lg">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-stack-lg border-b border-outline-variant/30">
+            <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100 space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-gray-200">
                 <div>
-                  <p className="text-on-surface-variant font-label-md mb-1">Mã đơn hàng</p>
-                  <h2 className="font-bold text-2xl serif text-on-surface">#{order.id}</h2>
+                  <p className="text-xs text-gray-500 mb-0.5">Mã đơn hàng</p>
+                  <h2 className="font-bold text-xl text-gray-900">#{order.id}</h2>
                 </div>
                 <StatusBadge status={order.status} />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
-                <div className="space-y-1">
-                  <p className="font-label-md text-on-surface-variant">Ngày đặt</p>
-                  <p className="font-body-md">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-200 text-sm">
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5">Ngày đặt</p>
+                  <p className="text-gray-900 font-medium">
                     {new Date(order.orderDate).toLocaleDateString('vi-VN', {
                       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
                     })}
                   </p>
                 </div>
-                <div className="space-y-1">
-                  <p className="font-label-md text-on-surface-variant">Khách hàng</p>
-                  <p className="font-body-md font-medium">{order.customerName || 'N/A'}</p>
-                  {order.customerEmail && <p className="font-body-md text-sm text-on-surface-variant">{order.customerEmail}</p>}
-                  {order.customerPhone && <p className="font-body-md text-sm text-on-surface-variant">{order.customerPhone}</p>}
+                <div>
+                  <p className="text-xs text-gray-500 mb-0.5">Khách hàng</p>
+                  <p className="text-gray-900 font-medium">{order.customerName || 'N/A'}</p>
+                  {order.customerEmail && <p className="text-gray-500 text-xs mt-0.5">{order.customerEmail}</p>}
+                  {order.customerPhone && <p className="text-gray-500 text-xs">{order.customerPhone}</p>}
                 </div>
               </div>
 
               {(order.deliveryDate || order.deliveryTimeSlot || order.deliveryDistrict || order.deliveryAddress) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Giao hàng</p>
-                    {order.deliveryDate && <p className="font-body-md">{new Date(order.deliveryDate).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>}
-                    {order.deliveryTimeSlot && <p className="font-body-md text-sm text-on-surface-variant">Khung giờ: {order.deliveryTimeSlot}</p>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-200 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Giao hàng</p>
+                    {order.deliveryDate && <p className="text-gray-900 font-medium">{new Date(order.deliveryDate).toLocaleDateString('vi-VN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>}
+                    {order.deliveryTimeSlot && <p className="text-gray-500 text-xs mt-0.5">Khung giờ: {order.deliveryTimeSlot}</p>}
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Địa chỉ nhận</p>
-                    {order.deliveryDistrict && <p className="font-body-md">{order.deliveryDistrict}</p>}
-                    {order.deliveryAddress && <p className="font-body-md text-sm text-on-surface-variant">{order.deliveryAddress}</p>}
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Địa chỉ nhận</p>
+                    {order.deliveryDistrict && <p className="text-gray-900 font-medium">{order.deliveryDistrict}</p>}
+                    {order.deliveryAddress && <p className="text-gray-500 text-xs mt-0.5">{order.deliveryAddress}</p>}
                   </div>
                 </div>
               )}
 
               {(order.recipientName || order.recipientPhone) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Người đặt</p>
-                    <p className="font-body-md font-medium">{order.customerName || 'N/A'}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-200 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Người đặt</p>
+                    <p className="text-gray-900 font-medium">{order.customerName || 'N/A'}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Người nhận</p>
-                    <p className="font-body-md font-medium">{order.recipientName || 'N/A'}</p>
-                    {order.recipientPhone && <p className="font-body-md text-sm text-on-surface-variant">SĐT: {order.recipientPhone}</p>}
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Người nhận</p>
+                    <p className="text-gray-900 font-medium">{order.recipientName || 'N/A'}</p>
+                    {order.recipientPhone && <p className="text-gray-500 text-xs mt-0.5">SĐT: {order.recipientPhone}</p>}
                   </div>
                 </div>
               )}
 
               {(order.paymentMethod !== undefined || order.paymentStatus !== undefined) && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack-md pb-stack-lg border-b border-outline-variant/30">
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Phương thức</p>
-                    <p className="font-body-md">{getPaymentMethodText(order.paymentMethod)}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-gray-200 text-sm">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Phương thức</p>
+                    <p className="text-gray-900 font-medium">{getPaymentMethodText(order.paymentMethod)}</p>
                   </div>
-                  <div className="space-y-1">
-                    <p className="font-label-md text-on-surface-variant">Trạng thái thanh toán</p>
-                    <p className={`font-body-md font-bold uppercase tracking-widest text-xs ${
-                      order.paymentStatus === 1 || order.paymentStatus === 'Completed' ? 'text-primary' : 
-                      order.paymentStatus === 2 || order.paymentStatus === 'Failed' ? 'text-error' : 'text-on-surface-variant'
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Trạng thái thanh toán</p>
+                    <p className={`text-xs font-semibold ${
+                      order.paymentStatus === 1 || order.paymentStatus === 'Completed' ? 'text-green-600' : 
+                      order.paymentStatus === 2 || order.paymentStatus === 'Failed' ? 'text-red-600' : 'text-gray-500'
                     }`}>
                       {getPaymentStatusText(order.paymentStatus)}
                     </p>
@@ -181,112 +181,149 @@ const OrderDetailPage: React.FC = () => {
               )}
 
               <div>
-                <h3 className="font-label-md text-on-surface-variant mb-stack-md flex items-center gap-2">
+                <h3 className="text-sm font-medium text-gray-500 mb-3 flex items-center gap-2">
                   <span className="material-symbols-outlined text-lg">inventory_2</span>
                   Sản phẩm ({items.length})
                 </h3>
-                <div className="overflow-x-auto -mx-stack-lg">
+
+                {/* Mobile product list */}
+                <div className="md:hidden space-y-3">
+                  {items.map((item: any) => (
+                    <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                      {item.productImageUrl ? (
+                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 shrink-0">
+                          <img src={getImageUrl(item.productImageUrl)} alt={item.productName || ''} className="w-full h-full object-cover" loading="lazy" />
+                        </div>
+                      ) : (
+                        <div className="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                          <span className="material-symbols-outlined text-gray-400">image</span>
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 capitalize leading-tight">{item.productName || `Product #${item.productId}`}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{formatCurrency(item.unitPrice)}</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-xs text-gray-500">SL: x{item.quantity}</p>
+                        <p className="text-sm font-bold text-[#ab2c5d]">{formatCurrency(item.unitPrice * item.quantity)}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop product table */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
-                      <tr className="border-b border-outline-variant text-on-surface-variant font-label-md">
-                        <th className="py-3 px-stack-lg">Sản phẩm</th>
-                        <th className="py-3 px-stack-lg text-center">SL</th>
-                        <th className="py-3 px-stack-lg text-right">Đơn giá</th>
-                        <th className="py-3 px-stack-lg text-right">Tổng</th>
+                      <tr className="border-b border-gray-200 text-gray-500 text-xs font-medium uppercase tracking-wider">
+                        <th className="py-3 pr-4">Sản phẩm</th>
+                        <th className="py-3 px-4 text-center">SL</th>
+                        <th className="py-3 px-4 text-right">Đơn giá</th>
+                        <th className="py-3 pl-4 text-right">Tổng</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-outline-variant/10">
+                    <tbody className="divide-y divide-gray-100">
                       {items.map((item: any) => (
-                        <tr key={item.id} className="hover:bg-surface-container-low/30 transition-colors">
-                          <td className="py-4 px-stack-lg">
+                        <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="py-4 pr-4">
                             <div className="flex items-center gap-3">
                               {item.productImageUrl ? (
-                                <div className="w-12 h-12 rounded-lg overflow-hidden bg-surface-container-low shrink-0 border border-outline-variant/20">
+                                <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 shrink-0">
                                   <img src={getImageUrl(item.productImageUrl)} alt={item.productName || ''} className="w-full h-full object-cover" loading="lazy" />
                                 </div>
                               ) : (
-                                <div className="w-12 h-12 rounded-lg bg-surface-container-low flex items-center justify-center shrink-0">
-                                  <span className="material-symbols-outlined text-lg text-outline">image</span>
+                                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                                  <span className="material-symbols-outlined text-gray-400">image</span>
                                 </div>
                               )}
-                              <span className="font-body-md text-sm uppercase tracking-wider font-medium">{item.productName || `Product #${item.productId}`}</span>
+                              <span className="text-sm font-medium text-gray-900 capitalize">{item.productName || `Product #${item.productId}`}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-stack-lg text-center font-body-md">{item.quantity}</td>
-                          <td className="py-4 px-stack-lg text-right font-body-md">{formatCurrency(item.unitPrice)}</td>
-                          <td className="py-4 px-stack-lg text-right font-bold">{formatCurrency(item.unitPrice * item.quantity)}</td>
+                          <td className="py-4 px-4 text-center text-sm text-gray-700">{item.quantity}</td>
+                          <td className="py-4 px-4 text-right text-sm text-gray-700">{formatCurrency(item.unitPrice)}</td>
+                          <td className="py-4 pl-4 text-right text-sm font-bold text-gray-900">{formatCurrency(item.unitPrice * item.quantity)}</td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot>
-                      <tr className="border-t border-outline-variant/50">
-                        <td colSpan={3} className="py-5 px-stack-lg text-right font-bold text-sm uppercase tracking-[0.2em]">Tạm tính</td>
-                        <td className="py-5 px-stack-lg text-right font-bold text-xl serif">{formatCurrency(order.originalAmount)}</td>
-                      </tr>
-                      {order.discountAmount > 0 && (
-                        <tr>
-                          <td colSpan={3} className="py-3 px-stack-lg text-right font-body-md text-sm">Giảm giá{order.couponCode ? ` (${order.couponCode})` : ''}</td>
-                          <td className="py-3 px-stack-lg text-right font-body-md text-error">-{formatCurrency(order.discountAmount)}</td>
-                        </tr>
-                      )}
-                      <tr>
-                        <td colSpan={3} className="py-3 px-stack-lg text-right font-body-md text-sm">
-                          <span className="material-symbols-outlined text-[16px] text-outline align-middle mr-1">local_shipping</span>
-                          Phí giao hàng
-                        </td>
-                        <td className="py-3 px-stack-lg text-right font-body-md">{order.shippingFee > 0 ? formatCurrency(order.shippingFee) : 'Miễn phí'}</td>
-                      </tr>
-                      <tr className="border-t border-outline-variant/30">
-                        <td colSpan={3} className="py-5 px-stack-lg text-right font-bold text-sm uppercase tracking-[0.2em]">Tổng cộng</td>
-                        <td className="py-5 px-stack-lg text-right font-bold text-xl serif text-primary">{formatCurrency(totalAfterDiscount)}</td>
-                      </tr>
-                    </tfoot>
                   </table>
+                </div>
+
+                {/* Order Summary */}
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Tạm tính</span>
+                    <span className="text-gray-700 font-medium">{formatCurrency(order.originalAmount)}</span>
+                  </div>
+                  {order.discountAmount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Giảm giá{order.couponCode ? ` (${order.couponCode})` : ''}</span>
+                      <span className="text-red-600 font-medium">-{formatCurrency(order.discountAmount)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[14px]">local_shipping</span>
+                      Phí giao hàng
+                    </span>
+                    <span className="text-gray-700 font-medium">{order.shippingFee > 0 ? formatCurrency(order.shippingFee) : 'Miễn phí'}</span>
+                  </div>
+                  <div className="flex justify-between pt-3 border-t border-gray-200">
+                    <span className="text-sm font-semibold text-gray-900">TỔNG CỘNG</span>
+                    <span className="text-lg font-bold text-[#ab2c5d]">{formatCurrency(totalAfterDiscount)}</span>
+                  </div>
                 </div>
               </div>
 
               {order.notes && (
-                <div className="pt-stack-lg border-t border-outline-variant/30">
-                  <h3 className="font-label-md text-on-surface-variant mb-stack-sm flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg">notes</span>
+                <div className="pt-4 border-t border-gray-200">
+                  <h3 className="text-xs text-gray-500 mb-1.5 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-sm">notes</span>
                     Ghi chú
                   </h3>
-                  <p className="font-body-md text-on-surface-variant italic leading-relaxed text-sm">{order.notes}</p>
+                  <p className="text-sm text-gray-700 italic leading-relaxed">{order.notes}</p>
                 </div>
               )}
 
               {order.status === 'Cancelled' && order.cancelledAt && (
-                <div className="pt-stack-lg border-t border-outline-variant/30 bg-error-container/10 rounded-lg p-stack-md">
-                  <h3 className="font-label-md text-error mb-stack-sm flex items-center gap-2">
-                    <span className="material-symbols-outlined text-lg">cancel</span>
-                    Thông tin hủy đơn
-                  </h3>
-                  <p className="font-body-md text-sm">Đã hủy lúc: {new Date(order.cancelledAt).toLocaleString('vi-VN')}</p>
-                  {order.cancellationReason && <p className="font-body-md text-sm">Lý do: {order.cancellationReason}</p>}
-                  {order.refundAmount > 0 && <p className="font-body-md text-sm">Tiền hoàn: {formatCurrency(order.refundAmount)}</p>}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <h3 className="text-sm font-semibold text-red-700 mb-2 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-lg">cancel</span>
+                      Thông tin hủy đơn
+                    </h3>
+                    <p className="text-sm text-red-600">Đã hủy lúc: {new Date(order.cancelledAt).toLocaleString('vi-VN')}</p>
+                    {order.cancellationReason && <p className="text-sm text-red-600 mt-1">Lý do: {order.cancellationReason}</p>}
+                    {order.refundAmount > 0 && <p className="text-sm text-red-600 mt-1">Tiền hoàn: {formatCurrency(order.refundAmount)}</p>}
+                  </div>
                 </div>
               )}
 
               {order.status === 'PendingPayment' && (
-                <div className="pt-stack-lg border-t border-outline-variant/30 flex justify-end gap-md">
+                <div className="pt-4 border-t border-gray-200 flex justify-end">
                   <button
                     onClick={handleRetryPayment}
                     disabled={retrying}
-                    className="inline-flex items-center gap-2 bg-primary text-on-primary px-stack-md py-stack-sm text-label-sm uppercase tracking-[0.2em] font-bold rounded-lg hover:bg-primary/90 transition-all duration-300 border-0 cursor-pointer btn-luxury disabled:opacity-50"
+                    className="inline-flex items-center gap-2 bg-[#9f224e] text-white px-5 h-10 text-sm font-semibold rounded-lg hover:bg-[#7d1b3d] transition-all duration-300 border-0 cursor-pointer disabled:opacity-50"
                   >
                     {retrying ? 'Đang xử lý...' : 'Thanh toán lại'}
                     <span className="material-symbols-outlined text-lg">payments</span>
                   </button>
                 </div>
               )}
-              {order.canCancel && (
-                <div className="pt-stack-lg border-t border-outline-variant/30 flex justify-end">
+              {(order.canCancel || String(order.status) === 'PendingVerification' || String(order.status) === '4') && (
+                <div className="pt-4 border-t border-gray-200 flex flex-col sm:flex-row gap-3">
+                  <a
+                    href="tel:19006789"
+                    className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-[#9f224e]/30 text-[#9f224e] text-sm font-medium bg-transparent hover:bg-[#9f224e]/5 transition-colors no-underline"
+                  >
+                    <span>📞</span>
+                    Liên hệ hỗ trợ
+                  </a>
                   <button
                     onClick={() => setShowCancel(true)}
-                    className="inline-flex items-center gap-2 border border-error/30 px-stack-md py-stack-sm text-label-sm uppercase tracking-[0.2em] font-bold text-error rounded-lg hover:bg-error hover:text-on-error transition-all duration-300 bg-transparent cursor-pointer btn-luxury"
+                    className="flex-1 inline-flex items-center justify-center gap-2 h-10 px-4 rounded-lg border border-red-300 text-red-600 text-sm font-medium bg-transparent hover:bg-red-50 transition-colors cursor-pointer"
                   >
-                    Hủy đơn
-                    <span className="material-symbols-outlined text-lg">close</span>
+                    HỦY ĐƠN
                   </button>
                 </div>
               )}
