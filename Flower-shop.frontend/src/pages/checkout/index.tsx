@@ -200,17 +200,11 @@ const CheckoutPage: React.FC = () => {
     const orderPayload = {
       customerId: user?.id || 0,
       notes: [formData.notes, formData.greetingCard ? `Lời chúc: ${formData.greetingCard}` : ''].filter(Boolean).join(' | '),
-      items: checkoutItems.map(item => {
-        let sizeVariant = 'Classic';
-        if (item.name.includes('(Deluxe)')) sizeVariant = 'Deluxe';
-        else if (item.name.includes('(Grand)')) sizeVariant = 'Grand';
-        return {
-          productId: item.id,
-          quantity: item.quantity,
-          unitPrice: item.promotionPrice ?? item.discountPrice ?? item.price,
-          sizeVariant: sizeVariant
-        };
-      }),
+      items: checkoutItems.map(item => ({
+        productId: item.id,
+        quantity: item.quantity,
+        unitPrice: item.promotionPrice ?? item.discountPrice ?? item.price,
+      })),
       paymentMethod: formData.paymentMethod === 'OnlinePayment' ? 0 : 1,
       deliveryDate: formData.deliveryDate,
       deliveryTimeSlot: formData.deliveryTimeSlot,

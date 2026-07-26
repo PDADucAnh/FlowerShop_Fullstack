@@ -21,7 +21,6 @@ const ProductDetailPage = () => {
   const { data: product, isLoading } = useProduct(id as string);
   
   const [quantity, setQuantity] = useState(1);
-  const [selectedSize, setSelectedSize] = useState<'Classic' | 'Deluxe' | 'Grand'>('Classic');
   const [activeImage, setActiveImage] = useState<string>('');
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
@@ -32,7 +31,6 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     setQuantity(1);
-    setSelectedSize('Classic');
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -62,12 +60,11 @@ const ProductDetailPage = () => {
   const isOutOfStock = product ? product.stockQuantity === 0 : false;
   const isLowStock = product ? product.stockQuantity > 0 && product.stockQuantity <= 5 : false;
 
-  const sizePriceAdjustment = selectedSize === 'Deluxe' ? 300000 : selectedSize === 'Grand' ? 600000 : 0;
   const basePrice = product ? (promotionInfo?.promotionPrice ?? product.promotionPrice ?? product.currentPrice ?? product.discountPrice ?? product.price) : 0;
-  const finalPrice = basePrice + sizePriceAdjustment;
+  const finalPrice = basePrice;
   
   const originalPrice = product ? product.price : 0;
-  const finalOriginalPrice = originalPrice + sizePriceAdjustment;
+  const finalOriginalPrice = originalPrice;
 
   const hasPromoActive = !!promotionInfo?.promotionPrice || !!product?.promotionPrice || (!!product?.currentPrice && product.currentPrice < product.price);
 
@@ -97,7 +94,6 @@ const ProductDetailPage = () => {
     const name = promotionInfo?.name ?? product.promotionName;
     const customizedProduct = {
       ...product,
-      name: selectedSize !== 'Classic' ? `${product.name} (${selectedSize})` : product.name,
       price: finalOriginalPrice,
       promotionPrice: hasPromoActive ? finalPrice : undefined,
       currentPrice: hasPromoActive ? finalPrice : finalOriginalPrice,
@@ -107,7 +103,7 @@ const ProductDetailPage = () => {
     };
     addToCart(customizedProduct, quantity);
     toast.success(`Đã thêm "${customizedProduct.name}" (x${quantity}) vào giỏ hàng`);
-  }, [product, quantity, selectedSize, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart]);
+  }, [product, quantity, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart]);
 
   const handleBuyNow = useCallback(() => {
     if (!product) return;
@@ -120,7 +116,6 @@ const ProductDetailPage = () => {
     const name = promotionInfo?.name ?? product.promotionName;
     const customizedProduct = {
       ...product,
-      name: selectedSize !== 'Classic' ? `${product.name} (${selectedSize})` : product.name,
       price: finalOriginalPrice,
       promotionPrice: hasPromoActive ? finalPrice : undefined,
       currentPrice: hasPromoActive ? finalPrice : finalOriginalPrice,
@@ -130,7 +125,7 @@ const ProductDetailPage = () => {
     };
     addToCart(customizedProduct, quantity);
     navigate('/checkout');
-  }, [product, quantity, selectedSize, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart, navigate]);
+  }, [product, quantity, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart, navigate]);
 
   // Load related products
   const { data: relatedResult } = useProductsPaged(1, 5, null, null, product?.categoryProductId || null);
@@ -297,32 +292,6 @@ const ProductDetailPage = () => {
             <p className="font-body-md text-body-md text-on-surface-variant mb-stack-lg leading-relaxed">
               {product.description || 'Chưa có mô tả chi tiết cho sản phẩm này.'}
             </p>
-
-            {/* Configuration Options */}
-            <div className="space-y-stack-md mb-stack-lg">
-              <div>
-                <label className="font-label-md text-label-md text-on-surface block mb-base">Chọn Kích thước</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['Classic', 'Deluxe', 'Grand'] as const).map((size) => {
-                    const isSelected = selectedSize === size;
-                    const adjustmentText = size === 'Deluxe' ? ` (+${formatCurrency(300000)})` : size === 'Grand' ? ` (+${formatCurrency(600000)})` : '';
-                    return (
-                      <button
-                        key={size}
-                        onClick={() => setSelectedSize(size)}
-                        className={`rounded-lg py-3 text-center transition-all duration-300 font-label-sm text-label-sm hover:scale-[1.02] active:scale-[0.98] ${
-                          isSelected
-                            ? 'border-2 border-primary bg-surface-container-lowest shadow-[0_4px_20px_rgba(171,44,93,0.08)] text-primary font-semibold'
-                            : 'border border-outline-variant hover:border-primary hover:bg-surface-container-low text-on-surface-variant'
-                        }`}
-                      >
-                        {size}{adjustmentText}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
 
             {/* Add to Cart Area */}
             <div className="flex items-center gap-stack-sm mb-stack-lg">
