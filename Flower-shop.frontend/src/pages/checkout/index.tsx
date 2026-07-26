@@ -281,30 +281,29 @@ const CheckoutPage: React.FC = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col lg:flex-row gap-gutter">
           {/* Form Sections (Left) */}
-          <div className="w-full lg:w-2/3 space-y-stack-md">
+          <div className="w-full lg:w-2/3">
             {/* Section 1: Thông tin người mua */}
-            <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0_4px_20px_rgba(255,177,197,0.02)] border border-outline-variant/30 relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors duration-300"></div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-6 flex items-center">
+            <section className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center">
                 <span className="material-symbols-outlined mr-2 text-primary">person</span>
                 Thông tin người mua
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="buyer-name">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="buyer-name">
                     Họ và tên người mua
                   </label>
                   <input
                     type="text"
                     id="buyer-name"
                     {...register('fullname')}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all"
                     placeholder="Nhập họ và tên"
                   />
                   {errors.fullname && <p className="text-error text-xs mt-1">{errors.fullname.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="buyer-phone">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="buyer-phone">
                     Số điện thoại người mua
                   </label>
                   <input
@@ -315,7 +314,7 @@ const CheckoutPage: React.FC = () => {
                       phoneRegister.onBlur(e);
                       await handlePhoneBlur(e.target.value);
                     }}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all"
                     placeholder="Nhập số điện thoại"
                   />
                   {errors.phone && <p className="text-error text-xs mt-1">{errors.phone.message}</p>}
@@ -327,14 +326,14 @@ const CheckoutPage: React.FC = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="buyer-email">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="buyer-email">
                     Email người mua
                   </label>
                   <input
                     type="email"
                     id="buyer-email"
                     {...register('email')}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all"
                     placeholder="Nhập email"
                   />
                   {errors.email && <p className="text-error text-xs mt-1">{errors.email.message}</p>}
@@ -343,28 +342,27 @@ const CheckoutPage: React.FC = () => {
             </section>
 
             {/* Section 2: Thông tin người nhận */}
-            <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0_4px_20px_rgba(255,177,197,0.02)] border border-outline-variant/30 relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors duration-300"></div>
-              <div className="flex justify-between items-center mb-6">
+            <section className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+              <div className="flex justify-between items-center w-full mb-4">
                 <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center">
                   <span className="material-symbols-outlined mr-2 text-primary">local_florist</span>
                   Thông tin người nhận
                 </h2>
-                <label className="flex items-center space-x-2 cursor-pointer group/check">
+                <label className="flex items-center gap-2 cursor-pointer shrink-0">
                   <input
                     type="checkbox"
                     checked={recipientIsBuyer}
                     onChange={(e) => setRecipientIsBuyer(e.target.checked)}
-                    className="form-checkbox text-primary rounded border-outline-variant focus:ring-primary focus:ring-offset-0 transition-colors"
+                    className="rounded border-gray-300 text-[#9f224e] focus:ring-[#9f224e] focus:ring-offset-0 transition-colors cursor-pointer"
                   />
-                  <span className="font-label-sm text-label-sm text-on-surface-variant group-hover/check:text-primary transition-colors">
+                  <span className="text-xs text-gray-500 font-medium whitespace-nowrap">
                     Người nhận là người mua
                   </span>
                 </label>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="receiver-name">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="receiver-name">
                     Họ và tên người nhận
                   </label>
                   <input
@@ -372,13 +370,13 @@ const CheckoutPage: React.FC = () => {
                     id="receiver-name"
                     disabled={recipientIsBuyer}
                     {...register('recipientName')}
-                    className={`w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}`}
                     placeholder="Nhập họ và tên người nhận"
                   />
                   {errors.recipientName && <p className="text-error text-xs mt-1">{errors.recipientName.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="receiver-phone">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="receiver-phone">
                     Số điện thoại người nhận
                   </label>
                   <input
@@ -386,22 +384,22 @@ const CheckoutPage: React.FC = () => {
                     id="receiver-phone"
                     disabled={recipientIsBuyer}
                     {...register('recipientPhone')}
-                    className={`w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed' : ''}`}
+                    className={`w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all ${recipientIsBuyer ? 'opacity-60 cursor-not-allowed bg-gray-50' : ''}`}
                     placeholder="Nhập số điện thoại người nhận"
                   />
                   {errors.recipientPhone && <p className="text-error text-xs mt-1">{errors.recipientPhone.message}</p>}
                 </div>
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2 flex items-center" htmlFor="card-message">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center" htmlFor="card-message">
                     Lời chúc trên thiệp
-                    <span className="material-symbols-outlined ml-1 text-[16px] text-outline" title="Tặng kèm thiệp thiết kế riêng">
+                    <span className="material-symbols-outlined ml-1 text-[16px] text-gray-400" title="Tặng kèm thiệp thiết kế riêng">
                       info
                     </span>
                   </label>
                   <textarea
                     id="card-message"
                     {...register('greetingCard')}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim resize-none"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all resize-none"
                     placeholder="Nhập lời chúc muốn gửi gắm..."
                     rows={3}
                   ></textarea>
@@ -411,28 +409,27 @@ const CheckoutPage: React.FC = () => {
             </section>
 
             {/* Section 3: Thời gian & Địa điểm */}
-            <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0_4px_20px_rgba(255,177,197,0.02)] border border-outline-variant/30 relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors duration-300"></div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-6 flex items-center">
+            <section className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center">
                 <span className="material-symbols-outlined mr-2 text-primary">location_on</span>
                 Thời gian &amp; Địa điểm nhận hàng
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="address">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="address">
                     Địa chỉ chi tiết
                   </label>
                   <input
                     type="text"
                     id="address"
                     {...register('deliveryAddress')}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all"
                     placeholder="Số nhà, tên đường, phường/xã..."
                   />
                   {errors.deliveryAddress && <p className="text-error text-xs mt-1">{errors.deliveryAddress.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="delivery-date">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="delivery-date">
                     Ngày nhận hoa
                   </label>
                   <div className="relative">
@@ -441,20 +438,20 @@ const CheckoutPage: React.FC = () => {
                       id="delivery-date"
                       {...register('deliveryDate')}
                       min={getVietnamTodayString()}
-                      className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md"
+                      className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium outline-none transition-all"
                     />
                   </div>
                   {errors.deliveryDate && <p className="text-error text-xs mt-1">{errors.deliveryDate.message}</p>}
                 </div>
                 <div>
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="delivery-time">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="delivery-time">
                     Khung giờ giao hoa
                   </label>
                   <div className="relative">
                     <select
                       id="delivery-time"
                       {...register('deliveryTimeSlot')}
-                      className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md appearance-none cursor-pointer"
+                      className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium outline-none transition-all appearance-none cursor-pointer"
                     >
                       <option disabled value="">Chọn khung giờ</option>
                       {getFilteredSlots().map(slot => (
@@ -468,13 +465,13 @@ const CheckoutPage: React.FC = () => {
                   {errors.deliveryTimeSlot && <p className="text-error text-xs mt-1">{errors.deliveryTimeSlot.message}</p>}
                 </div>
                 <div className="col-span-1 md:col-span-2">
-                  <label className="block font-label-md text-label-md text-on-surface-variant mb-2" htmlFor="extra-notes">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="extra-notes">
                     Ghi chú thêm
                   </label>
                   <textarea
                     id="extra-notes"
                     {...register('notes')}
-                    className="w-full bg-[#FCE4EC] border-outline-variant rounded-lg px-4 py-3 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim resize-none"
+                    className="w-full bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 py-2.5 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all resize-none"
                     placeholder="Lưu ý về giao hàng, bảo vệ, gọi điện trước..."
                     rows={2}
                   ></textarea>
@@ -483,52 +480,51 @@ const CheckoutPage: React.FC = () => {
             </section>
 
             {/* Section 4: Phương thức thanh toán */}
-            <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-[0_4px_20px_rgba(255,177,197,0.02)] border border-outline-variant/30 relative overflow-hidden group">
-              <div className="absolute top-0 left-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-colors duration-300"></div>
-              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-6 flex items-center">
+            <section className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 mb-4">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center">
                 <span className="material-symbols-outlined mr-2 text-primary">payments</span>
                 Phương thức thanh toán
               </h2>
               <div className="space-y-4">
                 {/* Option 1: COD */}
-                <label className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors group/radio ${watchPaymentMethod === 'COD' ? 'border-primary bg-surface-container-low' : 'border-outline-variant hover:bg-surface-container-low'} ${isBlacklisted ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                  <div className="flex items-center h-6 mr-4">
+                <label className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${watchPaymentMethod === 'COD' ? 'border-[#9f224e] bg-gray-50' : 'border-gray-200 hover:bg-gray-50'} ${isBlacklisted ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                  <div className="flex items-center h-6 mr-3">
                     <input
                       type="radio"
                       value="COD"
                       disabled={isBlacklisted}
                       {...register('paymentMethod')}
-                      className="w-5 h-5 text-primary form-radio-pink bg-[#FCE4EC] border-outline-variant focus:ring-primary focus:ring-offset-0 transition-all cursor-pointer"
+                      className="w-4 h-4 text-[#9f224e] border-gray-300 focus:ring-[#9f224e] focus:ring-offset-0 transition-all cursor-pointer"
                     />
                   </div>
                   <div className="flex-grow">
                     <div className="flex items-center justify-between">
-                      <span className="font-label-md text-label-md text-on-surface group-hover/radio:text-primary transition-colors">
+                      <span className="text-sm font-medium text-gray-900">
                         Thanh toán khi nhận hàng (COD)
                       </span>
-                      <span className="material-symbols-outlined text-outline">local_shipping</span>
+                      <span className="material-symbols-outlined text-gray-400 text-lg">local_shipping</span>
                     </div>
-                    <p className="font-body-md text-sm text-on-surface-variant mt-1">Thanh toán bằng tiền mặt khi nhận được hoa</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Thanh toán bằng tiền mặt khi nhận được hoa</p>
                   </div>
                 </label>
                 {/* Option 2: VNPAY */}
-                <label className={`flex items-start p-4 border rounded-lg cursor-pointer transition-colors group/radio ${watchPaymentMethod === 'OnlinePayment' ? 'border-primary bg-surface-container-low' : 'border-outline-variant hover:bg-surface-container-low'}`}>
-                  <div className="flex items-center h-6 mr-4">
+                <label className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${watchPaymentMethod === 'OnlinePayment' ? 'border-[#9f224e] bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                  <div className="flex items-center h-6 mr-3">
                     <input
                       type="radio"
                       value="OnlinePayment"
                       {...register('paymentMethod')}
-                      className="w-5 h-5 text-primary form-radio-pink bg-[#FCE4EC] border-outline-variant focus:ring-primary focus:ring-offset-0 transition-all cursor-pointer"
+                      className="w-4 h-4 text-[#9f224e] border-gray-300 focus:ring-[#9f224e] focus:ring-offset-0 transition-all cursor-pointer"
                     />
                   </div>
                   <div className="flex-grow">
                     <div className="flex items-center justify-between">
-                      <span className="font-label-md text-label-md text-on-surface group-hover/radio:text-primary transition-colors">
+                      <span className="text-sm font-medium text-gray-900">
                         Chuyển khoản trực tuyến (VNPAY)
                       </span>
-                      <span className="material-symbols-outlined text-outline">account_balance_wallet</span>
+                      <span className="material-symbols-outlined text-gray-400 text-lg">account_balance_wallet</span>
                     </div>
-                    <p className="font-body-md text-sm text-on-surface-variant mt-1">Thanh toán an toàn qua cổng VNPAY</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Thanh toán an toàn qua cổng VNPAY</p>
                   </div>
                 </label>
               </div>
@@ -537,8 +533,8 @@ const CheckoutPage: React.FC = () => {
 
           {/* Sidebar (Right) - Order Summary */}
           <div className="w-full lg:w-1/3 mt-8 lg:mt-0">
-            <div className="bg-surface-container-lowest rounded-xl p-6 shadow-[0_4px_20px_rgba(255,177,197,0.05)] border border-outline-variant/30 sticky top-8">
-              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-6 border-b border-[#FCE4EC] pb-4">
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 sticky top-8">
+              <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4 border-b border-gray-100 pb-3">
                 Chi tiết đơn hàng
               </h2>
               {/* Product Item List */}
@@ -552,7 +548,7 @@ const CheckoutPage: React.FC = () => {
                   const savings = (item.price - displayPrice) * item.quantity;
 
                   return (
-                    <div className="flex items-start pb-6 border-b border-[#FCE4EC]" key={item.id}>
+                    <div className="flex items-start pb-4 border-b border-gray-100" key={item.id}>
                       <div className="w-20 h-24 bg-surface-container-low rounded-lg overflow-hidden flex-shrink-0 mr-4 petal-shadow">
                         <img
                           className="w-full h-full object-cover"
@@ -562,19 +558,19 @@ const CheckoutPage: React.FC = () => {
                         />
                       </div>
                       <div className="flex-grow">
-                        <h3 className="font-label-md text-label-md text-on-surface mb-1">{item.name}</h3>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant mb-1">SL: {item.quantity}</p>
+                        <h3 className="text-sm font-medium text-gray-900 mb-0.5">{item.name}</h3>
+                        <p className="text-xs text-gray-500 mb-1">SL: {item.quantity}</p>
                         
                         {hasPromo ? (
                           <div className="space-y-1">
-                            <span className="inline-block bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded tracking-wider uppercase">
+                            <span className="inline-block bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded tracking-wider uppercase leading-none">
                               {promoLabel}
                             </span>
                             <div className="flex items-baseline gap-2">
                               <span className="text-gray-400 line-through text-xs">
                                 {formatCurrency(item.price * item.quantity)}
                               </span>
-                              <span className="text-error font-semibold text-base">
+                              <span className="text-[#9f224e] font-bold text-sm">
                                 {formatCurrency(displayPrice * item.quantity)}
                               </span>
                             </div>
@@ -583,7 +579,7 @@ const CheckoutPage: React.FC = () => {
                             </p>
                           </div>
                         ) : (
-                          <p className="font-headline-sm text-base text-primary">
+                          <p className="text-sm font-bold text-[#9f224e]">
                             {formatCurrency(item.price * item.quantity)}
                           </p>
                         )}
@@ -593,13 +589,13 @@ const CheckoutPage: React.FC = () => {
                 })}
               </div>
               {/* Subtotals */}
-              <div className="space-y-3 font-body-md text-body-md text-on-surface-variant mb-6 pb-6 border-b border-[#FCE4EC] mt-6">
+              <div className="space-y-2 text-sm text-gray-500 mb-4 pb-4 border-b border-gray-100 mt-4">
                 <div className="flex justify-between">
                   <span>Tạm tính (Giá gốc)</span>
-                  <span>{formatCurrency(originalTotal)}</span>
+                  <span className="text-gray-700">{formatCurrency(originalTotal)}</span>
                 </div>
                 {promotionDiscountTotal > 0 && (
-                  <div className="flex justify-between text-error font-medium">
+                  <div className="flex justify-between text-red-600 font-medium">
                     <span>Khuyến mãi / Flash Sale</span>
                     <span>-{formatCurrency(promotionDiscountTotal)}</span>
                   </div>
@@ -614,18 +610,18 @@ const CheckoutPage: React.FC = () => {
                   <span>Phí vận chuyển</span>
                   {checkoutSettings ? (
                     shippingFee === 0 ? (
-                      <span className="text-primary font-medium">Miễn phí</span>
+                      <span className="text-[#9f224e] font-medium">Miễn phí</span>
                     ) : (
-                      <span className="font-medium">{formatCurrency(shippingFee)}</span>
+                      <span className="text-gray-700 font-medium">{formatCurrency(shippingFee)}</span>
                     )
                   ) : (
-                    <span className="text-on-surface-variant italic">Đang tính...</span>
+                    <span className="text-gray-400 italic">Đang tính...</span>
                   )}
                 </div>
               </div>
               {/* Coupon Code */}
               <div className="mb-6 pb-6 border-b border-[#FCE4EC]">
-                <label className="font-label-sm text-label-sm text-on-surface-variant mb-2 block">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">
                   Mã giảm giá
                 </label>
                 <div className="flex gap-2">
@@ -640,14 +636,14 @@ const CheckoutPage: React.FC = () => {
                       }
                     }}
                     placeholder="Nhập mã giảm giá"
-                    className="flex-1 bg-[#FCE4EC] border-outline-variant rounded-lg px-3 py-2.5 text-on-surface focus:outline-none form-input-pink transition-all font-body-md text-body-md placeholder-secondary-fixed-dim"
+                    className="flex-1 bg-white border border-gray-300 focus:border-[#9f224e] focus:ring-1 focus:ring-[#9f224e] rounded-lg px-3 h-11 text-sm text-gray-900 font-medium placeholder:text-gray-400 outline-none transition-all"
                     disabled={applyingCoupon}
                   />
                   <button
                     type="button"
                     onClick={handleApplyCoupon}
                     disabled={applyingCoupon || !couponCode.trim()}
-                    className="bg-primary text-on-primary px-4 py-2.5 rounded-lg font-label-md text-label-md border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity whitespace-nowrap"
+                    className="bg-[#9f224e] text-white px-4 py-2.5 rounded-lg text-sm font-medium border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#7d1b3d] transition-colors whitespace-nowrap h-11"
                   >
                     {applyingCoupon ? 'Đang áp...' : 'Áp dụng'}
                   </button>
@@ -656,21 +652,21 @@ const CheckoutPage: React.FC = () => {
                   <p className="text-error text-xs mt-2">{couponError}</p>
                 )}
                 {appliedCoupon && (
-                  <div className="mt-2 bg-surface-container-low rounded-lg p-3">
+                  <div className="mt-2 bg-gray-50 rounded-lg p-3 border border-gray-200">
                     <div className="flex justify-between items-center">
                       <div className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm text-primary">check_circle</span>
-                        <span className="font-label-sm text-label-sm text-primary">{appliedCoupon.code}</span>
+                        <span className="material-symbols-outlined text-sm text-green-600">check_circle</span>
+                        <span className="text-sm font-medium text-gray-900">{appliedCoupon.code}</span>
                       </div>
-                      <span className="font-label-sm text-label-sm text-error">-{formatCurrency(appliedCoupon.discountAmount)}</span>
+                      <span className="text-sm font-medium text-red-600">-{formatCurrency(appliedCoupon.discountAmount)}</span>
                     </div>
                   </div>
                 )}
               </div>
               {/* Total */}
-              <div className="flex justify-between items-end mb-8">
-                <span className="font-label-md text-label-md text-on-surface">Tổng thanh toán</span>
-                <span className="font-headline-md text-headline-sm text-primary">
+              <div className="flex justify-between items-end mb-4">
+                <span className="text-sm font-semibold text-gray-900">Tổng thanh toán</span>
+                <span className="text-lg font-bold text-[#9f224e]">
                   {formatCurrency(finalTotal)}
                 </span>
               </div>
@@ -678,16 +674,19 @@ const CheckoutPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={createOrder.isPending || checkoutItems.length === 0}
-                className="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 mb-4 flex items-center justify-center border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#9f224e] hover:bg-[#7d1b3d] text-white font-bold text-base h-12 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {createOrder.isPending ? 'Đang xử lý...' : 'Đặt hàng'}
+                {createOrder.isPending ? 'Đang xử lý...' : 'ĐẶT HÀNG'}
                 <span className="material-symbols-outlined ml-2" style={{ fontVariationSettings: "'FILL' 1" }}>
                   arrow_forward
                 </span>
               </button>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                Bằng việc đặt hàng, bạn đồng ý với Điều khoản và Chính sách của chúng tôi.
+              </p>
               {/* Security Note */}
-              <div className="flex items-center justify-center text-on-surface-variant font-label-sm text-label-sm">
-                <span className="material-symbols-outlined mr-2 text-[16px]">lock</span>
+              <div className="flex items-center justify-center text-gray-400 text-xs mt-3">
+                <span className="material-symbols-outlined mr-1 text-[14px]">lock</span>
                 Mã hóa đầu cuối an toàn. Thông tin của bạn được bảo vệ.
               </div>
             </div>
