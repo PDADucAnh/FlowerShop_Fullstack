@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="CloudinaryDotNet" Version="1.29.2" />
-    <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
     <PackageReference Include="EPPlus" Version="8.6.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">

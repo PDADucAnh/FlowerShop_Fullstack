@@ -3,8 +3,8 @@ using System;
 using Flower.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,448 +17,354 @@ namespace Flower.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "8.0.23")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             modelBuilder.Entity("Flower.Data.Entities.AdminNotification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("created_by");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("icon");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_read");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("message");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Metadata")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("metadata");
+                        .HasColumnType("text");
 
                     b.Property<string>("NavigationUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("navigation_url");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Priority")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("priority");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("read_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReferenceId")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("reference_id");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ReferenceType")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("reference_type");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("type");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_admin_notifications");
+                    b.HasKey("Id");
 
-                    b.ToTable("admin_notifications", (string)null);
+                    b.ToTable("AdminNotifications", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Advertisement", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("image_url");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LinkUrl")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("link_url");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("sort_order");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Subtitle")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("subtitle");
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_advertisements");
+                    b.HasKey("Id");
 
-                    b.ToTable("advertisements", (string)null);
+                    b.ToTable("Advertisements", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CancellationPolicy", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("CancellationFeePercent")
-                        .HasColumnType("int")
-                        .HasColumnName("cancellation_fee_percent");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("order_status");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("RefundPercent")
-                        .HasColumnType("int")
-                        .HasColumnName("refund_percent");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_cancellation_policies");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderStatus")
                         .IsUnique()
                         .HasDatabaseName("IX_CancellationPolicies_OrderStatus");
 
-                    b.ToTable("cancellation_policies", (string)null);
+                    b.ToTable("CancellationPolicies", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_categories");
+                    b.HasKey("Id");
 
-                    b.ToTable("categories", (string)null);
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CategoryProduct", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_categories_products");
+                    b.HasKey("Id");
 
-                    b.ToTable("categories_products", (string)null);
+                    b.ToTable("CategoriesProducts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Contact", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("email");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_read");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Message")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("message");
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("phone");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("read_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("subject");
+                        .HasColumnType("character varying(500)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_contacts");
+                    b.HasKey("Id");
 
-                    b.ToTable("contacts", (string)null);
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Coupon", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("code");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("DiscountType")
-                        .HasColumnType("int")
-                        .HasColumnName("discount_type");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_value");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsPublic")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_public");
+                        .HasColumnType("boolean");
 
                     b.Property<decimal?>("MaximumDiscountAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("maximum_discount_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal?>("MinimumOrderAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("minimum_order_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("UsageLimit")
-                        .HasColumnType("int")
-                        .HasColumnName("usage_limit");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("UsagePerCustomer")
-                        .HasColumnType("int")
-                        .HasColumnName("usage_per_customer");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UsedCount")
-                        .HasColumnType("int")
-                        .HasColumnName("used_count");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_coupons");
+                    b.HasKey("Id");
 
                     b.HasIndex("Code")
                         .IsUnique()
                         .HasDatabaseName("IX_Coupons_Code");
 
-                    b.ToTable("coupons", (string)null);
+                    b.ToTable("Coupons", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CouponUsage", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("CouponId")
-                        .HasColumnType("int")
-                        .HasColumnName("coupon_id");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("UsedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("used_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_coupon_usages");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_coupon_usages_customer_id");
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("OrderId")
                         .IsUnique()
@@ -467,293 +373,231 @@ namespace Flower.Data.Migrations
                     b.HasIndex("CouponId", "CustomerId")
                         .HasDatabaseName("IX_CouponUsages_CouponId_CustomerId");
 
-                    b.ToTable("coupon_usages", (string)null);
+                    b.ToTable("CouponUsages", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Customer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("address");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("DefaultAddressId")
-                        .HasColumnType("int")
-                        .HasColumnName("default_address_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("email");
+                        .HasColumnType("text");
 
                     b.Property<bool>("EmailVerified")
-                        .HasColumnType("bit")
-                        .HasColumnName("email_verified");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("FailedDeliveries")
-                        .HasColumnType("int")
-                        .HasColumnName("failed_deliveries");
+                        .HasColumnType("integer");
 
                     b.Property<int>("FraudScore")
-                        .HasColumnType("int")
-                        .HasColumnName("fraud_score");
+                        .HasColumnType("integer");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("full_name");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsBlacklisted")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_blacklisted");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLogin")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_login");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("text")
                         .HasColumnName("Password");
 
                     b.Property<string>("Phone")
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("phone");
+                        .HasColumnType("text");
 
                     b.Property<bool>("PhoneVerified")
-                        .HasColumnType("bit")
-                        .HasColumnName("phone_verified");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ResetToken")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("reset_token");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("ResetTokenExpiry")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("reset_token_expiry");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("SuccessfulDeliveries")
-                        .HasColumnType("int")
-                        .HasColumnName("successful_deliveries");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TotalOrders")
-                        .HasColumnType("int")
-                        .HasColumnName("total_orders");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_customers");
+                    b.HasKey("Id");
 
                     b.HasIndex("Email")
-                        .IsUnique()
-                        .HasDatabaseName("ix_customers_email");
+                        .IsUnique();
 
                     b.HasIndex("Phone")
                         .HasDatabaseName("IX_Customers_Phone");
 
                     b.HasIndex("ResetToken")
                         .HasDatabaseName("IX_Customers_ResetToken")
-                        .HasFilter("[ResetToken] IS NOT NULL");
+                        .HasFilter("\"ResetToken\" IS NOT NULL");
 
-                    b.ToTable("customers", (string)null);
+                    b.ToTable("Customers", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CustomerAddress", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("AddressLine")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("address_line");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("District")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("district");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_default");
+                        .HasColumnType("boolean");
 
                     b.Property<double?>("Latitude")
-                        .HasColumnType("float")
-                        .HasColumnName("latitude");
+                        .HasColumnType("double precision");
 
                     b.Property<double?>("Longitude")
-                        .HasColumnType("float")
-                        .HasColumnName("longitude");
+                        .HasColumnType("double precision");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("note");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("PostalCode")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("postal_code");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Province")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("province");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("ReceiverName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("receiver_name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ReceiverPhone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("receiver_phone");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Ward")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("ward");
+                        .HasColumnType("character varying(100)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_customer_addresses");
+                    b.HasKey("Id");
 
                     b.HasIndex("CustomerId", "IsDefault")
                         .HasDatabaseName("IX_CustomerAddresses_CustomerId_IsDefault")
-                        .HasFilter("[IsDefault] = 1");
+                        .HasFilter("\"IsDefault\" = true");
 
-                    b.ToTable("customer_addresses", (string)null);
+                    b.ToTable("CustomerAddresses", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CustomerPaymentPreference", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_default");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastUsedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_used_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PaymentMethodId")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_method_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_customer_payment_preferences");
+                    b.HasKey("Id");
 
-                    b.HasIndex("PaymentMethodId")
-                        .HasDatabaseName("ix_customer_payment_preferences_payment_method_id");
+                    b.HasIndex("PaymentMethodId");
 
                     b.HasIndex("CustomerId", "PaymentMethodId")
-                        .IsUnique()
-                        .HasDatabaseName("ix_customer_payment_preferences_customer_id_payment_method_id");
+                        .IsUnique();
 
-                    b.ToTable("customer_payment_preferences", (string)null);
+                    b.ToTable("CustomerPaymentPreferences", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.DeliverySlot", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CurrentBooked")
-                        .HasColumnType("int")
-                        .HasColumnName("current_booked");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("DeliveryDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("delivery_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<int>("MaxCapacity")
-                        .HasColumnType("int")
-                        .HasColumnName("max_capacity");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TimeSlot")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("time_slot");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_delivery_slots");
+                    b.HasKey("Id");
 
                     b.HasIndex("DeliveryDate", "TimeSlot", "IsActive")
                         .HasDatabaseName("IX_DeliverySlots_Date_TimeSlot_IsActive");
@@ -761,62 +605,50 @@ namespace Flower.Data.Migrations
                     b.HasIndex("ProductId", "DeliveryDate", "TimeSlot", "IsActive")
                         .HasDatabaseName("IX_DeliverySlots_ProductId_DeliveryDate_TimeSlot_IsActive");
 
-                    b.ToTable("delivery_slots", (string)null);
+                    b.ToTable("DeliverySlots", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.EmailHistory", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("EmailType")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("email_type");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int?>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Recipient")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("recipient");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("SentAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("sent_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("status");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Subject")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("subject");
+                        .HasColumnType("character varying(500)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_email_histories");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_email_histories_customer_id");
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("EmailType")
                         .HasDatabaseName("IX_EmailHistories_EmailType");
@@ -824,171 +656,135 @@ namespace Flower.Data.Migrations
                     b.HasIndex("OrderId")
                         .HasDatabaseName("IX_EmailHistories_OrderId");
 
-                    b.ToTable("email_histories", (string)null);
+                    b.ToTable("EmailHistories", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.FlashSale", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_flash_sales");
+                    b.HasKey("Id");
 
                     b.HasIndex("IsActive", "StartDate", "EndDate")
                         .HasDatabaseName("IX_FlashSales_Active_StartDate_EndDate");
 
-                    b.ToTable("flash_sales", (string)null);
+                    b.ToTable("FlashSales", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.FlashSaleProduct", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("DiscountPercent")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_percent");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("FlashSaleId")
-                        .HasColumnType("int")
-                        .HasColumnName("flash_sale_id");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("sale_price");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_flash_sale_products");
+                    b.HasKey("Id");
 
-                    b.HasIndex("FlashSaleId")
-                        .HasDatabaseName("ix_flash_sale_products_flash_sale_id");
+                    b.HasIndex("FlashSaleId");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_flash_sale_products_product_id");
+                    b.HasIndex("ProductId");
 
-                    b.ToTable("flash_sale_products", (string)null);
+                    b.ToTable("FlashSaleProducts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Notification", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Content")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("content");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("icon");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("IsRead")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_read");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Metadata")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("metadata");
+                        .HasColumnType("text");
 
                     b.Property<string>("NavigationUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("navigation_url");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int?>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Priority")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("priority");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("read_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ReferenceType")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("reference_type");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("type");
+                        .HasColumnType("character varying(50)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_notifications");
+                    b.HasKey("Id");
 
                     b.HasIndex("CustomerId")
                         .HasDatabaseName("IX_Notifications_CustomerId");
@@ -996,1102 +792,866 @@ namespace Flower.Data.Migrations
                     b.HasIndex("CustomerId", "IsRead")
                         .HasDatabaseName("IX_Notifications_CustomerId_IsRead");
 
-                    b.ToTable("notifications", (string)null);
+                    b.ToTable("Notifications", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Order", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<decimal>("CancellationFee")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("cancellation_fee");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("CancellationReason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("cancellation_reason");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("cancelled_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CancelledBy")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("cancelled_by");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int?>("CouponId")
-                        .HasColumnType("int")
-                        .HasColumnName("coupon_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("CustomerId")
-                        .HasColumnType("int")
-                        .HasColumnName("customer_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("DeliveryAddress")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("delivery_address");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("DeliveryAddressLine")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("delivery_address_line");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("DeliveryDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("delivery_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DeliveryDistrict")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("delivery_district");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("DeliveryPostalCode")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("delivery_postal_code");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("DeliveryProvince")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("delivery_province");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("DeliveryReceiverName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("delivery_receiver_name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("DeliveryReceiverPhone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("delivery_receiver_phone");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int?>("DeliverySlotId")
-                        .HasColumnType("int")
-                        .HasColumnName("delivery_slot_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("DeliveryTimeSlot")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("delivery_time_slot");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("DeliveryWard")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("delivery_ward");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<decimal>("DiscountAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("FinalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("final_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsVerified")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_verified");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("notes");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("order_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("OriginalAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("original_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("PaymentMethod")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_method");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("PaymentPaidAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("payment_paid_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("PaymentStatus")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("PaymentTransactionId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("payment_transaction_id");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int?>("PromotionId")
-                        .HasColumnType("int")
-                        .HasColumnName("promotion_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("RecipientName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("recipient_name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("RecipientPhone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("recipient_phone");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<decimal>("RefundAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("refund_amount");
+                        .HasColumnType("numeric");
 
                     b.Property<DateTime?>("RefundCompletedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("refund_completed_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("RefundRequestedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("refund_requested_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal>("ShippingFee")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("shipping_fee");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("TargetFinishedTime")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("target_finished_time");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("verified_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_orders");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CouponId")
-                        .HasDatabaseName("ix_orders_coupon_id");
+                    b.HasIndex("CouponId");
 
-                    b.HasIndex("CustomerId")
-                        .HasDatabaseName("ix_orders_customer_id");
+                    b.HasIndex("CustomerId");
 
                     b.HasIndex("OrderDate")
                         .HasDatabaseName("IX_Orders_OrderDate");
 
-                    b.HasIndex("PromotionId")
-                        .HasDatabaseName("ix_orders_promotion_id");
+                    b.HasIndex("PromotionId");
 
                     b.HasIndex("Status")
                         .HasDatabaseName("IX_Orders_Status");
 
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("Status"), new[] { "OrderDate", "PaymentMethod" });
+
                     b.HasIndex("Status", "OrderDate")
                         .HasDatabaseName("IX_Orders_Status_OrderDate");
 
-                    b.ToTable("orders", (string)null);
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.OrderDetail", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<decimal?>("Discount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProductImage")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("product_image");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("ProductName")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("product_name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Quantity")
-                        .HasColumnType("int")
-                        .HasColumnName("quantity");
+                        .HasColumnType("integer");
 
                     b.Property<string>("SizeVariant")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("size_variant");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal?>("Subtotal")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("subtotal");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("unit_price");
+                        .HasColumnType("decimal(18,2)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_order_details");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_order_details_order_id");
+                    b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_order_details_product_id");
+                    b.HasIndex("ProductId");
 
-                    b.ToTable("order_details", (string)null);
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Page", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("content");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_pages");
+                    b.HasKey("Id");
 
-                    b.ToTable("pages", (string)null);
+                    b.ToTable("Pages", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Payment", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("BankCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("bank_code");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Gateway")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("gateway");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("GatewayResponseCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("gateway_response_code");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("Method")
-                        .HasColumnType("int")
-                        .HasColumnName("method");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("notes");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("paid_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int?>("PaymentMethodId")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_method_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("PaymentUrl")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("payment_url");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("RefundNote")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("refund_note");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("RefundResponseCode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("refund_response_code");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("RefundTransactionId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("refund_transaction_id");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("RefundedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("refunded_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("RefundedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("refunded_by");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int")
-                        .HasColumnName("status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("TransactionId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("transaction_id");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_payments");
+                    b.HasKey("Id");
 
-                    b.HasIndex("OrderId")
-                        .HasDatabaseName("ix_payments_order_id");
+                    b.HasIndex("OrderId");
 
-                    b.HasIndex("PaymentMethodId")
-                        .HasDatabaseName("ix_payments_payment_method_id");
+                    b.HasIndex("PaymentMethodId");
 
-                    b.ToTable("payments", (string)null);
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.PaymentAttempt", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("AttemptNumber")
-                        .HasColumnType("int")
-                        .HasColumnName("attempt_number");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("GatewayRequest")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("gateway_request");
+                        .HasColumnType("text");
 
                     b.Property<string>("GatewayResponse")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("gateway_response");
+                        .HasColumnType("text");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("ip_address");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("PaymentId")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserAgent")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("user_agent");
+                        .HasColumnType("character varying(500)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_payment_attempts");
+                    b.HasKey("Id");
 
                     b.HasIndex("PaymentId", "AttemptNumber")
-                        .IsUnique()
-                        .HasDatabaseName("ix_payment_attempts_payment_id_attempt_number");
+                        .IsUnique();
 
-                    b.ToTable("payment_attempts", (string)null);
+                    b.ToTable("PaymentAttempts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.PaymentMethodDefinition", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("code");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<int>("DisplayOrder")
-                        .HasColumnType("int")
-                        .HasColumnName("display_order");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsOnline")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_online");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_payment_methods");
+                    b.HasKey("Id");
 
                     b.HasIndex("Code")
-                        .IsUnique()
-                        .HasDatabaseName("ix_payment_methods_code");
+                        .IsUnique();
 
-                    b.ToTable("payment_methods", (string)null);
+                    b.ToTable("PaymentMethods", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.PhoneBlacklist", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("phone_number");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("reason");
+                        .HasColumnType("character varying(500)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_phone_blacklists");
+                    b.HasKey("Id");
 
                     b.HasIndex("PhoneNumber", "IsActive")
                         .HasDatabaseName("IX_PhoneBlacklist_PhoneNumber_IsActive");
 
-                    b.ToTable("phone_blacklists", (string)null);
+                    b.ToTable("PhoneBlacklists", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Post", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("CategoryId")
-                        .HasColumnType("int")
-                        .HasColumnName("category_id");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("content");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("image_url");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Summary")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("summary");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("title");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_posts");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CategoryId")
-                        .HasDatabaseName("ix_posts_category_id");
+                    b.HasIndex("CategoryId");
 
-                    b.ToTable("posts", (string)null);
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("AddToCartCount")
-                        .HasColumnType("int")
-                        .HasColumnName("add_to_cart_count");
+                        .HasColumnType("integer");
 
                     b.Property<string>("CareInstruction")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("care_instruction");
+                        .HasColumnType("text");
 
                     b.Property<int>("CategoryProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("category_product_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
+                        .HasColumnType("text");
 
                     b.Property<decimal?>("DiscountPrice")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_price");
+                        .HasColumnType("numeric");
 
                     b.Property<string>("FlowerMeaning")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("flower_meaning");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("image_url");
+                        .HasColumnType("text");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("Origin")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("origin");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("price");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Sku")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("sku");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Slug")
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)")
-                        .HasColumnName("slug");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<int>("StockQuantity")
-                        .HasColumnType("int")
-                        .HasColumnName("stock_quantity");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ViewCount")
-                        .HasColumnType("int")
-                        .HasColumnName("view_count");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_products");
+                    b.HasKey("Id");
 
-                    b.HasIndex("CategoryProductId")
-                        .HasDatabaseName("ix_products_category_product_id");
+                    b.HasIndex("CategoryProductId");
 
                     b.HasIndex("Sku")
                         .IsUnique()
-                        .HasDatabaseName("ix_products_sku")
-                        .HasFilter("[Sku] IS NOT NULL");
+                        .HasFilter("\"Sku\" IS NOT NULL");
 
-                    b.ToTable("products", (string)null);
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.ProductVariant", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<bool>("IsDefault")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_default");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("PriceAdjustment")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("price_adjustment");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("ProductId1")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id1");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_product_variants");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_product_variants_product_id");
+                    b.HasIndex("ProductId");
 
-                    b.HasIndex("ProductId1")
-                        .HasDatabaseName("ix_product_variants_product_id1");
+                    b.HasIndex("ProductId1");
 
-                    b.ToTable("product_variants", (string)null);
+                    b.ToTable("ProductVariants", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.PromotionCampaign", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("BannerImage")
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("banner_image");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("DiscountType")
-                        .HasColumnType("int")
-                        .HasColumnName("discount_type");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("discount_value");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("end_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsStackable")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_stackable");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("Priority")
-                        .HasColumnType("int")
-                        .HasColumnName("priority");
+                        .HasColumnType("integer");
 
                     b.Property<int>("PromotionType")
-                        .HasColumnType("int")
-                        .HasColumnName("promotion_type");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("start_date");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_promotion_campaigns");
+                    b.HasKey("Id");
 
                     b.HasIndex("IsActive", "StartDate", "EndDate")
                         .HasDatabaseName("IX_PromotionCampaigns_Active_StartDate_EndDate");
 
-                    b.ToTable("promotion_campaigns", (string)null);
+                    b.ToTable("PromotionCampaigns", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.PromotionProduct", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
+                        .HasColumnType("integer");
 
                     b.Property<int>("PromotionId")
-                        .HasColumnType("int")
-                        .HasColumnName("promotion_id");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_promotion_products");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("ix_promotion_products_product_id");
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("PromotionId", "ProductId")
                         .IsUnique()
                         .HasDatabaseName("IX_PromotionProducts_PromotionId_ProductId");
 
-                    b.ToTable("promotion_products", (string)null);
+                    b.ToTable("PromotionProducts", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.RefreshToken", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("DeviceInfo")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("device_info");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("expires_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_revoked");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("RevokedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("revoked_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("TokenHash")
                         .IsRequired()
                         .HasMaxLength(256)
-                        .HasColumnType("nvarchar(256)")
-                        .HasColumnName("token_hash");
+                        .HasColumnType("character varying(256)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
+                        .HasColumnType("integer");
 
-                    b.HasKey("Id")
-                        .HasName("pk_refresh_tokens");
+                    b.HasKey("Id");
 
                     b.HasIndex("TokenHash")
                         .IsUnique()
                         .HasDatabaseName("IX_RefreshTokens_TokenHash");
 
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("ix_refresh_tokens_user_id");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("refresh_tokens", (string)null);
+                    b.ToTable("RefreshTokens", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.Refund", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ApprovedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("approved_by");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("GatewayRefundId")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("gateway_refund_id");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("PaymentId")
-                        .HasColumnType("int")
-                        .HasColumnName("payment_id");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("ProcessedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("processed_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Reason")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("reason");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<decimal>("RefundAmount")
-                        .HasColumnType("decimal(18,2)")
-                        .HasColumnName("refund_amount");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RefundPercent")
-                        .HasColumnType("int")
-                        .HasColumnName("refund_percent");
+                        .HasColumnType("integer");
 
                     b.Property<int>("RefundStatus")
-                        .HasColumnType("int")
-                        .HasColumnName("refund_status");
+                        .HasColumnType("integer");
 
                     b.Property<string>("RefundType")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("refund_type");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("RequestedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("requested_by");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
-                    b.HasKey("Id")
-                        .HasName("pk_refunds");
+                    b.HasKey("Id");
 
                     b.HasIndex("OrderId")
                         .HasDatabaseName("IX_Refunds_OrderId");
 
-                    b.HasIndex("PaymentId")
-                        .HasDatabaseName("ix_refunds_payment_id");
+                    b.HasIndex("PaymentId");
 
-                    b.ToTable("refunds", (string)null);
+                    b.ToTable("Refunds", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.SystemSetting", b =>
                 {
                     b.Property<string>("Key")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("key");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("description");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("updated_by");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("value");
+                        .HasColumnType("text");
 
-                    b.HasKey("Key")
-                        .HasName("pk_system_settings");
+                    b.HasKey("Key");
 
-                    b.ToTable("system_settings", (string)null);
+                    b.ToTable("SystemSettings", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Address")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("address");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Email")
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("email");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)")
-                        .HasColumnName("full_name");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_active");
+                        .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLogin")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("last_login");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("password_hash");
+                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("phone");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("role");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2")
-                        .HasColumnName("updated_at");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)")
-                        .HasColumnName("username");
+                        .HasColumnType("character varying(50)");
 
-                    b.HasKey("Id")
-                        .HasName("pk_users");
+                    b.HasKey("Id");
 
-                    b.ToTable("users", (string)null);
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Flower.Data.Entities.CouponUsage", b =>
@@ -2100,22 +1660,19 @@ namespace Flower.Data.Migrations
                         .WithMany("Usages")
                         .HasForeignKey("CouponId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_coupon_usages_coupons_coupon_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_coupon_usages_customers_customer_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_coupon_usages_orders_order_id");
+                        .IsRequired();
 
                     b.Navigation("Coupon");
 
@@ -2130,8 +1687,7 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_customer_addresses_customers_customer_id");
+                        .IsRequired();
 
                     b.Navigation("Customer");
                 });
@@ -2142,15 +1698,13 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_customer_payment_preferences_customers_customer_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.PaymentMethodDefinition", "PaymentMethod")
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_customer_payment_preferences_payment_methods_payment_method_id");
+                        .IsRequired();
 
                     b.Navigation("Customer");
 
@@ -2163,8 +1717,7 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_delivery_slots_products_product_id");
+                        .IsRequired();
 
                     b.Navigation("Product");
                 });
@@ -2174,8 +1727,7 @@ namespace Flower.Data.Migrations
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
                         .WithMany()
                         .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_email_histories_customers_customer_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Customer");
                 });
@@ -2186,15 +1738,13 @@ namespace Flower.Data.Migrations
                         .WithMany("FlashSaleProducts")
                         .HasForeignKey("FlashSaleId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_flash_sale_products_flash_sales_flash_sale_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_flash_sale_products_products_product_id");
+                        .IsRequired();
 
                     b.Navigation("FlashSale");
 
@@ -2207,8 +1757,7 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_notifications_customers_customer_id");
+                        .IsRequired();
 
                     b.Navigation("Customer");
                 });
@@ -2218,21 +1767,18 @@ namespace Flower.Data.Migrations
                     b.HasOne("Flower.Data.Entities.Coupon", "Coupon")
                         .WithMany()
                         .HasForeignKey("CouponId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_orders_coupons_coupon_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Flower.Data.Entities.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_orders_customers_customer_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.PromotionCampaign", "Promotion")
                         .WithMany()
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_orders_promotion_campaigns_promotion_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Coupon");
 
@@ -2247,15 +1793,13 @@ namespace Flower.Data.Migrations
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_details_orders_order_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_order_details_products_product_id");
+                        .IsRequired();
 
                     b.Navigation("Order");
 
@@ -2268,14 +1812,12 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_payments_orders_order_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.PaymentMethodDefinition", "PaymentMethodRef")
                         .WithMany()
                         .HasForeignKey("PaymentMethodId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_payments_payment_methods_payment_method_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Order");
 
@@ -2288,8 +1830,7 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("PaymentId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_payment_attempts_payments_payment_id");
+                        .IsRequired();
 
                     b.Navigation("Payment");
                 });
@@ -2300,8 +1841,7 @@ namespace Flower.Data.Migrations
                         .WithMany("Posts")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_posts_categories_category_id");
+                        .IsRequired();
 
                     b.Navigation("Category");
                 });
@@ -2312,8 +1852,7 @@ namespace Flower.Data.Migrations
                         .WithMany("Products")
                         .HasForeignKey("CategoryProductId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_products_categories_products_category_product_id");
+                        .IsRequired();
 
                     b.Navigation("CategoryProduct");
                 });
@@ -2324,13 +1863,11 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_product_variants_products_product_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Product", null)
                         .WithMany("ProductVariants")
-                        .HasForeignKey("ProductId1")
-                        .HasConstraintName("fk_product_variants_products_product_id1");
+                        .HasForeignKey("ProductId1");
 
                     b.Navigation("Product");
                 });
@@ -2341,15 +1878,13 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_promotion_products_products_product_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.PromotionCampaign", "Promotion")
                         .WithMany("PromotionProducts")
                         .HasForeignKey("PromotionId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_promotion_products_promotion_campaigns_promotion_id");
+                        .IsRequired();
 
                     b.Navigation("Product");
 
@@ -2362,8 +1897,7 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_refresh_tokens_users_user_id");
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
@@ -2374,14 +1908,12 @@ namespace Flower.Data.Migrations
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired()
-                        .HasConstraintName("fk_refunds_orders_order_id");
+                        .IsRequired();
 
                     b.HasOne("Flower.Data.Entities.Payment", "Payment")
                         .WithMany()
                         .HasForeignKey("PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .HasConstraintName("fk_refunds_payments_payment_id");
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Order");
 

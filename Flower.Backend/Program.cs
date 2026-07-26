@@ -179,7 +179,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString);
             break;
     }
-    options.UseSnakeCaseNamingConvention();
 });
 
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
