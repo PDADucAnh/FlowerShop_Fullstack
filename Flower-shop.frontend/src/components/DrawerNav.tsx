@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import settingsService from '../services/settingsService';
+import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
 
 interface DrawerNavProps {
   isOpen: boolean;
@@ -24,6 +26,8 @@ const menuItems: MenuItem[] = [
 
 const DrawerNav: React.FC<DrawerNavProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
+  const { user, isAuthenticated, logout } = useAuth();
+  const { favoritesCount } = useWishlist();
   const [storeName, setStoreName] = React.useState('Floraison Boutique');
 
   React.useEffect(() => {
@@ -90,6 +94,61 @@ const DrawerNav: React.FC<DrawerNavProps> = ({ isOpen, onClose }) => {
             );
           })}
         </nav>
+
+        <div className="border-t border-outline-variant/20 mx-6 my-2" />
+
+        <div className="flex flex-col gap-1 px-2">
+          <Link
+            to="/wishlist"
+            onClick={onClose}
+            className="flex items-center gap-4 py-3 px-4 mx-2 my-1 rounded-full transition-colors duration-200 no-underline text-on-surface-variant hover:bg-surface-container relative"
+          >
+            <span className="material-symbols-outlined">favorite</span>
+            <span className="font-body-lg text-body-lg">Yêu thích</span>
+            {favoritesCount > 0 && (
+              <span className="ml-auto min-w-[20px] h-[20px] flex items-center justify-center bg-error text-on-error text-[11px] font-bold rounded-full px-1">
+                {favoritesCount}
+              </span>
+            )}
+          </Link>
+
+          {isAuthenticated ? (
+            <>
+              <Link
+                to="/profile"
+                onClick={onClose}
+                className="flex items-center gap-4 py-3 px-4 mx-2 my-1 rounded-full transition-colors duration-200 no-underline text-on-surface-variant hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined">person</span>
+                <span className="font-body-lg text-body-lg">Hồ sơ</span>
+              </Link>
+              <Link
+                to="/my-orders"
+                onClick={onClose}
+                className="flex items-center gap-4 py-3 px-4 mx-2 my-1 rounded-full transition-colors duration-200 no-underline text-on-surface-variant hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined">receipt_long</span>
+                <span className="font-body-lg text-body-lg">Đơn hàng</span>
+              </Link>
+              <button
+                onClick={() => { logout(); onClose(); }}
+                className="flex items-center gap-4 py-3 px-4 mx-2 my-1 rounded-full transition-colors duration-200 bg-transparent border-0 cursor-pointer text-left text-on-surface-variant hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined">logout</span>
+                <span className="font-body-lg text-body-lg">Đăng xuất</span>
+              </button>
+            </>
+          ) : (
+            <Link
+              to="/login"
+              onClick={onClose}
+              className="flex items-center gap-4 py-3 px-4 mx-2 my-1 rounded-full transition-colors duration-200 no-underline text-on-surface-variant hover:bg-surface-container"
+            >
+              <span className="material-symbols-outlined">login</span>
+              <span className="font-body-lg text-body-lg">Đăng nhập</span>
+            </Link>
+          )}
+        </div>
       </aside>
     </>
   );

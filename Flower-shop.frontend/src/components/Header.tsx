@@ -290,7 +290,7 @@ const Header: React.FC = () => {
                 {layout.ctaButton.text}
               </Link>
             )}
-          <Link to="/wishlist" aria-label="wishlist" className="hover:text-primary/80 transition-colors text-primary no-underline relative flex items-center justify-center">
+          <Link to="/wishlist" aria-label="wishlist" className="hidden md:flex hover:text-primary/80 transition-colors text-primary no-underline relative items-center justify-center">
             <span className="material-symbols-outlined" data-icon="favorite">favorite</span>
             {favoritesCount > 0 && (
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full animate-ping" />
@@ -304,38 +304,42 @@ const Header: React.FC = () => {
               </span>
             )}
           </Link>
-          <NotificationBell />
+          <div className="hidden md:flex items-center">
+            <NotificationBell />
+          </div>
 
-          {isAuthenticated ? (
-            <div className="relative group py-2">
-              <button className="flex items-center space-x-2 hover:text-primary/80 transition-colors text-primary bg-transparent border-0 cursor-pointer">
-                <span className="material-symbols-outlined" data-icon="person">person</span>
-                <span className="font-label-md text-label-md">{user?.fullName || user?.username || 'Tài khoản'}</span>
-              </button>
-              <div className="absolute right-0 top-full w-48 bg-surface-container-lowest shadow-lg rounded-lg border border-outline-variant/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
-                <Link className="flex items-center gap-3 px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors no-underline" to="/profile">
-                  <span className="material-symbols-outlined text-[20px]">person</span>
-                  <span className="">Hồ sơ</span>
-                </Link>
-                <Link className="flex items-center gap-3 px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors border-t border-outline-variant/10 no-underline" to="/my-orders">
-                  <span className="material-symbols-outlined text-[20px]">receipt_long</span>
-                  <span className="">Đơn hàng</span>
-                </Link>
-                <button
-                  onClick={logout}
-                  className="w-full text-left flex items-center gap-3 px-4 py-3 text-label-md text-error hover:bg-error-container/20 transition-colors border-t border-outline-variant/10 bg-transparent border-0 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[20px]">logout</span>
-                  <span className="">Đăng xuất</span>
+          <div className="hidden md:flex items-center">
+            {isAuthenticated ? (
+              <div className="relative group py-2">
+                <button className="flex items-center space-x-2 hover:text-primary/80 transition-colors text-primary bg-transparent border-0 cursor-pointer">
+                  <span className="material-symbols-outlined" data-icon="person">person</span>
+                  <span className="font-label-md text-label-md">{user?.fullName || user?.username || 'Tài khoản'}</span>
                 </button>
+                <div className="absolute right-0 top-full w-48 bg-surface-container-lowest shadow-lg rounded-lg border border-outline-variant/20 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
+                  <Link className="flex items-center gap-3 px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors no-underline" to="/profile">
+                    <span className="material-symbols-outlined text-[20px]">person</span>
+                    <span className="">Hồ sơ</span>
+                  </Link>
+                  <Link className="flex items-center gap-3 px-4 py-3 text-label-md text-on-surface hover:bg-surface-container-low hover:text-primary transition-colors border-t border-outline-variant/10 no-underline" to="/my-orders">
+                    <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                    <span className="">Đơn hàng</span>
+                  </Link>
+                  <button
+                    onClick={logout}
+                    className="w-full text-left flex items-center gap-3 px-4 py-3 text-label-md text-error hover:bg-error-container/20 transition-colors border-t border-outline-variant/10 bg-transparent border-0 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">logout</span>
+                    <span className="">Đăng xuất</span>
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <Link to="/login" className="flex items-center space-x-2 hover:text-primary/80 transition-colors text-primary no-underline">
-              <span className="material-symbols-outlined" data-icon="person">person</span>
-              <span className="font-label-md text-label-md">Đăng nhập</span>
-            </Link>
-          )}
+            ) : (
+              <Link to="/login" className="flex items-center space-x-2 hover:text-primary/80 transition-colors text-primary no-underline">
+                <span className="material-symbols-outlined" data-icon="person">person</span>
+                <span className="font-label-md text-label-md">Đăng nhập</span>
+              </Link>
+            )}
+          </div>
 
           <button
             aria-label="menu"

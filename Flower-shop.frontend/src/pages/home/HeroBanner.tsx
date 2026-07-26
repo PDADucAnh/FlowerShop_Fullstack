@@ -58,7 +58,7 @@ function HeroBanner() {
 
   if (loading) {
     return (
-      <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden flex items-center justify-center mb-xl bg-neutral-100">
+      <section className="relative h-[50vh] max-h-[350px] md:max-h-none md:h-[921px] w-full overflow-hidden flex items-center justify-center mb-xl bg-neutral-100">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </section>
     );
@@ -66,7 +66,7 @@ function HeroBanner() {
 
   if (error) {
     return (
-      <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl bg-surface-container-low flex items-center justify-center">
+      <section className="relative h-[50vh] max-h-[350px] md:max-h-none md:h-[921px] w-full overflow-hidden mb-xl bg-surface-container-low flex items-center justify-center">
         <div className="text-center px-margin">
           <span className="material-symbols-outlined text-4xl text-error mb-md">error</span>
           <p className="font-label-sm text-label-sm text-error uppercase tracking-widest">Không thể tải banner. Vui lòng thử lại sau.</p>
@@ -77,7 +77,7 @@ function HeroBanner() {
 
   if (slides.length === 0) {
     return (
-      <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl group/slider">
+      <section className="relative h-[50vh] max-h-[350px] md:max-h-none md:h-[921px] w-full overflow-hidden mb-xl group/slider">
         <div className="absolute inset-0 w-full h-full">
           <img
             alt="Artistry in Every Bloom"
@@ -112,7 +112,7 @@ function HeroBanner() {
   }
 
   return (
-    <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl group/slider">
+    <section className="relative h-[50vh] max-h-[350px] md:max-h-none md:h-[921px] w-full overflow-hidden mb-xl group/slider">
       {slides.map((slide, index) => (
         <div
           key={slide.id}

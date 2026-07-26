@@ -13,12 +13,12 @@ function BestSellingProducts() {
         <div className="flex justify-between items-end mb-stack-md">
           <h3 className="font-headline-md text-headline-md text-on-surface">Bán Chạy Nhất</h3>
         </div>
-        <div className="flex gap-stack-md overflow-x-auto no-scrollbar pb-4">
+        <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-4 no-scrollbar pb-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex-shrink-0 w-64">
-              <div className="aspect-[4/5] rounded-xl overflow-hidden mb-base bg-surface-container-high animate-pulse" />
-              <div className="h-6 bg-surface-container-high rounded animate-pulse mb-1" />
-              <div className="h-4 bg-surface-container-high rounded w-1/3 animate-pulse mx-auto" />
+            <div key={i} className="w-[160px] sm:w-[200px] flex-shrink-0 snap-start">
+              <div className="aspect-square rounded-xl overflow-hidden mb-2 bg-surface-container-high animate-pulse" />
+              <div className="h-4 bg-surface-container-high rounded animate-pulse mb-1" />
+              <div className="h-3 bg-surface-container-high rounded w-1/3 animate-pulse mx-auto" />
             </div>
           ))}
         </div>
@@ -41,7 +41,7 @@ function BestSellingProducts() {
           Xem tất cả
         </Link>
       </div>
-      <div className="flex gap-stack-md overflow-x-auto no-scrollbar pb-4 -mx-margin-mobile px-margin-mobile">
+      <div className="flex overflow-x-auto snap-x snap-mandatory gap-3 px-4 no-scrollbar pb-2">
         {displayProducts.map((product: any) => {
           const imageUrl = getImageUrl(product.imageUrl);
           const displayPrice = product.promotionPrice ?? product.currentPrice ?? product.discountPrice ?? product.price;
@@ -49,9 +49,9 @@ function BestSellingProducts() {
             <Link
               key={product.id}
               to={`/product/${product.id}`}
-              className="flex-shrink-0 w-64 group no-underline"
+              className="w-[160px] sm:w-[200px] flex-shrink-0 snap-start group no-underline"
             >
-              <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-base petal-shadow">
+              <div className="relative aspect-square rounded-xl overflow-hidden mb-2 petal-shadow">
                 <img
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   src={imageUrl}
@@ -60,8 +60,8 @@ function BestSellingProducts() {
                 />
               </div>
               <div className="text-center">
-                <h4 className="font-headline-sm text-headline-sm text-on-surface">{product.name}</h4>
-                <p className="font-label-md text-tertiary">{formatCurrency(displayPrice)}</p>
+                <h4 className="font-label-md text-xs sm:text-sm text-on-surface line-clamp-2 leading-tight">{product.name}</h4>
+                <p className="font-label-sm text-tertiary mt-1">{formatCurrency(displayPrice)}</p>
               </div>
             </Link>
           );
