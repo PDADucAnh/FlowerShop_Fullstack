@@ -7,7 +7,7 @@ import { formatCurrency } from '../../utils/currency';
 
 const ShoppingCartPage: React.FC = () => {
   const navigate = useNavigate();
-  const { cartItems, removeFromCart, updateQuantity, cartTotal, recalculateCartPrices } = useCart();
+  const { cartItems, removeFromCart, updateQuantity, recalculateCartPrices } = useCart();
   const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
 
   React.useEffect(() => {
@@ -23,6 +23,10 @@ const ShoppingCartPage: React.FC = () => {
   };
 
   const selectedItems = cartItems.filter(item => selectedIds.has(item.id));
+  const selectedOriginalTotal = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const selectedEffectiveTotal = selectedItems.reduce((sum, item) =>
+    sum + (item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price) * item.quantity, 0);
+  const selectedSavings = selectedOriginalTotal - selectedEffectiveTotal;
 
   if (cartItems.length === 0) {
     return (
@@ -51,23 +55,19 @@ const ShoppingCartPage: React.FC = () => {
           <div className="w-16 h-1 bg-primary rounded-full"></div>
         </div>
 
-        {(() => {
-          const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-          const savings = originalTotal - cartTotal;
-          return savings > 0 ? (
-            <div className="mb-stack-lg p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
-              <span className="material-symbols-outlined text-green-600">redeem</span>
-              <div>
-                <p className="font-label-md text-green-800">
-                  Bạn tiết kiệm <strong>{formatCurrency(savings)}</strong> nhờ khuyến mãi
-                </p>
-                <p className="text-sm text-green-600">
-                  Tổng gốc: {formatCurrency(originalTotal)} | Tổng sau giảm: {formatCurrency(cartTotal)}
-                </p>
-              </div>
+        {selectedSavings > 0 ? (
+          <div className="mb-stack-lg p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-3">
+            <span className="material-symbols-outlined text-green-600">redeem</span>
+            <div>
+              <p className="font-label-md text-green-800">
+                Bạn tiết kiệm <strong>{formatCurrency(selectedSavings)}</strong> nhờ khuyến mãi
+              </p>
+              <p className="text-sm text-green-600">
+                Tổng gốc: {formatCurrency(selectedOriginalTotal)} | Tổng sau giảm: {formatCurrency(selectedEffectiveTotal)}
+              </p>
             </div>
-          ) : null;
-        })()}
+          </div>
+        ) : null}
 
         {/* Checkout Layout */}
         <div className="flex flex-col lg:flex-row gap-gutter">
@@ -99,7 +99,7 @@ const ShoppingCartPage: React.FC = () => {
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between items-center text-on-surface-variant">
                   <span className="font-body-md">Tạm tính</span>
-                  <span className="font-label-md">{formatCurrency(cartTotal)}</span>
+                  <span className="font-label-md">{formatCurrency(selectedEffectiveTotal)}</span>
                 </div>
                 <div className="flex justify-between items-center text-on-surface-variant">
                   <span className="font-body-md">Phí vận chuyển</span>
@@ -110,9 +110,17 @@ const ShoppingCartPage: React.FC = () => {
               <div className="border-t border-outline-variant/30 pt-6 mb-6 flex justify-between items-center text-on-surface">
                 <span className="font-headline-sm text-headline-sm">Tổng cộng</span>
                 <span className="font-headline-sm text-headline-sm text-primary">
-                  {formatCurrency(cartTotal)}
+                  {selectedItems.length > 0 ? formatCurrency(selectedEffectiveTotal) : (
+                    <span className="text-on-surface-variant font-body-md text-sm">Vui lòng chọn sản phẩm</span>
+                  )}
                 </span>
               </div>
+              <p className="text-on-surface-variant font-body-sm text-xs text-right -mt-5 mb-6">
+                {selectedItems.length > 0
+                  ? `Đã chọn ${selectedItems.length} sản phẩm`
+                  : 'Chưa chọn sản phẩm nào'
+                }
+              </p>
               
               <button
                 className="w-full bg-primary text-on-primary py-4 rounded-lg font-label-md text-label-md interactive-lift hover:opacity-90 transition-all flex items-center justify-center space-x-2 group border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:interactive-lift-none"
