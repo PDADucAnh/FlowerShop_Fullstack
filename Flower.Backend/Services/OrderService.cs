@@ -513,7 +513,10 @@ namespace Flower.Backend.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Unexpected error creating order for customer {CustomerId}", customerId);
-                return (false, "Lỗi không xác định khi tạo đơn hàng", 0);
+                var detail = ex.InnerException != null
+                    ? $"{ex.Message} | Inner: {ex.InnerException.Message}"
+                    : ex.Message;
+                return (false, $"Lỗi: {detail}", 0);
             }
         }
 
