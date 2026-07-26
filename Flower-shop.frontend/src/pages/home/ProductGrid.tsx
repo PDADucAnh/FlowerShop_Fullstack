@@ -28,11 +28,12 @@ function ProductGrid({ categoryId }: ProductGridProps) {
   return (
     <section className="py-stack-lg md:py-[80px] px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full border-t border-outline-variant/30">
       <div className="text-center mb-xl">
-        <h2 className="font-display-lg text-headline-md uppercase tracking-tight mb-sm">Tuyệt Tác Ngàn Hoa</h2>
+        <h2 className="font-display-lg text-headline-md uppercase tracking-tight mb-sm">Bộ Sưu Tập</h2>
+        <p className="text-secondary font-body-md max-w-xl mx-auto">Tinh hoa nghệ thuật cắm hoa</p>
         <div className="w-12 h-0.5 bg-primary mx-auto mt-md"></div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-gutter mb-xl">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-gutter mb-xl">
         {items.map((product: any) => (
           <ProductCard key={product.id} item={product} variant="standard" />
         ))}
