@@ -14,7 +14,7 @@ import axiosClient from '../../api/axiosClient';
 const MyOrders: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { data: orders, isPending, isError } = useMyOrders({ enabled: !!user });
+  const { data: orders, isPending, isError } = useMyOrders(user?.id, authLoading);
   const cancelOrder = useCancelOrder(() => setCancelTarget(null));
   const [cancelTarget, setCancelTarget] = React.useState<number | null>(null);
   const [retryingId, setRetryingId] = React.useState<number | null>(null);

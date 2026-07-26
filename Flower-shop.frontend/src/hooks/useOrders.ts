@@ -17,11 +17,11 @@ export const useCreateOrder = () => {
   });
 };
 
-export const useMyOrders = (options?: { enabled?: boolean }) => {
+export const useMyOrders = (userId?: number, authLoading?: boolean) => {
   return useQuery({
-    queryKey: ['orders'],
+    queryKey: ['my-orders', userId],
     queryFn: orderService.getMyOrders,
-    enabled: options?.enabled ?? true,
+    enabled: !!userId && !authLoading,
   });
 };
 

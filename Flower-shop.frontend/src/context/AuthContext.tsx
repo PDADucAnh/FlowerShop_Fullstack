@@ -3,6 +3,10 @@ import authService from '../services/authService';
 import tokenService from '../services/tokenService';
 import type { AuthUser, AuthContextType } from '../types/context';
 
+const safeDecode = (str: string) => {
+  try { return decodeURIComponent(escape(str)); } catch { return str; }
+};
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -23,7 +27,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser({
                     id: payload.Id ? Number(payload.Id) : undefined,
                     username: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'] || payload.unique_name,
-                    fullName: payload.FullName || '',
+                    fullName: safeDecode(payload.FullName || ''),
                     email: payload.Email || '',
                     phone: payload.Phone || '',
                     address: payload.Address || '',
