@@ -15,8 +15,10 @@ const axiosClient = axios.create({
 axiosClient.interceptors.request.use(
     (config) => {
         const token = tokenService.getToken();
-        if (token && config.headers) {
+        if (token && token !== 'undefined' && token !== 'null' && config.headers) {
             config.headers.Authorization = `Bearer ${token}`;
+        } else if (config.headers) {
+            delete config.headers.Authorization;
         }
         return config;
     },

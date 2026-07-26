@@ -257,10 +257,13 @@ builder.Services.AddRateLimiter(options =>
 // ---- CẤU HÌNH CORS ----
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowVercel", policy =>
     {
-        var origins = Environment.GetEnvironmentVariable("CORS_ORIGINS") ?? "http://localhost:3000";
-        policy.WithOrigins(origins.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        policy.WithOrigins(
+                    "https://ngoc-anh-flower-shop.vercel.app",
+                    "http://localhost:3000",
+                    "http://localhost:5173"
+                )
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -320,7 +323,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseCors("AllowFrontend");
+app.UseCors("AllowVercel");
 app.UseRateLimiter();
 
 app.Use(async (context, next) =>

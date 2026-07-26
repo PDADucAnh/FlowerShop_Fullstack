@@ -19,7 +19,7 @@ services:
       - key: WEBHOOK_SECRET_KEY
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://flower-shop-fullstack.vercel.app
+        value: https://ngoc-anh-flower-shop.vercel.app;https://flower-shop-fullstack.vercel.app
       - key: CLOUDINARY__CLOUDNAME
         sync: false
       - key: CLOUDINARY__APIKEY
