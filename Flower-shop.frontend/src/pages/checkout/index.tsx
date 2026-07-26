@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCart, type CartItem } from '../../context/CartContext';
+import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useCreateOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
@@ -32,8 +32,8 @@ const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { cartItems, cartTotal, clearCart, recalculateCartPrices } = useCart();
-  const selectedItems = (location.state as { selectedItems?: CartItem[] })?.selectedItems;
-  const checkoutItems = selectedItems ?? cartItems;
+  const selectedIds = (location.state as { selectedIds?: number[] })?.selectedIds;
+  const checkoutItems = selectedIds ? cartItems.filter(item => selectedIds.includes(item.id)) : cartItems;
   const originalTotal = checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const promotionDiscountTotal = checkoutItems.reduce((sum, item) => {
     const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;

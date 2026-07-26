@@ -117,7 +117,7 @@ const ShoppingCartPage: React.FC = () => {
               <button
                 className="w-full bg-primary text-on-primary py-4 rounded-lg font-label-md text-label-md interactive-lift hover:opacity-90 transition-all flex items-center justify-center space-x-2 group border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:interactive-lift-none"
                 disabled={selectedItems.length === 0}
-                onClick={() => navigate('/checkout', { state: { selectedItems } })}
+                onClick={() => navigate('/checkout', { state: { selectedIds: Array.from(selectedIds) } })}
               >
                 <span>TIẾN HÀNH THANH TOÁN</span>
                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
