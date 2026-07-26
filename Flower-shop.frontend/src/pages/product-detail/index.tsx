@@ -7,6 +7,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { getImageUrl } from '../../utils/apiUtils';
 import { formatCurrency } from '../../utils/currency';
 import toast from 'react-hot-toast';
+import ProductCard from '../../components/ProductCard';
 import promotionService from '../../services/promotionService';
 
 const formatImageUrl = (url?: string): string => {
@@ -195,14 +196,14 @@ const ProductDetailPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-margin-desktop lg:gap-gutter items-start">
           {/* Left Column: Image Gallery */}
-          <div className="lg:col-span-7 flex flex-col gap-stack-sm">
+          <div className="lg:col-span-7 flex flex-col gap-3">
             <div 
               onClick={() => {
                 const currentIdx = galleryImages.indexOf(activeImage);
                 setLightboxIndex(currentIdx !== -1 ? currentIdx : 0);
                 setShowLightbox(true);
               }}
-              className="w-full aspect-[4/5] rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(171,44,93,0.02)] bg-surface-container-low group cursor-zoom-in relative"
+              className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(171,44,93,0.02)] bg-surface-container-low group cursor-zoom-in relative"
             >
               <img
                 alt={product.name}
@@ -217,7 +218,7 @@ const ProductDetailPage = () => {
               )}
             </div>
             
-            <div className="grid grid-cols-4 gap-stack-sm">
+            <div className="flex gap-2">
               {galleryImages.slice(0, 3).map((imgUrl, idx) => (
                 <div
                   key={idx}
@@ -225,8 +226,8 @@ const ProductDetailPage = () => {
                     setActiveImage(imgUrl);
                     setLightboxIndex(idx);
                   }}
-                  className={`aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-colors ${
-                    activeImage === imgUrl ? 'border-primary' : 'border-transparent hover:border-outline-variant'
+                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-colors flex-shrink-0 ${
+                    activeImage === imgUrl ? 'border-[#ab2c5d]' : 'border-transparent hover:border-outline-variant'
                   }`}
                 >
                   <img
@@ -238,12 +239,11 @@ const ProductDetailPage = () => {
                 </div>
               ))}
               
-              {/* Video Thumbnail (4th Slot) - Clean grey background as mockup */}
               <div
                 onClick={() => setShowVideoModal(true)}
-                className="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-outline-variant transition-colors bg-surface-container flex items-center justify-center relative group"
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-outline-variant transition-colors bg-surface-container flex items-center justify-center relative group flex-shrink-0"
               >
-                <span className="material-symbols-outlined text-outline text-3xl z-10 transition-transform group-hover:scale-110">play_circle</span>
+                <span className="material-symbols-outlined text-outline text-2xl z-10 transition-transform group-hover:scale-110">play_circle</span>
               </div>
             </div>
           </div>
@@ -272,7 +272,7 @@ const ProductDetailPage = () => {
             <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-2">{product.name}</h1>
             
             <div className="flex items-baseline gap-4 mb-stack-md">
-              <p className="font-headline-md text-headline-md text-primary">
+              <p className="font-headline-md text-headline-md text-[#ab2c5d]">
                 {formatCurrency(finalPrice)}
               </p>
               {hasPromoActive && (
@@ -293,20 +293,20 @@ const ProductDetailPage = () => {
               {product.description || 'Chưa có mô tả chi tiết cho sản phẩm này.'}
             </p>
 
-            {/* Add to Cart Area */}
-            <div className="flex items-center gap-stack-sm mb-stack-lg">
-              <div className="flex items-center border border-outline-variant rounded-lg bg-surface-container-lowest h-[52px]">
+            {/* Mobile-friendly Action Buttons */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center border border-outline-variant rounded-lg bg-surface-container-lowest h-[48px]">
                 <button
                   aria-label="Giảm số lượng"
-                  className="px-4 py-2 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="px-3 py-2 text-on-surface-variant hover:text-[#ab2c5d] transition-colors disabled:opacity-30 disabled:cursor-not-allowed bg-transparent border-0 cursor-pointer flex items-center justify-center"
                   disabled={quantity <= 1}
                   onClick={() => handleQuantityChange(-1)}
                 >
-                  <span className="material-symbols-outlined">remove</span>
+                  <span className="material-symbols-outlined text-[20px]">remove</span>
                 </button>
                 <input
                   aria-label="Quantity"
-                  className="w-12 text-center border-none focus:ring-0 font-body-md text-body-md bg-transparent text-on-surface focus:outline-none"
+                  className="w-10 text-center border-none focus:ring-0 font-body-md text-body-md bg-transparent text-on-surface focus:outline-none"
                   min="1"
                   max={product.stockQuantity}
                   type="number"
@@ -325,28 +325,19 @@ const ProductDetailPage = () => {
                 />
                 <button
                   aria-label="Tăng số lượng"
-                  className="px-4 py-2 text-on-surface-variant hover:text-primary transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="px-3 py-2 text-on-surface-variant hover:text-[#ab2c5d] transition-colors disabled:opacity-30 disabled:cursor-not-allowed bg-transparent border-0 cursor-pointer flex items-center justify-center"
                   disabled={quantity >= product.stockQuantity}
                   onClick={() => handleQuantityChange(1)}
                 >
-                  <span className="material-symbols-outlined">add</span>
+                  <span className="material-symbols-outlined text-[20px]">add</span>
                 </button>
               </div>
 
               <button
-                className="flex-1 bg-primary text-on-primary h-[52px] rounded-lg font-label-md text-label-md shadow-[0_4px_20px_rgba(171,44,93,0.2)] hover:shadow-[0_8px_30px_rgba(171,44,93,0.3)] hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
-                disabled={!canAddToCart}
-                onClick={handleAddToCart}
-              >
-                <span className="material-symbols-outlined">shopping_bag</span>
-                {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
-              </button>
-
-              <button
                 onClick={() => toggleFavorite(product)}
-                className="h-[52px] w-[52px] border border-outline-variant rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:border-primary transition-colors bg-surface-container-lowest"
+                className="h-[48px] w-[48px] border border-outline-variant rounded-lg flex items-center justify-center text-on-surface-variant hover:text-[#ab2c5d] hover:border-[#ab2c5d] transition-colors bg-surface-container-lowest bg-transparent cursor-pointer flex-shrink-0"
               >
-                <span className={`material-symbols-outlined ${isFavorite(product.id) ? 'text-error' : ''}`}>
+                <span className={`material-symbols-outlined text-[22px] ${isFavorite(product.id) ? 'text-[#ab2c5d]' : ''}`}>
                   {isFavorite(product.id) ? 'favorite' : 'favorite_border'}
                 </span>
               </button>
@@ -354,44 +345,90 @@ const ProductDetailPage = () => {
 
             <button
               disabled={!canAddToCart}
+              onClick={handleAddToCart}
+              className="w-full h-[48px] bg-[#ab2c5d] text-white rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed border-0 cursor-pointer transition-all active:scale-[0.98]"
+            >
+              <span className="material-symbols-outlined">shopping_bag</span>
+              {isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+            </button>
+
+            <button
+              disabled={!canAddToCart}
               onClick={handleBuyNow}
-              className="w-full h-[52px] bg-transparent text-primary border border-primary hover:bg-primary-container/10 active:scale-[0.98] transition-all rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed mb-stack-lg"
+              className="w-full h-[48px] bg-transparent text-[#ab2c5d] border border-[#ab2c5d] hover:bg-[#ab2c5d]/5 active:scale-[0.98] transition-all rounded-lg font-label-md text-label-md flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer mb-3"
             >
               <span className="material-symbols-outlined">flash_on</span>
               Mua ngay
             </button>
 
-            {/* Accordions (Details) */}
-            <div className="border-t border-surface-variant divide-y divide-surface-variant">
-              <details className="group py-4" open>
-                <summary className="flex justify-between items-center font-label-md text-label-md text-on-surface cursor-pointer list-none [&::-webkit-details-marker]:hidden">
-                  Chăm sóc &amp; Bảo quản
-                  <span className="material-symbols-outlined text-outline transition-transform group-open:rotate-180">expand_more</span>
+            {/* Consultation Buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-stack-lg">
+              <a
+                href="https://zalo.me/123456789"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 h-[44px] rounded-lg border border-[#0068FF] text-[#0068FF] font-label-md text-label-md no-underline hover:bg-[#0068FF]/5 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">forum</span>
+                Chat Zalo
+              </a>
+              <a
+                href="https://m.me/your-page-id"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 h-[44px] rounded-lg border border-[#0084FF] text-[#0084FF] font-label-md text-label-md no-underline hover:bg-[#0084FF]/5 transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">messenger</span>
+                Messenger
+              </a>
+            </div>
+
+            {/* Accordions */}
+            <div className="border border-outline-variant rounded-xl overflow-hidden divide-y divide-outline-variant">
+              <details className="group" open>
+                <summary className="flex justify-between items-center px-4 py-4 font-label-md text-label-md text-on-surface cursor-pointer list-none [&::-webkit-details-marker]:none hover:bg-surface-container-low transition-colors">
+                  Thông tin sản phẩm
+                  <span className="material-symbols-outlined text-outline transition-transform group-open:rotate-180 text-[20px]">expand_more</span>
                 </summary>
-                <div className="pt-4 font-body-md text-body-md text-on-surface-variant">
+                <div className="px-4 pb-4 font-body-md text-body-md text-on-surface-variant leading-relaxed">
                   <ul className="space-y-2 list-none p-0 m-0">
                     <li className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-sm text-primary mt-1">water_drop</span>
+                      <span className="material-symbols-outlined text-sm text-[#ab2c5d] mt-0.5">check_circle</span>
+                      {product.description || 'Chưa có mô tả chi tiết cho sản phẩm này.'}
+                    </li>
+                  </ul>
+                </div>
+              </details>
+
+              <details className="group">
+                <summary className="flex justify-between items-center px-4 py-4 font-label-md text-label-md text-on-surface cursor-pointer list-none [&::-webkit-details-marker]:none hover:bg-surface-container-low transition-colors">
+                  Chăm sóc &amp; Bảo quản
+                  <span className="material-symbols-outlined text-outline transition-transform group-open:rotate-180 text-[20px]">expand_more</span>
+                </summary>
+                <div className="px-4 pb-4 font-body-md text-body-md text-on-surface-variant">
+                  <ul className="space-y-2 list-none p-0 m-0">
+                    <li className="flex items-start gap-2">
+                      <span className="material-symbols-outlined text-sm text-[#ab2c5d] mt-1">water_drop</span>
                       Cắt cuống hoa góc 45 độ khoảng 1-2 cm khi nhận hoa.
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-sm text-primary mt-1">sunny</span>
+                      <span className="material-symbols-outlined text-sm text-[#ab2c5d] mt-1">sunny</span>
                       Đặt hoa nơi mát mẻ, tránh ánh nắng trực tiếp và gió lùa.
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-sm text-primary mt-1">local_drink</span>
+                      <span className="material-symbols-outlined text-sm text-[#ab2c5d] mt-1">local_drink</span>
                       Thay nước sạch và rửa bình cắm hoa mỗi 2 ngày một lần.
                     </li>
                   </ul>
                 </div>
               </details>
               
-              <details className="group py-4">
-                <summary className="flex justify-between items-center font-label-md text-label-md text-on-surface cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+              <details className="group">
+                <summary className="flex justify-between items-center px-4 py-4 font-label-md text-label-md text-on-surface cursor-pointer list-none [&::-webkit-details-marker]:none hover:bg-surface-container-low transition-colors">
                   Thông tin Giao hàng
-                  <span className="material-symbols-outlined text-outline transition-transform group-open:rotate-180">expand_more</span>
+                  <span className="material-symbols-outlined text-outline transition-transform group-open:rotate-180 text-[20px]">expand_more</span>
                 </summary>
-                <div className="pt-4 font-body-md text-body-md text-on-surface-variant">
+                <div className="px-4 pb-4 font-body-md text-body-md text-on-surface-variant leading-relaxed">
                   Giao hàng hỏa tốc trong ngày đối với các đơn hàng đặt trước 14:00. Hoa được vận chuyển bằng phương tiện chuyên dụng kiểm soát nhiệt độ để đảm bảo độ tươi nguyên bản khi đến tay khách hàng.
                 </div>
               </details>
@@ -409,54 +446,10 @@ const ProductDetailPage = () => {
               </Link>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-              {relatedProducts.map((p: any) => {
-                const displayPrice = p.promotionPrice ?? p.currentPrice ?? p.discountPrice ?? p.price;
-                const hasPromo = displayPrice < p.price;
-                const isFlash = p.hasFlashSale || p.isFlashSale || p.promotionType === 'FlashSale';
-                const percent = p.promotionPercent ?? p.discountPercent;
-
-                return (
-                  <Link
-                    key={p.id}
-                    to={`/product/${p.id}`}
-                    className="group cursor-pointer text-decoration-none block"
-                  >
-                    <div className="w-full aspect-[4/5] rounded-xl overflow-hidden bg-surface-container-low mb-4 shadow-[0_4px_20px_rgba(171,44,93,0.02)] transition-shadow group-hover:shadow-[0_8px_30px_rgba(171,44,93,0.08)] relative">
-                      <img
-                        alt={p.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        src={formatImageUrl(p.imageUrl)}
-                        loading="lazy"
-                      />
-                      {isFlash && (
-                        <div className="absolute top-2 left-2 bg-red-600 text-white px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide flex items-center gap-0.5 shadow z-10 animate-pulse">
-                          <span className="material-symbols-outlined text-[11px] font-bold">bolt</span>
-                          Flash Sale {percent ? `-${percent}%` : ''}
-                        </div>
-                      )}
-                      {!isFlash && hasPromo && (
-                        <div className="absolute top-2 left-2 bg-primary text-on-primary px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide shadow z-10">
-                          KM {percent ? `-${percent}%` : ''}
-                        </div>
-                      )}
-                    </div>
-                    <div className="text-center">
-                      <h3 className="font-label-md text-label-md text-on-surface mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
-                      <div className="flex justify-center gap-2 items-baseline">
-                        <p className="font-body-md text-body-md text-primary mb-0 font-semibold">
-                          {formatCurrency(displayPrice)}
-                        </p>
-                        {hasPromo && (
-                          <p className="font-body-sm text-body-sm text-secondary line-through mb-0 opacity-60">
-                            {formatCurrency(p.price)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+              {relatedProducts.map((p: any) => (
+                <ProductCard key={p.id} item={p} variant="standard" />
+              ))}
             </div>
             
             <div className="mt-6 text-center sm:hidden">

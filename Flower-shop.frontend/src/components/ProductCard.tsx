@@ -86,11 +86,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                     <p className="mt-1">
                         {hasPromotion ? (
                             <>
-                                <span className="text-emerald-700 font-semibold text-sm">{formatCurrency(displayPrice)}</span>
+                                <span className="text-[#ab2c5d] font-semibold text-sm">{formatCurrency(displayPrice)}</span>
                                 <span className="text-on-surface-variant line-through text-xs ml-2">{formatCurrency(item.price)}</span>
                             </>
                         ) : (
-                            <span className="text-emerald-700 font-semibold text-sm">{formatCurrency(displayPrice)}</span>
+                            <span className="text-[#ab2c5d] font-semibold text-sm">{formatCurrency(displayPrice)}</span>
                         )}
                     </p>
                 </div>
@@ -111,11 +111,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, variant = 'standard' })
                 <p className="mt-1">
                     {hasPromotion ? (
                         <>
-                            <span className="text-emerald-700 font-semibold text-sm">{formatCurrency(displayPrice)}</span>
+                            <span className="text-[#ab2c5d] font-semibold text-sm">{formatCurrency(displayPrice)}</span>
                             <span className="text-on-surface-variant line-through text-xs ml-2">{formatCurrency(item.price)}</span>
                         </>
                     ) : (
-                        <span className="text-emerald-700 font-semibold text-sm">{formatCurrency(displayPrice)}</span>
+                        <span className="text-[#ab2c5d] font-semibold text-sm">{formatCurrency(displayPrice)}</span>
                     )}
                 </p>
             </div>
