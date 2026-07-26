@@ -27,6 +27,7 @@ const ShopPage: React.FC = () => {
   const [activePricePreset, setActivePricePreset] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [promotionOnly, setPromotionOnly] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Debounced API state
   const [debouncedMin, setDebouncedMin] = useState<number | null>(null);
@@ -69,15 +70,39 @@ const ShopPage: React.FC = () => {
   return (
     <div className="flex-grow w-full max-w-container-max mx-auto px-margin-desktop py-stack-lg flex flex-col md:flex-row gap-gutter">
       <SEO title="Cửa hàng" description="Danh sách sản phẩm hoa tươi" />
-      <aside className="w-full md:w-64 flex-shrink-0">
-        <ShopSidebar 
-          onCategoryChange={handleCategoryChange} 
+      {/* Mobile filter toggle */}
+      <button
+        className="md:hidden w-full bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-3 flex items-center justify-center gap-2 text-primary font-label-md text-label-md hover:bg-surface-container-low transition-colors cursor-pointer"
+        onClick={() => setSidebarOpen(true)}
+      >
+        <span className="material-symbols-outlined text-[20px]">filter_list</span>
+        Bộ lọc & sắp xếp
+      </button>
+
+      {/* Mobile sidebar backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-30 md:hidden"
+          style={{ backdropFilter: 'blur(2px)' }}
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar: desktop always visible, mobile as drawer */}
+      <aside
+        className={`${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        } md:translate-x-0 fixed md:static top-[72px] md:top-0 left-0 z-40 h-full md:h-auto w-72 md:w-64 flex-shrink-0 transition-transform duration-300 ease-in-out overflow-y-auto`}
+      >
+        <ShopSidebar
+          onCategoryChange={(id) => { handleCategoryChange(id); setSidebarOpen(false); }}
           activeCategoryId={selectedCategoryId}
           onPriceChange={handlePriceChange}
           activePricePreset={activePricePreset}
           setActivePricePreset={setActivePricePreset}
           onPromotionFilterChange={setPromotionOnly}
           activePromotionOnly={promotionOnly}
+          onMobileClose={() => setSidebarOpen(false)}
         />
       </aside>
       <section className="flex-grow">

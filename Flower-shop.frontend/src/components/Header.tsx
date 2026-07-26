@@ -20,6 +20,7 @@ const Header: React.FC = () => {
   const [storeInfo, setStoreInfo] = useState<StoreInfo | null>(null);
   const [layout, setLayout] = useState<HeaderLayout | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     settingsService.getStoreInfo().then((res) => {
@@ -157,10 +158,7 @@ const Header: React.FC = () => {
                 to={getMenuUrl(child)}
                 target={child.isExternal ? '_blank' : undefined}
                 rel={child.isExternal ? 'noopener noreferrer' : undefined}
-                onClick={() => {
-                  const nav = document.querySelector('.mobile-nav');
-                  if (nav) nav.classList.add('hidden');
-                }}
+                onClick={() => setMobileNavOpen(false)}
               >
                 {child.label}
               </Link>
@@ -319,16 +317,16 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-stack-sm text-primary">
-          <div className="mobile-nav hidden md:hidden fixed inset-x-0 top-[72px] bg-surface border-t border-outline-variant/20 shadow-lg z-40 flex flex-col p-4 space-y-3">
+          <div className={`${mobileNavOpen ? '' : 'hidden'} md:hidden fixed inset-x-0 top-[72px] bg-surface border-t border-outline-variant/20 shadow-lg z-40 flex flex-col p-4 space-y-3`}>
             {layout?.menuItems && layout.menuItems.length > 0
               ? layout.menuItems.map((item) => renderMobileMenuItem(item))
               : (
                 <>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/" onClick={() => document.querySelector('.mobile-nav')?.classList.add('hidden')}>Trang chủ</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/shop" onClick={() => document.querySelector('.mobile-nav')?.classList.add('hidden')}>Cửa hàng</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/blog" onClick={() => document.querySelector('.mobile-nav')?.classList.add('hidden')}>Tin tức</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/about" onClick={() => document.querySelector('.mobile-nav')?.classList.add('hidden')}>Giới thiệu</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/contact" onClick={() => document.querySelector('.mobile-nav')?.classList.add('hidden')}>Liên hệ</Link>
+                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/" onClick={() => setMobileNavOpen(false)}>Trang chủ</Link>
+                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/shop" onClick={() => setMobileNavOpen(false)}>Cửa hàng</Link>
+                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/blog" onClick={() => setMobileNavOpen(false)}>Tin tức</Link>
+                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/about" onClick={() => setMobileNavOpen(false)}>Giới thiệu</Link>
+                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/contact" onClick={() => setMobileNavOpen(false)}>Liên hệ</Link>
                 </>
               )
             }
@@ -400,14 +398,9 @@ const Header: React.FC = () => {
           <button
             aria-label="menu"
             className="md:hidden text-primary bg-transparent border-0 cursor-pointer flex items-center justify-center"
-            onClick={() => {
-              const nav = document.querySelector('.mobile-nav');
-              if (nav) {
-                nav.classList.toggle('hidden');
-              }
-            }}
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
           >
-            <span className="material-symbols-outlined">menu</span>
+            <span className="material-symbols-outlined">{mobileNavOpen ? 'close' : 'menu'}</span>
           </button>
         </div>
       </div>

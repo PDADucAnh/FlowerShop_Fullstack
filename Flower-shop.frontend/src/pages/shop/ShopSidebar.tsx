@@ -9,6 +9,7 @@ interface ShopSidebarProps {
   setActivePricePreset: (preset: string | null) => void;
   onPromotionFilterChange: (value: boolean) => void;
   activePromotionOnly: boolean;
+  onMobileClose?: () => void;
 }
 
 const ShopSidebar = ({ 
@@ -18,7 +19,8 @@ const ShopSidebar = ({
   activePricePreset,
   setActivePricePreset,
   onPromotionFilterChange,
-  activePromotionOnly
+  activePromotionOnly,
+  onMobileClose
 }: ShopSidebarProps) => {
   const { data: categories = [] } = useProductCategories();
   const [minInput, setMinInput] = useState('');
@@ -43,15 +45,26 @@ const ShopSidebar = ({
     <div className="flex flex-col gap-stack-md bg-surface-container-lowest border border-outline-variant/20 rounded-2xl p-6 shadow-sm">
       <div className="mb-stack-sm border-b border-outline-variant/20 pb-4 flex justify-between items-center">
         <h2 className="font-headline-sm text-headline-sm text-on-surface">Lọc theo</h2>
-        <button
-          className="font-label-sm text-label-sm text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer"
-          onClick={() => {
-            onCategoryChange(null);
-            handlePresetSelect(null, null, null);
-          }}
-        >
-          Xóa tất cả
-        </button>
+        <div className="flex items-center gap-2">
+          {onMobileClose && (
+            <button
+              className="md:hidden font-label-sm text-label-sm text-on-surface-variant hover:text-primary bg-transparent border-0 p-0 cursor-pointer"
+              onClick={onMobileClose}
+              aria-label="Đóng bộ lọc"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          )}
+          <button
+            className="font-label-sm text-label-sm text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer"
+            onClick={() => {
+              onCategoryChange(null);
+              handlePresetSelect(null, null, null);
+            }}
+          >
+            Xóa tất cả
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-stack-sm border-b border-outline-variant/20 pb-4">

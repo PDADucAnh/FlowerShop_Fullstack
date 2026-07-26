@@ -37,7 +37,7 @@
         <span class="font-label-sm text-label-sm text-on-surface-variant">
             Hiển thị @((currentPage - 1) * pageSize + 1)-@Math.Min(currentPage * pageSize, totalCount) trên tổng số @totalCount bản ghi
         </span>
-        <div class="flex gap-1">
+        <div class="flex gap-1 flex-wrap">
             <a href="@getUrl(currentPage - 1)"
                class="p-1 rounded-md text-on-surface-variant hover:bg-surface-variant transition-colors flex items-center justify-center @(currentPage <= 1 ? "disabled pointer-events-none opacity-40" : "")"
                aria-label="Trang trước">
