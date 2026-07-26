@@ -80,7 +80,7 @@ function HeroBanner() {
       <section className="relative h-[819px] md:h-[921px] w-full overflow-hidden mb-xl group/slider">
         <div className="absolute inset-0 w-full h-full">
           <img
-            alt="Tuyệt Tác Hoa Tươi Nghệ Thuật"
+            alt="Artistry in Every Bloom"
             className="w-full h-full object-cover"
             src="https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=1600"
             loading="eager"
@@ -91,19 +91,19 @@ function HeroBanner() {
         <div className="absolute inset-0 z-20 flex items-center justify-center">
           <div className="relative text-center px-margin max-w-3xl flex flex-col items-center">
             <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-stack-sm bg-surface-container-lowest/80 px-4 py-1 rounded-full backdrop-blur-sm petal-shadow inline-block">
-              Lãng Mạn Đương Đại
+              Floraison Boutique
             </span>
             <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-stack-md leading-tight">
-              Tuyệt Tác Hoa Tươi Nghệ Thuật
+              Artistry in Every Bloom
             </h1>
             <p className="font-body-lg text-body-lg text-on-surface-variant mb-lg max-w-xl mx-auto">
-              Khám phá những thiết kế hoa độc đáo, sang trọng mang phong cách châu Âu hiện đại.
+              Tinh hoa nghệ thuật cắm hoa — những thiết kế hoa độc đáo, sang trọng dành cho bạn.
             </p>
             <Link
               to="/shop"
-              className="bg-primary text-on-primary px-8 py-4 font-label-sm text-label-sm uppercase tracking-widest border border-primary text-decoration-none btn-luxury btn-primary-luxury inline-block"
+              className="bg-primary text-on-primary px-8 py-4 font-label-sm text-label-sm uppercase tracking-widest border border-primary text-decoration-none btn-luxury btn-primary-luxury inline-block active:scale-95"
             >
-              Mua ngay
+              Khám phá ngay
             </Link>
           </div>
         </div>
@@ -144,7 +144,7 @@ function HeroBanner() {
               {index === current && (
                 <>
                   <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-stack-sm bg-surface-container-lowest/80 px-4 py-1 rounded-full backdrop-blur-sm petal-shadow inline-block">
-                    Lãng Mạn Đương Đại
+                    Floraison Boutique
                   </span>
                   <h1 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-stack-md leading-tight">
                     {slide.title}
@@ -157,9 +157,9 @@ function HeroBanner() {
                   {slide.linkUrl && (
                     <Link
                       to={slide.linkUrl}
-                      className="bg-primary text-on-primary px-8 py-4 font-label-sm text-label-sm uppercase tracking-widest border border-primary text-decoration-none btn-luxury btn-primary-luxury inline-block"
+                      className="bg-primary text-on-primary px-8 py-4 font-label-sm text-label-sm uppercase tracking-widest border border-primary text-decoration-none btn-luxury btn-primary-luxury inline-block active:scale-95"
                     >
-                      Mua ngay
+                      Khám phá ngay
                     </Link>
                   )}
                 </>
