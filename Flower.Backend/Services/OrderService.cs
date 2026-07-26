@@ -407,11 +407,10 @@ namespace Flower.Backend.Services
             {
                 foreach (var item in items)
                 {
-                    var isPostgres = _context.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
-                string Q(string name) => isPostgres ? $"\"{name}\"" : $"[{name}]";
-                var affected = await _context.Database.ExecuteSqlRawAsync(
-                        $"UPDATE {Q("Products")} SET {Q("StockQuantity")} = {Q("StockQuantity")} - {{0}} WHERE {Q("Id")} = {{1}} AND {Q("StockQuantity")} >= {{0}}",
-                        item.Quantity, item.ProductId);
+                    var affected = await _context.Products
+                    .Where(p => p.Id == item.ProductId && p.StockQuantity >= item.Quantity)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(p => p.StockQuantity, p => p.StockQuantity - item.Quantity));
                     if (affected == 0)
                     {
                         await transaction.RollbackAsync();

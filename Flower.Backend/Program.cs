@@ -21,7 +21,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Text.Json;
@@ -130,7 +129,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var dbProvider = Environment.GetEnvironmentVariable("DB_PROVIDER") ?? "SqlServer";
+var dbProvider = builder.Configuration.GetValue<string>("DbProvider")
+    ?? Environment.GetEnvironmentVariable("DB_PROVIDER") ?? "SqlServer";
 
 string GetConnectionString()
 {
@@ -149,6 +149,17 @@ string GetConnectionString()
             return $"Host={pgHost};Port={pgPort};Database={pgDb};Username={pgUser};Password={pgPass};SSL Mode=Require;Trust Server Certificate=true";
     }
 
+    if (dbProvider == "MySQL")
+    {
+        var myHost = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
+        var myPort = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
+        var myDb = Environment.GetEnvironmentVariable("MYSQL_DATABASE");
+        var myUser = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
+        var myPass = Environment.GetEnvironmentVariable("MYSQL_PASSWORD");
+        if (!string.IsNullOrEmpty(myDb))
+            return $"Server={myHost};Port={myPort};Database={myDb};User={myUser};Password={myPass};SslMode=Preferred";
+    }
+
     return builder.Configuration.GetConnectionString("DefaultConnection");
 }
 
@@ -156,10 +167,19 @@ var connectionString = GetConnectionString();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    if (dbProvider == "PostgreSQL")
-        options.UseNpgsql(connectionString);
-    else
-        options.UseSqlServer(connectionString);
+    switch (dbProvider)
+    {
+        case "PostgreSQL":
+            options.UseNpgsql(connectionString);
+            break;
+        case "MySQL":
+            options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+            break;
+        default:
+            options.UseSqlServer(connectionString);
+            break;
+    }
+    options.UseSnakeCaseNamingConvention();
 });
 
 builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());

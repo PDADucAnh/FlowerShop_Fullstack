@@ -1,5 +1,6 @@
 using Flower.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Flower.Data
 {
@@ -47,6 +48,15 @@ namespace Flower.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            var utcConverter = new ValueConverter<DateTime, DateTime>(
+                v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+                foreach (var property in entityType.GetProperties())
+                    if (property.ClrType == typeof(DateTime) || property.ClrType == typeof(DateTime?))
+                        property.SetValueConverter(utcConverter);
+
             modelBuilder.Entity<Customer>()
                 .HasIndex(c => c.Email)
                 .IsUnique();
@@ -91,8 +101,7 @@ namespace Flower.Data
 
             modelBuilder.Entity<Order>()
                 .HasIndex(o => o.Status)
-                .HasDatabaseName("IX_Orders_Status")
-                .IncludeProperties(o => new { o.OrderDate, o.PaymentMethod });
+                .HasDatabaseName("IX_Orders_Status");
 
             modelBuilder.Entity<Order>()
                 .HasIndex(o => new { o.Status, o.OrderDate })
