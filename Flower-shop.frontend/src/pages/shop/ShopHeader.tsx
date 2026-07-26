@@ -9,17 +9,15 @@ interface ShopHeaderProps {
 }
 
 const ShopHeader = ({ count, page = 1, pageSize = 9, sortBy, onSortChange }: ShopHeaderProps) => {
-  const from = count > 0 ? (page - 1) * pageSize + 1 : 0;
-  const to = Math.min(page * pageSize, count);
   return (
-    <div className="flex justify-between items-center mb-stack-lg pb-4 border-b border-surface-variant">
-      <p className="font-body-md text-body-md text-on-surface-variant">
-        {count > 0 ? `Hiển thị ${from}-${to} / ${count} kết quả` : 'Không có kết quả'}
+    <div className="flex justify-between items-center mb-3 pb-3 border-b border-surface-variant">
+      <p className="text-xs sm:text-sm text-on-surface-variant font-medium">
+        {count > 0 ? `${count} sản phẩm` : 'Không có kết quả'}
       </p>
-      <div className="flex items-center gap-2">
-        <span className="font-label-md text-label-md text-on-surface">Sắp xếp:</span>
+      <div className="flex items-center gap-1.5">
+        <span className="hidden sm:inline text-xs text-on-surface font-medium">Sắp xếp:</span>
         <select
-          className="bg-surface-container-lowest border border-outline-variant text-on-surface font-body-md text-body-md rounded px-3 py-1 focus:ring-primary focus:border-primary outline-none transition-colors"
+          className="bg-surface-container-lowest border border-outline-variant text-on-surface text-xs sm:text-sm rounded-lg px-2 py-1.5 focus:ring-primary focus:border-primary outline-none transition-colors"
           value={sortBy || ''}
           onChange={(e) => onSortChange?.(e.target.value)}
         >
