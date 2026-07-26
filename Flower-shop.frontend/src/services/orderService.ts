@@ -13,8 +13,13 @@ const orderService = {
   },
 
   getMyOrders: async (): Promise<Order[]> => {
-    const data: Order[] = await axiosClient.get('/Orders');
-    return data;
+    try {
+      const res = await axiosClient.get('/Orders');
+      return Array.isArray(res) ? res : (res as any)?.items ?? [];
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      return [];
+    }
   },
 
   getOrderById: async (id: number): Promise<Order> => {

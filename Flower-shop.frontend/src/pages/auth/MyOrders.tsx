@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useMyOrders, useCancelOrder } from '../../hooks/useOrders';
+import { useAuth } from '../../context/AuthContext';
 import { formatCurrency } from '../../utils/currency';
 import { CancelModal, OrderSkeleton, AccountSidebar, statusStyles } from '../../components/OrderComponents';
 import { getOrderStatusText } from '../../utils/statusMappers';
@@ -11,12 +12,20 @@ import { getImageUrl } from '../../utils/apiUtils';
 import axiosClient from '../../api/axiosClient';
 
 const MyOrders: React.FC = () => {
-  const { data: orders, isLoading, isError } = useMyOrders();
-  const cancelOrder = useCancelOrder(() => setCancelTarget(null));
-  const [cancelTarget, setCancelTarget] = useState<number | null>(null);
-  const [retryingId, setRetryingId] = useState<number | null>(null);
-  const { ref, isVisible } = useScrollReveal({ threshold: 0 });
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { data: orders, isPending, isError } = useMyOrders({ enabled: !!user });
+  const cancelOrder = useCancelOrder(() => setCancelTarget(null));
+  const [cancelTarget, setCancelTarget] = React.useState<number | null>(null);
+  const [retryingId, setRetryingId] = React.useState<number | null>(null);
+  const { ref, isVisible } = useScrollReveal({ threshold: 0 });
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      navigate('/login', { replace: true });
+    }
+  }, [user, authLoading, navigate]);
 
   const handleRetryPayment = async (orderId: number) => {
     setRetryingId(orderId);
@@ -38,7 +47,29 @@ const MyOrders: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (authLoading) {
+    return (
+      <div className="bg-gray-50 min-h-screen pt-20">
+        <main className="max-w-container-max mx-auto px-4 md:px-6 py-6 min-h-[calc(100vh-200px)]">
+          <div className="flex flex-col md:flex-row gap-6">
+            <AccountSidebar />
+            <section className="flex-grow">
+              <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100">
+                <h2 className="text-lg font-bold text-gray-900 mb-4">Lịch sử đơn hàng</h2>
+                <OrderSkeleton />
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
+
+  if (isPending) {
     return (
       <div className="bg-gray-50 min-h-screen pt-20">
         <main className="max-w-container-max mx-auto px-4 md:px-6 py-6 min-h-[calc(100vh-200px)]">
@@ -74,6 +105,8 @@ const MyOrders: React.FC = () => {
     );
   }
 
+  const safeOrders: Order[] = Array.isArray(orders) ? orders : [];
+
   return (
     <div className="bg-gray-50 min-h-screen pt-20">
       <SEO title="Đơn hàng của tôi" description="Danh sách đơn hàng" />
@@ -93,12 +126,12 @@ const MyOrders: React.FC = () => {
             <div className="bg-white rounded-xl p-4 md:p-6 shadow-sm border border-gray-100">
               <div className="flex items-baseline gap-2 mb-4">
                 <h2 className="text-lg font-bold text-gray-900">Lịch sử đơn hàng</h2>
-                {orders && orders.length > 0 && (
-                  <span className="text-sm text-gray-500 font-normal">({orders.length} đơn hàng)</span>
+                {safeOrders.length > 0 && (
+                  <span className="text-sm text-gray-500 font-normal">({safeOrders.length} đơn hàng)</span>
                 )}
               </div>
 
-              {!orders || orders.length === 0 ? (
+              {safeOrders.length === 0 ? (
                 <div className="text-center py-12">
                   <span className="material-symbols-outlined text-4xl text-gray-300 mb-4 inline-block">receipt_long</span>
                   <p className="text-sm text-gray-500 mb-4">Chưa có đơn hàng. Hãy mua sắm để thấy đơn hàng ở đây.</p>
@@ -109,9 +142,8 @@ const MyOrders: React.FC = () => {
                 </div>
               ) : (
                 <>
-                  {/* Mobile cards */}
                   <div className="md:hidden space-y-3">
-                    {orders.map((order: Order) => {
+                    {safeOrders.map((order: Order) => {
                       const preview = order.orderDetails?.[0];
                       const subtotal = order.orderDetails?.reduce((sum: number, item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
                       const displayTotal = order.finalAmount > 0 ? order.finalAmount : subtotal;
@@ -167,7 +199,6 @@ const MyOrders: React.FC = () => {
                     })}
                   </div>
 
-                  {/* Desktop table */}
                   <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                       <thead>
@@ -181,7 +212,7 @@ const MyOrders: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {orders.map((order: Order) => {
+                        {safeOrders.map((order: Order) => {
                           const preview = order.orderDetails?.[0];
                           const subtotal = order.orderDetails?.reduce((sum: number, item) => sum + item.unitPrice * item.quantity, 0) ?? 0;
                           const displayTotal = order.finalAmount > 0 ? order.finalAmount : subtotal;

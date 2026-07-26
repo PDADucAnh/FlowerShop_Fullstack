@@ -17,10 +17,11 @@ export const useCreateOrder = () => {
   });
 };
 
-export const useMyOrders = () => {
+export const useMyOrders = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['orders'],
     queryFn: orderService.getMyOrders,
+    enabled: options?.enabled ?? true,
   });
 };
 
