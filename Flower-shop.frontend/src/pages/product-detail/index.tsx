@@ -162,11 +162,11 @@ const ProductDetailPage = () => {
   }
 
   return (
-    <div className="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden pt-20">
+    <div className="bg-background text-on-background font-body-md text-body-md antialiased overflow-x-hidden">
       <SEO title="Chi tiết sản phẩm" description="Chi tiết sản phẩm hoa tươi" />
-      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-stack-lg min-h-screen">
+      <main className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop pt-[60px] md:pt-[72px] pb-stack-lg min-h-screen">
         {/* Breadcrumbs */}
-        <nav aria-label="Breadcrumb" className="flex text-label-sm font-label-sm text-on-surface-variant mb-stack-md">
+        <nav aria-label="Breadcrumb" className="flex text-label-sm font-label-sm text-on-surface-variant mb-1 py-1.5">
           <ol className="inline-flex items-center space-x-1 md:space-x-2 list-none p-0 m-0">
             <li className="inline-flex items-center">
               <Link className="hover:text-primary transition-colors text-decoration-none" to="/">Trang chủ</Link>
