@@ -250,7 +250,7 @@ const ProductDetailPage = () => {
 
           {/* Right Column: Product Details */}
           <div className="lg:col-span-5 flex flex-col pt-2 md:pt-0 sticky top-stack-lg">
-            {/* Header badge & Clean Title */}
+            {/* Badges & Title */}
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               {(promotionInfo?.hasFlashSale || product.hasFlashSale || product.isFlashSale || promotionInfo?.promotionType === 'FlashSale' || product.promotionType === 'FlashSale') && (
                 <span className="bg-red-600 text-white px-3 py-1 rounded-full font-label-sm text-label-sm font-bold flex items-center gap-0.5 animate-pulse shadow-sm">
@@ -362,24 +362,24 @@ const ProductDetailPage = () => {
             </button>
 
             {/* Consultation Buttons */}
-            <div className="grid grid-cols-2 gap-3 mb-stack-lg">
+            <div className="grid grid-cols-2 gap-2 my-3 w-full overflow-hidden">
               <a
                 href="https://zalo.me/123456789"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 h-[44px] rounded-lg border border-[#0068FF] text-[#0068FF] font-label-md text-label-md no-underline hover:bg-[#0068FF]/5 transition-colors"
+                className="flex items-center justify-center gap-1.5 h-[40px] rounded-lg bg-[#E8F5FD] text-[#0068FF] text-xs sm:text-sm font-medium whitespace-nowrap no-underline hover:brightness-95 transition-all border-0"
               >
-                <span className="material-symbols-outlined text-[18px]">forum</span>
+                <span className="material-symbols-outlined text-[16px] sm:text-[18px] flex-shrink-0">forum</span>
                 Chat Zalo
               </a>
               <a
                 href="https://m.me/your-page-id"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 h-[44px] rounded-lg border border-[#0084FF] text-[#0084FF] font-label-md text-label-md no-underline hover:bg-[#0084FF]/5 transition-colors"
+                className="flex items-center justify-center gap-1.5 h-[40px] rounded-lg bg-[#E3F2FD] text-[#0068FF] text-xs sm:text-sm font-medium whitespace-nowrap no-underline hover:brightness-95 transition-all border-0"
               >
-                <span className="material-symbols-outlined text-[18px]">messenger</span>
-                Messenger
+                <span className="material-symbols-outlined text-[16px] sm:text-[18px] flex-shrink-0">messenger</span>
+                Chat Messenger
               </a>
             </div>
 
