@@ -45,7 +45,7 @@ export const useCancelOrder = (onModalClose?: () => void) => {
   return useMutation({
     mutationFn: (id: number) => orderService.cancelOrder(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] });
       toast.success('Hủy đơn thành công.');
     },
     onError: (error: any) => {

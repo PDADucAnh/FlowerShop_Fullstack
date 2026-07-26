@@ -1,17 +1,14 @@
 import React from 'react';
+import type { FallbackProps } from 'react-error-boundary';
 
-import { FallbackProps } from 'react-error-boundary';
-
-type ErrorFallbackProps = FallbackProps;
-
-const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => (
-  <div className="d-flex flex-column align-items-center justify-content-center min-vh-100 bg-light px-3 text-center">
-    <div className="d-flex align-items-center justify-content-center bg-secondary bg-opacity-10 text-secondary mb-4 rounded-circle" style={{ width: '64px', height: '64px' }}>
-      <span className="material-symbols-outlined" style={{ fontSize: '40px' }}>error_outline</span>
+const ErrorFallback: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => (
+  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-6 text-center">
+    <div className="flex items-center justify-center bg-red-100 text-red-600 mb-6 rounded-full" style={{ width: '64px', height: '64px' }}>
+      <span className="material-symbols-outlined text-4xl">error_outline</span>
     </div>
-    <h2 className="fw-bold text-secondary mb-2">Lỗi hệ thống</h2>
-    <p className="text-muted small mb-4" style={{ maxWidth: '400px' }}>{(error as Error).message}</p>
-    <button className="btn btn-dark btn-sm px-4" onClick={resetErrorBoundary}>Thử lại</button>
+    <h2 className="text-lg font-bold text-gray-900 mb-2">Lỗi hệ thống</h2>
+    <p className="text-sm text-gray-500 mb-6 max-w-md">{(error as Error).message || 'Đã xảy ra lỗi không mong muốn.'}</p>
+    <button className="bg-[#9f224e] hover:bg-[#7d1b3d] text-white px-6 py-2.5 text-sm font-semibold rounded-lg transition-colors cursor-pointer border-0" onClick={resetErrorBoundary}>Thử lại</button>
   </div>
 );
 
