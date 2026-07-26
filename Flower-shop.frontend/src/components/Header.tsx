@@ -7,6 +7,7 @@ import { useProductCategories } from '../hooks/useCategories';
 import { NotificationBell } from './NotificationBell';
 import settingsService, { StoreInfo } from '../services/settingsService';
 import layoutService, { HeaderLayout, MenuItem } from '../services/layoutService';
+import DrawerNav from './DrawerNav';
 
 const Header: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -133,52 +134,6 @@ const Header: React.FC = () => {
         to={url}
         target={item.isExternal ? '_blank' : undefined}
         rel={item.isExternal ? 'noopener noreferrer' : undefined}
-      >
-        {item.label}
-      </Link>
-    );
-  };
-
-  const renderMobileMenuItem = (item: MenuItem) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const url = getMenuUrl(item);
-
-    if (hasChildren) {
-      return (
-        <div key={item.id}>
-          <div className="flex items-center justify-between py-2">
-            <span className="font-label-md text-label-md text-on-surface-variant">{item.label}</span>
-            <span className="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
-          </div>
-          <div className="pl-4">
-            {item.children.map((child) => (
-              <Link
-                key={child.id}
-                className="block font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline py-2"
-                to={getMenuUrl(child)}
-                target={child.isExternal ? '_blank' : undefined}
-                rel={child.isExternal ? 'noopener noreferrer' : undefined}
-                onClick={() => setMobileNavOpen(false)}
-              >
-                {child.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <Link
-        key={item.id}
-        className="block font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline py-2"
-        to={url}
-        target={item.isExternal ? '_blank' : undefined}
-        rel={item.isExternal ? 'noopener noreferrer' : undefined}
-        onClick={() => {
-          const nav = document.querySelector('.mobile-nav');
-          if (nav) nav.classList.add('hidden');
-        }}
       >
         {item.label}
       </Link>
@@ -317,20 +272,7 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-stack-sm text-primary">
-          <div className={`${mobileNavOpen ? '' : 'hidden'} md:hidden fixed inset-x-0 top-[72px] bg-surface border-t border-outline-variant/20 shadow-lg z-40 flex flex-col p-4 space-y-3`}>
-            {layout?.menuItems && layout.menuItems.length > 0
-              ? layout.menuItems.map((item) => renderMobileMenuItem(item))
-              : (
-                <>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/" onClick={() => setMobileNavOpen(false)}>Trang chủ</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/shop" onClick={() => setMobileNavOpen(false)}>Cửa hàng</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/blog" onClick={() => setMobileNavOpen(false)}>Tin tức</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/about" onClick={() => setMobileNavOpen(false)}>Giới thiệu</Link>
-                  <Link className="font-label-md text-label-md text-on-surface-variant hover:text-primary no-underline" to="/contact" onClick={() => setMobileNavOpen(false)}>Liên hệ</Link>
-                </>
-              )
-            }
-          </div>
+          <DrawerNav isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />
             {hotlineText && (
               <a href={`tel:${hotlineText}`} className="hidden md:flex items-center gap-1 text-primary hover:text-primary/80 transition-colors no-underline">
                 <span className="material-symbols-outlined text-[18px]">call</span>
