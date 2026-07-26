@@ -610,6 +610,14 @@ namespace Flower.Backend.Services
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return false;
 
+            var refunds = await _context.Refunds.Where(r => r.OrderId == id).ToListAsync();
+            if (refunds.Count != 0)
+                _context.Refunds.RemoveRange(refunds);
+
+            var couponUsage = await _context.CouponUsages.FirstOrDefaultAsync(cu => cu.OrderId == id);
+            if (couponUsage != null)
+                _context.CouponUsages.Remove(couponUsage);
+
             _context.Orders.Remove(order);
             await _context.SaveChangesAsync();
             return true;
