@@ -8,11 +8,25 @@ import { formatCurrency } from '../../utils/currency';
 const ShoppingCartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, recalculateCartPrices } = useCart();
-  const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = React.useState<Set<number>>(() =>
+    new Set(cartItems.map(item => item.id))
+  );
 
   React.useEffect(() => {
     recalculateCartPrices().catch(console.error);
   }, [recalculateCartPrices]);
+
+  // Auto-select new items added to cart
+  React.useEffect(() => {
+    setSelectedIds(prev => {
+      const allIds = new Set(cartItems.map(item => item.id));
+      const next = new Set(prev);
+      let changed = false;
+      allIds.forEach(id => { if (!next.has(id)) { next.add(id); changed = true; } });
+      next.forEach(id => { if (!allIds.has(id)) { next.delete(id); changed = true; } });
+      return changed ? next : prev;
+    });
+  }, [cartItems]);
 
   const handleToggleSelect = (id: number) => {
     setSelectedIds(prev => {
@@ -132,14 +146,14 @@ const ShoppingCartPage: React.FC = () => {
               </button>
               
               {/* Trust Badges */}
-              <div className="mt-8 grid grid-cols-2 gap-4 text-center">
+              <div className="mt-8 grid grid-cols-2 gap-3">
                 <div className="p-3 bg-surface-container-low rounded-lg flex flex-col items-center">
-                  <span className="material-symbols-outlined text-primary mb-1">verified_user</span>
-                  <p className="font-label-sm text-[10px] uppercase tracking-tighter">Bảo mật 100%</p>
+                  <span className="material-symbols-outlined text-primary mb-1 text-xl">verified_user</span>
+                  <p className="text-[10px] sm:text-xs font-medium text-center whitespace-nowrap">Bảo mật 100%</p>
                 </div>
                 <div className="p-3 bg-surface-container-low rounded-lg flex flex-col items-center">
-                  <span className="material-symbols-outlined text-primary mb-1">local_shipping</span>
-                  <p className="font-label-sm text-[10px] uppercase tracking-tighter">Giao nhanh 2h</p>
+                  <span className="material-symbols-outlined text-primary mb-1 text-xl">local_shipping</span>
+                  <p className="text-[10px] sm:text-xs font-medium text-center whitespace-nowrap">Giao nhanh 2h</p>
                 </div>
               </div>
             </div>
