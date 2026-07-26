@@ -407,8 +407,9 @@ namespace Flower.Backend.Services
             {
                 foreach (var item in items)
                 {
-                    var affected = await _context.Database.ExecuteSqlRawAsync(
-                        "UPDATE Products SET StockQuantity = StockQuantity - {0} WHERE Id = {1} AND StockQuantity >= {0}",
+                    var productsTable = _context.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL" ? "\"Products\"" : "[Products]";
+                var affected = await _context.Database.ExecuteSqlRawAsync(
+                        $"UPDATE {productsTable} SET StockQuantity = StockQuantity - {{0}} WHERE Id = {{1}} AND StockQuantity >= {{0}}",
                         item.Quantity, item.ProductId);
                     if (affected == 0)
                     {

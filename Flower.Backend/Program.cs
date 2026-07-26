@@ -348,14 +348,20 @@ app.MapControllerRoute(
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
     try
     {
+        logger.LogInformation("Applying database migrations...");
         db.Database.Migrate();
+        logger.LogInformation("Database migrations applied successfully.");
     }
-    catch
+    catch (Exception ex)
     {
+        logger.LogWarning(ex, "First migration attempt failed. Dropping database and retrying...");
         db.Database.EnsureDeleted();
         db.Database.Migrate();
+        logger.LogInformation("Database recreated and migrations applied successfully.");
     }
 
     if (!db.Users.Any())

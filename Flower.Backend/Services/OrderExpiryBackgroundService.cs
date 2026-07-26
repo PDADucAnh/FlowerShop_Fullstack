@@ -108,8 +108,9 @@ namespace Flower.Backend.Services
                                     if (product != null)
                                     {
                                         var newStock = product.StockQuantity + detail.Quantity;
+                                        var productsTable = context.Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL" ? "\"Products\"" : "[Products]";
                                         await context.Database.ExecuteSqlRawAsync(
-                                            "UPDATE Products SET StockQuantity = {0} WHERE Id = {1}",
+                                            $"UPDATE {productsTable} SET StockQuantity = {{0}} WHERE Id = {{1}}",
                                             newStock, detail.ProductId);
                                     }
                                 }
