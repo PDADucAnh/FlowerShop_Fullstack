@@ -1,18 +1,19 @@
-# Task 1 Report: Add EPPlus NuGet Package + Create Excel Template
+# Task 1 Report: CSS utilities for drawer and scroll
 
-## What I did
+## What was implemented
+Appended three utility classes to `Flower-shop.frontend/src/assets/css/index.css` before the `@media (prefers-reduced-motion)` block:
+- `.no-scrollbar` — hides scrollbar cross-browser (webkit, IE, Firefox)
+- `.drawer-overlay` / `.drawer-overlay.active` — animated overlay with backdrop blur
+- `.drawer-content` / `.drawer-content.active` — slide-in panel with cubic-bezier easing
 
-1. Added EPPlus (v8.6.2) NuGet package to `Flower.Backend/Flower.Backend.csproj` via `dotnet add`
-2. Created `Flower.Backend/wwwroot/templates/` directory
-3. Generated `product_import_template.xlsx` programmatically (using a temporary dotnet console project with EPPlus) with headers: STT, TenSanPham, MaSanPham, GiaBan, SoLuongKho, DanhMucSlug, TenFileAnh, MoTa
-4. Added `DownloadTemplate` action to `ProductController.cs` that serves the template file
-5. Built the project successfully (0 errors)
-6. Cleaned up the temporary project
+## Testing
+- `npx tsc --noEmit` → exit code 0, zero TypeScript errors
 
-## Issues encountered
+## Files changed
+- `Flower-shop.frontend/src/assets/css/index.css` (+22 lines)
 
-- EPPlus 8.x uses `ExcelPackage.License.SetNonCommercialPersonal()` instead of the old `LicenseContext` property. Required a quick Context7 docs lookup.
-
-## Commit SHA
-
-- `93c7d66` — chore: add EPPlus package and product import Excel template
+## Self-review
+- All classes follow existing file conventions (same indentation, no comments, no semicolons on single rules)
+- Inserted at the correct location (before the prefers-reduced-motion media query)
+- No conflicts with existing CSS
+- Re-read the file after edit to confirm correctness

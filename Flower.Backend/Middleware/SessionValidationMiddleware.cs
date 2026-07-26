@@ -20,6 +20,14 @@ namespace Flower.Backend.Middleware
 
         public async Task InvokeAsync(HttpContext context, IAuthService authService, IMemoryCache cache, IApplicationDbContext dbContext)
         {
+            // Middleware is designed for Cookie auth (admin panel) only.
+            // JWT API requests are validated by JwtBearerHandler independently.
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                await _next(context);
+                return;
+            }
+
             if (context.Request.Path.StartsWithSegments("/hubs"))
             {
                 await _next(context);

@@ -5,11 +5,14 @@ import type { CartItem } from '../../context/CartContext';
 
 interface CartTableProps {
   items: CartItem[];
+  selectedIds: Set<number>;
+  onToggleSelect: (id: number) => void;
   onUpdateQuantity: (id: number, qty: number) => void;
   onRemove: (id: number) => void;
 }
 
-const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
+const CartTable = ({ items, selectedIds, onToggleSelect, onUpdateQuantity, onRemove }: CartTableProps) => {
+  const allSelected = items.length > 0 && items.every(item => selectedIds.has(item.id));
   const [inputValues, setInputValues] = useState<Record<number, string>>({});
 
   const handleInputChange = (id: number, value: string) => {
@@ -46,7 +49,21 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
     <div className="bg-surface rounded-xl overflow-hidden">
       {/* Table Header */}
       <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 border-b border-outline-variant bg-surface-container-low text-on-surface-variant font-label-md">
-        <div className="col-span-6 uppercase">Sản phẩm</div>
+        <div className="col-span-1 flex items-center">
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={() => {
+              if (allSelected) {
+                items.forEach(item => { if (selectedIds.has(item.id)) onToggleSelect(item.id); });
+              } else {
+                items.forEach(item => { if (!selectedIds.has(item.id)) onToggleSelect(item.id); });
+              }
+            }}
+            className="rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+          />
+        </div>
+        <div className="col-span-5 uppercase">Sản phẩm</div>
         <div className="col-span-2 text-center uppercase">Giá</div>
         <div className="col-span-2 text-center uppercase">Số lượng</div>
         <div className="col-span-2 text-right uppercase">Tổng cộng</div>
@@ -59,7 +76,15 @@ const CartTable = ({ items, onUpdateQuantity, onRemove }: CartTableProps) => {
             key={item.id}
             className="grid grid-cols-1 md:grid-cols-12 gap-4 px-6 py-8 items-center border-b border-outline-variant hover:bg-surface-container-lowest transition-colors duration-300 group"
           >
-            <div className="col-span-1 md:col-span-6 flex items-center space-x-6">
+            <div className="hidden md:flex col-span-1 items-center justify-center">
+              <input
+                type="checkbox"
+                checked={selectedIds.has(item.id)}
+                onChange={() => onToggleSelect(item.id)}
+                className="rounded border-outline-variant text-primary focus:ring-primary focus:ring-offset-0 cursor-pointer"
+              />
+            </div>
+            <div className="col-span-1 md:col-span-5 flex items-center space-x-6">
               <div className="w-24 h-32 rounded-lg bg-surface-variant flex-shrink-0 overflow-hidden petal-shadow">
                 <img
                   className="w-full h-full object-cover"

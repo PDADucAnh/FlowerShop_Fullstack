@@ -1,0 +1,11 @@
+
+# Review package: 3d4545e..42121d7
+
+## Commits
+42121d7 feat: add drawer and no-scrollbar CSS utilities
+
+## Files changed
+ Flower-shop.frontend/src/assets/css/index.css | 22 ++++++++++++++++++++++  1 file changed, 22 insertions(+)
+
+## Diff
+diff --git a/Flower-shop.frontend/src/assets/css/index.css b/Flower-shop.frontend/src/assets/css/index.css index db6caa2..1948249 100644 --- a/Flower-shop.frontend/src/assets/css/index.css +++ b/Flower-shop.frontend/src/assets/css/index.css @@ -86,20 +86,42 @@ a:hover { color: #ab2c5d; }      50%      { transform: translateY(-12px); }  }    @keyframes shimmer {      0% { transform: translateX(-100%); }      100% { transform: translateX(200%); }  }    html { scroll-behavior: smooth; }   +.no-scrollbar::-webkit-scrollbar { display: none; } +.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; } + +.drawer-overlay { +    background-color: rgba(0, 0, 0, 0.3); +    backdrop-filter: blur(4px); +    opacity: 0; +    pointer-events: none; +    transition: opacity 0.3s ease; +} +.drawer-overlay.active { +    opacity: 1; +    pointer-events: auto; +} +.drawer-content { +    transform: translateX(-100%); +    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); +} +.drawer-content.active { +    transform: translateX(0); +} +  @media (prefers-reduced-motion: reduce) {      *, *::before, *::after {          animation-duration: 0.01ms !important;          animation-iteration-count: 1 !important;          transition-duration: 0.01ms !important;      }  }    .blog-detail-content {      font-family: 'Plus Jakarta Sans', sans-serif;

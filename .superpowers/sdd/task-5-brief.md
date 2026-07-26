@@ -1,197 +1,100 @@
-### Task 5: Admin View — Footer Tab
+### Task 5: BestSellingProducts — horizontal scroll
 
 **Files:**
-- Create: `Flower.Backend/Views/Layout/_FooterTab.cshtml`
+- Modify: `Flower-shop.frontend/src/pages/home/BestSellingProducts.tsx`
 
-**Consumes:** `List<FooterColumnDTO>` (Task 1), `ViewBag.Pages` (Task 3)
+- [ ] **Step 1: Rewrite BestSellingProducts with horizontal scroll**
 
-- [ ] **Step 1: Create _FooterTab.cshtml**
+Replace entire file content with this:
 
-```html
-@model List<FooterColumnDTO>
-@{
-    var pages = ViewBag.Pages as List<PageDTO> ?? new();
-}
+```tsx
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useBestSellingProducts } from '../../hooks/useProducts';
+import { getImageUrl } from '../../utils/apiUtils';
+import { formatCurrency } from '../../utils/currency';
 
-<form id="footerForm" method="post" action="@Url.Action("SaveFooter")">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="jsonPayload" id="footerJsonPayload" />
+function BestSellingProducts() {
+  const { data: products = [], isLoading } = useBestSellingProducts(4);
 
-    <div id="footerColumns" class="space-y-4">
-        @for (int i = 0; i < Model.Count; i++)
-        {
-            var col = Model[i];
-            <div class="bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 footer-column" data-index="@i">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex gap-4 items-center flex-1">
-                        <span class="drag-handle cursor-move text-gray-400">⠿</span>
-                        <input type="text" class="col-title font-bold px-3 py-2 border rounded-lg flex-1" value="@col.Title" placeholder="Tiêu đề cột" />
-                        <select class="col-align px-3 py-2 border rounded-lg">
-                            <option value="left" @(col.Align == "left" ? "selected" : "")>Trái</option>
-                            <option value="center" @(col.Align == "center" ? "selected" : "")>Giữa</option>
-                            <option value="right" @(col.Align == "right" ? "selected" : "")>Phải</option>
-                        </select>
-                        <input type="number" class="col-sort-order w-16 px-3 py-2 border rounded-lg" value="@col.SortOrder" placeholder="TT" />
-                        <select class="col-type px-3 py-2 border rounded-lg">
-                            <option value="links" @(col.Type == "links" ? "selected" : "")>Links</option>
-                            <option value="social_icons" @(col.Type == "social_icons" ? "selected" : "")>Social Icons</option>
-                            <option value="text_block" @(col.Type == "text_block" ? "selected" : "")>Text Block</option>
-                        </select>
-                        <label class="flex items-center gap-1 text-sm">
-                            <input type="checkbox" class="col-active" @(col.IsActive ? "checked" : "") />
-                            Bật
-                        </label>
-                    </div>
-                    <button type="button" class="remove-column text-red-500 hover:text-red-700 ml-2">×</button>
-                </div>
-
-                <!-- Links list -->
-                <div class="footer-links space-y-2 pl-8">
-                    @foreach (var link in col.Links)
-                    {
-                        <div class="flex gap-2 items-center link-item" data-id="@link.Id">
-                            <span class="drag-handle cursor-move text-gray-400">⠿</span>
-                            <input type="text" class="link-label flex-1 px-3 py-2 border rounded-lg text-sm" value="@link.Label" placeholder="Nhãn" />
-                            <select class="link-type px-3 py-2 border rounded-lg text-sm">
-                                <option value="custom" @(link.Type == "custom" ? "selected" : "")>URL tùy chỉnh</option>
-                                <option value="page" @(link.Type == "page" ? "selected" : "")>Bài viết</option>
-                                <option value="text_block" @(link.Type == "text_block" ? "selected" : "")>Văn bản</option>
-                            </select>
-                            @if (link.Type == "page")
-                            {
-                                <select class="link-page-id px-3 py-2 border rounded-lg text-sm">
-                                    <option value="">Chọn bài viết...</option>
-                                    @foreach (var p in pages)
-                                    {
-                                        <option value="@p.Id" @(link.PageId == p.Id ? "selected" : "")>@p.Title</option>
-                                    }
-                                </select>
-                            }
-                            else
-                            {
-                                <input type="text" class="link-url flex-1 px-3 py-2 border rounded-lg text-sm" value="@(link.Url ?? "")" placeholder="URL" />
-                            }
-                            <button type="button" class="remove-link text-red-400 hover:text-red-600">×</button>
-                        </div>
-                    }
-                </div>
-                <button type="button" class="add-link mt-2 ml-8 text-sm text-primary hover:underline">+ Thêm link</button>
+  if (isLoading) {
+    return (
+      <section className="mt-stack-lg px-margin-mobile">
+        <div className="flex justify-between items-end mb-stack-md">
+          <h3 className="font-headline-md text-headline-md text-on-surface">Bán Chạy Nhất</h3>
+        </div>
+        <div className="flex gap-stack-md overflow-x-auto no-scrollbar pb-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex-shrink-0 w-64">
+              <div className="aspect-[4/5] rounded-xl overflow-hidden mb-base bg-surface-container-high animate-pulse" />
+              <div className="h-6 bg-surface-container-high rounded animate-pulse mb-1" />
+              <div className="h-4 bg-surface-container-high rounded w-1/3 animate-pulse mx-auto" />
             </div>
-        }
-    </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
-    <button type="button" id="addColumn" class="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm">+ Thêm cột mới</button>
+  const allProducts = Array.isArray(products) ? products : [];
+  const displayProducts = allProducts.slice(0, 6);
 
-    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-outline-variant/15">
-        <button type="submit" class="px-5 py-2.5 bg-primary text-on-primary border-0 rounded-lg">Lưu cấu hình</button>
-    </div>
-</form>
+  if (displayProducts.length === 0) {
+    return null;
+  }
 
-@section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script>
-        // SortableJS for columns and links
-        new Sortable(document.getElementById('footerColumns'), {
-            handle: '.drag-handle',
-            animation: 150
-        });
-
-        document.querySelectorAll('.footer-links').forEach(el => {
-            new Sortable(el, {
-                handle: '.drag-handle',
-                animation: 150
-            });
-        });
-
-        // Add column
-        document.getElementById('addColumn').addEventListener('click', function() {
-            const col = document.createElement('div');
-            col.className = 'bg-white rounded-xl shadow-sm border border-outline-variant/20 p-6 footer-column';
-            col.innerHTML = `
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex gap-4 items-center flex-1">
-                        <span class="drag-handle cursor-move text-gray-400">⠿</span>
-                        <input type="text" class="col-title font-bold px-3 py-2 border rounded-lg flex-1" placeholder="Tiêu đề cột" />
-                        <select class="col-align px-3 py-2 border rounded-lg"><option value="left">Trái</option><option value="center">Giữa</option><option value="right">Phải</option></select>
-                        <input type="number" class="col-sort-order w-16 px-3 py-2 border rounded-lg" value="0" />
-                        <select class="col-type px-3 py-2 border rounded-lg"><option value="links">Links</option><option value="social_icons">Social Icons</option></select>
-                        <label class="flex items-center gap-1 text-sm"><input type="checkbox" class="col-active" checked /> Bật</label>
-                    </div>
-                    <button type="button" class="remove-column text-red-500 hover:text-red-700 ml-2">×</button>
-                </div>
-                <div class="footer-links space-y-2 pl-8"></div>
-                <button type="button" class="add-link mt-2 ml-8 text-sm text-primary hover:underline">+ Thêm link</button>`;
-            document.getElementById('footerColumns').appendChild(col);
-            col.querySelector('.remove-column').onclick = () => col.remove();
-            col.querySelector('.add-link').onclick = addLinkHandler;
-            new Sortable(col.querySelector('.footer-links'), { handle: '.drag-handle', animation: 150 });
-        });
-
-        // Add link
-        const addLinkHandler = function() {
-            const links = this.closest('.footer-column').querySelector('.footer-links');
-            const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center link-item';
-            div.dataset.id = crypto.randomUUID();
-            div.innerHTML = `
-                <span class="drag-handle cursor-move text-gray-400">⠿</span>
-                <input type="text" class="link-label flex-1 px-3 py-2 border rounded-lg text-sm" placeholder="Nhãn" />
-                <select class="link-type px-3 py-2 border rounded-lg text-sm" onchange="toggleLinkUrl(this)">
-                    <option value="custom">URL tùy chỉnh</option>
-                    <option value="page">Bài viết</option>
-                    <option value="text_block">Văn bản</option>
-                </select>
-                <input type="text" class="link-url flex-1 px-3 py-2 border rounded-lg text-sm" placeholder="URL" />
-                <button type="button" class="remove-link text-red-400 hover:text-red-600">×</button>`;
-            links.appendChild(div);
-            div.querySelector('.remove-link').onclick = () => div.remove();
-        };
-        document.querySelectorAll('.add-link').forEach(btn => {
-            btn.addEventListener('click', addLinkHandler);
-        });
-
-        // Serialize on submit
-        document.getElementById('footerForm').addEventListener('submit', function(e) {
-            const columns = [];
-            document.querySelectorAll('.footer-column').forEach(col => {
-                const links = [];
-                col.querySelectorAll('.link-item').forEach(link => {
-                    const type = link.querySelector('.link-type').value;
-                    links.push({
-                        id: link.dataset.id,
-                        label: link.querySelector('.link-label').value,
-                        type: type,
-                        pageId: type === 'page' ? parseInt(link.querySelector('.link-page-id').value) || null : null,
-                        url: type !== 'page' ? link.querySelector('.link-url').value || null : null
-                    });
-                });
-                columns.push({
-                    title: col.querySelector('.col-title').value,
-                    align: col.querySelector('.col-align').value,
-                    sortOrder: parseInt(col.querySelector('.col-sort-order').value) || 0,
-                    type: col.querySelector('.col-type').value,
-                    isActive: col.querySelector('.col-active').checked,
-                    links: links
-                });
-            });
-            document.getElementById('footerJsonPayload').value = JSON.stringify(columns);
-        });
-    </script>
+  return (
+    <section className="mt-stack-lg px-margin-mobile">
+      <div className="flex justify-between items-end mb-stack-md">
+        <h3 className="font-headline-md text-headline-md text-on-surface">Bán Chạy Nhất</h3>
+        <Link to="/shop?sort=best-selling" className="font-label-md text-primary uppercase tracking-widest text-xs no-underline">
+          Xem tất cả
+        </Link>
+      </div>
+      <div className="flex gap-stack-md overflow-x-auto no-scrollbar pb-4 -mx-margin-mobile px-margin-mobile">
+        {displayProducts.map((product: any) => {
+          const imageUrl = getImageUrl(product.imageUrl);
+          const displayPrice = product.promotionPrice ?? product.currentPrice ?? product.discountPrice ?? product.price;
+          return (
+            <Link
+              key={product.id}
+              to={`/product/${product.id}`}
+              className="flex-shrink-0 w-64 group no-underline"
+            >
+              <div className="relative aspect-[4/5] rounded-xl overflow-hidden mb-base petal-shadow">
+                <img
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  src={imageUrl}
+                  alt={product.name}
+                  loading="lazy"
+                />
+              </div>
+              <div className="text-center">
+                <h4 className="font-headline-sm text-headline-sm text-on-surface">{product.name}</h4>
+                <p className="font-label-md text-tertiary">{formatCurrency(displayPrice)}</p>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
+
+export default BestSellingProducts;
 ```
 
-- [ ] **Step 2: Build to verify**
+- [ ] **Step 2: Verify TypeScript compiles**
 
-Run: `cd Flower.Backend && dotnet build`
-Expected: `Build succeeded`
+```bash
+cd Flower-shop.frontend && npx tsc --noEmit
+```
+
+Expected: No errors.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add Flower.Backend/Views/Layout/_FooterTab.cshtml
-git commit -m "feat: add admin layout footer tab with SortableJS column/link editor"
+git add Flower-shop.frontend/src/pages/home/BestSellingProducts.tsx
+git commit -m "feat: change BestSellingProducts to horizontal scroll layout"
 ```
-
----
-
-

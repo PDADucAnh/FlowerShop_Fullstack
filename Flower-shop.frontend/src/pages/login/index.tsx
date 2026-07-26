@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAuth } from '../../context/AuthContext';
@@ -10,7 +10,9 @@ const LoginPage: React.FC = () => {
     const [error, setError] = React.useState<string>('');
     const [loading, setLoading] = React.useState<boolean>(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const { login } = useAuth();
+    const from = (location.state as { from?: string })?.from || '/';
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -21,7 +23,7 @@ const LoginPage: React.FC = () => {
         setLoading(true);
         try {
             await login(data.username, data.password, data.rememberMe || false);
-            navigate('/');
+            navigate(from);
         } catch (err: any) {
             const backendMessage = err?.response?.data?.message;
             setError(backendMessage || 'Đăng nhập thất bại. Vui lòng thử lại.');

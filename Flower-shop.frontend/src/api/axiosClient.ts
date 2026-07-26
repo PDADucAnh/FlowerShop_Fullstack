@@ -27,7 +27,7 @@ axiosClient.interceptors.response.use(
     (error) => {
         if (error.response?.status === 401) {
             tokenService.removeToken();
-            authEvents.emit('unauthorized');
+            authEvents.emit('unauthorized', window.location.pathname);
         }
         console.error('API Error:', error.response || error.message);
         return Promise.reject(error);

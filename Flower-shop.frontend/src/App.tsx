@@ -55,7 +55,9 @@ const PageLoader: React.FC = () => (
 const AuthRedirectHandler: React.FC = () => {
   const navigate = useNavigate();
   useEffect(() => {
-    const unsubscribe = authEvents.on('unauthorized', () => navigate('/login'));
+    const unsubscribe = authEvents.on('unauthorized', (path?: string) => {
+      navigate('/login', { state: { from: path || '/' } });
+    });
     return unsubscribe;
   }, [navigate]);
   return null;

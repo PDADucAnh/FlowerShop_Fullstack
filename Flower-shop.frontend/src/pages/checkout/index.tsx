@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCart } from '../../context/CartContext';
+import { useCart, type CartItem } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { useCreateOrder } from '../../hooks/useOrders';
 import { formatCurrency } from '../../utils/currency';
@@ -30,9 +30,12 @@ const DEFAULT_SLOTS = [
 
 const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { cartItems, cartTotal, clearCart, recalculateCartPrices } = useCart();
-  const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const promotionDiscountTotal = cartItems.reduce((sum, item) => {
+  const selectedItems = (location.state as { selectedItems?: CartItem[] })?.selectedItems;
+  const checkoutItems = selectedItems ?? cartItems;
+  const originalTotal = checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const promotionDiscountTotal = checkoutItems.reduce((sum, item) => {
     const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
     const discount = item.price - displayPrice;
     return sum + (discount > 0 ? discount * item.quantity : 0);
@@ -163,7 +166,7 @@ const CheckoutPage: React.FC = () => {
     setCouponError('');
     setAppliedCoupon(null);
     try {
-      const subtotal = cartItems.reduce((sum, item) => {
+      const subtotal = checkoutItems.reduce((sum, item) => {
         return sum + (item.promotionPrice ?? item.discountPrice ?? item.price) * item.quantity;
       }, 0);
       const res: any = await couponService.apply({
@@ -192,12 +195,12 @@ const CheckoutPage: React.FC = () => {
   };
 
   const onSubmit = async (formData: CheckoutFormData) => {
-    if (cartItems.length === 0) return;
+    if (checkoutItems.length === 0) return;
 
     const orderPayload = {
       customerId: user?.id || 0,
       notes: [formData.notes, formData.greetingCard ? `Lời chúc: ${formData.greetingCard}` : ''].filter(Boolean).join(' | '),
-      items: cartItems.map(item => {
+      items: checkoutItems.map(item => {
         let sizeVariant = 'Classic';
         if (item.name.includes('(Deluxe)')) sizeVariant = 'Deluxe';
         else if (item.name.includes('(Grand)')) sizeVariant = 'Grand';
@@ -242,7 +245,7 @@ const CheckoutPage: React.FC = () => {
 
   const phoneRegister = register('phone');
 
-  if (cartItems.length === 0) {
+  if (checkoutItems.length === 0) {
     return (
       <div className="text-center py-20 px-margin-mobile md:px-margin-desktop min-h-screen pt-40 bg-background text-on-background">
         <div className="size-20 bg-surface-container flex items-center justify-center text-outline mb-4 mx-auto rounded-full">
@@ -546,7 +549,7 @@ const CheckoutPage: React.FC = () => {
               </h2>
               {/* Product Item List */}
               <div className="space-y-6 max-h-96 overflow-y-auto no-scrollbar">
-                {cartItems.map(item => {
+                {checkoutItems.map(item => {
                   const displayPrice = item.promotionPrice ?? item.currentPrice ?? item.discountPrice ?? item.price;
                   const hasPromo = displayPrice < item.price;
                   const percent = item.promotionPercent ?? item.discountPercent;
@@ -680,7 +683,7 @@ const CheckoutPage: React.FC = () => {
               {/* Checkout Button */}
               <button
                 type="submit"
-                disabled={createOrder.isPending || cartItems.length === 0}
+                disabled={createOrder.isPending || checkoutItems.length === 0}
                 className="w-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-label-md text-label-md py-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 mb-4 flex items-center justify-center border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {createOrder.isPending ? 'Đang xử lý...' : 'Đặt hàng'}

@@ -53,7 +53,8 @@ namespace Flower.Backend.Controllers.Api
                     }
 
                     // NOTE: Jwt:SecretKey must be >= 32 characters (256 bits) for HS256
-                    var jwtKey = _configuration["Jwt:SecretKey"]
+                    var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+                        ?? _configuration["Jwt:SecretKey"]
                         ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
                     var issuer = _configuration["Jwt:Issuer"]
                         ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
@@ -142,35 +143,36 @@ namespace Flower.Backend.Controllers.Api
                 return BadRequest(new { message });
 
             // Generate a new JWT token to update claims
-            var jwtKey = _configuration["Jwt:SecretKey"]
-                ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
-            var issuer = _configuration["Jwt:Issuer"]
-                ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
-            var audience = _configuration["Jwt:Audience"]
-                ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
-            if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
-                expiryMinutes = 60;
+                    var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+                        ?? _configuration["Jwt:SecretKey"]
+                        ?? throw new InvalidOperationException("Jwt:SecretKey is not configured.");
+                    var issuer = _configuration["Jwt:Issuer"]
+                        ?? throw new InvalidOperationException("Jwt:Issuer is not configured.");
+                    var audience = _configuration["Jwt:Audience"]
+                        ?? throw new InvalidOperationException("Jwt:Audience is not configured.");
+                    if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
+                        expiryMinutes = 60;
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(jwtKey);
-            var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(BuildUserClaims(result)),
-                Expires = expiration,
-                Issuer = issuer,
-                Audience = audience,
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var key = Encoding.UTF8.GetBytes(jwtKey);
+                    var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+                    var tokenDescriptor = new SecurityTokenDescriptor
+                    {
+                        Subject = new ClaimsIdentity(BuildUserClaims(result)),
+                        Expires = expiration,
+                        Issuer = issuer,
+                        Audience = audience,
+                        SigningCredentials = new SigningCredentials(
+                            new SymmetricSecurityKey(key),
+                            SecurityAlgorithms.HmacSha256)
+                    };
+                    var token = tokenHandler.CreateToken(tokenDescriptor);
+                    var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new
-            {
-                token = tokenString,
-                user = new
+                    return Ok(new
+                    {
+                        token = tokenString,
+                        user = new
                 {
                     id = result.Id,
                     username = result.Username,

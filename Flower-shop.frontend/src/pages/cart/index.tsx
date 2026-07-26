@@ -8,10 +8,21 @@ import { formatCurrency } from '../../utils/currency';
 const ShoppingCartPage: React.FC = () => {
   const navigate = useNavigate();
   const { cartItems, removeFromCart, updateQuantity, cartTotal, recalculateCartPrices } = useCart();
+  const [selectedIds, setSelectedIds] = React.useState<Set<number>>(new Set());
 
   React.useEffect(() => {
     recalculateCartPrices().catch(console.error);
   }, [recalculateCartPrices]);
+
+  const handleToggleSelect = (id: number) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const selectedItems = cartItems.filter(item => selectedIds.has(item.id));
 
   if (cartItems.length === 0) {
     return (
@@ -64,6 +75,8 @@ const ShoppingCartPage: React.FC = () => {
           <div className="lg:w-[70%] space-y-gutter">
             <CartTable
               items={cartItems}
+              selectedIds={selectedIds}
+              onToggleSelect={handleToggleSelect}
               onUpdateQuantity={updateQuantity}
               onRemove={removeFromCart}
             />
@@ -102,8 +115,9 @@ const ShoppingCartPage: React.FC = () => {
               </div>
               
               <button
-                className="w-full bg-primary text-on-primary py-4 rounded-lg font-label-md text-label-md interactive-lift hover:opacity-90 transition-all flex items-center justify-center space-x-2 group border-0 cursor-pointer"
-                onClick={() => navigate('/checkout')}
+                className="w-full bg-primary text-on-primary py-4 rounded-lg font-label-md text-label-md interactive-lift hover:opacity-90 transition-all flex items-center justify-center space-x-2 group border-0 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed disabled:interactive-lift-none"
+                disabled={selectedItems.length === 0}
+                onClick={() => navigate('/checkout', { state: { selectedItems } })}
               >
                 <span>TIẾN HÀNH THANH TOÁN</span>
                 <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>

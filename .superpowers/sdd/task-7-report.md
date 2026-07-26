@@ -1,7 +1,14 @@
-# Task 7 Report
+# Task 7: LatestBlog — stacked vertical layout
 
-**Status:** DONE
-**Commit:** b6f7ea87349fc1e6caa091f8e8d3a6ac2521eb2b
-**File:** Flower-shop.frontend/src/services/layoutService.ts
+**Status:** Done
 
-TypeScript check: passed (no errors)
+**Commits:**
+- `ca90995` - feat: change LatestBlog to stacked vertical cards
+
+**Test summary:** TypeScript compiles cleanly (`npx tsc --noEmit` — no errors).
+
+**Changes:**
+- Replaced grid of `PostCard` components with vertically stacked `<Link>` cards
+- Added `getImageUrl` import, `react-router-dom` `Link` usage
+- Inlined card markup with image, category label, title, and description
+- Updated layout classes to stacked vertical design with `space-y-stack-md`

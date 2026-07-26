@@ -1,38 +1,46 @@
-### Task 1: Add EPPlus NuGet Package + Create Excel Template
+### Task 1: CSS utilities for drawer and scroll
 
 **Files:**
-- Modify: `Flower.Backend/Flower.Backend.csproj`
-- Create: `Flower.Backend/wwwroot/templates/product_import_template.xlsx`
+- Modify: `Flower-shop.frontend/src/assets/css/index.css` (append at end before `@media` block)
 
-- [ ] **Step 1: Add EPPlus package**
+- [ ] **Step 1: Add .no-scrollbar, .drawer-overlay, .drawer-content CSS**
 
-```bash
-cd D:\TrenLop\ThucTapTaiTruong\FlowerShop
-dotnet add Flower.Backend/Flower.Backend.csproj package EPPlus
+Append to `index.css` (before the `@media (prefers-reduced-motion)` block at line 96):
+
+```css
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.drawer-overlay {
+    background-color: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+.drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+.drawer-content {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.drawer-content.active {
+    transform: translateX(0);
+}
 ```
 
-Expected output: `PackageReference for 'EPPlus' added to file 'Flower.Backend/Flower.Backend.csproj'`
-
-- [ ] **Step 2: Create template directory**
+- [ ] **Step 2: Verify build still works**
 
 ```bash
-New-Item -ItemType Directory -Path "D:\TrenLop\ThucTapTaiTruong\FlowerShop\Flower.Backend\wwwroot\templates" -Force
+cd Flower-shop.frontend && npx tsc --noEmit
 ```
+Expected: No errors.
 
-- [ ] **Step 3: Create the Excel template programmatically via a small script**
-
-Create `Flower.Backend/wwwroot/templates/product_import_template.xlsx` using EPPlus with headers:
-`STT`, `TenSanPham`, `MaSanPham`, `GiaBan`, `SoLuongKho`, `DanhMucSlug`, `TenFileAnh`, `MoTa`
-
-- In the controller, add a `DownloadTemplate` action that serves this file.
-
-- [ ] **Step 4: Commit**
+- [ ] **Step 3: Commit**
 
 ```bash
-git add Flower.Backend/Flower.Backend.csproj Flower.Backend/wwwroot/templates/product_import_template.xlsx
-git commit -m "chore: add EPPlus package and product import Excel template"
+git add Flower-shop.frontend/src/assets/css/index.css
+git commit -m "feat: add drawer and no-scrollbar CSS utilities"
 ```
-
----
-
-
