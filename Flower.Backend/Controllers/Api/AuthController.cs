@@ -79,18 +79,23 @@ namespace Flower.Backend.Controllers.Api
                     var token = tokenHandler.CreateToken(tokenDescriptor);
                     var tokenString = tokenHandler.WriteToken(token);
 
+                    var rawRefreshToken = await _authService.CreateRefreshTokenAsync(result.Id, "AdminSPA");
+
                     return Ok(new
                     {
-                        token = tokenString,
+                        accessToken = tokenString,
+                        refreshToken = rawRefreshToken,
                         expiresAt = expiration.ToString("o"),
-                        id = result.Id,
-                        username = result.Username,
-                        fullName = result.FullName,
-                        email = result.Email,
-                        phone = result.Phone,
-                        address = result.Address,
-                        role = result.Role,
-                        message = "Login successful"
+                        user = new
+                        {
+                            id = result.Id,
+                            username = result.Username,
+                            fullName = result.FullName,
+                            email = result.Email,
+                            phone = result.Phone,
+                            address = result.Address,
+                            role = result.Role
+                        }
                     });
                 }
 
@@ -238,6 +243,99 @@ namespace Flower.Backend.Controllers.Api
             }
 
             return Ok(new { message });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest request)
+        {
+            try
+            {
+                var userId = await _authService.ValidateRefreshTokenAsync(request.RefreshToken);
+                if (userId == null)
+                    return Unauthorized(new { success = false, message = "Refresh token không hợp lệ hoặc đã hết hạn." });
+
+                await _authService.RevokeTokenAsync(request.RefreshToken);
+
+                var user = await _authService.GetProfile(userId.Value.ToString(), "User");
+                if (user == null)
+                    return Unauthorized(new { success = false, message = "Người dùng không tồn tại." });
+
+                var jwtKey = Environment.GetEnvironmentVariable("JWT_SECRET_KEY")
+                    ?? _configuration["Jwt:SecretKey"];
+                var issuer = _configuration["Jwt:Issuer"];
+                var audience = _configuration["Jwt:Audience"];
+                if (!int.TryParse(_configuration["Jwt:ExpiryMinutes"], out var expiryMinutes))
+                    expiryMinutes = 60;
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes(jwtKey);
+                var expiration = DateTime.UtcNow.AddMinutes(expiryMinutes);
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(BuildUserClaims(user)),
+                    Expires = expiration,
+                    Issuer = issuer,
+                    Audience = audience,
+                    SigningCredentials = new SigningCredentials(
+                        new SymmetricSecurityKey(key),
+                        SecurityAlgorithms.HmacSha256)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var tokenString = tokenHandler.WriteToken(token);
+
+                var newRefreshToken = await _authService.CreateRefreshTokenAsync(user.Id, "AdminSPA");
+
+                return Ok(new
+                {
+                    accessToken = tokenString,
+                    refreshToken = newRefreshToken,
+                    expiresAt = expiration.ToString("o")
+                });
+            }
+            catch
+            {
+                return StatusCode(500, new { success = false, message = "Có lỗi xảy ra khi làm mới phiên đăng nhập." });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] RefreshTokenRequest? request)
+        {
+            if (request != null && !string.IsNullOrEmpty(request.RefreshToken))
+                await _authService.RevokeTokenAsync(request.RefreshToken);
+            else
+            {
+                var userIdClaim = User.FindFirst("Id")?.Value;
+                if (int.TryParse(userIdClaim, out var userId))
+                    await _authService.RevokeUserTokensAsync(userId);
+            }
+            return Ok(new { success = true, message = "Đã đăng xuất thành công." });
+        }
+
+        [Authorize]
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var username = User.Identity?.Name;
+            var authType = User.FindFirst("AuthType")?.Value ?? "User";
+            if (string.IsNullOrEmpty(username))
+                return Unauthorized(new { message = "Invalid token" });
+            var result = await _authService.GetProfile(username, authType);
+            if (result == null)
+                return NotFound(new { message = "User not found" });
+            return Ok(new
+            {
+                id = result.Id,
+                username = result.Username,
+                fullName = result.FullName,
+                email = result.Email,
+                phone = result.Phone,
+                address = result.Address,
+                role = result.Role,
+                authType = result.AuthType
+            });
         }
     }
 }

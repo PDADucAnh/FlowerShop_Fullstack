@@ -51,4 +51,10 @@ namespace Flower.Backend.Models.DTOs
         [MinLength(6, ErrorMessage = "Mật khẩu mới phải dài tối thiểu 6 ký tự")]
         public string NewPassword { get; set; } = string.Empty;
     }
+
+    public class RefreshTokenRequest
+    {
+        [Required]
+        public string RefreshToken { get; set; } = string.Empty;
+    }
 }
