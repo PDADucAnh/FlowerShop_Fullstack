@@ -96,6 +96,17 @@ namespace Flower.Backend.Models.DTOs
             entity.Slug = dto.Slug;
         }
 
+        public static ProductImageDTO ToDTO(this ProductImage image)
+        {
+            if (image == null) return null;
+            return new ProductImageDTO
+            {
+                Id = image.Id,
+                ImageUrl = image.ImageUrl,
+                SortOrder = image.SortOrder
+            };
+        }
+
         public static ProductDTO ToDTO(this Product product)
         {
             if (product == null) return null;
@@ -116,7 +127,12 @@ namespace Flower.Backend.Models.DTOs
                 AddToCartCount = product.AddToCartCount,
                 OriginalPrice = product.Price,
                 CurrentPrice = product.Price,
-                IsFlashSale = false
+                IsFlashSale = false,
+                Images = product.Images?.OrderBy(i => i.SortOrder).Select(i => i.ToDTO()).ToList() ?? new(),
+                IsActive = product.IsActive,
+                FlowerMeaning = product.FlowerMeaning,
+                Origin = product.Origin,
+                CareInstruction = product.CareInstruction
             };
         }
 
@@ -132,7 +148,11 @@ namespace Flower.Backend.Models.DTOs
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 ImageUrl = dto.ImageUrl,
-                CategoryProductId = dto.CategoryProductId
+                CategoryProductId = dto.CategoryProductId,
+                IsActive = dto.IsActive,
+                FlowerMeaning = dto.FlowerMeaning,
+                Origin = dto.Origin,
+                CareInstruction = dto.CareInstruction
             };
         }
 
@@ -147,6 +167,10 @@ namespace Flower.Backend.Models.DTOs
             entity.StockQuantity = dto.StockQuantity;
             entity.ImageUrl = dto.ImageUrl;
             entity.CategoryProductId = dto.CategoryProductId;
+            entity.IsActive = dto.IsActive;
+            entity.FlowerMeaning = dto.FlowerMeaning;
+            entity.Origin = dto.Origin;
+            entity.CareInstruction = dto.CareInstruction;
         }
 
         public static CustomerDTO ToDTO(this Customer customer)

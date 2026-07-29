@@ -23,12 +23,35 @@ namespace Flower.Backend.Models.DTOs
         public decimal? PromotionPercent { get; set; }
         public string? PromotionType { get; set; }
         public bool HasFlashSale { get; set; }
+        public List<ProductImageDTO> Images { get; set; } = new();
+        public bool IsActive { get; set; }
+        public string? FlowerMeaning { get; set; }
+        public string? Origin { get; set; }
+        public string? CareInstruction { get; set; }
         public decimal OriginalPrice { get; set; }
         public decimal CurrentPrice { get; set; }
         public decimal? DiscountPercent { get; set; }
         public decimal? DiscountAmount { get; set; }
         public bool IsFlashSale { get; set; }
         public string? PromotionName { get; set; }
+    }
+
+    public class ProductImageDTO
+    {
+        public int Id { get; set; }
+        public string ImageUrl { get; set; }
+        public int SortOrder { get; set; }
+    }
+
+    public class UploadImageResponse
+    {
+        public string Url { get; set; }
+    }
+
+    public class AddProductImageRequest
+    {
+        [Required]
+        public string ImageUrl { get; set; }
     }
 
     public class CreateProductDTO
@@ -55,6 +78,14 @@ namespace Flower.Backend.Models.DTOs
         public string? ImageUrl { get; set; }
 
         public int CategoryProductId { get; set; }
+
+        public bool IsActive { get; set; } = true;
+        [MaxLength(500)]
+        public string? FlowerMeaning { get; set; }
+        [MaxLength(200)]
+        public string? Origin { get; set; }
+        public string? CareInstruction { get; set; }
+        public List<string>? NewImages { get; set; }
     }
 
     public class UpdateProductDTO
@@ -83,6 +114,14 @@ namespace Flower.Backend.Models.DTOs
         public string? ImageUrl { get; set; }
 
         public int CategoryProductId { get; set; }
+
+        public bool IsActive { get; set; } = true;
+        [MaxLength(500)]
+        public string? FlowerMeaning { get; set; }
+        [MaxLength(200)]
+        public string? Origin { get; set; }
+        public string? CareInstruction { get; set; }
+        public List<string>? NewImages { get; set; }
     }
 
     public class CartRecalculateRequest

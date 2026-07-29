@@ -54,7 +54,8 @@ namespace Flower.Backend.Services
         private IQueryable<Product> BuildQuery()
         {
             return _context.Products
-                .Include(p => p.CategoryProduct);
+                .Include(p => p.CategoryProduct)
+                .Include(p => p.Images);
         }
 
         public async Task<IEnumerable<ProductDTO>> GetAll()
@@ -150,8 +151,27 @@ namespace Flower.Backend.Services
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
+            // Associate uploaded images
+            if (dto.NewImages != null && dto.NewImages.Count > 0)
+            {
+                for (int i = 0; i < dto.NewImages.Count; i++)
+                {
+                    _context.ProductImages.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        ImageUrl = dto.NewImages[i],
+                        SortOrder = i
+                    });
+                }
+                await _context.SaveChangesAsync();
+            }
+
             await _context.Entry(product)
                 .Reference(p => p.CategoryProduct)
+                .LoadAsync();
+
+            await _context.Entry(product)
+                .Collection(p => p.Images)
                 .LoadAsync();
 
             return product.ToDTO();
@@ -163,6 +183,7 @@ namespace Flower.Backend.Services
                 return false;
 
             var product = await _context.Products
+                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
                 return false;
@@ -173,6 +194,23 @@ namespace Flower.Backend.Services
             }
 
             dto.UpdateEntity(product);
+
+            // Append new images
+            if (dto.NewImages != null && dto.NewImages.Count > 0)
+            {
+                var maxSort = product.Images?.Any() == true
+                    ? product.Images.Max(i => i.SortOrder)
+                    : 0;
+                for (int i = 0; i < dto.NewImages.Count; i++)
+                {
+                    _context.ProductImages.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        ImageUrl = dto.NewImages[i],
+                        SortOrder = maxSort + 1 + i
+                    });
+                }
+            }
 
             try
             {

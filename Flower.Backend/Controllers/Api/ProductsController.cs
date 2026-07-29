@@ -1,5 +1,6 @@
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
+using Flower.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
@@ -138,6 +139,59 @@ namespace Flower.Backend.Controllers.Api
                 return NotFound();
 
             await _notificationService.NotifyEntityChanged("Product");
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{id}/images")]
+        public async Task<IActionResult> GetImages(int id)
+        {
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+                return NotFound();
+
+            return Ok(product.Images.Select(i => i.ToDTO()).ToList());
+        }
+
+        [HttpPost("{id}/images")]
+        public async Task<IActionResult> AddImage(int id, [FromBody] AddProductImageRequest request)
+        {
+            var product = await _context.Products.FindAsync(id);
+            if (product == null)
+                return NotFound();
+
+            var maxSort = await _context.ProductImages
+                .Where(i => i.ProductId == id)
+                .MaxAsync(i => (int?)i.SortOrder) ?? -1;
+
+            var image = new ProductImage
+            {
+                ProductId = id,
+                ImageUrl = request.ImageUrl,
+                SortOrder = maxSort + 1
+            };
+
+            _context.ProductImages.Add(image);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetDetail), new { id }, image.ToDTO());
+        }
+
+        [HttpDelete("{id}/images/{imageId}")]
+        public async Task<IActionResult> DeleteImage(int id, int imageId)
+        {
+            var image = await _context.ProductImages
+                .FirstOrDefaultAsync(i => i.Id == imageId && i.ProductId == id);
+
+            if (image == null)
+                return NotFound();
+
+            _context.ProductImages.Remove(image);
+            await _context.SaveChangesAsync();
+
             return NoContent();
         }
 
