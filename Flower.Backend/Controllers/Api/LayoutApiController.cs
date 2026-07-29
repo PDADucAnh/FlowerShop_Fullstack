@@ -68,6 +68,24 @@ namespace Flower.Backend.Controllers.Api
             };
         }
 
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("header")]
+        public async Task<IActionResult> SaveHeader([FromBody] HeaderLayoutDTO dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("HeaderLayout", dto, username);
+            return NoContent();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("footer")]
+        public async Task<IActionResult> SaveFooter([FromBody] List<FooterColumnDTO> dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("FooterLayout", dto, username);
+            return NoContent();
+        }
+
         private static List<FooterColumnDTO> GetDefaultFooter()
         {
             return new List<FooterColumnDTO>

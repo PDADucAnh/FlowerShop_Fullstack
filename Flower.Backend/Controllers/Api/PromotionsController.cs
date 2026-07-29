@@ -69,6 +69,14 @@ namespace Flower.Backend.Controllers.Api
             return Ok(items);
         }
 
+        [Authorize(Policy = "AdminOnly")]
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _promotionService.GetPaged(page, pageSize);
+            return Ok(result);
+        }
+
         [Authorize(Policy = "StaffOnly")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

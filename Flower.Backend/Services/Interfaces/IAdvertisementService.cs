@@ -8,6 +8,7 @@ namespace Flower.Backend.Services.Interfaces
     {
         Task<IEnumerable<AdvertisementDTO>> GetAllActive();
         Task<IEnumerable<AdvertisementDTO>> GetAll();
+        Task<PagedResult<AdvertisementDTO>> GetPaged(int page, int pageSize);
         Task<AdvertisementDTO?> GetById(int id);
         Task<AdvertisementDTO> Create(CreateAdvertisementDTO dto);
         Task<bool> Update(int id, UpdateAdvertisementDTO dto);

@@ -33,5 +33,58 @@ namespace Flower.Backend.Controllers.Api
             var order = await _settingService.GetSetting<OrderSettings>("Order") ?? new OrderSettings();
             return Ok(new { shipping, order });
         }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var settings = await _settingService.GetAllSettings();
+            return Ok(settings);
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("store-info")]
+        public async Task<IActionResult> SaveStoreInfo([FromBody] StoreInfoSettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("StoreInfo", dto, username);
+            return NoContent();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("smtp")]
+        public async Task<IActionResult> SaveSmtp([FromBody] SmtpSettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("Smtp", dto, username);
+            return NoContent();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("vnpay")]
+        public async Task<IActionResult> SaveVnPay([FromBody] VNPaySettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("VNPay", dto, username);
+            return NoContent();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("shipping")]
+        public async Task<IActionResult> SaveShipping([FromBody] ShippingSettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("Shipping", dto, username);
+            return NoContent();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("order")]
+        public async Task<IActionResult> SaveOrder([FromBody] OrderSettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("Order", dto, username);
+            return NoContent();
+        }
     }
 }

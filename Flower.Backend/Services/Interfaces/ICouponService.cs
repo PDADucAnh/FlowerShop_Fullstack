@@ -7,6 +7,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface ICouponService
     {
         Task<IEnumerable<CouponDTO>> GetAll();
+        Task<PagedResult<CouponDTO>> GetPaged(int page, int pageSize);
         Task<CouponDTO?> GetById(int id);
         Task<CouponDTO> Create(CreateCouponDTO dto);
         Task<bool> Update(int id, UpdateCouponDTO dto);

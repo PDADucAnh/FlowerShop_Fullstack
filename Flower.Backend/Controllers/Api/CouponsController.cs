@@ -27,6 +27,14 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [Authorize(Policy = "StaffOnly")]
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            var result = await _couponService.GetPaged(page, pageSize);
+            return Ok(result);
+        }
+
+        [Authorize(Policy = "StaffOnly")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

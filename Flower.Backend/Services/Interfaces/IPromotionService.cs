@@ -7,6 +7,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface IPromotionService
     {
         Task<IEnumerable<PromotionCampaignDTO>> GetAll();
+        Task<PagedResult<PromotionCampaignDTO>> GetPaged(int page, int pageSize);
         Task<PromotionCampaignDTO?> GetById(int id);
         Task<PromotionCampaignDTO> Create(CreatePromotionCampaignDTO dto);
         Task<bool> Update(int id, UpdatePromotionCampaignDTO dto);

@@ -7,6 +7,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface IPageService
     {
         Task<IEnumerable<PageDTO>> GetAll();
+        Task<PagedResult<PageDTO>> GetPaged(int page, int pageSize);
         Task<IEnumerable<PageDTO>> GetAllActive();
         Task<PageDTO?> GetById(int id);
         Task<PageDTO?> GetBySlug(string slug);

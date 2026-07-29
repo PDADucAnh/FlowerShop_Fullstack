@@ -28,11 +28,18 @@ namespace Flower.Backend.Services
             return list.Select(p => p.ToDTO());
         }
 
-        public async Task<PagedResult<PostDTO>> GetPaged(int page, int pageSize)
+        public async Task<PagedResult<PostDTO>> GetPaged(int page, int pageSize, string? search = null)
         {
             var query = _context.Posts
                 .Include(p => p.Category)
-                .OrderByDescending(p => p.Id);
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(p => p.Title.Contains(search) || (p.Summary != null && p.Summary.Contains(search)));
+            }
+
+            query = query.OrderByDescending(p => p.Id);
 
             var totalCount = await query.CountAsync();
             var items = await query

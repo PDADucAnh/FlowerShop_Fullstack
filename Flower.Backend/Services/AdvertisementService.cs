@@ -39,6 +39,23 @@ namespace Flower.Backend.Services
             return items.Select(a => a.ToDTO());
         }
 
+        public async Task<PagedResult<AdvertisementDTO>> GetPaged(int page, int pageSize)
+        {
+            var query = _context.Advertisements.OrderByDescending(a => a.SortOrder);
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<AdvertisementDTO>
+            {
+                Items = items.Select(a => a.ToDTO()).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<AdvertisementDTO?> GetById(int id)
         {
             var item = await _context.Advertisements.FindAsync(id);

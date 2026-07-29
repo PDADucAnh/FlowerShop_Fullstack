@@ -28,6 +28,23 @@ namespace Flower.Backend.Services
             return coupons.Select(c => c.ToDTO());
         }
 
+        public async Task<PagedResult<CouponDTO>> GetPaged(int page, int pageSize)
+        {
+            var query = _context.Coupons.OrderByDescending(c => c.CreatedAt);
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<CouponDTO>
+            {
+                Items = items.Select(c => c.ToDTO()).ToList(),
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         public async Task<CouponDTO?> GetById(int id)
         {
             var coupon = await _context.Coupons.FindAsync(id);

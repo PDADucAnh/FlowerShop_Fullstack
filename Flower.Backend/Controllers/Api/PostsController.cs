@@ -22,9 +22,9 @@ namespace Flower.Backend.Controllers.Api
 
         [AllowAnonymous]
         [HttpGet("paged")]
-        public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 6)
+        public async Task<IActionResult> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 6, [FromQuery] string? search = null)
         {
-            var result = await _postService.GetPaged(page, pageSize);
+            var result = await _postService.GetPaged(page, pageSize, search);
             return Ok(result);
         }
 
