@@ -119,7 +119,7 @@ namespace Flower.Backend.Services
             return orders.Select(o => o.ToDTO()).ToList();
         }
 
-        public async Task<PagedResult<OrderDTO>> GetPaged(int page, int pageSize)
+        public async Task<PagedResult<OrderDTO>> GetPaged(int page, int pageSize, List<OrderStatus>? statuses = null, string? search = null, DateTime? dateFrom = null, DateTime? dateTo = null, int? customerId = null)
         {
             IQueryable<Order> query = _context.Orders
                 .Include(o => o.Customer)
@@ -130,6 +130,23 @@ namespace Flower.Backend.Services
                 .OrderByDescending(o => o.OrderDate);
 
             query = ApplyOwnershipFilter(query);
+
+            if (statuses != null && statuses.Count > 0)
+                query = query.Where(o => statuses.Contains(o.Status));
+
+            if (!string.IsNullOrEmpty(search))
+                query = query.Where(o =>
+                    (o.Customer != null && o.Customer.FullName.Contains(search)) ||
+                    (o.Customer != null && o.Customer.Phone != null && o.Customer.Phone.Contains(search)));
+
+            if (dateFrom.HasValue)
+                query = query.Where(o => o.OrderDate >= dateFrom.Value);
+
+            if (dateTo.HasValue)
+                query = query.Where(o => o.OrderDate <= dateTo.Value);
+
+            if (customerId.HasValue)
+                query = query.Where(o => o.CustomerId == customerId.Value);
 
             var totalCount = await query.CountAsync();
             var items = await query
@@ -565,6 +582,81 @@ namespace Flower.Backend.Services
                         {
                             await _emailService.SendOrderCompletedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
                         }
+                    }
+
+                    if (order.CustomerId > 0)
+                    {
+                        var (notifTitle, notifType, notifIcon) = statusChangedToConfirmed
+                            ? ($"Đơn hàng #{order.Id} đã được xác nhận", "OrderConfirmed", "Verified")
+                            : statusChangedToShipping
+                                ? ($"Đơn hàng #{order.Id} đang được giao", "OrderShipping", "LocalShipping")
+                                : ($"Đơn hàng #{order.Id} đã hoàn thành", "OrderCompleted", "CheckCircle");
+
+                        await _notificationService.CreateCustomerNotification(
+                            customerId: order.CustomerId,
+                            title: notifTitle,
+                            content: $"Trạng thái đơn hàng #{order.Id} đã được cập nhật.",
+                            type: notifType,
+                            orderId: order.Id,
+                            referenceType: "OrderStatusChanged",
+                            icon: notifIcon,
+                            priority: "High",
+                            navigationUrl: $"/my-orders/{order.Id}"
+                        );
+                    }
+                }
+
+                if (oldStatus != order.Status && order.CustomerId > 0)
+                {
+                    await _notificationService.NotifyCustomerEvent(order.CustomerId, "OrderChanged", new { orderId = order.Id, status = order.Status.ToString() });
+                }
+
+                return true;
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!await _context.Orders.AnyAsync(e => e.Id == id))
+                    return false;
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateStatus(int id, OrderStatus newStatus)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null) return false;
+
+            var oldStatus = order.Status;
+            order.Status = newStatus;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+
+                var statusChangedToConfirmed = oldStatus != OrderStatus.Confirmed && order.Status == OrderStatus.Confirmed;
+                var statusChangedToCompleted = oldStatus != OrderStatus.Completed && order.Status == OrderStatus.Completed;
+                var statusChangedToShipping = oldStatus != OrderStatus.Shipping && order.Status == OrderStatus.Shipping;
+
+                if (statusChangedToConfirmed || statusChangedToCompleted || statusChangedToShipping)
+                {
+                    await _context.Entry(order).Reference(o => o.Customer).LoadAsync();
+                    await _context.Entry(order).Collection(o => o.OrderDetails).LoadAsync();
+                    if (order.OrderDetails != null)
+                    {
+                        foreach (var detail in order.OrderDetails)
+                        {
+                            await _context.Entry(detail).Reference(d => d.Product).LoadAsync();
+                        }
+                    }
+
+                    if (order.Customer != null && !string.IsNullOrEmpty(order.Customer.Email))
+                    {
+                        if (statusChangedToConfirmed)
+                            await _emailService.SendOrderConfirmedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
+                        else if (statusChangedToShipping)
+                            await _emailService.SendOrderShippingEmailAsync(order, order.Customer.Email, order.Customer.FullName);
+                        else if (statusChangedToCompleted)
+                            await _emailService.SendOrderCompletedEmailAsync(order, order.Customer.Email, order.Customer.FullName);
                     }
 
                     if (order.CustomerId > 0)

@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Flower.Backend.Models;
 
 namespace Flower.Backend.Services
 {
@@ -25,6 +26,41 @@ namespace Flower.Backend.Services
                 .OrderByDescending(c => c.CreatedAt)
                 .ToListAsync();
             return items.Select(c => c.ToDTO());
+        }
+
+        public async Task<PagedResult<ContactDTO>> GetPaged(int page, int pageSize, bool? isRead = null)
+        {
+            IQueryable<Contact> query = _context.Contacts.OrderByDescending(c => c.CreatedAt);
+
+            if (isRead.HasValue)
+                query = query.Where(c => c.IsRead == isRead.Value);
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var dtos = items.Select(c => new ContactDTO
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Email = c.Email,
+                Phone = c.Phone,
+                Subject = c.Subject,
+                Message = c.Message,
+                IsRead = c.IsRead,
+                ReadAt = c.ReadAt,
+                CreatedAt = c.CreatedAt
+            }).ToList();
+
+            return new PagedResult<ContactDTO>
+            {
+                Items = dtos,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<ContactDTO?> GetById(int id)

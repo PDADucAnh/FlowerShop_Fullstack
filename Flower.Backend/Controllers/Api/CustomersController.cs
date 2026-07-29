@@ -3,6 +3,7 @@ using Flower.Backend.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
+using Flower.Data.Entities;
 
 namespace Flower.Backend.Controllers.Api
 {
@@ -12,10 +13,12 @@ namespace Flower.Backend.Controllers.Api
     public class CustomersController : ControllerBase
     {
         private readonly ICustomerService _customerService;
+        private readonly IOrderService _orderService;
 
-        public CustomersController(ICustomerService customerService)
+        public CustomersController(ICustomerService customerService, IOrderService orderService)
         {
             _customerService = customerService;
+            _orderService = orderService;
         }
 
         [HttpGet]
@@ -23,6 +26,26 @@ namespace Flower.Backend.Controllers.Api
         {
             var customers = await _customerService.GetAll();
             return Ok(customers);
+        }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? search = null)
+        {
+            var result = await _customerService.GetPaged(page, pageSize, search);
+            return Ok(result);
+        }
+
+        [HttpGet("{id}/orders")]
+        public async Task<IActionResult> GetCustomerOrders(
+            int id,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _orderService.GetPaged(page, pageSize, customerId: id);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

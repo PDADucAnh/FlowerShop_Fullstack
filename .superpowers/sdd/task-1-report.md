@@ -1,16 +1,19 @@
-# Task 1 Report: Backend CORS & Auth Endpoints
+# Task 1 Report: ProductImage Entity + Migration + DbSet
 
 **Status:** DONE
 
 **Commits:**
-- `61235a8` feat: add CORS for admin domains + refresh/logout/me auth endpoints
+- `5257e57` feat: add ProductImage entity + migration
 
 **Changes:**
-- `Program.cs`: Added `http://localhost:5174` and `https://flower-admin.vercel.app` to AllowVercel CORS policy
-- `AuthController.cs`: Updated login to return `accessToken`/`refreshToken`/`user` object instead of flat fields; added `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET /api/auth/me` endpoints
-- `AuthResult.cs`: Added `LoginResponseDTO` class
-- `AuthDTOs.cs`: Added `RefreshTokenRequest` class
+- `Flower.Data/Entities/ProductImage.cs`: New entity with Id, ProductId, ImageUrl, SortOrder, CreatedAt + navigation
+- `Flower.Data/Entities/Product.cs`: Added `Images` collection navigation property
+- `Flower.Data/IApplicationDbContext.cs`: Added `DbSet<ProductImage> ProductImages`
+- `Flower.Data/ApplicationDbContext.cs`: Added `DbSet<ProductImage>` + fluent config for cascade delete
+- `Flower.Data/Migrations/20260729004843_AddProductImages.cs`: EF migration creating ProductImages table
 
-**Build:** 0 errors, 122 warnings (pre-existing)
+**Build:** 0 errors
 
-**Concerns:** None
+**Self-review:** ProductImage entity follows existing patterns (attributes, FK convention, navigation). Migration scaffolded with only the intended table. No concerns.
+
+**Next:** Task 2 ready — extend DTOs, Add UploadController, update ProductService + ProductsController

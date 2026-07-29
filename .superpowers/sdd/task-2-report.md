@@ -1,26 +1,19 @@
-# Task 2 Report: DrawerNav component
+# Task 2 Report: Backend DTOs, Mappers, Service, UploadController, Image Endpoints
 
-## What I implemented
-Created `Flower-shop.frontend/src/components/DrawerNav.tsx` — a slide-in navigation drawer for mobile with:
-- Overlay backdrop that closes on click
-- Slide-in panel (width 320px) with rounded right corners
-- Store name header fetched from `settingsService.getStoreInfo()`
-- 6 menu items with Material Symbols icons and Vietnamese labels
-- Active route highlighting via `useLocation()`
-- Auto-close on window resize ≥768px
-- Body scroll lock when open
+**Status:** DONE
 
-## What I tested and results
-- `npx tsc --noEmit`: **zero errors**
+**Commits:**
+- `7d0a748` feat: extend product DTOs, add image upload/association endpoints
 
-## Files changed
-- Created: `Flower-shop.frontend/src/components/DrawerNav.tsx` (+98 lines)
+**Changes:**
+- `ProductDTOs.cs`: Added ProductImageDTO, UploadImageResponse, AddProductImageRequest; extended CreateProductDTO, UpdateProductDTO with IsActive/FlowerMeaning/Origin/CareInstruction/NewImages; extended ProductDTO with Images/IsActive/FlowerMeaning/Origin/CareInstruction
+- `MappingExtensions.cs`: Added ProductImage ToDTO mapping; updated Product ToDTO with Images + new fields; updated Create ToEntity, UpdateEntity with new fields
+- `ProductService.cs`: BuildQuery includes Images; Create handles NewImages batch; Update handles NewImages append
+- `UploadController.cs`: New — POST /api/Upload with image validation + Cloudinary upload
+- `ProductsController.cs`: Added GET/POST/DELETE /{id}/images endpoints for image CRUD
 
-## Self-review findings
-- Code matches brief exactly; no deviations
-- Imports are clean (React, react-router-dom, settingsService)
-- Matches existing component patterns in `src/components/`
-- No unused variables or dead code
+**Build:** 0 errors
 
-## Issues or concerns
-None
+**Concerns:** None
+
+**Next:** Task 3 — Frontend types + API functions

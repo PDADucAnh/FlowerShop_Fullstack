@@ -29,9 +29,17 @@ namespace Flower.Backend.Services
             return list.Select(c => c.ToDTO());
         }
 
-        public async Task<PagedResult<CustomerDTO>> GetPaged(int page, int pageSize)
+        public async Task<PagedResult<CustomerDTO>> GetPaged(int page, int pageSize, string? search = null)
         {
-            var query = _context.Customers.OrderByDescending(c => c.Id);
+            IQueryable<Customer> query = _context.Customers.OrderByDescending(c => c.CreatedAt);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(c =>
+                    c.FullName.Contains(search) ||
+                    c.Email.Contains(search) ||
+                    (c.Phone != null && c.Phone.Contains(search)));
+            }
 
             var totalCount = await query.CountAsync();
             var items = await query
@@ -39,9 +47,25 @@ namespace Flower.Backend.Services
                 .Take(pageSize)
                 .ToListAsync();
 
+            var dtos = items.Select(c => new CustomerDTO
+            {
+                Id = c.Id,
+                FullName = c.FullName,
+                Email = c.Email,
+                Phone = c.Phone,
+                Address = c.Address,
+                TotalOrders = c.TotalOrders,
+                SuccessfulDeliveries = c.SuccessfulDeliveries,
+                FailedDeliveries = c.FailedDeliveries,
+                IsBlacklisted = c.IsBlacklisted,
+                FraudScore = c.FraudScore,
+                IsActive = c.IsActive,
+                CreatedAt = c.CreatedAt
+            }).ToList();
+
             return new PagedResult<CustomerDTO>
             {
-                Items = items.Select(c => c.ToDTO()).ToList(),
+                Items = dtos,
                 TotalCount = totalCount,
                 Page = page,
                 PageSize = pageSize

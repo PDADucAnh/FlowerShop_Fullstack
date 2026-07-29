@@ -7,6 +7,7 @@ namespace Flower.Backend.Services.Interfaces
     public interface IContactService
     {
         Task<IEnumerable<ContactDTO>> GetAll();
+        Task<PagedResult<ContactDTO>> GetPaged(int page, int pageSize, bool? isRead = null);
         Task<ContactDTO?> GetById(int id);
         Task<ContactDTO> Create(CreateContactDTO dto);
         Task<bool> MarkRead(int id, bool isRead);

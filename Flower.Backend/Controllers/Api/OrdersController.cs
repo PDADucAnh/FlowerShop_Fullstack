@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers.Api
 {
+    public class UpdateOrderStatusRequest
+    {
+        public OrderStatus Status { get; set; }
+    }
+
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -125,6 +130,39 @@ namespace Flower.Backend.Controllers.Api
         {
             var orders = await _orderService.GetAll();
             return Ok(orders);
+        }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20,
+            [FromQuery] string? status = null,
+            [FromQuery] string? search = null,
+            [FromQuery] DateTime? dateFrom = null,
+            [FromQuery] DateTime? dateTo = null)
+        {
+            List<OrderStatus>? statuses = null;
+            if (!string.IsNullOrEmpty(status))
+            {
+                var parts = status.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                statuses = new List<OrderStatus>();
+                foreach (var part in parts)
+                {
+                    if (Enum.TryParse<OrderStatus>(part, true, out var parsed))
+                        statuses.Add(parsed);
+                }
+            }
+
+            var result = await _orderService.GetPaged(page, pageSize, statuses, search, dateFrom, dateTo);
+            return Ok(result);
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateOrderStatusRequest request)
+        {
+            var updated = await _orderService.UpdateStatus(id, request.Status);
+            if (!updated) return NotFound();
+            return NoContent();
         }
 
         [HttpGet("{id}")]

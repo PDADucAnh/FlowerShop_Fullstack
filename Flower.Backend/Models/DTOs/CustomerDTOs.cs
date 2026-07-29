@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flower.Backend.Models.DTOs
@@ -16,6 +17,7 @@ namespace Flower.Backend.Models.DTOs
         public bool IsBlacklisted { get; set; }
         public int FraudScore { get; set; }
         public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     public class CreateCustomerDTO
