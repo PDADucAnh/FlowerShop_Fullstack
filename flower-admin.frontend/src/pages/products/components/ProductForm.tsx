@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { productsApi } from '@/api/products'
@@ -33,8 +33,12 @@ interface ImageItem {
   uploading?: boolean
 }
 
+function removeDiacritics(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 function generateSlug(name: string): string {
-  return name
+  return removeDiacritics(name)
     .toLowerCase()
     .replace(/đ/g, 'd')
     .replace(/[^a-z0-9\s-]/g, '')
@@ -57,6 +61,7 @@ function generateSku(name: string): string {
 export function ProductForm({ product }: ProductFormProps) {
   const navigate = useNavigate()
   const isEditing = !!product
+  const slugManuallyEdited = useRef(false)
   const [saving, setSaving] = useState(false)
   const [showExtra, setShowExtra] = useState(false)
   const [mainImage, setMainImage] = useState<string>(product?.imageUrl || '')
@@ -77,6 +82,7 @@ export function ProductForm({ product }: ProductFormProps) {
   })
 
   useEffect(() => {
+    slugManuallyEdited.current = false
     if (product) {
       setForm({
         name: product.name,
@@ -121,7 +127,7 @@ export function ProductForm({ product }: ProductFormProps) {
     setForm((prev) => ({
       ...prev,
       name,
-      slug: isEditing ? prev.slug : generateSlug(name),
+      slug: !slugManuallyEdited.current ? generateSlug(name) : prev.slug,
       sku: isEditing ? prev.sku : prev.sku || generateSku(name),
     }))
   }
@@ -296,10 +302,11 @@ export function ProductForm({ product }: ProductFormProps) {
                   <Label className="text-on-surface-variant mb-1.5 block">Slug</Label>
                   <Input
                     value={form.slug}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      slugManuallyEdited.current = true
                       setForm((prev) => ({ ...prev, slug: e.target.value }))
-                    }
-                    placeholder="ten-san-pham"
+                    }}
+                    placeholder={generateSlug(form.name) || 'Tự động tạo nếu để trống'}
                     className="bg-surface-container-low border-input"
                   />
                 </div>
