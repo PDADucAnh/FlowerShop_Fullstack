@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { categoriesApi } from '@/api/categories'
 import {
@@ -22,8 +22,12 @@ interface CategoryDialogProps {
   onOpenChange: (open: boolean) => void
 }
 
+function removeDiacritics(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
 function generateSlug(name: string): string {
-  return name
+  return removeDiacritics(name)
     .toLowerCase()
     .replace(/đ/g, 'd')
     .replace(/[^a-z0-9\s-]/g, '')
@@ -35,11 +39,15 @@ function generateSlug(name: string): string {
 export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogProps) {
   const queryClient = useQueryClient()
   const isEditing = !!category
+  const slugManuallyEdited = useRef(false)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [slug, setSlug] = useState('')
 
   useEffect(() => {
+    if (open) {
+      slugManuallyEdited.current = false
+    }
     if (category) {
       setName(category.name)
       setDescription(category.description || '')
@@ -53,7 +61,7 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
 
   const mutation = useMutation({
     mutationFn: () => {
-      const payload = { name, description, slug }
+      const payload = { name, description, slug: slug || generateSlug(name) }
       return isEditing
         ? categoriesApi.update(category!.id, { ...payload, id: category!.id })
         : categoriesApi.create(payload)
@@ -70,7 +78,7 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
 
   const handleNameChange = (value: string) => {
     setName(value)
-    if (!isEditing && !slug) {
+    if (!isEditing && !slugManuallyEdited.current) {
       setSlug(generateSlug(value))
     }
   }
@@ -98,7 +106,11 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
             <Input
               id="cat-slug"
               value={slug}
-              onChange={(e) => setSlug(e.target.value)}
+              onChange={(e) => {
+                slugManuallyEdited.current = true
+                setSlug(e.target.value)
+              }}
+              placeholder={!isEditing ? generateSlug(name) || 'Tự động tạo nếu để trống' : ''}
             />
           </div>
           <div className="space-y-2">
