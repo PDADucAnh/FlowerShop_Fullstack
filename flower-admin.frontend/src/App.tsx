@@ -15,11 +15,11 @@ import { CustomersPage } from '@/pages/customers/CustomersPage'
 import { CustomerDetailPage } from '@/pages/customers/CustomerDetailPage'
 import { ContactsPage } from '@/pages/contacts/ContactsPage'
 import { ContactDetailPage } from '@/pages/contacts/ContactDetailPage'
-import {
-  ContentPage,
-  MarketingPage,
-  SystemPage,
-} from '@/pages/PlaceholderPages'
+import { ContentPage } from '@/pages/ContentPage'
+import { PostFormPage } from '@/pages/content/PostFormPage'
+import { PageFormPage } from '@/pages/content/PageFormPage'
+import { MarketingPage } from '@/pages/MarketingPage'
+import { SystemSettingsPage } from '@/pages/SystemSettingsPage'
 
 const queryClient = new QueryClient()
 
@@ -43,9 +43,14 @@ function App() {
                 <Route path="products/new" element={<ProductFormPage />} />
                 <Route path="products/:id/edit" element={<ProductFormPage />} />
                 <Route path="products/categories" element={<CategoriesPage />} />
-                <Route path="content" element={<ContentPage />} />
+                <Route path="content" element={<ContentPage />}>
+                  <Route path="posts/new" element={<PostFormPage />} />
+                  <Route path="posts/:id/edit" element={<PostFormPage />} />
+                  <Route path="pages/new" element={<PageFormPage />} />
+                  <Route path="pages/:id/edit" element={<PageFormPage />} />
+                </Route>
                 <Route path="marketing" element={<MarketingPage />} />
-                <Route path="system" element={<SystemPage />} />
+                <Route path="system" element={<SystemSettingsPage />} />
               </Route>
             </Route>
           </Routes>

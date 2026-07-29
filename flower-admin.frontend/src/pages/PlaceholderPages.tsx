@@ -1,13 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const placeholderPages = [
-  { href: '/orders', title: 'Đơn hàng' },
-  { href: '/products', title: 'Sản phẩm' },
-  { href: '/content', title: 'Nội dung' },
-  { href: '/marketing', title: 'Marketing' },
-  { href: '/system', title: 'Hệ thống' },
-]
-
 export function PlaceholderPage({ title }: { title: string }) {
   return (
     <div className="space-y-6">
@@ -28,16 +20,4 @@ export function PlaceholderPage({ title }: { title: string }) {
 
 export function OrdersPage() {
   return <PlaceholderPage title="Đơn hàng" />
-}
-
-export function ContentPage() {
-  return <PlaceholderPage title="Nội dung" />
-}
-
-export function MarketingPage() {
-  return <PlaceholderPage title="Marketing" />
-}
-
-export function SystemPage() {
-  return <PlaceholderPage title="Hệ thống" />
 }
