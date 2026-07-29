@@ -1,16 +1,32 @@
-# Task 3 Report: Simplify Header — use DrawerNav for mobile
+# Task 3: Orders List Page — Report
 
-## What I implemented
-- Added `import DrawerNav from './DrawerNav'` to Header.tsx
-- Replaced the inline mobile nav `<div>` (with dynamic menu items or fallback links) with `<DrawerNav isOpen={mobileNavOpen} onClose={() => setMobileNavOpen(false)} />`
-- Removed the `renderMobileMenuItem` function entirely (kept `MenuItem` type import since `renderMenuItem` still uses it)
+## Status: ✅ Completed
 
-## What I tested and test results
-- `npx tsc --noEmit` passed with zero errors
-- The existing `HeaderLayout` and `MenuItem` types from `layoutService` remain used by the desktop nav (`renderMenuItem`), so no import changes needed
+## Files Created (3)
 
-## Files changed
-- `Flower-shop.frontend/src/components/Header.tsx` — +2 lines, -60 lines
+| File | Lines |
+|------|-------|
+| `flower-admin.frontend/src/pages/orders/components/OrderStatusBadge.tsx` | 24 |
+| `flower-admin.frontend/src/pages/orders/components/OrderTable.tsx` | 94 |
+| `flower-admin.frontend/src/pages/orders/OrdersPage.tsx` | 126 |
 
-## Issues or concerns
-- None. The DrawerNav component already handles its own menu items, open/close state, and active-link highlighting. The mobile nav is now fully delegated.
+## Components
+
+- **OrderStatusBadge** — Renders a `<Badge>` with Vietnamese label + color for each `OrderStatus` enum value (14 statuses supported).
+- **OrderTable** — Data table with columns: mã đơn, khách hàng, ngày đặt, tổng tiền, thanh toán (method + status), trạng thái đơn, thao tác (view button). Row click navigates to order detail.
+- **OrdersPage** — Main page with search input, status filter tabs (10 groups), paginated card listing. Uses `@tanstack/react-query` for data fetching. Handles loading, error, and empty states.
+
+## Verification
+
+- `npx tsc --noEmit` → **0 errors**
+
+## Commit
+
+```
+7c5bda7 feat: add orders list page with status filter tabs
+```
+
+## Concerns
+
+- Routing to `/orders/:id` is not yet configured (Task 7 handles router setup).
+- `PaymentMethod.OnlinePayment = 0` is displayed as "VNPay" in the table (matches existing convention).

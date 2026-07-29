@@ -1,19 +1,32 @@
-# Task 2 Report: Backend DTOs, Mappers, Service, UploadController, Image Endpoints
+# Task 2 Report — Frontend Types + API Modules
 
-**Status:** DONE
+## Status: ✅ Complete
 
-**Commits:**
-- `7d0a748` feat: extend product DTOs, add image upload/association endpoints
+## What was done
 
-**Changes:**
-- `ProductDTOs.cs`: Added ProductImageDTO, UploadImageResponse, AddProductImageRequest; extended CreateProductDTO, UpdateProductDTO with IsActive/FlowerMeaning/Origin/CareInstruction/NewImages; extended ProductDTO with Images/IsActive/FlowerMeaning/Origin/CareInstruction
-- `MappingExtensions.cs`: Added ProductImage ToDTO mapping; updated Product ToDTO with Images + new fields; updated Create ToEntity, UpdateEntity with new fields
-- `ProductService.cs`: BuildQuery includes Images; Create handles NewImages batch; Update handles NewImages append
-- `UploadController.cs`: New — POST /api/Upload with image validation + Cloudinary upload
-- `ProductsController.cs`: Added GET/POST/DELETE /{id}/images endpoints for image CRUD
+Created 6 files under `flower-admin.frontend/`:
 
-**Build:** 0 errors
+| File | Description |
+|------|-------------|
+| `src/types/order.ts` | `OrderStatus`, `PaymentMethod`, `PaymentStatus` enums + `OrderDTO`, `OrderDetailDTO` interfaces |
+| `src/types/customer.ts` | `CustomerDTO`, `UpdateCustomerRequest` interfaces |
+| `src/types/contact.ts` | `ContactDTO` interface |
+| `src/api/orders.ts` | `ordersApi` — `getPaged`, `getById`, `updateStatus`, `cancelByShop` |
+| `src/api/customers.ts` | `customersApi` — `getPaged`, `getById`, `getOrders`, `update` |
+| `src/api/contacts.ts` | `contactsApi` — `getPaged`, `getById`, `getUnreadCount`, `markRead`, `delete` |
 
-**Concerns:** None
+## TypeScript check
 
-**Next:** Task 3 — Frontend types + API functions
+`npx tsc --noEmit` → **0 errors**
+
+## Commit
+
+```
+231ba6d feat: add frontend types and API modules for orders, customers, contacts
+```
+
+6 files changed, 202 insertions(+)
+
+## Concerns
+
+None.
