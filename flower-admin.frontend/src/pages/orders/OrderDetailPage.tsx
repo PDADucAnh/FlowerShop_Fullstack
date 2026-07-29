@@ -36,7 +36,7 @@ const statusOptions: { value: OrderStatus; label: string }[] = [
   { value: OrderStatus.Completed, label: 'Đã giao' },
 ]
 
-const terminalStatuses = [OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.Completed, OrderStatus.Refunded]
+const terminalStatuses: OrderStatus[] = [OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.Completed, OrderStatus.Refunded]
 
 function isTerminal(status: OrderStatus) {
   return terminalStatuses.includes(status)

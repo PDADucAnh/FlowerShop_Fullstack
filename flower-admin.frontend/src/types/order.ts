@@ -1,37 +1,40 @@
-export enum OrderStatus {
-  Pending = 0,
-  Shipping = 1,
-  Completed = 2,
-  Cancelled = 3,
-  PendingVerification = 4,
-  Confirmed = 5,
-  Preparing = 6,
-  PendingPayment = 7,
-  Paid = 8,
-  ReadyForDelivery = 9,
-  Refunded = 10,
-  CancelledByCustomer = 11,
-  CancelledByShop = 12,
-  RefundPending = 13,
-}
+export const OrderStatus = {
+  Pending: 0,
+  Shipping: 1,
+  Completed: 2,
+  Cancelled: 3,
+  PendingVerification: 4,
+  Confirmed: 5,
+  Preparing: 6,
+  PendingPayment: 7,
+  Paid: 8,
+  ReadyForDelivery: 9,
+  Refunded: 10,
+  CancelledByCustomer: 11,
+  CancelledByShop: 12,
+  RefundPending: 13,
+} as const
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
 
-export enum PaymentMethod {
-  OnlinePayment = 0,
-  COD = 1,
-}
+export const PaymentMethod = {
+  OnlinePayment: 0,
+  COD: 1,
+} as const
+export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
-export enum PaymentStatus {
-  Pending = 0,
-  Completed = 1,
-  Failed = 2,
-  Refunded = 3,
-  PartialRefund = 4,
-  Expired = 5,
-  Cancelled = 6,
-  RefundPending = 7,
-  PartialRefundPending = 8,
-  PartialRefunded = 9,
-}
+export const PaymentStatus = {
+  Pending: 0,
+  Completed: 1,
+  Failed: 2,
+  Refunded: 3,
+  PartialRefund: 4,
+  Expired: 5,
+  Cancelled: 6,
+  RefundPending: 7,
+  PartialRefundPending: 8,
+  PartialRefunded: 9,
+} as const
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
 export interface OrderDetailDTO {
   id: number
