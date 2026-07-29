@@ -10,7 +10,7 @@ import { apiClient } from './client'
 
 export const authApi = {
   login(data: LoginRequest) {
-    return apiClient.post<ApiResponse<LoginResponse>>('/api/auth/login', data)
+    return apiClient.post<LoginResponse>('/api/auth/login', data)
   },
 
   refresh(data: RefreshTokenRequest) {

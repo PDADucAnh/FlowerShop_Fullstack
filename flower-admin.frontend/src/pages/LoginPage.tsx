@@ -24,12 +24,12 @@ export function LoginPage() {
     setLoading(true)
     try {
       const { data } = await authApi.login({ username, password })
-      if (data.data) {
-        login(data.data.accessToken, data.data.refreshToken, data.data.user)
+      if (data.accessToken) {
+        login(data.accessToken, data.refreshToken, data.user)
         toast.success('Đăng nhập thành công')
         navigate('/', { replace: true })
       } else {
-        toast.error(data.message || 'Đăng nhập thất bại')
+        toast.error((data as any).message || 'Đăng nhập thất bại')
       }
     } catch {
       toast.error('Tên đăng nhập hoặc mật khẩu không đúng')
