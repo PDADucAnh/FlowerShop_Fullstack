@@ -30,10 +30,6 @@ export function OrdersPage() {
   return <PlaceholderPage title="Đơn hàng" />
 }
 
-export function ProductsPage() {
-  return <PlaceholderPage title="Sản phẩm" />
-}
-
 export function ContentPage() {
   return <PlaceholderPage title="Nội dung" />
 }
