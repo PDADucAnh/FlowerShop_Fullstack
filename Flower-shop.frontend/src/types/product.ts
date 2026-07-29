@@ -1,3 +1,9 @@
+export interface ProductImage {
+  id: number
+  imageUrl: string
+  sortOrder: number
+}
+
 export interface Product {
   id: number;
   sku?: string;
@@ -24,6 +30,7 @@ export interface Product {
   discountAmount?: number;
   isFlashSale?: boolean;
   promotionName?: string;
+  images?: ProductImage[];
 }
 
 export interface ProductInput {
