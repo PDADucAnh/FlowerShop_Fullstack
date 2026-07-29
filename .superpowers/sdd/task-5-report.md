@@ -1,30 +1,28 @@
-# Task 5 Report: BestSellingProducts — horizontal scroll
+# Task 5: Customers Pages — Report
 
-**Status:** DONE
+## Status
 
-## Steps Completed
+All 4 files created, compiles, committed.
 
-- [x] Step 1: Rewrote `BestSellingProducts.tsx` with horizontal scroll layout (flex overflow-x-auto)
-- [x] Step 2: Verified TypeScript compiles cleanly (`npx tsc --noEmit` — zero errors)
-- [x] Step 3: Committed
+## Files Created
 
-## Changes
-
-- `Flower-shop.frontend/src/pages/home/BestSellingProducts.tsx` — 63 insertions, 37 deletions
-  - Removed grid layout with `ProductCard` components
-  - Added `Link` import from `react-router-dom` for "Xem tất cả" link and per-product links
-  - Added `getImageUrl` and `formatCurrency` utility imports
-  - Horizontal scroll container with `overflow-x-auto no-scrollbar`
-  - Skeleton loading state with 4 placeholder cards (instead of previous full-section skeleton)
-  - Empty state returns null (instead of dashed-border placeholder)
-  - Product limit changed from 3 to 4 initially, displays up to 6
-  - Each product is a direct `Link` element with image + name + price
-  - Price selection: `promotionPrice ?? currentPrice ?? discountPrice ?? price`
+| File | Description |
+|------|-------------|
+| `flower-admin.frontend/src/pages/customers/CustomersPage.tsx` | Paged list with search, empty/loading/error states |
+| `flower-admin.frontend/src/pages/customers/CustomerDetailPage.tsx` | Detail with stats cards, info, order history pagination, edit dialog |
+| `flower-admin.frontend/src/pages/customers/components/CustomerTable.tsx` | Table component with row navigation |
+| `flower-admin.frontend/src/pages/customers/components/CustomerEditDialog.tsx` | Edit dialog with form, validation, loading state |
 
 ## Commit
 
-`64aa026` — `feat: change BestSellingProducts to horizontal scroll layout`
+```
+fc081b9 — feat: add customers list and detail pages with edit dialog
+```
+
+## Typecheck
+
+`npx tsc --noEmit` — **passes** (no errors).
 
 ## Concerns
 
-None. TypeScript compiles cleanly, no new dependencies, no backend changes.
+- Routes `/customers` and `/customers/:id` not yet registered in `App.tsx` (will be done in a follow-up task or routing integration).

@@ -9,8 +9,13 @@ import { DashboardPage } from '@/pages/DashboardPage'
 import { ProductsPage } from '@/pages/products/ProductsPage'
 import { ProductFormPage } from '@/pages/products/ProductFormPage'
 import { CategoriesPage } from '@/pages/categories/CategoriesPage'
+import { OrdersPage } from '@/pages/orders/OrdersPage'
+import { OrderDetailPage } from '@/pages/orders/OrderDetailPage'
+import { CustomersPage } from '@/pages/customers/CustomersPage'
+import { CustomerDetailPage } from '@/pages/customers/CustomerDetailPage'
+import { ContactsPage } from '@/pages/contacts/ContactsPage'
+import { ContactDetailPage } from '@/pages/contacts/ContactDetailPage'
 import {
-  OrdersPage,
   ContentPage,
   MarketingPage,
   SystemPage,
@@ -29,6 +34,11 @@ function App() {
               <Route element={<AppShell />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="orders" element={<OrdersPage />} />
+                <Route path="orders/:id" element={<OrderDetailPage />} />
+                <Route path="customers" element={<CustomersPage />} />
+                <Route path="customers/:id" element={<CustomerDetailPage />} />
+                <Route path="contacts" element={<ContactsPage />} />
+                <Route path="contacts/:id" element={<ContactDetailPage />} />
                 <Route path="products" element={<ProductsPage />} />
                 <Route path="products/new" element={<ProductFormPage />} />
                 <Route path="products/:id/edit" element={<ProductFormPage />} />
