@@ -32,6 +32,7 @@ export interface CreateProductRequest {
   price: number
   stockQuantity: number
   categoryProductId: number
+  imageUrl?: string
   isActive?: boolean
   flowerMeaning?: string
   origin?: string

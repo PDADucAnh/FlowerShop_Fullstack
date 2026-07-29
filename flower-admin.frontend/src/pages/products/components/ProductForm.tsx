@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useDropzone } from 'react-dropzone'
 import { productsApi } from '@/api/products'
 import { categoriesApi } from '@/api/categories'
-import { ImageUploader } from './ImageUploader'
+import { uploadApi } from '@/api/upload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -15,14 +16,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { toast } from 'sonner'
-import { Loader2, ArrowLeft } from 'lucide-react'
+import { Loader2, ArrowLeft, X, CloudUpload, ImagePlus, ChevronDown, ChevronUp } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import type { Product, CreateProductRequest } from '@/types/product'
 
 interface ProductFormProps {
   product?: Product | null
+}
+
+interface ImageItem {
+  id: string
+  url: string
+  isExisting: boolean
+  existingId?: number
+  uploading?: boolean
 }
 
 function generateSlug(name: string): string {
@@ -50,7 +58,9 @@ export function ProductForm({ product }: ProductFormProps) {
   const navigate = useNavigate()
   const isEditing = !!product
   const [saving, setSaving] = useState(false)
-  const [newImageUrls, setNewImageUrls] = useState<string[]>([])
+  const [showExtra, setShowExtra] = useState(false)
+  const [mainImage, setMainImage] = useState<string>(product?.imageUrl || '')
+  const [mainImageUploading, setMainImageUploading] = useState(false)
 
   const [form, setForm] = useState({
     name: '',
@@ -81,6 +91,15 @@ export function ProductForm({ product }: ProductFormProps) {
         origin: product.origin || '',
         careInstruction: product.careInstruction || '',
       })
+      setMainImage(product.imageUrl || '')
+      setGalleryImages(
+        (product.images || []).map((img) => ({
+          id: `existing-${img.id}`,
+          url: img.imageUrl,
+          isExisting: true,
+          existingId: img.id,
+        }))
+      )
     }
   }, [product])
 
@@ -107,6 +126,77 @@ export function ProductForm({ product }: ProductFormProps) {
     }))
   }
 
+  const onMainImageDrop = useCallback(async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0]
+    if (!file) return
+    setMainImageUploading(true)
+    try {
+      const { data } = await uploadApi.upload(file)
+      setMainImage(data.url)
+      toast.success('Tải ảnh chính thành công')
+    } catch {
+      toast.error('Tải ảnh chính thất bại')
+    } finally {
+      setMainImageUploading(false)
+    }
+  }, [])
+
+  const {
+    getRootProps: getMainRootProps,
+    getInputProps: getMainInputProps,
+    isDragActive: isMainDragActive,
+  } = useDropzone({
+    onDrop: onMainImageDrop,
+    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] },
+    maxSize: 5 * 1024 * 1024,
+    multiple: false,
+  })
+
+  // Gallery images
+  const [galleryImages, setGalleryImages] = useState<ImageItem[]>([])
+
+  const onGalleryDrop = useCallback(async (acceptedFiles: File[]) => {
+    for (const file of acceptedFiles) {
+      const tempId = `gallery-${Date.now()}-${Math.random()}`
+      setGalleryImages((prev) => [
+        ...prev,
+        { id: tempId, url: '', isExisting: false, uploading: true },
+      ])
+      try {
+        const { data } = await uploadApi.upload(file)
+        setGalleryImages((prev) =>
+          prev.map((img) =>
+            img.id === tempId
+              ? { ...img, url: data.url, uploading: false }
+              : img
+          )
+        )
+      } catch {
+        toast.error(`Tải ảnh thất bại: ${file.name}`)
+        setGalleryImages((prev) => prev.filter((img) => img.id !== tempId))
+      }
+    }
+  }, [])
+
+  const {
+    getRootProps: getGalleryRootProps,
+    getInputProps: getGalleryInputProps,
+    isDragActive: isGalleryDragActive,
+  } = useDropzone({
+    onDrop: onGalleryDrop,
+    accept: { 'image/*': ['.png', '.jpg', '.jpeg', '.gif', '.webp'] },
+    maxSize: 5 * 1024 * 1024,
+  })
+
+  const removeGalleryImage = (item: ImageItem) => {
+    if (item.isExisting && item.existingId && product) {
+      productsApi.deleteImage(product.id, item.existingId).catch(() => {
+        toast.error('Xóa ảnh thất bại')
+      })
+    }
+    setGalleryImages((prev) => prev.filter((img) => img.id !== item.id))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.categoryProductId || form.price <= 0) {
@@ -116,6 +206,11 @@ export function ProductForm({ product }: ProductFormProps) {
 
     setSaving(true)
     try {
+      const newUrls = galleryImages
+        .filter((img) => !img.isExisting)
+        .map((img) => img.url)
+        .filter(Boolean)
+
       const payload: CreateProductRequest = {
         name: form.name,
         slug: form.slug || undefined,
@@ -123,12 +218,13 @@ export function ProductForm({ product }: ProductFormProps) {
         price: form.price,
         stockQuantity: form.stockQuantity,
         categoryProductId: form.categoryProductId,
+        imageUrl: mainImage || undefined,
         isActive: form.isActive,
         description: form.description || undefined,
         flowerMeaning: form.flowerMeaning || undefined,
         origin: form.origin || undefined,
         careInstruction: form.careInstruction || undefined,
-        newImages: newImageUrls.length > 0 ? newImageUrls : undefined,
+        newImages: newUrls.length > 0 ? newUrls : undefined,
       }
 
       if (isEditing && product) {
@@ -147,51 +243,77 @@ export function ProductForm({ product }: ProductFormProps) {
     }
   }
 
-  const handleDeleteExistingImage = async (imageId: number) => {
-    if (!product) return
-    try {
-      await productsApi.deleteImage(product.id, imageId)
-    } catch {
-      toast.error('Xóa ảnh thất bại')
-    }
-  }
-
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/products')}>
-          <ArrowLeft className="size-5" />
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-headline-md text-on-surface mb-1">
+            {isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
+          </h2>
+          <p className="text-body-md text-on-surface-variant">
+            {isEditing ? 'Cập nhật thông tin sản phẩm' : 'Thêm sản phẩm mới vào cửa hàng'}
+          </p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => navigate('/products')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="size-4" />
+          Quay lại
         </Button>
-        <h1 className="text-2xl font-semibold">
-          {isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
-        </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Thông tin cơ bản</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="name">Tên sản phẩm *</Label>
+      <div className="rounded-xl border bg-white p-6 md:p-8 shadow-[0_4px_20px_rgba(171,44,93,0.02)]">
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left column */}
+            <div className="space-y-5">
+              <div>
+                <Label className="text-on-surface-variant mb-1.5 block">Tên sản phẩm</Label>
                 <Input
-                  id="name"
                   value={form.name}
                   onChange={(e) => handleNameChange(e.target.value)}
+                  placeholder="Nhập tên sản phẩm..."
+                  className="bg-surface-container-low border-input"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="category">Danh mục *</Label>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">SKU</Label>
+                  <Input
+                    value={form.sku}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, sku: e.target.value }))
+                    }
+                    placeholder="PN-001"
+                    className="bg-surface-container-low border-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">Slug</Label>
+                  <Input
+                    value={form.slug}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, slug: e.target.value }))
+                    }
+                    placeholder="ten-san-pham"
+                    className="bg-surface-container-low border-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-on-surface-variant mb-1.5 block">Danh mục</Label>
                 <Select
                   value={String(form.categoryProductId)}
                   onValueChange={(v) =>
                     setForm((prev) => ({ ...prev, categoryProductId: Number(v) }))
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-surface-container-low">
                     <SelectValue placeholder="Chọn danh mục" />
                   </SelectTrigger>
                   <SelectContent>
@@ -203,165 +325,231 @@ export function ProductForm({ product }: ProductFormProps) {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">Giá (VNĐ)</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.price || ''}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, price: Number(e.target.value) }))
+                    }
+                    placeholder="0"
+                    className="bg-surface-container-low border-input"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">Số lượng tồn kho</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    value={form.stockQuantity}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, stockQuantity: Number(e.target.value) }))
+                    }
+                    placeholder="0"
+                    className="bg-surface-container-low border-input"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-on-surface-variant mb-1.5 block">Mô tả</Label>
+                <Textarea
+                  value={form.description}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  placeholder="Nhập mô tả chi tiết sản phẩm..."
+                  rows={5}
+                  className="bg-surface-container-low border-input resize-none"
+                />
+              </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-3">
-              <div className="space-y-2">
-                <Label htmlFor="slug">Slug</Label>
-                <Input
-                  id="slug"
-                  value={form.slug}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, slug: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="sku">SKU</Label>
-                <Input
-                  id="sku"
-                  value={form.sku}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, sku: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="flex items-end gap-2">
-                <div className="flex-1 space-y-2">
-                  <Label htmlFor="isActive">Trạng thái</Label>
-                  <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
-                    <Switch
-                      id="isActive"
-                      checked={form.isActive}
-                      onCheckedChange={(v: boolean) =>
-                        setForm((prev) => ({ ...prev, isActive: v }))
-                      }
+            {/* Right column */}
+            <div className="space-y-6">
+              <div>
+                <Label className="text-on-surface-variant mb-1.5 block">Hình ảnh chính</Label>
+                {mainImage ? (
+                  <div className="relative rounded-xl overflow-hidden border border-input bg-surface-container-low group">
+                    <img
+                      src={mainImage}
+                      alt=""
+                      className="w-full h-48 object-cover"
                     />
-                    <Label htmlFor="isActive" className="cursor-pointer">
-                      {form.isActive ? 'Đang bán' : 'Ngừng bán'}
-                    </Label>
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                      <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setMainImage('')}
+                        >
+                          <X className="size-4 mr-1" />
+                          Xóa
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    {...getMainRootProps()}
+                    className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center bg-surface-container-low cursor-pointer transition-colors ${
+                      isMainDragActive
+                        ? 'border-primary bg-primary/5'
+                        : 'border-outline-variant/30 hover:border-primary/50 hover:bg-primary/5'
+                    }`}
+                  >
+                    <input {...getMainInputProps()} />
+                    {mainImageUploading ? (
+                      <Loader2 className="size-10 animate-spin text-primary mb-2" />
+                    ) : (
+                      <CloudUpload className="size-10 text-primary mb-2" />
+                    )}
+                    <p className="text-sm text-on-surface-variant">
+                      {mainImageUploading
+                        ? 'Đang tải...'
+                        : isMainDragActive
+                          ? 'Thả ảnh vào đây'
+                          : 'Kéo thả hoặc click để tải ảnh lên'}
+                    </p>
+                    <p className="text-xs text-on-surface-variant/60 mt-1">
+                      PNG, JPG (Tối đa 5MB)
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <Label className="text-on-surface-variant">Ảnh phụ (Gallery)</Label>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {galleryImages.map((item) => (
+                    <div key={item.id} className="relative w-[calc(33.333%-12px)] aspect-square rounded-lg overflow-hidden border border-input group">
+                      {item.uploading ? (
+                        <div className="flex items-center justify-center h-full bg-muted">
+                          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {!item.uploading && (
+                        <button
+                          type="button"
+                          onClick={() => removeGalleryImage(item)}
+                          className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-destructive text-destructive-foreground shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="size-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <div
+                    {...getGalleryRootProps()}
+                    className={`w-[calc(33.333%-12px)] aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-surface-container-low cursor-pointer transition-colors ${
+                      isGalleryDragActive
+                        ? 'border-primary bg-primary/5'
+                        : 'border-outline-variant/30 hover:border-primary/50 hover:bg-primary/5'
+                    }`}
+                  >
+                    <input {...getGalleryInputProps()} />
+                    <ImagePlus className="size-6 text-on-surface-variant group-hover:text-primary transition-colors" />
+                    <span className="text-xs text-on-surface-variant mt-1">Thêm ảnh</span>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Giá & Tồn kho</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="price">Giá (VNĐ) *</Label>
-              <Input
-                id="price"
-                type="number"
-                min={0}
-                value={form.price}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, price: Number(e.target.value) }))
-                }
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Số lượng tồn</Label>
-              <Input
-                id="stockQuantity"
-                type="number"
-                min={0}
-                value={form.stockQuantity}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    stockQuantity: Number(e.target.value),
-                  }))
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Hình ảnh</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ImageUploader
-              existingImages={product?.images || []}
-              onImagesChange={setNewImageUrls}
-              onDeleteExisting={handleDeleteExistingImage}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Mô tả & Thông tin thêm</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="description">Mô tả</Label>
-              <Textarea
-                id="description"
-                rows={4}
-                value={form.description}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, description: e.target.value }))
-                }
-              />
-            </div>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="flowerMeaning">Ý nghĩa hoa</Label>
-                <Input
-                  id="flowerMeaning"
-                  value={form.flowerMeaning}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, flowerMeaning: e.target.value }))
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="origin">Xuất xứ</Label>
-                <Input
-                  id="origin"
-                  value={form.origin}
-                  onChange={(e) =>
-                    setForm((prev) => ({ ...prev, origin: e.target.value }))
+              <div className="flex items-center gap-3 pt-2">
+                <Label className="text-on-surface-variant mb-0 cursor-pointer">Đang bán</Label>
+                <Switch
+                  checked={form.isActive}
+                  onCheckedChange={(v: boolean) =>
+                    setForm((prev) => ({ ...prev, isActive: v }))
                   }
                 />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="careInstruction">Hướng dẫn chăm sóc</Label>
-              <Textarea
-                id="careInstruction"
-                rows={3}
-                value={form.careInstruction}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, careInstruction: e.target.value }))
-                }
-              />
-            </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        <div className="flex items-center justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate('/products')}
-          >
-            Hủy
-          </Button>
-          <Button type="submit" disabled={saving}>
-            {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {isEditing ? 'Cập nhật' : 'Thêm sản phẩm'}
-          </Button>
-        </div>
-      </form>
+          {/* Extra info collapsible */}
+          <div className="mt-6 pt-4 border-t border-border">
+            <button
+              type="button"
+              onClick={() => setShowExtra(!showExtra)}
+              className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-colors"
+            >
+              {showExtra ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+              Thông tin thêm
+            </button>
+            {showExtra && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">Ý nghĩa hoa</Label>
+                  <Input
+                    value={form.flowerMeaning}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, flowerMeaning: e.target.value }))
+                    }
+                    placeholder="Ví dụ: Tượng trưng cho tình yêu vĩnh cửu"
+                    className="bg-surface-container-low border-input"
+                  />
+                </div>
+                <div>
+                  <Label className="text-on-surface-variant mb-1.5 block">Xuất xứ</Label>
+                  <Input
+                    value={form.origin}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, origin: e.target.value }))
+                    }
+                    placeholder="Ví dụ: Đà Lạt, Việt Nam"
+                    className="bg-surface-container-low border-input"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label className="text-on-surface-variant mb-1.5 block">Hướng dẫn chăm sóc</Label>
+                  <Textarea
+                    value={form.careInstruction}
+                    onChange={(e) =>
+                      setForm((prev) => ({ ...prev, careInstruction: e.target.value }))
+                    }
+                    placeholder="Nhập hướng dẫn chăm sóc hoa..."
+                    rows={3}
+                    className="bg-surface-container-low border-input resize-none"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-4 mt-8 pt-6 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate('/products')}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="submit"
+              disabled={saving}
+              className="shadow-[0_4px_20px_rgba(171,44,93,0.2)] hover:shadow-[0_6px_25px_rgba(171,44,93,0.3)] transition-shadow"
+            >
+              {saving && <Loader2 className="mr-2 size-4 animate-spin" />}
+              {isEditing ? 'Cập nhật sản phẩm' : 'Thêm sản phẩm'}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }
