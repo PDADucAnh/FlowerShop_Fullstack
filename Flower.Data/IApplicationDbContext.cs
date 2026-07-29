@@ -41,6 +41,7 @@ namespace Flower.Data
         DbSet<AdminNotification> AdminNotifications { get; set; }
         DbSet<SystemSetting> SystemSettings { get; set; }
         DbSet<Page> Pages { get; set; }
+        DbSet<ProductImage> ProductImages { get; set; }
         DbSet<Contact> Contacts { get; set; }
 
         EntityEntry Entry(object entity);

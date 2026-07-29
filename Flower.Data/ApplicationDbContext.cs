@@ -42,6 +42,7 @@ namespace Flower.Data
         public DbSet<AdminNotification> AdminNotifications { get; set; }
         public DbSet<SystemSetting> SystemSettings { get; set; }
         public DbSet<Page> Pages { get; set; }
+        public DbSet<ProductImage> ProductImages { get; set; }
         public DbSet<Contact> Contacts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -124,6 +125,12 @@ namespace Flower.Data
                 .HasOne(pv => pv.Product)
                 .WithMany()
                 .HasForeignKey(pv => pv.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ProductImage>()
+                .HasOne(pi => pi.Product)
+                .WithMany(p => p.Images)
+                .HasForeignKey(pi => pi.ProductId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<PhoneBlacklist>()

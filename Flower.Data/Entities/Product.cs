@@ -43,6 +43,8 @@ namespace Flower.Data.Entities
 
         public virtual ICollection<ProductVariant>? ProductVariants { get; set; }
 
+        public virtual ICollection<ProductImage>? Images { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         [MaxLength(500)]
