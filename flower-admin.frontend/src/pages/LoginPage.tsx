@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { LogIn } from 'lucide-react'
 
 export function LoginPage() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
@@ -17,13 +17,13 @@ export function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password) {
-      toast.error('Vui lòng nhập email và mật khẩu')
+    if (!username || !password) {
+      toast.error('Vui lòng nhập tên đăng nhập và mật khẩu')
       return
     }
     setLoading(true)
     try {
-      const { data } = await authApi.login({ email, password })
+      const { data } = await authApi.login({ username, password })
       if (data.data) {
         login(data.data.accessToken, data.data.refreshToken, data.data.user)
         toast.success('Đăng nhập thành công')
@@ -32,7 +32,7 @@ export function LoginPage() {
         toast.error(data.message || 'Đăng nhập thất bại')
       }
     } catch {
-      toast.error('Email hoặc mật khẩu không đúng')
+      toast.error('Tên đăng nhập hoặc mật khẩu không đúng')
     } finally {
       setLoading(false)
     }
@@ -54,14 +54,13 @@ export function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-on-surface">
-                Email
+                Tên đăng nhập
               </label>
               <Input
-                type="email"
-                placeholder="admin@flowershop.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
+                placeholder="admin"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoComplete="username"
               />
             </div>
             <div className="space-y-2">

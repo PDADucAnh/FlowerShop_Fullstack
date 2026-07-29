@@ -24,7 +24,7 @@ export interface RefreshTokenResponse {
 }
 
 export interface LoginRequest {
-  email: string
+  username: string
   password: string
 }
 
