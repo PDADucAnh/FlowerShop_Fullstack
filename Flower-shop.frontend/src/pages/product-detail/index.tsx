@@ -4,15 +4,11 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProduct, useProductsPaged } from '../../hooks/useProducts';
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-import { getImageUrl } from '../../utils/apiUtils';
 import { formatCurrency } from '../../utils/currency';
 import toast from 'react-hot-toast';
 import ProductCard from '../../components/ProductCard';
+import ProductGallery from '../../components/ProductGallery';
 import promotionService from '../../services/promotionService';
-
-const formatImageUrl = (url?: string): string => {
-  return getImageUrl(url) || '';
-};
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -22,10 +18,7 @@ const ProductDetailPage = () => {
   const { data: product, isLoading } = useProduct(id as string);
   
   const [quantity, setQuantity] = useState(1);
-  const [activeImage, setActiveImage] = useState<string>('');
   const [showVideoModal, setShowVideoModal] = useState(false);
-  const [showLightbox, setShowLightbox] = useState(false);
-  const [lightboxIndex, setLightboxIndex] = useState(0);
   const [promotionInfo, setPromotionInfo] = useState<{ promotionPrice?: number; promotionPercent?: number; promotionType?: string; hasFlashSale?: boolean; name?: string } | null>(null);
 
   const videoUrl = "https://www.youtube.com/embed/g20T21s0uVw"; // Aesthetic Flower Care Tutorial
@@ -34,12 +27,6 @@ const ProductDetailPage = () => {
     setQuantity(1);
     window.scrollTo(0, 0);
   }, [id]);
-
-  useEffect(() => {
-    if (product) {
-      setActiveImage(product.imageUrl || '');
-    }
-  }, [product]);
 
   useEffect(() => {
     if (product) {
@@ -132,13 +119,6 @@ const ProductDetailPage = () => {
   const { data: relatedResult } = useProductsPaged(1, 5, null, null, product?.categoryProductId || null);
   const relatedProducts = relatedResult?.items?.filter((p: any) => p.id !== product?.id).slice(0, 4) || [];
 
-  const galleryImages: string[] = product ? [
-    product.imageUrl || '',
-    ...(product.images || [])
-      .sort((a: { sortOrder: number }, b: { sortOrder: number }) => a.sortOrder - b.sortOrder)
-      .map((img: { imageUrl: string }) => img.imageUrl),
-  ].filter(Boolean) : [];
-
   if (isLoading) {
     return (
       <div className="bg-background min-h-screen flex items-center justify-center">
@@ -197,55 +177,19 @@ const ProductDetailPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-margin-desktop lg:gap-gutter items-start">
           {/* Left Column: Image Gallery */}
           <div className="lg:col-span-7 flex flex-col gap-3">
-            <div 
-              onClick={() => {
-                const currentIdx = galleryImages.indexOf(activeImage);
-                setLightboxIndex(currentIdx !== -1 ? currentIdx : 0);
-                setShowLightbox(true);
-              }}
-              className="w-full aspect-square rounded-xl overflow-hidden shadow-[0_4px_20px_rgba(171,44,93,0.02)] bg-surface-container-low group cursor-zoom-in relative"
-            >
-              <img
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                src={formatImageUrl(activeImage || product.imageUrl)}
-                loading="eager"
-              />
-              {(isOutOfStock || isLowStock) && (
-                <div className={`absolute top-4 left-4 px-3 py-1 font-label-sm text-label-sm uppercase tracking-widest rounded-sm z-10 ${isOutOfStock ? 'bg-error text-on-error' : 'bg-warning text-on-warning'}`}>
-                  {isOutOfStock ? 'Hết hàng' : `Chỉ còn ${product.stockQuantity} sản phẩm`}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex gap-2">
-              {galleryImages.slice(0, 3).map((imgUrl, idx) => (
-                <div
-                  key={idx}
-                  onClick={() => {
-                    setActiveImage(imgUrl);
-                    setLightboxIndex(idx);
-                  }}
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden cursor-pointer border-2 transition-colors flex-shrink-0 ${
-                    activeImage === imgUrl ? 'border-[#ab2c5d]' : 'border-transparent hover:border-outline-variant'
-                  }`}
-                >
-                  <img
-                    alt={`${product.name} detail view ${idx + 1}`}
-                    className="w-full h-full object-cover"
-                    src={formatImageUrl(imgUrl)}
-                    loading="lazy"
-                  />
-                </div>
-              ))}
-              
-              <div
-                onClick={() => setShowVideoModal(true)}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden cursor-pointer border-2 border-transparent hover:border-outline-variant transition-colors bg-surface-container flex items-center justify-center relative group flex-shrink-0"
-              >
-                <span className="material-symbols-outlined text-outline text-2xl z-10 transition-transform group-hover:scale-110">play_circle</span>
-              </div>
-            </div>
+            <ProductGallery
+              images={[
+                product.imageUrl || '',
+                ...(product.images || [])
+                  .sort((a: { sortOrder: number }, b: { sortOrder: number }) => a.sortOrder - b.sortOrder)
+                  .map((img: { imageUrl: string }) => img.imageUrl),
+              ].filter(Boolean)}
+              productName={product.name}
+              stockQuantity={product.stockQuantity}
+              isOutOfStock={isOutOfStock}
+              isLowStock={isLowStock}
+              videoUrl={videoUrl}
+            />
           </div>
 
           {/* Right Column: Product Details */}
@@ -483,57 +427,7 @@ const ProductDetailPage = () => {
         </div>
       )}
 
-      {/* Lightbox Modal */}
-      {showLightbox && (
-        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col justify-between py-6">
-          <div className="flex justify-between items-center px-6">
-            <span className="text-white font-label-md">
-              {lightboxIndex + 1} / {galleryImages.length}
-            </span>
-            <button
-              onClick={() => setShowLightbox(false)}
-              className="text-white hover:text-primary p-2 bg-white/10 rounded-full transition-colors"
-            >
-              <span className="material-symbols-outlined">close</span>
-            </button>
-          </div>
 
-          <div className="flex items-center justify-between px-4 max-h-[80vh]">
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
-              className="text-white hover:text-primary p-3 bg-white/5 rounded-full transition-colors"
-            >
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <img
-              src={formatImageUrl(galleryImages[lightboxIndex])}
-              alt="Zoomed view"
-              className="max-w-full max-h-[75vh] object-contain rounded-lg shadow-2xl"
-              loading="lazy"
-            />
-            <button
-              onClick={() => setLightboxIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
-              className="text-white hover:text-primary p-3 bg-white/5 rounded-full transition-colors"
-            >
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
-
-          <div className="flex justify-center gap-2 overflow-x-auto px-6">
-            {galleryImages.map((img, idx) => (
-              <button
-                key={idx}
-                onClick={() => setLightboxIndex(idx)}
-                className={`w-16 h-16 rounded-md overflow-hidden border-2 transition-all ${
-                  lightboxIndex === idx ? 'border-primary scale-105' : 'border-transparent opacity-60'
-                }`}
-              >
-                <img src={formatImageUrl(img)} className="w-full h-full object-cover" alt="" loading="lazy" />
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
