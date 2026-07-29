@@ -1,19 +1,16 @@
-# Task 1 Report: CSS utilities for drawer and scroll
+# Task 1 Report: Backend CORS & Auth Endpoints
 
-## What was implemented
-Appended three utility classes to `Flower-shop.frontend/src/assets/css/index.css` before the `@media (prefers-reduced-motion)` block:
-- `.no-scrollbar` — hides scrollbar cross-browser (webkit, IE, Firefox)
-- `.drawer-overlay` / `.drawer-overlay.active` — animated overlay with backdrop blur
-- `.drawer-content` / `.drawer-content.active` — slide-in panel with cubic-bezier easing
+**Status:** DONE
 
-## Testing
-- `npx tsc --noEmit` → exit code 0, zero TypeScript errors
+**Commits:**
+- `61235a8` feat: add CORS for admin domains + refresh/logout/me auth endpoints
 
-## Files changed
-- `Flower-shop.frontend/src/assets/css/index.css` (+22 lines)
+**Changes:**
+- `Program.cs`: Added `http://localhost:5174` and `https://flower-admin.vercel.app` to AllowVercel CORS policy
+- `AuthController.cs`: Updated login to return `accessToken`/`refreshToken`/`user` object instead of flat fields; added `POST /api/auth/refresh`, `POST /api/auth/logout`, `GET /api/auth/me` endpoints
+- `AuthResult.cs`: Added `LoginResponseDTO` class
+- `AuthDTOs.cs`: Added `RefreshTokenRequest` class
 
-## Self-review
-- All classes follow existing file conventions (same indentation, no comments, no semicolons on single rules)
-- Inserted at the correct location (before the prefers-reduced-motion media query)
-- No conflicts with existing CSS
-- Re-read the file after edit to confirm correctness
+**Build:** 0 errors, 122 warnings (pre-existing)
+
+**Concerns:** None
