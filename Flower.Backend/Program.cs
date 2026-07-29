@@ -259,13 +259,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowVercel", policy =>
     {
-        policy.WithOrigins(
-                    "https://ngoc-anh-flower-shop.vercel.app",
-                    "http://localhost:3000",
-                    "http://localhost:5173",
-                    "http://localhost:5174",
-                    "https://flower-admin.vercel.app"
-                )
+        var envOrigins = (Environment.GetEnvironmentVariable("ALLOWED_ORIGINS") ?? "")
+                    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        policy.WithOrigins(envOrigins.Concat(new[]
+                    {
+                        "https://ngoc-anh-flower-shop.vercel.app",
+                        "http://localhost:3000",
+                        "http://localhost:5173",
+                        "http://localhost:5174",
+                        "https://flower-admin.vercel.app",
+                        "https://flower-admin-frontend.vercel.app",
+                    }).ToArray())
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
