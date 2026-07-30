@@ -130,8 +130,8 @@ export function UsersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Quản lý nhân viên</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild onClick={openCreate}>
-            <Button size="sm"><Plus className="mr-1 size-4" />Thêm nhân viên</Button>
+          <DialogTrigger render={<Button size="sm" />} onClick={openCreate}>
+            <Plus className="mr-1 size-4" />Thêm nhân viên
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{editItem ? 'Sửa nhân viên' : 'Thêm nhân viên'}</DialogTitle></DialogHeader>

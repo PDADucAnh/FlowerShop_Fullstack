@@ -164,8 +164,8 @@ export function FlashSalesTab() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild onClick={openCreate}>
-            <Button size="sm"><Plus className="mr-1 size-4" />Tạo Flash Sale</Button>
+          <DialogTrigger render={<Button size="sm" />} onClick={openCreate}>
+            <Plus className="mr-1 size-4" />Tạo Flash Sale
           </DialogTrigger>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader><DialogTitle>{editItem ? 'Sửa Flash Sale' : 'Tạo Flash Sale'}</DialogTitle></DialogHeader>

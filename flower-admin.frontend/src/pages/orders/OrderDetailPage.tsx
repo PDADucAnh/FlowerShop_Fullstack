@@ -40,8 +40,8 @@ const statusOptions: { value: OrderStatus; label: string }[] = [
 
 
 
-function isTerminal(status: number) {
-  return ([OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.Completed, OrderStatus.Refunded] as number[]).includes(status)
+function isTerminal(status: number): boolean {
+  return status === OrderStatus.Cancelled || status === OrderStatus.CancelledByCustomer || status === OrderStatus.CancelledByShop || status === OrderStatus.Completed || status === OrderStatus.Refunded
 }
 
 const paymentStatusLabels: Record<number, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
@@ -164,13 +164,7 @@ export function OrderDetailPage() {
     )
   }
 
-  const showCancellationInfo = [
-    OrderStatus.Cancelled,
-    OrderStatus.CancelledByCustomer,
-    OrderStatus.CancelledByShop,
-    OrderStatus.RefundPending,
-    OrderStatus.Refunded,
-  ].includes(order.status)
+  const showCancellationInfo = [OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.RefundPending, OrderStatus.Refunded].some((s) => s === order.status)
 
   const paymentInfo = getPaymentLabel(order.paymentStatus)
 

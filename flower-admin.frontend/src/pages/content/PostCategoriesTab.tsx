@@ -69,10 +69,8 @@ export function PostCategoriesTab() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild onClick={openCreate}>
-            <Button size="sm">
-              <Plus className="mr-1 size-4" />Thêm danh mục
-            </Button>
+          <DialogTrigger render={<Button size="sm" />} onClick={openCreate}>
+            <Plus className="mr-1 size-4" />Thêm danh mục
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{editItem ? 'Sửa danh mục' : 'Thêm danh mục'}</DialogTitle></DialogHeader>
@@ -81,9 +79,7 @@ export function PostCategoriesTab() {
               <input name="slug" defaultValue={editItem?.slug ?? ''} placeholder="Slug (tùy chọn)" className="flex h-9 w-full rounded-md border bg-background px-3 py-1 text-sm" />
               <textarea name="description" defaultValue={editItem?.description ?? ''} placeholder="Mô tả (tùy chọn)" className="flex min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm" />
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" type="button">Hủy</Button>
-                </DialogClose>
+                <DialogClose render={<Button variant="outline" />}>Hủy</DialogClose>
                 <Button type="submit">{editItem ? 'Cập nhật' : 'Thêm'}</Button>
               </DialogFooter>
             </form>
