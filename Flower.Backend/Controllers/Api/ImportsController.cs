@@ -55,7 +55,6 @@ namespace Flower.Backend.Controllers.Api
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "product_import_template.xlsx");
             }
 
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
             var sheet = package.Workbook.Worksheets.Add("Sản phẩm");
             sheet.Cells[1, 1].Value = "STT";
@@ -82,10 +81,10 @@ namespace Flower.Backend.Controllers.Api
             var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates");
             Directory.CreateDirectory(tempDir);
             var savePath = Path.Combine(tempDir, "product_import_template.xlsx");
-            await System.IO.File.WriteAllBytesAsync(savePath, await package.GetAsByteArrayAsync());
+            var productBytes = await package.GetAsByteArrayAsync();
+            await System.IO.File.WriteAllBytesAsync(savePath, productBytes);
 
-            var bytes2 = await package.GetAsByteArrayAsync();
-            return File(bytes2, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "product_import_template.xlsx");
+            return File(productBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "product_import_template.xlsx");
         }
 
         [HttpPost("categories/upload")]
@@ -125,7 +124,6 @@ namespace Flower.Backend.Controllers.Api
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "category_import_template.xlsx");
             }
 
-            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using var package = new ExcelPackage();
             var sheet = package.Workbook.Worksheets.Add("Danh mục sản phẩm");
             sheet.Cells[1, 1].Value = "STT";
