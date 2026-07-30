@@ -286,31 +286,48 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
-// Auto-apply pending migrations (SQL Server) or ensure schema (PostgreSQL)
+// Auto-apply pending migrations or ensure schema
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    if (dbProvider == "PostgreSQL")
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
+    try
     {
-        await context.Database.EnsureCreatedAsync();
+        if (dbProvider == "PostgreSQL")
+        {
+            await context.Database.EnsureCreatedAsync();
+        }
+        else
+        {
+            await context.Database.MigrateAsync();
+        }
     }
-    else
+    catch (Exception ex)
     {
-        await context.Database.MigrateAsync();
+        logger.LogWarning(ex, "Database migration/creation issue — continuing for seeding");
     }
 
-    // Seed admin account
-    if (!context.Users.Any(u => u.Username == "admin"))
+    try
     {
-        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
-        context.Users.Add(new Flower.Data.Entities.User
+        if (!context.Users.Any(u => u.Username == "admin"))
         {
-            Username = "admin",
-            PasswordHash = hasher.HashPassword(null!, "123456"),
-            FullName = "Administrator",
-            Role = "Admin"
-        });
-        context.SaveChanges();
+            var admin = new Flower.Data.Entities.User
+            {
+                Username = "admin",
+                FullName = "Administrator",
+                Role = "Admin"
+            };
+            var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
+            admin.PasswordHash = hasher.HashPassword(admin, "123456");
+            context.Users.Add(admin);
+            context.SaveChanges();
+            logger.LogInformation("Seeded admin user (admin / 123456)");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to seed admin user");
     }
 }
 
