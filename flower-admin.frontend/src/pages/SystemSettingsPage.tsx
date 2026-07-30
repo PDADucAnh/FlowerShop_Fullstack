@@ -4,6 +4,7 @@ import { SmtpTab } from './system/SmtpTab'
 import { VnPayTab } from './system/VnPayTab'
 import { ShippingTab } from './system/ShippingTab'
 import { OrderTab } from './system/OrderTab'
+import { CloudinaryTab } from './system/CloudinaryTab'
 
 const tabs = [
   { key: 'store', label: 'Cửa hàng' },
@@ -11,6 +12,7 @@ const tabs = [
   { key: 'vnpay', label: 'VNPay' },
   { key: 'shipping', label: 'Vận chuyển' },
   { key: 'order', label: 'Đơn hàng' },
+  { key: 'cloudinary', label: 'Cloudinary' },
 ]
 
 export function SystemSettingsPage() {
@@ -39,6 +41,7 @@ export function SystemSettingsPage() {
       {activeTab === 'vnpay' && <VnPayTab />}
       {activeTab === 'shipping' && <ShippingTab />}
       {activeTab === 'order' && <OrderTab />}
+      {activeTab === 'cloudinary' && <CloudinaryTab />}
     </div>
   )
 }

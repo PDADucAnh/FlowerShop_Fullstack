@@ -86,5 +86,14 @@ namespace Flower.Backend.Controllers.Api
             await _settingService.SaveSetting("Order", dto, username);
             return NoContent();
         }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPut("cloudinary")]
+        public async Task<IActionResult> SaveCloudinary([FromBody] CloudinarySettings dto)
+        {
+            var username = User.Identity?.Name ?? "System";
+            await _settingService.SaveSetting("Cloudinary", dto, username);
+            return NoContent();
+        }
     }
 }

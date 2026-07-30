@@ -22,9 +22,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { ArrowLeft, Printer, Loader2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Printer, Loader2, AlertCircle, Trash2, Phone, Banknote, CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
-import { OrderStatus } from '@/types/order'
+import { orderDetailsApi } from '@/api/orderDetails'
+import { emailHistoriesApi } from '@/api/emailHistories'
+import { OrderStatus, PaymentStatus, PaymentMethod } from '@/types/order'
 import type { OrderDTO } from '@/types/order'
 
 const statusOptions: { value: OrderStatus; label: string }[] = [
@@ -40,6 +42,23 @@ const terminalStatuses: OrderStatus[] = [OrderStatus.Cancelled, OrderStatus.Canc
 
 function isTerminal(status: OrderStatus) {
   return terminalStatuses.includes(status)
+}
+
+const paymentStatusLabels: Record<number, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
+  [PaymentStatus.Pending]: { label: 'Chờ thanh toán', variant: 'outline' },
+  [PaymentStatus.Completed]: { label: 'Đã thanh toán', variant: 'default' },
+  [PaymentStatus.Failed]: { label: 'Thất bại', variant: 'destructive' },
+  [PaymentStatus.Refunded]: { label: 'Đã hoàn tiền', variant: 'secondary' },
+  [PaymentStatus.PartialRefund]: { label: 'Hoàn tiền một phần', variant: 'secondary' },
+  [PaymentStatus.Expired]: { label: 'Hết hạn', variant: 'outline' },
+  [PaymentStatus.Cancelled]: { label: 'Đã hủy', variant: 'destructive' },
+  [PaymentStatus.RefundPending]: { label: 'Chờ hoàn tiền', variant: 'outline' },
+  [PaymentStatus.PartialRefundPending]: { label: 'Chờ hoàn tiền một phần', variant: 'outline' },
+  [PaymentStatus.PartialRefunded]: { label: 'Đã hoàn tiền một phần', variant: 'secondary' },
+}
+
+function getPaymentLabel(status: number) {
+  return paymentStatusLabels[status] ?? { label: 'Không xác định', variant: 'outline' as const }
 }
 
 export function OrderDetailPage() {
@@ -80,6 +99,41 @@ export function OrderDetailPage() {
     onError: () => toast.error('Không thể hủy đơn hàng'),
   })
 
+  const confirmCodMutation = useMutation({
+    mutationFn: () => ordersApi.confirmCod(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      toast.success('Đã xác nhận đơn hàng COD')
+    },
+    onError: () => toast.error('Không thể xác nhận đơn hàng'),
+  })
+
+  const refundMutation = useMutation({
+    mutationFn: () => ordersApi.processRefund(orderId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
+      queryClient.invalidateQueries({ queryKey: ['orders'] })
+      toast.success('Đã xác nhận hoàn tiền')
+    },
+    onError: () => toast.error('Không thể xử lý hoàn tiền'),
+  })
+
+  const { data: emailHistories } = useQuery({
+    queryKey: ['order-email-history', orderId],
+    queryFn: () => emailHistoriesApi.getByOrderId(orderId).then((r) => r.data),
+    enabled: !!orderId,
+  })
+
+  const deleteDetailMutation = useMutation({
+    mutationFn: (detailId: number) => orderDetailsApi.delete(detailId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
+      toast.success('Đã xóa sản phẩm khỏi đơn hàng')
+    },
+    onError: () => toast.error('Không thể xóa sản phẩm'),
+  })
+
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN').format(value) + '₫'
 
@@ -89,6 +143,8 @@ export function OrderDetailPage() {
   }
 
   const handlePrint = () => window.print()
+
+  const isCod = order?.paymentMethod === PaymentMethod.COD
 
   if (isLoading) {
     return (
@@ -107,6 +163,16 @@ export function OrderDetailPage() {
       </div>
     )
   }
+
+  const showCancellationInfo = [
+    OrderStatus.Cancelled,
+    OrderStatus.CancelledByCustomer,
+    OrderStatus.CancelledByShop,
+    OrderStatus.RefundPending,
+    OrderStatus.Refunded,
+  ].includes(order.status)
+
+  const paymentInfo = getPaymentLabel(order.paymentStatus)
 
   return (
     <div ref={printRef} className="space-y-6">
@@ -155,6 +221,18 @@ export function OrderDetailPage() {
                   Hủy đơn
                 </Button>
               )}
+              {order.status === OrderStatus.PendingVerification && isCod && (
+                <Button size="sm" onClick={() => confirmCodMutation.mutate()} disabled={confirmCodMutation.isPending}>
+                  <Phone className="mr-1 size-4" />
+                  {confirmCodMutation.isPending ? 'Đang xử lý…' : 'Đã gọi điện - Xác nhận đơn'}
+                </Button>
+              )}
+              {order.status === OrderStatus.RefundPending && (
+                <Button size="sm" onClick={() => refundMutation.mutate()} disabled={refundMutation.isPending}>
+                  <Banknote className="mr-1 size-4" />
+                  {refundMutation.isPending ? 'Đang xử lý…' : 'Xác nhận hoàn tiền'}
+                </Button>
+              )}
             </>
           )}
           <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -177,11 +255,11 @@ export function OrderDetailPage() {
         <Card>
           <CardHeader><CardTitle className="text-sm">Thanh toán</CardTitle></CardHeader>
           <CardContent className="space-y-1 text-sm">
-            <p>Phương thức: <span className="font-medium">{order.paymentMethod === 1 ? 'COD' : 'VNPay'}</span></p>
-            <p>Trạng thái: <Badge variant={order.paymentStatus === 1 ? 'default' : 'outline'} className="text-xs">
-              {order.paymentStatus === 1 ? 'Đã thanh toán' : 'Chưa thanh toán'}
-            </Badge></p>
+            <p>Phương thức: <span className="font-medium">{isCod ? 'COD' : 'VNPay'}</span></p>
+            <p>Trạng thái: <Badge variant={paymentInfo.variant} className="text-xs">{paymentInfo.label}</Badge></p>
             {order.paymentTransactionId && <p className="text-muted-foreground">GD: {order.paymentTransactionId}</p>}
+            {order.paymentPaidAt && <p className="text-muted-foreground">Thanh toán lúc: {formatDate(order.paymentPaidAt)}</p>}
+            {order.refundAmount > 0 && <p className="text-muted-foreground">Tiền hoàn: {formatCurrency(order.refundAmount)}</p>}
           </CardContent>
         </Card>
 
@@ -228,6 +306,13 @@ export function OrderDetailPage() {
                   <TableCell className="text-right font-mono">{formatCurrency(detail.unitPrice)}</TableCell>
                   <TableCell className="text-right font-mono text-destructive">{detail.discountAmount > 0 ? `-${formatCurrency(detail.discountAmount)}` : '—'}</TableCell>
                   <TableCell className="text-right font-mono">{formatCurrency(detail.subtotal)}</TableCell>
+                  <TableCell className="text-right print-hidden">
+                    {order.status === OrderStatus.PendingVerification && (
+                      <Button variant="ghost" size="icon" onClick={() => deleteDetailMutation.mutate(detail.id)}>
+                        <Trash2 className="size-4 text-destructive" />
+                      </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -255,6 +340,77 @@ export function OrderDetailPage() {
           </div>
         </div>
       </div>
+
+      {order.notes && (
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Ghi chú</CardTitle></CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground italic">{order.notes}</p>
+          </CardContent>
+        </Card>
+      )}
+
+      {showCancellationInfo && (order.cancelledBy || order.cancellationReason || order.cancellationFee > 0 || order.refundAmount > 0) && (
+        <Card className="border-destructive/30">
+          <CardHeader><CardTitle className="text-sm text-destructive">Thông tin hủy / Hoàn tiền</CardTitle></CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            {order.cancelledBy && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Người hủy</span>
+                <span className="font-medium">{order.cancelledBy === 'Shop' ? 'Cửa hàng' : order.cancelledBy === 'Customer' ? 'Khách hàng' : order.cancelledBy}</span>
+              </div>
+            )}
+            {order.cancelledAt && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Hủy lúc</span>
+                <span>{formatDate(order.cancelledAt)}</span>
+              </div>
+            )}
+            {order.cancellationReason && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Lý do</span>
+                <span className="text-right max-w-[200px]">{order.cancellationReason}</span>
+              </div>
+            )}
+            {order.cancellationFee > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phí hủy</span>
+                <span className="font-mono">{formatCurrency(order.cancellationFee)}</span>
+              </div>
+            )}
+            {order.refundAmount > 0 && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Số tiền hoàn</span>
+                <span className="font-mono">{formatCurrency(order.refundAmount)}</span>
+              </div>
+            )}
+            {order.refundCompletedAt && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Hoàn tiền lúc</span>
+                <span>{formatDate(order.refundCompletedAt)}</span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {emailHistories && emailHistories.length > 0 && (
+        <Card>
+          <CardHeader><CardTitle className="text-sm">Lịch sử email</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
+            {emailHistories.map((email) => (
+              <div key={email.id} className={`flex items-start gap-3 rounded p-3 text-sm ${email.status === 'Sent' ? 'bg-green-50 dark:bg-green-950/20' : 'bg-red-50 dark:bg-red-950/20'}`}>
+                {email.status === 'Sent' ? <CheckCircle2 className="mt-0.5 size-4 text-green-600 shrink-0" /> : <XCircle className="mt-0.5 size-4 text-red-600 shrink-0" />}
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{email.emailType} — {email.status === 'Sent' ? 'Đã gửi' : 'Thất bại'}</p>
+                  <p className="truncate text-xs text-muted-foreground">{email.recipient}</p>
+                  {email.sentAt && <p className="text-xs text-muted-foreground">{formatDate(email.sentAt)}</p>}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <CancelOrderDialog
         orderId={order.id}

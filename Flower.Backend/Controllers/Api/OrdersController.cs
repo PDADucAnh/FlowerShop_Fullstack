@@ -1,8 +1,10 @@
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Models.DTOs;
+using Flower.Data;
 using Flower.Data.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,11 +23,15 @@ namespace Flower.Backend.Controllers.Api
     {
         private readonly IOrderService _orderService;
         private readonly ISystemSettingService _settingService;
+        private readonly IPaymentService _paymentService;
+        private readonly IApplicationDbContext _context;
 
-        public OrdersController(IOrderService orderService, ISystemSettingService settingService)
+        public OrdersController(IOrderService orderService, ISystemSettingService settingService, IPaymentService paymentService, IApplicationDbContext context)
         {
             _orderService = orderService;
             _settingService = settingService;
+            _paymentService = paymentService;
+            _context = context;
         }
 
         [HttpPost]
@@ -223,6 +229,37 @@ namespace Flower.Backend.Controllers.Api
                 return BadRequest(new { message });
 
             return Ok(new { message });
+        }
+
+        [HttpPut("{id}/confirm-cod")]
+        public async Task<IActionResult> ConfirmCOD(int id)
+        {
+            var (success, message) = await _orderService.ProcessCODOrder(id);
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [HttpPost("{id}/process-refund")]
+        public async Task<IActionResult> ProcessRefund(int id)
+        {
+            var processedBy = User?.Identity?.Name ?? "Admin";
+            var (success, message) = await _paymentService.ProcessRefund(id, processedBy: processedBy);
+            if (!success)
+                return BadRequest(new { message });
+
+            return Ok(new { message });
+        }
+
+        [HttpGet("{id}/email-history")]
+        public async Task<IActionResult> GetEmailHistory(int id)
+        {
+            var emails = await _context.EmailHistories
+                .Where(e => e.OrderId == id)
+                .OrderByDescending(e => e.CreatedAt)
+                .ToListAsync();
+            return Ok(emails);
         }
 
         [HttpGet("check-blacklist")]

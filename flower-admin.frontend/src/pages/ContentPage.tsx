@@ -4,12 +4,14 @@ import { BannersTab } from './content/BannersTab'
 import { PostsTab } from './content/PostsTab'
 import { PagesTab } from './content/PagesTab'
 import { LayoutTab } from './content/LayoutTab'
+import { PostCategoriesTab } from './content/PostCategoriesTab'
 
 const tabs = [
   { key: 'banners', label: 'Banner' },
   { key: 'posts', label: 'Bài viết' },
   { key: 'pages', label: 'Trang tĩnh' },
   { key: 'layout', label: 'Giao diện' },
+  { key: 'categories', label: 'Danh mục bài viết' },
 ]
 
 export function ContentPage() {
@@ -42,6 +44,7 @@ export function ContentPage() {
       {activeTab === 'posts' && <PostsTab />}
       {activeTab === 'pages' && <PagesTab />}
       {activeTab === 'layout' && <LayoutTab />}
+      {activeTab === 'categories' && <PostCategoriesTab />}
     </div>
   )
 }

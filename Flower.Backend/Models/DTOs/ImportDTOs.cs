@@ -21,3 +21,12 @@ public class ImportViewModel
 {
     public ImportResult? Result { get; set; }
 }
+
+public class ImportApiResponse
+{
+    public int TotalRows { get; set; }
+    public int SuccessCount { get; set; }
+    public int FailureCount { get; set; }
+    public List<ImportError> Errors { get; set; } = new();
+    public List<string> SkippedSkus { get; set; } = new();
+}

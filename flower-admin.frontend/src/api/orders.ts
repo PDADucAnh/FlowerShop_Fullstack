@@ -1,6 +1,6 @@
 import { apiClient } from './client'
 import type { PaginatedResponse } from '@/types/api'
-import type { OrderDTO, OrderStatus } from '@/types/order'
+import type { OrderDTO, OrderStatus, CreateOrderRequest } from '@/types/order'
 
 export interface OrdersPagedParams {
   page?: number
@@ -23,5 +23,14 @@ export const ordersApi = {
   },
   cancelByShop(id: number, reason: string) {
     return apiClient.put(`/api/orders/${id}/cancel-by-shop`, { reason })
+  },
+  confirmCod(id: number) {
+    return apiClient.put<{ message: string }>(`/api/orders/${id}/confirm-cod`)
+  },
+  processRefund(id: number) {
+    return apiClient.post<{ message: string }>(`/api/orders/${id}/process-refund`)
+  },
+  create(data: CreateOrderRequest) {
+    return apiClient.post<{ message: string; orderId: number }>('/api/orders', data)
   },
 }

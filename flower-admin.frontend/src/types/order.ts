@@ -36,6 +36,27 @@ export const PaymentStatus = {
 } as const
 export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
 
+export interface CreateOrderItemRequest {
+  productId: number
+  quantity: number
+  unitPrice: number
+  sizeVariant?: string
+}
+
+export interface CreateOrderRequest {
+  customerId: number
+  notes?: string
+  items: CreateOrderItemRequest[]
+  paymentMethod: PaymentMethod
+  deliveryDate?: string
+  deliveryTimeSlot?: string
+  deliveryDistrict?: string
+  deliveryAddress?: string
+  recipientName?: string
+  recipientPhone?: string
+  couponCode?: string
+}
+
 export interface OrderDetailDTO {
   id: number
   orderId: number

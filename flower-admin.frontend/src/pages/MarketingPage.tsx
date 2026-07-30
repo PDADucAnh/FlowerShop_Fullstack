@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { PromotionsTab } from './marketing/PromotionsTab'
 import { CouponsTab } from './marketing/CouponsTab'
+import { FlashSalesTab } from './marketing/FlashSalesTab'
 
 const tabs = [
   { key: 'promotions', label: 'Khuyến mãi' },
   { key: 'coupons', label: 'Mã giảm giá' },
+  { key: 'flashsales', label: 'Flash Sale' },
 ]
 
 export function MarketingPage() {
@@ -30,6 +32,7 @@ export function MarketingPage() {
       </div>
       {activeTab === 'promotions' && <PromotionsTab />}
       {activeTab === 'coupons' && <CouponsTab />}
+      {activeTab === 'flashsales' && <FlashSalesTab />}
     </div>
   )
 }

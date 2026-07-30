@@ -1,5 +1,5 @@
 import { apiClient } from './client'
-import type { AllSystemSettings, StoreInfoSettings, SmtpSettings, VNPaySettings, ShippingSettings, OrderSettings } from '@/types/settings'
+import type { AllSystemSettings, StoreInfoSettings, SmtpSettings, VNPaySettings, ShippingSettings, OrderSettings, CloudinarySettings } from '@/types/settings'
 
 export const settingsApi = {
   getAll() {
@@ -19,5 +19,8 @@ export const settingsApi = {
   },
   saveOrder(dto: OrderSettings) {
     return apiClient.put('/api/settings/order', dto)
+  },
+  saveCloudinary(dto: CloudinarySettings) {
+    return apiClient.put('/api/settings/cloudinary', dto)
   },
 }

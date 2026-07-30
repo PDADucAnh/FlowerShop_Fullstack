@@ -34,6 +34,13 @@ export interface ShippingSettings {
   deliveryTime: string
 }
 
+export interface CloudinarySettings {
+  cloudName: string
+  apiKey: string
+  apiSecret: string
+  folder: string
+}
+
 export interface OrderSettings {
   autoCancelMinutes: number
   enableCOD: boolean
@@ -46,4 +53,5 @@ export interface AllSystemSettings {
   vnPay: VNPaySettings
   shipping: ShippingSettings
   order: OrderSettings
+  cloudinary: CloudinarySettings
 }

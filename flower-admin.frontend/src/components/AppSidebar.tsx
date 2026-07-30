@@ -10,6 +10,9 @@ import {
   FileText,
   Megaphone,
   Settings,
+  Upload,
+  ShieldCheck,
+  Bell,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -24,9 +27,12 @@ const navItems: NavItem[] = [
   { label: 'Đơn hàng', href: '/orders', icon: ShoppingBag },
   { label: 'Sản phẩm', href: '/products', icon: Package },
   { label: 'Danh mục', href: '/products/categories', icon: FolderTree },
+  { label: 'Import', href: '/products/import', icon: Upload },
   { label: 'Khách hàng', href: '/customers', icon: Users },
   { label: 'Liên hệ', href: '/contacts', icon: MessageSquare },
   { label: 'Nội dung', href: '/content', icon: FileText },
+  { label: 'Nhân viên', href: '/users', icon: ShieldCheck },
+  { label: 'Thông báo', href: '/notifications', icon: Bell },
   { label: 'Marketing', href: '/marketing', icon: Megaphone },
   { label: 'Hệ thống', href: '/system', icon: Settings },
 ]
