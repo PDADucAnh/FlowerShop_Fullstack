@@ -121,7 +121,7 @@ namespace Flower.Backend.Controllers.Api
             var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates", "category_import_template.xlsx");
             if (System.IO.File.Exists(path))
             {
-                var bytes = System.IO.File.ReadAllBytes(path);
+                var bytes = await System.IO.File.ReadAllBytesAsync(path);
                 return File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "category_import_template.xlsx");
             }
 
@@ -149,10 +149,11 @@ namespace Flower.Backend.Controllers.Api
             var tempDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "templates");
             Directory.CreateDirectory(tempDir);
             var savePath = Path.Combine(tempDir, "category_import_template.xlsx");
-            await System.IO.File.WriteAllBytesAsync(savePath, await package.GetAsByteArrayAsync());
 
-            var bytes2 = await package.GetAsByteArrayAsync();
-            return File(bytes2, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "category_import_template.xlsx");
+            var fileBytes = await package.GetAsByteArrayAsync();
+            await System.IO.File.WriteAllBytesAsync(savePath, fileBytes);
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "category_import_template.xlsx");
         }
     }
 }

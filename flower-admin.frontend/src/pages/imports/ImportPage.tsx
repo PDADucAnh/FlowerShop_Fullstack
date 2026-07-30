@@ -124,15 +124,13 @@ function ImportForm({
                 <FileSpreadsheet className="mr-1 size-4" />
                 Chọn file Excel
               </Button>
-              {type === 'products' && (
-                <Button variant="secondary" size="sm" onClick={() => zipRef.current?.click()}>
-                  <FileArchive className="mr-1 size-4" />
-                  Chọn file ảnh (.zip)
-                </Button>
-              )}
+              <Button variant="secondary" size="sm" onClick={() => zipRef.current?.click()}>
+                <FileArchive className="mr-1 size-4" />
+                Chọn file ảnh (.zip)
+              </Button>
             </div>
             <input ref={excelRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleExcelSelect} />
-            {type === 'products' && <input ref={zipRef} type="file" accept=".zip" className="hidden" onChange={handleZipSelect} />}
+            <input ref={zipRef} type="file" accept=".zip" className="hidden" onChange={handleZipSelect} />
           </div>
 
           {excelFile && (
@@ -148,7 +146,7 @@ function ImportForm({
             </div>
           )}
 
-          {type === 'products' && zipFile && (
+          {zipFile && (
             <div className="flex items-center justify-between rounded-lg border bg-surface px-3 py-2">
               <div className="flex items-center gap-2 text-sm">
                 <FileArchive className="size-4 text-amber-600" />
