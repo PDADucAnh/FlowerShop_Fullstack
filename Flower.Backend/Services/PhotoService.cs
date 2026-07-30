@@ -41,7 +41,7 @@ namespace Flower.Backend.Services
             return _cloudinary;
         }
 
-        public async Task<string?> UploadPhotoAsync(IFormFile file)
+        public async Task<string?> UploadPhotoAsync(IFormFile file, string? subfolder = null)
         {
             if (file.Length <= 0)
             {
@@ -106,10 +106,14 @@ namespace Flower.Backend.Services
             _logger.LogInformation("UploadPhotoAsync: FileName={Name}, OriginalLength={OriginalLength}, CompressedLength={CompressedLength}, CloudName={CloudName}, Folder={Folder}",
                 file.FileName, file.Length, compressedStream.Length, _settings?.CloudName, _settings?.Folder);
 
+            var folder = _settings!.Folder;
+            if (!string.IsNullOrEmpty(subfolder))
+                folder = $"{folder}/{subfolder}";
+
             var uploadParams = new ImageUploadParams
             {
                 File = new FileDescription(file.FileName, compressedStream),
-                Folder = _settings!.Folder
+                Folder = folder
             };
 
             var uploadResult = await cloudinary.UploadAsync(uploadParams);

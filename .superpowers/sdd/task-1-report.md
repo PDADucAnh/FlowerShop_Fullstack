@@ -1,44 +1,45 @@
-# Task 1 Report — Backend New Service Methods + Controller Actions
+# Task 1 Report: Backend Entities, DTOs & Migration
 
 ## What was implemented
 
-- **IOrderService.cs**: Added `UpdateStatus(int id, OrderStatus newStatus) → bool` and extended `GetPaged` with filters (statuses, search, dateFrom, dateTo, customerId)
-- **OrderService.cs**: Implemented `UpdateStatus` with email notifications and customer notifications on status change; updated `GetPaged` with all filter parameters
-- **IContactService.cs**: Added `GetPaged(int page, int pageSize, bool? isRead = null) → PagedResult<ContactDTO>`
-- **ContactService.cs**: Implemented `GetPaged` with isRead filtering
-- **CustomerDTOs.cs**: Added `CreatedAt` property + `using System;`
-- **OrdersController.cs**: Added `GET api/orders/paged` (with status/search/date filters) and `PUT api/orders/{id}/status` endpoints; added `UpdateOrderStatusRequest` DTO
-- **CustomersController.cs**: Added `GET api/customers/paged` (with search) and `GET api/customers/{id}/orders` endpoints; injected `IOrderService` dependency
-- **ContactsController.cs**: Added `GET api/contacts/paged` (with isRead filter)
-- **ICustomerService.cs**: Updated `GetPaged` signature to include `search` parameter
-- **CustomerService.cs**: Updated `GetPaged` implementation with search filtering and explicit `CustomerDTO` mapping including `CreatedAt`
+### Entities
+- **CategoryProduct.cs** — Added `[MaxLength(2000)] public string? ImageUrl { get; set; }` after `Slug`
+- **User.cs** — Added `[MaxLength(2000)] public string? Avatar { get; set; }` after `Address`
+- **Customer.cs** — Added `[MaxLength(2000)] public string? Avatar { get; set; }` after `Address`
 
-## Build test results
+### DTOs
+- **CategoryProductDTOs.cs** — Added `ImageUrl` (nullable string) to `CategoryProductDTO`, `CreateCategoryProductDTO` (with `[MaxLength(2000)]`), and `UpdateCategoryProductDTO` (with `[MaxLength(2000)]`)
+- **UserDTOs.cs** — Added `Avatar` (nullable string) to `UserDTO`, `CreateUserDTO`, and `UpdateUserDTO`
+- **CustomerDTOs.cs** — Added `Avatar` (nullable string) to `CustomerDTO`
 
-`dotnet build` from `Flower.Backend/` — **Build succeeded with 0 errors, 111 warnings** (all warnings are pre-existing, not from these changes)
+### Mapping Extensions
+- `CategoryProduct ToDTO()` — added `ImageUrl = categoryProduct.ImageUrl`
+- `CategoryProduct ToEntity(CreateCategoryProductDTO)` — added `ImageUrl = dto.ImageUrl`
+- `UpdateEntity(UpdateCategoryProductDTO, CategoryProduct)` — added `entity.ImageUrl = dto.ImageUrl`
+- `UserDTO ToDTO(User)` — added `Avatar = user.Avatar`
+- `User ToEntity(CreateUserDTO)` — added `Avatar = dto.Avatar`
+- `UpdateEntity(UpdateUserDTO, User)` — added `entity.Avatar = dto.Avatar` (method did not exist, created it with full mapping)
+- `CustomerDTO ToDTO(Customer)` — added `Avatar = customer.Avatar`
+
+### Migration
+- Created `AddCategoryImageAndAvatar` migration (auto-generated) with correct nullable columns
+
+## Build result
+**dotnet build — PASSED (0 errors, 131 warnings, all pre-existing)**
 
 ## Files changed
+1. `Flower.Data/Entities/CategoryProduct.cs`
+2. `Flower.Data/Entities/User.cs`
+3. `Flower.Data/Entities/Customer.cs`
+4. `Flower.Backend/Models/DTOs/CategoryProductDTOs.cs`
+5. `Flower.Backend/Models/DTOs/UserDTOs.cs`
+6. `Flower.Backend/Models/DTOs/CustomerDTOs.cs`
+7. `Flower.Backend/Models/DTOs/MappingExtensions.cs`
+8. `Flower.Data/Migrations/20260730105026_AddCategoryImageAndAvatar.cs` (new)
+9. `Flower.Data/Migrations/20260730105026_AddCategoryImageAndAvatar.Designer.cs` (new)
+10. `Flower.Data/Migrations/ApplicationDbContextModelSnapshot.cs` (updated)
+11. `.superpowers/sdd/task-1-brief.md` (updated to this task's brief)
 
-- `Flower.Backend/Services/Interfaces/IOrderService.cs`
-- `Flower.Backend/Services/OrderService.cs`
-- `Flower.Backend/Services/Interfaces/IContactService.cs`
-- `Flower.Backend/Services/ContactService.cs`
-- `Flower.Backend/Services/Interfaces/ICustomerService.cs`
-- `Flower.Backend/Services/CustomerService.cs`
-- `Flower.Backend/Models/DTOs/CustomerDTOs.cs`
-- `Flower.Backend/Controllers/Api/OrdersController.cs`
-- `Flower.Backend/Controllers/Api/CustomersController.cs`
-- `Flower.Backend/Controllers/Api/ContactsController.cs`
-
-## Self-review findings
-
-- `UpdateStatus` in `OrderService` mirrors the same pattern from `OrderService.Update()` — handles email notifications and customer notifications for confirmed/shipping/completed transitions
-- `UpdateOrderStatusRequest` is placed in the namespace alongside `OrdersController` (as specified by the brief)
-- `CustomerDTO.CreatedAt` requires `using System;` — added it
-- `CustomersController` now has both `ICustomerService` and `IOrderService` injected for the customer orders endpoint
-- Extended `IOrderService.GetPaged` signature includes all optional parameters, maintaining backward compatibility via default values (`null`)
-
-## Issues or concerns
-
-- `IOrderService` now uses `List<OrderStatus>` which requires `using Flower.Data.Entities;` — already present
-- The existing `OrderService.GetPaged` overload (2-param) was replaced with the 7-param overload; the old 2-param version no longer exists (callers need updating)
+## Issues / concerns
+- The `UpdateEntity(this UpdateUserDTO dto, User entity)` method did not previously exist in `MappingExtensions.cs`. Per the task brief, I created it with full property mapping including `Avatar`.
+- The `.superpowers/sdd/task-1-brief.md` file contained the previous task's brief (new service methods). I overwrote it with this task's brief as part of the commit. This is the correct file per the task workflow.
