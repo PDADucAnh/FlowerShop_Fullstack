@@ -43,49 +43,50 @@ namespace Flower.Backend.Controllers.Api
             [FromQuery] int pageSize = 8,
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
-            [FromQuery] int? categoryProductId = null)
+            [FromQuery] int? categoryProductId = null,
+            [FromQuery] bool includeInactive = false)
         {
-            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId);
+            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId, includeInactive);
             return Ok(result);
         }
 
         [AllowAnonymous]
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string query)
+        public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] bool includeInactive = false)
         {
-            var results = await _productService.Search(query);
+            var results = await _productService.Search(query, includeInactive);
             return Ok(results);
         }
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] bool includeInactive = false)
         {
-            var products = await _productService.GetAll();
+            var products = await _productService.GetAll(includeInactive);
             return Ok(products);
         }
 
         [AllowAnonymous]
         [HttpGet("categoryproduct/{categoryProductId}")]
-        public async Task<IActionResult> GetByCategoryProduct(int categoryProductId)
+        public async Task<IActionResult> GetByCategoryProduct(int categoryProductId, [FromQuery] bool includeInactive = false)
         {
-            var products = await _productService.GetByCategoryProduct(categoryProductId);
+            var products = await _productService.GetByCategoryProduct(categoryProductId, includeInactive);
             return Ok(products);
         }
 
         [AllowAnonymous]
         [HttpGet("trending")]
-        public async Task<IActionResult> GetTrending([FromQuery] int count = 10)
+        public async Task<IActionResult> GetTrending([FromQuery] int count = 10, [FromQuery] bool includeInactive = false)
         {
-            var products = await _productService.GetTrending(count);
+            var products = await _productService.GetTrending(count, includeInactive);
             return Ok(products);
         }
 
         [AllowAnonymous]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetDetail(int id)
+        public async Task<IActionResult> GetDetail(int id, [FromQuery] bool includeInactive = false)
         {
-            var product = await _productService.GetDetail(id);
+            var product = await _productService.GetDetail(id, includeInactive);
 
             if (product == null)
             {

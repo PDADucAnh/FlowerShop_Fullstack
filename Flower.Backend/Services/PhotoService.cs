@@ -171,7 +171,10 @@ namespace Flower.Backend.Services
                 var extIndex = afterUpload.LastIndexOf('.');
                 var publicId = extIndex >= 0 ? afterUpload[..extIndex] : afterUpload;
 
-                var deleteParams = new DeletionParams(publicId);
+                var deleteParams = new DeletionParams(publicId)
+                {
+                    Invalidate = true
+                };
                 var result = await cloudinary.DestroyAsync(deleteParams);
                 _logger.LogInformation("DeleteCloudinaryPhotoAsync: PublicId={PublicId}, Result={Result}", publicId, result.Result);
                 return result.Result == "ok";

@@ -53,16 +53,21 @@ namespace Flower.Backend.Services
             }
         }
 
-        private IQueryable<Product> BuildQuery()
+        private IQueryable<Product> BuildQuery(bool includeInactive = false)
         {
-            return _context.Products
+            IQueryable<Product> query = _context.Products
                 .Include(p => p.CategoryProduct)
                 .Include(p => p.Images);
+
+            if (!includeInactive)
+                query = query.Where(p => p.IsActive);
+
+            return query;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetAll()
+        public async Task<IEnumerable<ProductDTO>> GetAll(bool includeInactive = false)
         {
-            var products = await BuildQuery()
+            var products = await BuildQuery(includeInactive)
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
             var dtos = products.Select(p => p.ToDTO()).ToList();
@@ -70,9 +75,9 @@ namespace Flower.Backend.Services
             return dtos;
         }
 
-        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null)
+        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null, bool includeInactive = false)
         {
-            var query = BuildQuery();
+            var query = BuildQuery(includeInactive);
 
             if (categoryProductId.HasValue)
             {
@@ -108,9 +113,9 @@ namespace Flower.Backend.Services
             };
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetByCategoryProduct(int categoryProductId)
+        public async Task<IEnumerable<ProductDTO>> GetByCategoryProduct(int categoryProductId, bool includeInactive = false)
         {
-            var products = await BuildQuery()
+            var products = await BuildQuery(includeInactive)
                 .Where(p => p.CategoryProductId == categoryProductId)
                 .ToListAsync();
             var dtos = products.Select(p => p.ToDTO()).ToList();
@@ -118,9 +123,9 @@ namespace Flower.Backend.Services
             return dtos;
         }
 
-        public async Task<ProductDTO?> GetDetail(int id)
+        public async Task<ProductDTO?> GetDetail(int id, bool includeInactive = false)
         {
-            var product = await BuildQuery()
+            var product = await BuildQuery(includeInactive)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null) return null;
             var dto = product.ToDTO();
@@ -279,7 +284,7 @@ namespace Flower.Backend.Services
             }
         }
 
-        public async Task<IEnumerable<ProductDTO>> Search(string query)
+        public async Task<IEnumerable<ProductDTO>> Search(string query, bool includeInactive = false)
         {
             if (string.IsNullOrEmpty(query))
             {
@@ -287,7 +292,7 @@ namespace Flower.Backend.Services
             }
 
             var cleanQuery = query.Trim().ToLower();
-            var products = await BuildQuery()
+            var products = await BuildQuery(includeInactive)
                 .Where(p => p.Name.ToLower().Contains(cleanQuery) || 
                            (p.Sku != null && p.Sku.ToLower().Contains(cleanQuery)))
                 .OrderByDescending(p => p.Id)
@@ -318,7 +323,7 @@ namespace Flower.Backend.Services
             }
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetTrending(int count = 10)
+        public async Task<IEnumerable<ProductDTO>> GetTrending(int count = 10, bool includeInactive = false)
         {
             var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
             var thirtyDaysAgo = DateTime.UtcNow.AddDays(-30);
@@ -342,7 +347,7 @@ namespace Flower.Backend.Services
             const double W2 = 1.0;
             const double W3 = 0.5;
 
-            var products = await BuildQuery()
+            var products = await BuildQuery(includeInactive)
                 .Where(p => p.StockQuantity > 0)
                 .ToListAsync();
 

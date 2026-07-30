@@ -52,6 +52,7 @@ export function ProductsPage() {
         page,
         pageSize,
         categoryProductId: categoryFilter === 'all' ? null : Number(categoryFilter),
+        includeInactive: true,
       }).then((r) => r.data),
   })
 

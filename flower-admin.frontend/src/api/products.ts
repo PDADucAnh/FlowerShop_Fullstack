@@ -7,6 +7,7 @@ export interface ProductListParams {
   categoryProductId?: number | null
   minPrice?: number | null
   maxPrice?: number | null
+  includeInactive?: boolean
 }
 
 export const productsApi = {

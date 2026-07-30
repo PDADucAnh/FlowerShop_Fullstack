@@ -38,7 +38,7 @@ namespace Flower.Backend.Controllers
 
         public async Task<IActionResult> Index(int page = 1, int pageSize = 12)
         {
-            var paged = await _productService.GetPaged(page, pageSize);
+            var paged = await _productService.GetPaged(page, pageSize, null, null, null, true);
             ViewData["TotalPages"] = paged.TotalPages;
             ViewData["CurrentPage"] = paged.Page;
             ViewData["TotalCount"] = paged.TotalCount;
@@ -142,7 +142,7 @@ namespace Flower.Backend.Controllers
 
         public async Task<IActionResult> Details(int id)
         {
-            var product = await _productService.GetDetail(id);
+            var product = await _productService.GetDetail(id, true);
             if (product == null) return NotFound();
             return View(product);
         }
@@ -186,7 +186,7 @@ namespace Flower.Backend.Controllers
             }
             else
             {
-                var oldProduct = await _productService.GetDetail(model.Id);
+                var oldProduct = await _productService.GetDetail(model.Id, true);
                 if (oldProduct != null && string.IsNullOrEmpty(model.ImageUrl))
                 {
                     model.ImageUrl = oldProduct.ImageUrl ?? string.Empty;
