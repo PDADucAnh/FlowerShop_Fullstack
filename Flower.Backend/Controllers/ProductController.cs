@@ -1,3 +1,4 @@
+using Flower.Backend.Helpers;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Flower.Backend.Utils;
@@ -86,7 +87,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage, CloudinaryFolders.Products);
                 if (string.IsNullOrEmpty(model.ImageUrl))
                 {
                     _logger.LogWarning("UploadPhotoAsync returned null for file {FileName}", uploadImage.FileName);
@@ -173,7 +174,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage, CloudinaryFolders.Products);
                 if (string.IsNullOrEmpty(model.ImageUrl))
                 {
                     ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");

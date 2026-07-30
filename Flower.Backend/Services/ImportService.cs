@@ -1,3 +1,4 @@
+using Flower.Backend.Helpers;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Flower.Data;
@@ -155,7 +156,7 @@ public class ImportService : IImportService
                         {
                             Headers = new HeaderDictionary()
                         };
-                        imageUrl = await _photoService.UploadPhotoAsync(formFile);
+                        imageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Products);
                     }
                     else if (!string.IsNullOrWhiteSpace(imageFileName))
                     {
@@ -379,7 +380,7 @@ public class ImportService : IImportService
                             {
                                 Headers = new HeaderDictionary()
                             };
-                            imageUrl = await _photoService.UploadPhotoAsync(formFile, "categories");
+                            imageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Categories);
                         }
                         else
                         {

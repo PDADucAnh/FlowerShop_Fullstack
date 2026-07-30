@@ -77,7 +77,7 @@ export function UsersPage() {
     if (!file) return
     setUploading(true)
     try {
-      const { data } = await uploadApi.upload(file)
+      const { data } = await uploadApi.upload(file, 'flower-shop/avatars')
       setFormAvatar(data.url)
       toast.success('Đã tải ảnh lên')
     } catch {

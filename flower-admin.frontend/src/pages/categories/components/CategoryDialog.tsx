@@ -93,7 +93,7 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
     if (!file) return
     setUploading(true)
     try {
-      const { data } = await uploadApi.upload(file)
+      const { data } = await uploadApi.upload(file, 'flower-shop/categories')
       setImageUrl(data.url)
       toast.success('Đã tải ảnh lên')
     } catch {

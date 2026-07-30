@@ -1,3 +1,4 @@
+using Flower.Backend.Helpers;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -42,7 +43,7 @@ namespace Flower.Backend.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile, CloudinaryFolders.Banners);
             }
 
             await _advertisementService.Create(model);
@@ -88,7 +89,7 @@ namespace Flower.Backend.Controllers
 
             if (imageFile != null && imageFile.Length > 0)
             {
-                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(imageFile, CloudinaryFolders.Banners);
             }
             else
             {

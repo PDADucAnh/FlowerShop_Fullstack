@@ -41,7 +41,7 @@ export function ImageUploader({ existingImages = [], onImagesChange, onDeleteExi
       ])
 
       try {
-        const { data } = await uploadApi.upload(file)
+        const { data } = await uploadApi.upload(file, 'flower-shop/products')
         newUrls.push(data.url)
         setImages((prev) =>
           prev.map((img) =>

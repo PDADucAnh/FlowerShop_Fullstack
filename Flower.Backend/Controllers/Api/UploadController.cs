@@ -1,3 +1,4 @@
+using Flower.Backend.Helpers;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Upload(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file, [FromForm] string? folder = null)
         {
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "Vui lòng chọn file ảnh" });
@@ -38,7 +39,7 @@ namespace Flower.Backend.Controllers.Api
                 return BadRequest(new { message = "File không hợp lệ. Chỉ chấp nhận file ảnh." });
             }
 
-            var url = await _photoService.UploadPhotoAsync(file);
+            var url = await _photoService.UploadPhotoAsync(file, folder);
             if (string.IsNullOrEmpty(url))
             {
                 return StatusCode(500, new { message = "Upload ảnh thất bại. Vui lòng thử lại." });

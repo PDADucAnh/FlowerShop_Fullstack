@@ -1,3 +1,4 @@
+using Flower.Backend.Helpers;
 using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Flower.Data;
@@ -68,7 +69,7 @@ namespace Flower.Backend.Controllers
                 return Json(new { error = new { message = "File không hợp lệ. Chỉ chấp nhận file ảnh." } });
             }
 
-            var url = await _photoService.UploadPhotoAsync(upload);
+            var url = await _photoService.UploadPhotoAsync(upload, CloudinaryFolders.Posts);
             if (string.IsNullOrEmpty(url))
                 return Json(new { error = new { message = "Upload thất bại." } });
 
@@ -118,7 +119,7 @@ namespace Flower.Backend.Controllers
                     return View(model);
                 }
 
-                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage, CloudinaryFolders.Posts);
             }
 
             await _postService.Create(model);
@@ -172,7 +173,7 @@ namespace Flower.Backend.Controllers
 
             if (uploadImage != null && uploadImage.Length > 0)
             {
-                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage);
+                model.ImageUrl = await _photoService.UploadPhotoAsync(uploadImage, CloudinaryFolders.Posts);
             }
             else
             {

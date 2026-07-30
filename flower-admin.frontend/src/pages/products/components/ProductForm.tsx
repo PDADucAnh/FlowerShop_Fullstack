@@ -137,7 +137,7 @@ export function ProductForm({ product }: ProductFormProps) {
     if (!file) return
     setMainImageUploading(true)
     try {
-      const { data } = await uploadApi.upload(file)
+      const { data } = await uploadApi.upload(file, 'flower-shop/products')
       setMainImage(data.url)
       toast.success('Tải ảnh chính thành công')
     } catch {
@@ -169,7 +169,7 @@ export function ProductForm({ product }: ProductFormProps) {
         { id: tempId, url: '', isExisting: false, uploading: true },
       ])
       try {
-        const { data } = await uploadApi.upload(file)
+        const { data } = await uploadApi.upload(file, 'flower-shop/products')
         setGalleryImages((prev) =>
           prev.map((img) =>
             img.id === tempId

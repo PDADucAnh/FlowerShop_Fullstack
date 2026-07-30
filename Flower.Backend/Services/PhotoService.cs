@@ -106,9 +106,7 @@ namespace Flower.Backend.Services
             _logger.LogInformation("UploadPhotoAsync: FileName={Name}, OriginalLength={OriginalLength}, CompressedLength={CompressedLength}, CloudName={CloudName}, Folder={Folder}",
                 file.FileName, file.Length, compressedStream.Length, _settings?.CloudName, _settings?.Folder);
 
-            var folder = _settings!.Folder;
-            if (!string.IsNullOrEmpty(subfolder))
-                folder = $"{folder}/{subfolder}";
+            var folder = !string.IsNullOrEmpty(subfolder) ? subfolder : _settings!.Folder;
 
             var uploadParams = new ImageUploadParams
             {
