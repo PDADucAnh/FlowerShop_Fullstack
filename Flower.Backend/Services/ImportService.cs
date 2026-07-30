@@ -99,6 +99,9 @@ public class ImportService : IImportService
                 .Where(p => p.Sku != null)
                 .ToDictionaryAsync(p => p.Sku!, p => p, StringComparer.OrdinalIgnoreCase);
 
+            // Track pending image uploads: local path + file name per valid product
+            var pendingImages = new Dictionary<Flower.Data.Entities.Product, (string LocalPath, string FileName)>();
+
             for (int row = 2; row <= rowCount; row++)
             {
                 var errors = new List<string>();
@@ -136,6 +139,27 @@ public class ImportService : IImportService
                         errors.Add("Danh mục sản phẩm (cột DanhMucSlug) không được để trống");
                     }
 
+                    // Check image file exists in ZIP (if specified), but DON'T upload yet
+                    string? pendingImagePath = null;
+                    if (!string.IsNullOrWhiteSpace(imageFileName))
+                    {
+                        if (imageMap.TryGetValue(imageFileName, out var imgPath))
+                        {
+                            pendingImagePath = imgPath;
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Image file not found in ZIP: {FileName}", imageFileName);
+                            result.Errors.Add(new ImportError
+                            {
+                                RowIndex = rowIndex,
+                                ProductCode = sku,
+                                ProductName = name,
+                                ErrorMessage = $"Không tìm thấy file ảnh '{imageFileName}' trong file ZIP"
+                            });
+                        }
+                    }
+
                     if (errors.Count > 0)
                     {
                         result.Errors.Add(new ImportError
@@ -148,27 +172,6 @@ public class ImportService : IImportService
                         continue;
                     }
 
-                    string? imageUrl = null;
-                    if (!string.IsNullOrWhiteSpace(imageFileName) && imageMap.TryGetValue(imageFileName, out var imagePath))
-                    {
-                        await using var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
-                        var formFile = new FormFile(fs, 0, fs.Length, "file", imageFileName)
-                        {
-                            Headers = new HeaderDictionary()
-                        };
-                        imageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Products);
-                    }
-                    else if (!string.IsNullOrWhiteSpace(imageFileName))
-                    {
-                        result.Errors.Add(new ImportError
-                        {
-                            RowIndex = rowIndex,
-                            ProductCode = sku,
-                            ProductName = name,
-                            ErrorMessage = $"Không tìm thấy file ảnh '{imageFileName}' trong file ZIP"
-                        });
-                    }
-
                     if (!string.IsNullOrWhiteSpace(sku))
                     {
                         if (existingProducts.TryGetValue(sku, out var existingProduct))
@@ -179,10 +182,11 @@ public class ImportService : IImportService
                                 existingProduct.Price = price;
                                 existingProduct.StockQuantity = stock;
                                 existingProduct.Description = description;
-                                if (imageUrl != null) existingProduct.ImageUrl = imageUrl;
                                 existingProduct.CategoryProductId = resolvedCategoryId!.Value;
                                 existingProduct.Slug = GenerateSlug(name);
                                 existingProduct.UpdatedAt = DateTime.UtcNow;
+                                if (pendingImagePath != null)
+                                    pendingImages[existingProduct] = (pendingImagePath, imageFileName!);
                                 result.SuccessCount++;
                                 continue;
                             }
@@ -219,7 +223,6 @@ public class ImportService : IImportService
                         Price = price,
                         StockQuantity = stock,
                         Description = description,
-                        ImageUrl = imageUrl,
                         CategoryProductId = resolvedCategoryId!.Value,
                         Slug = GenerateSlug(name),
                         IsActive = true,
@@ -227,6 +230,9 @@ public class ImportService : IImportService
                         ViewCount = 0,
                         AddToCartCount = 0
                     };
+
+                    if (pendingImagePath != null)
+                        pendingImages[product] = (pendingImagePath, imageFileName!);
 
                     productsToAdd.Add(product);
                     result.SuccessCount++;
@@ -240,6 +246,17 @@ public class ImportService : IImportService
                         ErrorMessage = $"Lỗi xử lý dòng: {ex.Message}"
                     });
                 }
+            }
+
+            // Upload images ONLY for validated products
+            foreach (var (product, (localPath, fileName)) in pendingImages)
+            {
+                await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+                var formFile = new FormFile(fs, 0, fs.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary()
+                };
+                product.ImageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Products);
             }
 
             if (productsToAdd.Count > 0)
@@ -341,6 +358,7 @@ public class ImportService : IImportService
             result.TotalRows = Math.Max(0, rowCount - 1);
 
             var itemsToAdd = new List<Flower.Data.Entities.CategoryProduct>();
+            var pendingCatImages = new Dictionary<Flower.Data.Entities.CategoryProduct, (string LocalPath, string FileName)>();
 
             for (int row = 2; row <= rowCount; row++)
             {
@@ -369,18 +387,15 @@ public class ImportService : IImportService
                     if (string.IsNullOrWhiteSpace(slug))
                         slug = GenerateSlug(name);
 
-                    string? imageUrl = null;
+                    // Check image exists but DON'T upload yet
+                    string? pendingImagePath = null;
+                    string? resolvedImageKey = null;
                     if (!string.IsNullOrWhiteSpace(imageFileName))
                     {
-                        var imageKey = Path.GetFileName(imageFileName);
-                        if (imageMap.TryGetValue(imageKey, out var imagePath))
+                        resolvedImageKey = Path.GetFileName(imageFileName);
+                        if (imageMap.TryGetValue(resolvedImageKey, out var imgPath))
                         {
-                            await using var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
-                            var formFile = new FormFile(fs, 0, fs.Length, "file", imageKey)
-                            {
-                                Headers = new HeaderDictionary()
-                            };
-                            imageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Categories);
+                            pendingImagePath = imgPath;
                         }
                         else
                         {
@@ -399,21 +414,25 @@ public class ImportService : IImportService
                         existing.Name = name;
                         existing.Slug = slug;
                         existing.Description = description;
-                        if (imageUrl != null) existing.ImageUrl = imageUrl;
                         existing.UpdatedAt = DateTime.UtcNow;
+                        if (pendingImagePath != null)
+                            pendingCatImages[existing] = (pendingImagePath, resolvedImageKey!);
                         result.SuccessCount++;
                         continue;
                     }
 
-                    itemsToAdd.Add(new Flower.Data.Entities.CategoryProduct
+                    var category = new Flower.Data.Entities.CategoryProduct
                     {
                         Name = name,
                         Slug = slug,
                         Description = description,
-                        ImageUrl = imageUrl,
                         CreatedAt = DateTime.UtcNow
-                    });
+                    };
 
+                    if (pendingImagePath != null)
+                        pendingCatImages[category] = (pendingImagePath, resolvedImageKey!);
+
+                    itemsToAdd.Add(category);
                     result.SuccessCount++;
                 }
                 catch (Exception ex)
@@ -425,6 +444,17 @@ public class ImportService : IImportService
                         ErrorMessage = $"Lỗi xử lý dòng: {ex.Message}"
                     });
                 }
+            }
+
+            // Upload images ONLY for validated categories
+            foreach (var (cat, (localPath, fileName)) in pendingCatImages)
+            {
+                await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
+                var formFile = new FormFile(fs, 0, fs.Length, "file", fileName)
+                {
+                    Headers = new HeaderDictionary()
+                };
+                cat.ImageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Categories);
             }
 
             if (itemsToAdd.Count > 0)
