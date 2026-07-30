@@ -11,4 +11,14 @@ export const importsApi = {
   downloadTemplate() {
     return apiClient.get('/api/imports/template', { responseType: 'blob' })
   },
+
+  uploadCategories(formData: FormData) {
+    return apiClient.post<ImportApiResponse>('/api/imports/categories/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+
+  downloadCategoryTemplate() {
+    return apiClient.get('/api/imports/categories/template', { responseType: 'blob' })
+  },
 }

@@ -6,6 +6,7 @@ export interface User {
   phone?: string
   address?: string
   role: string
+  avatar?: string
 }
 
 export interface CreateUserRequest {
@@ -13,6 +14,7 @@ export interface CreateUserRequest {
   password: string
   fullName: string
   role: string
+  avatar?: string
 }
 
 export interface UpdateUserRequest {
@@ -24,4 +26,5 @@ export interface UpdateUserRequest {
   phone?: string
   address?: string
   role: string
+  avatar?: string
 }

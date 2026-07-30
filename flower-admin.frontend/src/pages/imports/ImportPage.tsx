@@ -3,11 +3,24 @@ import { useMutation } from '@tanstack/react-query'
 import { importsApi } from '@/api/imports'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Upload, FileSpreadsheet, FileArchive, X, Download, AlertCircle, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 import type { ImportApiResponse } from '@/types/import'
 
-export function ImportPage() {
+function ImportForm({
+  type,
+  isPending,
+  onUpload,
+  onResult,
+  handleDownloadTemplate,
+}: {
+  type: 'products' | 'categories'
+  isPending: boolean
+  onUpload: (formData: FormData, onSuccess: (data: ImportApiResponse) => void) => void
+  onResult: (data: ImportApiResponse | null) => void
+  handleDownloadTemplate: () => Promise<void>
+}) {
   const [excelFile, setExcelFile] = useState<File | null>(null)
   const [zipFile, setZipFile] = useState<File | null>(null)
   const [duplicateAction, setDuplicateAction] = useState<'skip' | 'update'>('skip')
@@ -16,33 +29,6 @@ export function ImportPage() {
   const [dragOver, setDragOver] = useState(false)
   const excelRef = useRef<HTMLInputElement>(null)
   const zipRef = useRef<HTMLInputElement>(null)
-
-  const uploadMutation = useMutation({
-    mutationFn: (formData: FormData) => importsApi.upload(formData).then((r) => r.data),
-    onSuccess: (data) => {
-      setResult(data)
-      if (data.successCount > 0) toast.success(`Import thành công ${data.successCount} sản phẩm`)
-      if (data.failureCount > 0) toast.error(`${data.failureCount} dòng bị lỗi`)
-    },
-    onError: () => toast.error('Import thất bại. Vui lòng thử lại.'),
-  })
-
-  const handleDownloadTemplate = async () => {
-    try {
-      const response = await importsApi.downloadTemplate()
-      const url = URL.createObjectURL(new Blob([response.data]))
-      const link = document.createElement('a')
-      link.href = url
-      link.download = 'product_import_template.xlsx'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-      toast.success('Đã tải file mẫu')
-    } catch {
-      toast.error('Không thể tải file mẫu')
-    }
-  }
 
   const handleExcelSelect = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -103,7 +89,9 @@ export function ImportPage() {
     if (zipFile) formData.append('zipFile', zipFile)
     formData.append('onDuplicate', duplicateAction)
 
-    uploadMutation.mutate(formData)
+    onUpload(formData, (data) => {
+      setResult(data)
+    })
   }
 
   const resetForm = () => {
@@ -114,15 +102,7 @@ export function ImportPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Import sản phẩm</h1>
-        <Button variant="outline" onClick={handleDownloadTemplate}>
-          <Download className="mr-2 size-4" />
-          Tải file Excel mẫu
-        </Button>
-      </div>
-
+    <div className="space-y-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Tải lên file Excel</CardTitle>
@@ -144,13 +124,15 @@ export function ImportPage() {
                 <FileSpreadsheet className="mr-1 size-4" />
                 Chọn file Excel
               </Button>
-              <Button variant="secondary" size="sm" onClick={() => zipRef.current?.click()}>
-                <FileArchive className="mr-1 size-4" />
-                Chọn file ảnh (.zip)
-              </Button>
+              {type === 'products' && (
+                <Button variant="secondary" size="sm" onClick={() => zipRef.current?.click()}>
+                  <FileArchive className="mr-1 size-4" />
+                  Chọn file ảnh (.zip)
+                </Button>
+              )}
             </div>
             <input ref={excelRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={handleExcelSelect} />
-            <input ref={zipRef} type="file" accept=".zip" className="hidden" onChange={handleZipSelect} />
+            {type === 'products' && <input ref={zipRef} type="file" accept=".zip" className="hidden" onChange={handleZipSelect} />}
           </div>
 
           {excelFile && (
@@ -166,7 +148,7 @@ export function ImportPage() {
             </div>
           )}
 
-          {zipFile && (
+          {type === 'products' && zipFile && (
             <div className="flex items-center justify-between rounded-lg border bg-surface px-3 py-2">
               <div className="flex items-center gap-2 text-sm">
                 <FileArchive className="size-4 text-amber-600" />
@@ -180,14 +162,14 @@ export function ImportPage() {
           )}
 
           <div>
-            <label className="text-sm font-medium">Khi trùng SKU</label>
+            <label className="text-sm font-medium">Khi trùng {type === 'products' ? 'SKU' : 'tên'}</label>
             <div className="mt-1 flex gap-4">
               <label className="flex items-center gap-2 text-sm">
-                <input type="radio" name="duplicate" value="skip" checked={duplicateAction === 'skip'} onChange={() => setDuplicateAction('skip')} className="size-4" />
+                <input type="radio" name={`duplicate-${type}`} value="skip" checked={duplicateAction === 'skip'} onChange={() => setDuplicateAction('skip')} className="size-4" />
                 Bỏ qua
               </label>
               <label className="flex items-center gap-2 text-sm">
-                <input type="radio" name="duplicate" value="update" checked={duplicateAction === 'update'} onChange={() => setDuplicateAction('update')} className="size-4" />
+                <input type="radio" name={`duplicate-${type}`} value="update" checked={duplicateAction === 'update'} onChange={() => setDuplicateAction('update')} className="size-4" />
                 Cập nhật
               </label>
             </div>
@@ -200,8 +182,8 @@ export function ImportPage() {
                 Nhập lại
               </Button>
             )}
-            <Button onClick={handleSubmit} disabled={!excelFile || uploadMutation.isPending}>
-              {uploadMutation.isPending ? (
+            <Button onClick={handleSubmit} disabled={!excelFile || isPending}>
+              {isPending ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
                   Đang xử lý…
@@ -217,7 +199,7 @@ export function ImportPage() {
         </CardContent>
       </Card>
 
-      {uploadMutation.isPending && (
+      {isPending && (
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -264,8 +246,7 @@ export function ImportPage() {
                       <thead className="bg-muted/50">
                         <tr>
                           <th className="px-3 py-2 text-left font-medium">Dòng</th>
-                          <th className="px-3 py-2 text-left font-medium">Mã SP</th>
-                          <th className="px-3 py-2 text-left font-medium">Tên SP</th>
+                          <th className="px-3 py-2 text-left font-medium">Tên</th>
                           <th className="px-3 py-2 text-left font-medium">Lỗi</th>
                         </tr>
                       </thead>
@@ -273,7 +254,6 @@ export function ImportPage() {
                         {result.errors.map((err, idx) => (
                           <tr key={idx} className="border-t">
                             <td className="px-3 py-2 text-muted-foreground">{err.rowIndex}</td>
-                            <td className="px-3 py-2 font-mono text-xs">{err.productCode || '—'}</td>
                             <td className="px-3 py-2">{err.productName || '—'}</td>
                             <td className="px-3 py-2 text-red-600">{err.errorMessage}</td>
                           </tr>
@@ -287,6 +267,111 @@ export function ImportPage() {
           </CardContent>
         </Card>
       )}
+    </div>
+  )
+}
+
+export function ImportPage() {
+  const productMutation = useMutation({
+    mutationFn: (formData: FormData) => importsApi.upload(formData).then((r) => r.data),
+  })
+
+  const categoryMutation = useMutation({
+    mutationFn: (formData: FormData) => importsApi.uploadCategories(formData).then((r) => r.data),
+  })
+
+  const handleDownloadProductTemplate = async () => {
+    try {
+      const response = await importsApi.downloadTemplate()
+      const url = URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'product_import_template.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      toast.success('Đã tải file mẫu')
+    } catch {
+      toast.error('Không thể tải file mẫu')
+    }
+  }
+
+  const handleDownloadCategoryTemplate = async () => {
+    try {
+      const response = await importsApi.downloadCategoryTemplate()
+      const url = URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'category_import_template.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      toast.success('Đã tải file mẫu')
+    } catch {
+      toast.error('Không thể tải file mẫu')
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Import dữ liệu</h1>
+
+      <Tabs defaultValue="products">
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="products">Sản phẩm</TabsTrigger>
+            <TabsTrigger value="categories">Danh mục</TabsTrigger>
+          </TabsList>
+          <div className="flex gap-1">
+            {document.querySelector('[data-tab="products"]') && (
+              <Button variant="outline" size="sm" onClick={handleDownloadProductTemplate}>
+                <Download className="mr-1 size-4" />
+                Mẫu SP
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <TabsContent value="products" className="mt-4">
+          <ImportForm
+            type="products"
+            isPending={productMutation.isPending}
+            onUpload={(formData: FormData, onSuccess: (data: ImportApiResponse) => void) =>
+              productMutation.mutate(formData, {
+                onSuccess: (data: ImportApiResponse) => {
+                  onSuccess(data)
+                  if (data.successCount > 0) toast.success(`Import thành công ${data.successCount} sản phẩm`)
+                  if (data.failureCount > 0) toast.error(`${data.failureCount} dòng bị lỗi`)
+                },
+                onError: () => toast.error('Import thất bại. Vui lòng thử lại.'),
+              })
+            }
+            onResult={() => {}}
+            handleDownloadTemplate={handleDownloadProductTemplate}
+          />
+        </TabsContent>
+
+        <TabsContent value="categories" className="mt-4">
+          <ImportForm
+            type="categories"
+            isPending={categoryMutation.isPending}
+            onUpload={(formData: FormData, onSuccess: (data: ImportApiResponse) => void) =>
+              categoryMutation.mutate(formData, {
+                onSuccess: (data: ImportApiResponse) => {
+                  onSuccess(data)
+                  if (data.successCount > 0) toast.success(`Import thành công ${data.successCount} danh mục`)
+                  if (data.failureCount > 0) toast.error(`${data.failureCount} dòng bị lỗi`)
+                },
+                onError: () => toast.error('Import thất bại. Vui lòng thử lại.'),
+              })
+            }
+            onResult={() => {}}
+            handleDownloadTemplate={handleDownloadCategoryTemplate}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

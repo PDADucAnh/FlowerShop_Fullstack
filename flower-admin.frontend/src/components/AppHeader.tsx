@@ -38,9 +38,13 @@ export function AppHeader({ collapsed, onToggle }: AppHeaderProps) {
       <DropdownMenu>
         <DropdownMenuTrigger className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 outline-none hover:bg-muted">
           <Avatar className="size-8">
-            <AvatarFallback className="bg-primary text-xs text-on-primary">
-              {initials}
-            </AvatarFallback>
+            {user?.avatar ? (
+              <img src={user.avatar} alt="" className="size-full rounded-full object-cover" />
+            ) : (
+              <AvatarFallback className="bg-primary text-xs text-on-primary">
+                {initials}
+              </AvatarFallback>
+            )}
           </Avatar>
           <span className="text-sm font-medium text-on-surface">
             {user?.fullName}

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, type ChangeEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { usersApi } from '@/api/users'
+import { uploadApi } from '@/api/upload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,7 +17,7 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, AlertCircle, Plus, Pencil, Trash2 } from 'lucide-react'
+import { Loader2, AlertCircle, Plus, Pencil, Trash2, Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 import type { User, CreateUserRequest, UpdateUserRequest } from '@/types/user'
 
@@ -34,6 +35,7 @@ export function UsersPage() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<User | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<User | null>(null)
+  const [uploading, setUploading] = useState(false)
   const queryClient = useQueryClient()
 
   const { data: users, isLoading, error } = useQuery({
@@ -48,6 +50,7 @@ export function UsersPage() {
   const [formPhone, setFormPhone] = useState('')
   const [formAddress, setFormAddress] = useState('')
   const [formRole, setFormRole] = useState('Staff')
+  const [formAvatar, setFormAvatar] = useState('')
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['users'] })
 
@@ -69,11 +72,26 @@ export function UsersPage() {
     onError: () => toast.error('Không thể xóa nhân viên'),
   })
 
+  const handleAvatarUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const { data } = await uploadApi.upload(file)
+      setFormAvatar(data.url)
+      toast.success('Đã tải ảnh lên')
+    } catch {
+      toast.error('Tải ảnh thất bại')
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const openCreate = () => {
     setEditItem(null)
     setFormUsername(''); setFormPassword(''); setFormFullName('')
     setFormEmail(''); setFormPhone(''); setFormAddress('')
-    setFormRole('Staff')
+    setFormRole('Staff'); setFormAvatar('')
     setDialogOpen(true)
   }
 
@@ -86,6 +104,7 @@ export function UsersPage() {
     setFormPhone(item.phone || '')
     setFormAddress(item.address || '')
     setFormRole(item.role)
+    setFormAvatar(item.avatar || '')
     setDialogOpen(true)
   }
 
@@ -105,6 +124,7 @@ export function UsersPage() {
           phone: formPhone || undefined,
           address: formAddress || undefined,
           role: formRole,
+          avatar: formAvatar || undefined,
         },
       })
     } else {
@@ -113,6 +133,7 @@ export function UsersPage() {
         password: formPassword,
         fullName: formFullName,
         role: formRole,
+        avatar: formAvatar || undefined,
       })
     }
   }
@@ -133,7 +154,7 @@ export function UsersPage() {
           <DialogTrigger render={<Button size="sm" />} onClick={openCreate}>
             <Plus className="mr-1 size-4" />Thêm nhân viên
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader><DialogTitle>{editItem ? 'Sửa nhân viên' : 'Thêm nhân viên'}</DialogTitle></DialogHeader>
             <div className="space-y-4">
               <div className="space-y-2">
@@ -159,6 +180,23 @@ export function UsersPage() {
               <div className="space-y-2">
                 <Label>Địa chỉ</Label>
                 <Input value={formAddress} onChange={(e) => setFormAddress(e.target.value)} placeholder="Địa chỉ" />
+              </div>
+              <div className="space-y-2">
+                <Label>Avatar</Label>
+                <div className="flex items-start gap-4">
+                  {formAvatar ? (
+                    <div className="relative size-16 shrink-0 overflow-hidden rounded-full border">
+                      <img src={formAvatar} alt="Avatar" className="size-full object-cover" />
+                      <button type="button" onClick={() => setFormAvatar('')} className="absolute right-0 top-0 rounded-full bg-background/80 p-0.5 text-muted-foreground hover:text-destructive"><X className="size-3" /></button>
+                    </div>
+                  ) : (
+                    <div className="flex size-16 shrink-0 items-center justify-center rounded-full border border-dashed text-muted-foreground"><Upload className="size-5" /></div>
+                  )}
+                  <div className="flex-1">
+                    <Input type="file" accept="image/*" onChange={handleAvatarUpload} disabled={uploading} />
+                    {uploading && <p className="mt-1 text-xs text-muted-foreground">Đang tải ảnh lên...</p>}
+                  </div>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label>Vai trò</Label>
@@ -191,6 +229,7 @@ export function UsersPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">Avatar</TableHead>
                   <TableHead>Tên đăng nhập</TableHead>
                   <TableHead>Họ tên</TableHead>
                   <TableHead>Email</TableHead>
@@ -202,6 +241,15 @@ export function UsersPage() {
               <TableBody>
                 {users.map((user) => (
                   <TableRow key={user.id}>
+                    <TableCell>
+                      {user.avatar ? (
+                        <img src={user.avatar} alt="" className="size-9 rounded-full border object-cover" />
+                      ) : (
+                        <div className="flex size-9 items-center justify-center rounded-full border border-dashed text-xs text-muted-foreground">
+                          {user.fullName.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                    </TableCell>
                     <TableCell><span className="font-mono text-sm">{user.username}</span></TableCell>
                     <TableCell className="font-medium">{user.fullName}</TableCell>
                     <TableCell className="text-muted-foreground">{user.email || '—'}</TableCell>

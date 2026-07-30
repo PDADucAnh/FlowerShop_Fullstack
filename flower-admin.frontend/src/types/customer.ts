@@ -4,6 +4,7 @@ export interface CustomerDTO {
   email: string
   phone?: string
   address?: string
+  avatar?: string
   totalOrders: number
   successfulDeliveries: number
   failedDeliveries: number

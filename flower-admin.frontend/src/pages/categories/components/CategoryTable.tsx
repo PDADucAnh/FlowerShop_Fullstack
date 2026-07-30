@@ -21,6 +21,7 @@ export function CategoryTable({ categories, onEdit, onDelete }: CategoryTablePro
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-12">Ảnh</TableHead>
           <TableHead className="w-16">ID</TableHead>
           <TableHead>Tên danh mục</TableHead>
           <TableHead>Mô tả</TableHead>
@@ -31,6 +32,17 @@ export function CategoryTable({ categories, onEdit, onDelete }: CategoryTablePro
       <TableBody>
         {categories.map((cat) => (
           <TableRow key={cat.id}>
+            <TableCell>
+              {cat.imageUrl ? (
+                <img
+                  src={cat.imageUrl}
+                  alt={cat.name}
+                  className="size-9 rounded-md border object-cover"
+                />
+              ) : (
+                <div className="size-9 rounded-md border border-dashed" />
+              )}
+            </TableCell>
             <TableCell className="text-muted-foreground">{cat.id}</TableCell>
             <TableCell className="font-medium">{cat.name}</TableCell>
             <TableCell className="text-muted-foreground max-w-xs truncate">
