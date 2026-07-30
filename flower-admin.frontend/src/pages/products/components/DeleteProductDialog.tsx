@@ -41,7 +41,7 @@ export function DeleteProductDialog({ product, open, onOpenChange, onDeleted }: 
         <AlertDialogHeader>
           <AlertDialogTitle>Xóa sản phẩm</AlertDialogTitle>
           <AlertDialogDescription>
-            Bạn có chắc chắn muốn xóa <strong>{product?.name}</strong>? Hành động này không thể hoàn tác.
+            Bạn có chắc chắn muốn chuyển <strong>{product?.name}</strong> sang trạng thái ngừng kinh doanh? Sản phẩm có thể được khôi phục sau.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

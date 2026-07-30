@@ -166,4 +166,9 @@ namespace Flower.Backend.Models.DTOs
     {
         public List<int> ProductIds { get; set; } = new();
     }
+
+    public class BulkRestoreRequest
+    {
+        public List<int> ProductIds { get; set; } = new();
+    }
 }

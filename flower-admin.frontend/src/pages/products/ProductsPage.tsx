@@ -25,9 +25,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { Plus, Search, Loader2, AlertCircle, Trash2, X } from 'lucide-react'
+import { Plus, Search, Loader2, AlertCircle, Trash2, X, Undo2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Product } from '@/types/product'
+import type { ProductListParams } from '@/api/products'
 
 export function ProductsPage() {
   const navigate = useNavigate()
@@ -38,6 +39,8 @@ export function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [confirmBulkRestore, setConfirmBulkRestore] = useState(false)
   const pageSize = 20
 
   const { data: categories } = useQuery({
@@ -46,14 +49,24 @@ export function ProductsPage() {
   })
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page, categoryFilter],
-    queryFn: () =>
-      productsApi.getPaged({
+    queryKey: ['products', page, categoryFilter, statusFilter],
+    queryFn: () => {
+      const params: ProductListParams = {
         page,
         pageSize,
         categoryProductId: categoryFilter === 'all' ? null : Number(categoryFilter),
-        includeInactive: true,
-      }).then((r) => r.data),
+      }
+      if (statusFilter === 'all') {
+        params.includeInactive = true
+      } else if (statusFilter === 'active') {
+        params.isActive = true
+        params.includeInactive = true
+      } else if (statusFilter === 'inactive') {
+        params.isActive = false
+        params.includeInactive = true
+      }
+      return productsApi.getPaged(params).then((r) => r.data)
+    },
   })
 
   const bulkDeleteMutation = useMutation({
@@ -69,6 +82,24 @@ export function ProductsPage() {
       setConfirmBulkDelete(false)
     },
   })
+
+  const bulkRestoreMutation = useMutation({
+    mutationFn: (ids: number[]) => productsApi.bulkRestore(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      toast.success(`Đã khôi phục ${selectedIds.size} sản phẩm`)
+      setSelectedIds(new Set())
+      setConfirmBulkRestore(false)
+    },
+    onError: () => {
+      toast.error('Không thể khôi phục sản phẩm')
+      setConfirmBulkRestore(false)
+    },
+  })
+
+  const selectedRows = data?.items.filter(p => selectedIds.has(p.id)) ?? []
+  const hasActiveSelected = selectedRows.some(p => p.isActive)
+  const hasInactiveSelected = selectedRows.some(p => !p.isActive)
 
   const handleSearch = () => {
     if (!search.trim()) return
@@ -131,6 +162,33 @@ export function ProductsPage() {
         </Select>
       </div>
 
+      <div className="flex items-center gap-1 rounded-lg border bg-muted/30 p-1 w-fit">
+        <button
+          onClick={() => { setStatusFilter('all'); setPage(1) }}
+          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+            statusFilter === 'all' ? 'bg-background shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Tất cả
+        </button>
+        <button
+          onClick={() => { setStatusFilter('active'); setPage(1) }}
+          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+            statusFilter === 'active' ? 'bg-background shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Đang bán
+        </button>
+        <button
+          onClick={() => { setStatusFilter('inactive'); setPage(1) }}
+          className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+            statusFilter === 'inactive' ? 'bg-background shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          Ngừng bán
+        </button>
+      </div>
+
       {selectedIds.size > 0 && (
         <div className="flex items-center justify-between rounded-lg border bg-muted/50 px-4 py-2.5">
           <p className="text-sm">
@@ -145,14 +203,26 @@ export function ProductsPage() {
               <X className="mr-1 size-4" />
               Bỏ chọn
             </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setConfirmBulkDelete(true)}
-            >
-              <Trash2 className="mr-1 size-4" />
-              Xóa các sản phẩm đã chọn
-            </Button>
+            {hasInactiveSelected && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setConfirmBulkRestore(true)}
+              >
+                <Undo2 className="mr-1 size-4" />
+                Khôi phục các sản phẩm đã chọn
+              </Button>
+            )}
+            {hasActiveSelected && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmBulkDelete(true)}
+              >
+                <Trash2 className="mr-1 size-4" />
+                Xóa các sản phẩm đã chọn
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -235,6 +305,27 @@ export function ProductsPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               {bulkDeleteMutation.isPending ? 'Đang xóa…' : 'Xóa'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmBulkRestore} onOpenChange={setConfirmBulkRestore}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Khôi phục sản phẩm</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn khôi phục <strong>{selectedIds.size}</strong> sản phẩm đã chọn?
+              Sản phẩm sẽ được kích hoạt trở lại trạng thái kinh doanh.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => bulkRestoreMutation.mutate([...selectedIds])}
+              disabled={bulkRestoreMutation.isPending}
+            >
+              {bulkRestoreMutation.isPending ? 'Đang khôi phục…' : 'Khôi phục'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

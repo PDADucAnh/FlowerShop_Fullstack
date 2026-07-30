@@ -8,6 +8,7 @@ export interface ProductListParams {
   minPrice?: number | null
   maxPrice?: number | null
   includeInactive?: boolean
+  isActive?: boolean | null
 }
 
 export const productsApi = {
@@ -37,6 +38,10 @@ export const productsApi = {
 
   bulkDelete(productIds: number[]) {
     return apiClient.post('/api/Products/bulk-delete', { productIds })
+  },
+
+  bulkRestore(productIds: number[]) {
+    return apiClient.post('/api/Products/bulk-restore', { productIds })
   },
 
   getImages(productId: number) {

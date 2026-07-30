@@ -14,13 +14,11 @@ namespace Flower.Backend.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly IPriceCalculationService _priceCalculationService;
-        private readonly IPhotoService _photoService;
 
-        public ProductService(IApplicationDbContext context, IPriceCalculationService priceCalculationService, IPhotoService photoService)
+        public ProductService(IApplicationDbContext context, IPriceCalculationService priceCalculationService)
         {
             _context = context;
             _priceCalculationService = priceCalculationService;
-            _photoService = photoService;
         }
 
         private async Task EnrichWithPromotion(IEnumerable<ProductDTO> products)
@@ -75,9 +73,12 @@ namespace Flower.Backend.Services
             return dtos;
         }
 
-        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null, bool includeInactive = false)
+        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null, bool includeInactive = false, bool? isActive = null)
         {
             var query = BuildQuery(includeInactive);
+
+            if (isActive.HasValue)
+                query = query.Where(p => p.IsActive == isActive.Value);
 
             if (categoryProductId.HasValue)
             {
@@ -235,14 +236,12 @@ namespace Flower.Backend.Services
         public async Task<bool> Delete(int id)
         {
             var product = await _context.Products
-                .Include(p => p.Images)
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
                 return false;
 
-            await DeleteProductImagesAsync(product);
-
-            _context.Products.Remove(product);
+            product.IsActive = false;
+            product.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
             return true;
         }
@@ -253,14 +252,11 @@ namespace Flower.Backend.Services
                 return 0;
 
             var products = await _context.Products
-                .Include(p => p.Images)
                 .Where(p => ids.Contains(p.Id) && p.IsActive)
                 .ToListAsync();
 
             foreach (var product in products)
             {
-                await DeleteProductImagesAsync(product);
-
                 product.IsActive = false;
                 product.UpdatedAt = DateTime.UtcNow;
             }
@@ -269,19 +265,23 @@ namespace Flower.Backend.Services
             return products.Count;
         }
 
-        private async Task DeleteProductImagesAsync(Product product)
+        public async Task<int> BulkRestoreAsync(List<int> ids)
         {
-            if (!string.IsNullOrEmpty(product.ImageUrl))
-                await _photoService.DeletePhotoAsync(product.ImageUrl);
+            if (ids == null || ids.Count == 0)
+                return 0;
 
-            if (product.Images != null)
+            var products = await _context.Products
+                .Where(p => ids.Contains(p.Id) && !p.IsActive)
+                .ToListAsync();
+
+            foreach (var product in products)
             {
-                foreach (var image in product.Images)
-                {
-                    if (!string.IsNullOrEmpty(image.ImageUrl))
-                        await _photoService.DeletePhotoAsync(image.ImageUrl);
-                }
+                product.IsActive = true;
+                product.UpdatedAt = DateTime.UtcNow;
             }
+
+            await _context.SaveChangesAsync();
+            return products.Count;
         }
 
         public async Task<IEnumerable<ProductDTO>> Search(string query, bool includeInactive = false)

@@ -44,9 +44,10 @@ namespace Flower.Backend.Controllers.Api
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
             [FromQuery] int? categoryProductId = null,
-            [FromQuery] bool includeInactive = false)
+            [FromQuery] bool includeInactive = false,
+            [FromQuery] bool? isActive = null)
         {
-            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId, includeInactive);
+            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId, includeInactive, isActive);
             return Ok(result);
         }
 
@@ -161,6 +162,23 @@ namespace Flower.Backend.Controllers.Api
             {
                 deletedCount,
                 message = $"Đã xóa {deletedCount} sản phẩm"
+            });
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("bulk-restore")]
+        public async Task<IActionResult> BulkRestore([FromBody] BulkRestoreRequest request)
+        {
+            if (request?.ProductIds == null || request.ProductIds.Count == 0)
+                return BadRequest(new { message = "Danh sách sản phẩm không hợp lệ" });
+
+            var restoredCount = await _productService.BulkRestoreAsync(request.ProductIds);
+            await _notificationService.NotifyEntityChanged("Product");
+
+            return Ok(new
+            {
+                restoredCount,
+                message = $"Đã khôi phục {restoredCount} sản phẩm"
             });
         }
 
