@@ -38,10 +38,10 @@ const statusOptions: { value: OrderStatus; label: string }[] = [
   { value: OrderStatus.Completed, label: 'Đã giao' },
 ]
 
-const terminalStatuses: OrderStatus[] = [OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.Completed, OrderStatus.Refunded]
 
-function isTerminal(status: OrderStatus) {
-  return terminalStatuses.includes(status)
+
+function isTerminal(status: number) {
+  return ([OrderStatus.Cancelled, OrderStatus.CancelledByCustomer, OrderStatus.CancelledByShop, OrderStatus.Completed, OrderStatus.Refunded] as number[]).includes(status)
 }
 
 const paymentStatusLabels: Record<number, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {

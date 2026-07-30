@@ -263,9 +263,7 @@ export function FlashSalesTab() {
               </div>
 
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" type="button">Hủy</Button>
-                </DialogClose>
+                <DialogClose render={<Button variant="outline" />}>Hủy</DialogClose>
                 <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
                   {createMutation.isPending || updateMutation.isPending ? (
                     <><Loader2 className="mr-2 size-4 animate-spin" />Đang lưu...</>

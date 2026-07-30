@@ -96,13 +96,16 @@ export function UsersPage() {
     if (editItem) {
       updateMutation.mutate({
         id: editItem.id,
-        username: formUsername,
-        password: formPassword || undefined,
-        fullName: formFullName,
-        email: formEmail || undefined,
-        phone: formPhone || undefined,
-        address: formAddress || undefined,
-        role: formRole,
+        dto: {
+          id: editItem.id,
+          username: formUsername,
+          password: formPassword || undefined,
+          fullName: formFullName,
+          email: formEmail || undefined,
+          phone: formPhone || undefined,
+          address: formAddress || undefined,
+          role: formRole,
+        },
       })
     } else {
       createMutation.mutate({
@@ -159,7 +162,7 @@ export function UsersPage() {
               </div>
               <div className="space-y-2">
                 <Label>Vai trò</Label>
-                <Select value={formRole} onValueChange={setFormRole}>
+                <Select value={formRole} onValueChange={(v) => v !== null && setFormRole(v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {roleOptions.map((opt) => (
@@ -169,9 +172,7 @@ export function UsersPage() {
                 </Select>
               </div>
               <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline" type="button">Hủy</Button>
-                </DialogClose>
+                <DialogClose render={<Button variant="outline" />}>Hủy</DialogClose>
                 <Button onClick={handleSubmit} disabled={createMutation.isPending || updateMutation.isPending}>
                   {createMutation.isPending || updateMutation.isPending ? (
                     <><Loader2 className="mr-2 size-4 animate-spin" />Đang lưu...</>
