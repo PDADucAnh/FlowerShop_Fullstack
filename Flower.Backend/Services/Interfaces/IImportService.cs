@@ -9,4 +9,9 @@ public interface IImportService
         IFormFile excelFile,
         IFormFile? zipFile,
         string onDuplicate);
+
+    Task<ImportResult> ImportCategoriesAsync(
+        IFormFile excelFile,
+        IFormFile? zipFile,
+        string onDuplicate);
 }

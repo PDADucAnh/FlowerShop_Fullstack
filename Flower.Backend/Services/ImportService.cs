@@ -275,6 +275,191 @@ public class ImportService : IImportService
         return result;
     }
 
+    public async Task<ImportResult> ImportCategoriesAsync(
+        IFormFile excelFile,
+        IFormFile? zipFile,
+        string onDuplicate)
+    {
+        var result = new ImportResult();
+        var tempDir = string.Empty;
+
+        try
+        {
+            var excelExt = Path.GetExtension(excelFile.FileName).ToLowerInvariant();
+            if (excelExt != ".xlsx")
+            {
+                result.Errors.Add(new ImportError { ErrorMessage = "File Excel phải có định dạng .xlsx" });
+                return result;
+            }
+
+            Dictionary<string, string> imageMap = new(StringComparer.OrdinalIgnoreCase);
+            if (zipFile != null && zipFile.Length > 0)
+            {
+                var zipExt = Path.GetExtension(zipFile.FileName).ToLowerInvariant();
+                if (zipExt != ".zip")
+                {
+                    result.Errors.Add(new ImportError { ErrorMessage = "File ảnh phải có định dạng .zip" });
+                    return result;
+                }
+
+                tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                Directory.CreateDirectory(tempDir);
+
+                using var zipStream = zipFile.OpenReadStream();
+                System.IO.Compression.ZipFile.ExtractToDirectory(zipStream, tempDir, overwriteFiles: true);
+
+                foreach (var filePath in Directory.EnumerateFiles(tempDir, "*.*", SearchOption.AllDirectories))
+                {
+                    var ext = Path.GetExtension(filePath);
+                    if (AllowedImageExtensions.Contains(ext))
+                    {
+                        var fileName = Path.GetFileName(filePath);
+                        imageMap[fileName] = filePath;
+                    }
+                }
+            }
+
+            var existingCategories = await _context.CategoriesProducts.ToListAsync();
+            var categoryByName = new Dictionary<string, Flower.Data.Entities.CategoryProduct>(StringComparer.OrdinalIgnoreCase);
+            foreach (var c in existingCategories)
+                categoryByName[c.Name] = c;
+
+            using var excelStream = new MemoryStream();
+            await excelFile.CopyToAsync(excelStream);
+            excelStream.Position = 0;
+
+            using var package = new ExcelPackage(excelStream);
+            var worksheet = package.Workbook.Worksheets[0];
+            if (worksheet == null)
+            {
+                result.Errors.Add(new ImportError { ErrorMessage = "File Excel không có worksheet nào" });
+                return result;
+            }
+
+            var rowCount = worksheet.Dimension?.Rows ?? 0;
+            result.TotalRows = Math.Max(0, rowCount - 1);
+
+            var itemsToAdd = new List<Flower.Data.Entities.CategoryProduct>();
+
+            for (int row = 2; row <= rowCount; row++)
+            {
+                var errors = new List<string>();
+                var rowIndex = row - 1;
+
+                try
+                {
+                    var name = worksheet.GetValue<string>(row, 2)?.Trim();
+                    var slug = worksheet.GetValue<string>(row, 3)?.Trim();
+                    var description = worksheet.GetValue<string>(row, 4)?.Trim();
+                    var imageFileName = worksheet.GetValue<string>(row, 5)?.Trim();
+
+                    if (string.IsNullOrWhiteSpace(name))
+                    {
+                        errors.Add("Tên danh mục không được để trống");
+                        result.Errors.Add(new ImportError
+                        {
+                            RowIndex = rowIndex,
+                            ProductName = name,
+                            ErrorMessage = string.Join("; ", errors)
+                        });
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(slug))
+                        slug = GenerateSlug(name);
+
+                    string? imageUrl = null;
+                    if (!string.IsNullOrWhiteSpace(imageFileName))
+                    {
+                        var imageKey = Path.GetFileName(imageFileName);
+                        if (imageMap.TryGetValue(imageKey, out var imagePath))
+                        {
+                            await using var fs = new FileStream(imagePath, FileMode.Open, FileAccess.Read);
+                            var formFile = new FormFile(fs, 0, fs.Length, "file", imageKey)
+                            {
+                                Headers = new HeaderDictionary()
+                            };
+                            imageUrl = await _photoService.UploadPhotoAsync(formFile, "categories");
+                        }
+                        else
+                        {
+                            _logger.LogWarning("Image file not found in ZIP: {FileName}", imageFileName);
+                        }
+                    }
+
+                    if (categoryByName.TryGetValue(name, out var existing))
+                    {
+                        if (onDuplicate.Equals("skip", StringComparison.OrdinalIgnoreCase))
+                        {
+                            result.SkippedSkus.Add(name);
+                            continue;
+                        }
+
+                        existing.Name = name;
+                        existing.Slug = slug;
+                        existing.Description = description;
+                        if (imageUrl != null) existing.ImageUrl = imageUrl;
+                        existing.UpdatedAt = DateTime.UtcNow;
+                        result.SuccessCount++;
+                        continue;
+                    }
+
+                    itemsToAdd.Add(new Flower.Data.Entities.CategoryProduct
+                    {
+                        Name = name,
+                        Slug = slug,
+                        Description = description,
+                        ImageUrl = imageUrl,
+                        CreatedAt = DateTime.UtcNow
+                    });
+
+                    result.SuccessCount++;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing category import row {Row}", row);
+                    result.Errors.Add(new ImportError
+                    {
+                        RowIndex = rowIndex,
+                        ErrorMessage = $"Lỗi xử lý dòng: {ex.Message}"
+                    });
+                }
+            }
+
+            if (itemsToAdd.Count > 0)
+            {
+                _context.CategoriesProducts.AddRange(itemsToAdd);
+                await _context.SaveChangesAsync();
+            }
+            else if (onDuplicate == "update")
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            result.FailureCount = result.Errors.Count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Category import failed");
+            result.Errors.Add(new ImportError
+            {
+                RowIndex = 0,
+                ErrorMessage = $"Lỗi hệ thống: {ex.Message}"
+            });
+        }
+        finally
+        {
+            if (!string.IsNullOrEmpty(tempDir) && Directory.Exists(tempDir))
+            {
+                try { Directory.Delete(tempDir, recursive: true); }
+                catch (Exception ex) { _logger.LogWarning(ex, "Failed to delete temp dir {Path}", tempDir); }
+            }
+        }
+
+        result.FailureCount = result.Errors.Count;
+        return result;
+    }
+
     private static string GenerateSlug(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return string.Empty;
