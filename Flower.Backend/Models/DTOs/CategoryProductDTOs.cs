@@ -8,6 +8,7 @@ namespace Flower.Backend.Models.DTOs
         public string Name { get; set; }
         public string? Description { get; set; }
         public string? Slug { get; set; }
+        public string? ImageUrl { get; set; }
     }
 
     public class CreateCategoryProductDTO
@@ -21,6 +22,9 @@ namespace Flower.Backend.Models.DTOs
 
         [MaxLength(300)]
         public string? Slug { get; set; }
+
+        [MaxLength(2000)]
+        public string? ImageUrl { get; set; }
     }
 
     public class UpdateCategoryProductDTO
@@ -36,5 +40,8 @@ namespace Flower.Backend.Models.DTOs
 
         [MaxLength(300)]
         public string? Slug { get; set; }
+
+        [MaxLength(2000)]
+        public string? ImageUrl { get; set; }
     }
 }

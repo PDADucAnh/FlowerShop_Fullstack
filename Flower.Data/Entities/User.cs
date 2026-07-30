@@ -29,6 +29,9 @@ namespace Flower.Data.Entities
         [MaxLength(500)]
         public string? Address { get; set; }
 
+        [MaxLength(2000)]
+        public string? Avatar { get; set; }
+
         [Required(ErrorMessage = "Role is required")]
         [MaxLength(50)]
         public string Role { get; set; }

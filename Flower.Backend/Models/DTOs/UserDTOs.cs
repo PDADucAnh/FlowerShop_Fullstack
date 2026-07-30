@@ -11,6 +11,7 @@ namespace Flower.Backend.Models.DTOs
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string Role { get; set; }
+        public string? Avatar { get; set; }
     }
 
     public class CreateUserDTO
@@ -26,6 +27,8 @@ namespace Flower.Backend.Models.DTOs
         public string FullName { get; set; }
         [Required(ErrorMessage = "Vai trò không được để trống")]
         public string Role { get; set; }
+
+        public string? Avatar { get; set; }
     }
 
     public class UpdateUserDTO
@@ -46,5 +49,7 @@ namespace Flower.Backend.Models.DTOs
         public string? Address { get; set; }
         [Required]
         public string Role { get; set; }
+
+        public string? Avatar { get; set; }
     }
 }

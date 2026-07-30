@@ -21,6 +21,9 @@ namespace Flower.Data.Entities
 
         public string? Address { get; set; }
 
+        [MaxLength(2000)]
+        public string? Avatar { get; set; }
+
         [Required]
         [Column("Password")]
         public string PasswordHash { get; set; }

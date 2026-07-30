@@ -18,7 +18,8 @@ namespace Flower.Backend.Models.DTOs
                 Email = user.Email,
                 Phone = user.Phone,
                 Address = user.Address,
-                Role = user.Role
+                Role = user.Role,
+                Avatar = user.Avatar
             };
         }
 
@@ -29,8 +30,21 @@ namespace Flower.Backend.Models.DTOs
             {
                 Username = dto.Username,
                 FullName = dto.FullName,
-                Role = dto.Role
+                Role = dto.Role,
+                Avatar = dto.Avatar
             };
+        }
+
+        public static void UpdateEntity(this UpdateUserDTO dto, User entity)
+        {
+            if (dto == null || entity == null) return;
+            entity.Username = dto.Username;
+            entity.FullName = dto.FullName;
+            entity.Email = dto.Email;
+            entity.Phone = dto.Phone;
+            entity.Address = dto.Address;
+            entity.Role = dto.Role;
+            entity.Avatar = dto.Avatar;
         }
 
         public static CategoryDTO ToDTO(this Category category)
@@ -73,7 +87,8 @@ namespace Flower.Backend.Models.DTOs
                 Id = categoryProduct.Id,
                 Name = categoryProduct.Name ?? "",
                 Description = categoryProduct.Description,
-                Slug = categoryProduct.Slug
+                Slug = categoryProduct.Slug,
+                ImageUrl = categoryProduct.ImageUrl
             };
         }
 
@@ -84,7 +99,8 @@ namespace Flower.Backend.Models.DTOs
             {
                 Name = dto.Name,
                 Description = dto.Description,
-                Slug = dto.Slug
+                Slug = dto.Slug,
+                ImageUrl = dto.ImageUrl
             };
         }
 
@@ -94,6 +110,7 @@ namespace Flower.Backend.Models.DTOs
             entity.Name = dto.Name;
             entity.Description = dto.Description;
             entity.Slug = dto.Slug;
+            entity.ImageUrl = dto.ImageUrl;
         }
 
         public static ProductImageDTO ToDTO(this ProductImage image)
@@ -188,7 +205,8 @@ namespace Flower.Backend.Models.DTOs
                 FailedDeliveries = customer.FailedDeliveries,
                 IsBlacklisted = customer.IsBlacklisted,
                 FraudScore = customer.FraudScore,
-                IsActive = customer.IsActive
+                IsActive = customer.IsActive,
+                Avatar = customer.Avatar
             };
         }
 

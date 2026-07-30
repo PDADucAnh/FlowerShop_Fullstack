@@ -18,6 +18,7 @@ namespace Flower.Backend.Models.DTOs
         public int FraudScore { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string? Avatar { get; set; }
     }
 
     public class CreateCustomerDTO

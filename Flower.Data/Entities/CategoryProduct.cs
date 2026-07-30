@@ -19,6 +19,9 @@ namespace Flower.Data.Entities
         [MaxLength(300)]
         public string? Slug { get; set; }
 
+        [MaxLength(2000)]
+        public string? ImageUrl { get; set; }
+
         public virtual ICollection<Product>? Products { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
