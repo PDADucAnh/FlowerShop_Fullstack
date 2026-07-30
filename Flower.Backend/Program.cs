@@ -303,20 +303,29 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        if (!context.Users.Any(u => u.Username == "admin"))
+        var admin = await context.Users.FirstOrDefaultAsync(u => u.Username == "admin");
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
+
+        if (admin == null)
         {
-            var admin = new Flower.Data.Entities.User
+            admin = new Flower.Data.Entities.User
             {
                 Username = "admin",
                 FullName = "Administrator",
                 Role = "Admin"
             };
-            var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<Flower.Data.Entities.User>();
             admin.PasswordHash = hasher.HashPassword(admin, "123456");
             context.Users.Add(admin);
-            context.SaveChanges();
             logger.LogInformation("Seeded admin user (admin / 123456)");
         }
+        else
+        {
+            admin.PasswordHash = hasher.HashPassword(admin, "123456");
+            context.Users.Update(admin);
+            logger.LogInformation("Updated admin user password (admin / 123456)");
+        }
+
+        await context.SaveChangesAsync();
     }
     catch (Exception ex)
     {
