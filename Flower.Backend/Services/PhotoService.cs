@@ -4,6 +4,7 @@ using Flower.Backend.Models.DTOs;
 using Flower.Backend.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Hosting;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System.IO;
@@ -15,12 +16,14 @@ namespace Flower.Backend.Services
     {
         private readonly ISystemSettingService _settingService;
         private readonly ILogger<PhotoService> _logger;
+        private readonly IWebHostEnvironment _env;
         private Cloudinary? _cloudinary;
 
-        public PhotoService(ISystemSettingService settingService, ILogger<PhotoService> logger)
+        public PhotoService(ISystemSettingService settingService, ILogger<PhotoService> logger, IWebHostEnvironment env)
         {
             _settingService = settingService;
             _logger = logger;
+            _env = env;
         }
 
         private CloudinarySettings? _settings;
@@ -135,15 +138,74 @@ namespace Flower.Backend.Services
             if (string.IsNullOrEmpty(imageUrl))
                 return false;
 
-            var cloudinary = await GetCloudinaryAsync();
-            var uri = new System.Uri(imageUrl);
-            var segments = uri.Segments;
-            var lastSegment = segments[^1];
-            var publicId = _settings!.Folder + "/" + System.IO.Path.GetFileNameWithoutExtension(lastSegment);
+            if (imageUrl.StartsWith("http"))
+                return await DeleteCloudinaryPhotoAsync(imageUrl);
 
-            var deleteParams = new DeletionParams(publicId);
-            var result = await cloudinary.DestroyAsync(deleteParams);
-            return result.Result == "ok";
+            return DeleteLocalPhotoAsync(imageUrl);
+        }
+
+        private async Task<bool> DeleteCloudinaryPhotoAsync(string imageUrl)
+        {
+            try
+            {
+                var cloudinary = await GetCloudinaryAsync();
+                var uri = new Uri(imageUrl);
+                var path = uri.AbsolutePath;
+
+                var uploadIndex = path.IndexOf("/upload/", StringComparison.OrdinalIgnoreCase);
+                if (uploadIndex < 0)
+                {
+                    _logger.LogWarning("DeleteCloudinaryPhotoAsync: URL does not contain /upload/ path: {Url}", imageUrl);
+                    return false;
+                }
+
+                var afterUpload = path[(uploadIndex + 8)..];
+
+                if (afterUpload.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                {
+                    var slashIndex = afterUpload.IndexOf('/');
+                    if (slashIndex > 0)
+                        afterUpload = afterUpload[(slashIndex + 1)..];
+                }
+
+                var extIndex = afterUpload.LastIndexOf('.');
+                var publicId = extIndex >= 0 ? afterUpload[..extIndex] : afterUpload;
+
+                var deleteParams = new DeletionParams(publicId);
+                var result = await cloudinary.DestroyAsync(deleteParams);
+                _logger.LogInformation("DeleteCloudinaryPhotoAsync: PublicId={PublicId}, Result={Result}", publicId, result.Result);
+                return result.Result == "ok";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteCloudinaryPhotoAsync failed for URL: {Url}", imageUrl);
+                return false;
+            }
+        }
+
+        private bool DeleteLocalPhotoAsync(string imageUrl)
+        {
+            try
+            {
+                var relativePath = imageUrl.TrimStart('/');
+                var fullPath = Path.Combine(_env.WebRootPath, relativePath);
+                fullPath = fullPath.Replace('/', Path.DirectorySeparatorChar);
+
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                    _logger.LogInformation("DeleteLocalPhotoAsync: Deleted local file: {Path}", fullPath);
+                    return true;
+                }
+
+                _logger.LogWarning("DeleteLocalPhotoAsync: File not found: {Path}", fullPath);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "DeleteLocalPhotoAsync failed for URL: {Url}", imageUrl);
+                return false;
+            }
         }
     }
 }

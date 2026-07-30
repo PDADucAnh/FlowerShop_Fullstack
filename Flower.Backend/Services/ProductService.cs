@@ -14,11 +14,13 @@ namespace Flower.Backend.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly IPriceCalculationService _priceCalculationService;
+        private readonly IPhotoService _photoService;
 
-        public ProductService(IApplicationDbContext context, IPriceCalculationService priceCalculationService)
+        public ProductService(IApplicationDbContext context, IPriceCalculationService priceCalculationService, IPhotoService photoService)
         {
             _context = context;
             _priceCalculationService = priceCalculationService;
+            _photoService = photoService;
         }
 
         private async Task EnrichWithPromotion(IEnumerable<ProductDTO> products)
@@ -227,9 +229,13 @@ namespace Flower.Backend.Services
 
         public async Task<bool> Delete(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            var product = await _context.Products
+                .Include(p => p.Images)
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (product == null)
                 return false;
+
+            await DeleteProductImagesAsync(product);
 
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
@@ -242,17 +248,35 @@ namespace Flower.Backend.Services
                 return 0;
 
             var products = await _context.Products
+                .Include(p => p.Images)
                 .Where(p => ids.Contains(p.Id) && p.IsActive)
                 .ToListAsync();
 
             foreach (var product in products)
             {
+                await DeleteProductImagesAsync(product);
+
                 product.IsActive = false;
                 product.UpdatedAt = DateTime.UtcNow;
             }
 
             await _context.SaveChangesAsync();
             return products.Count;
+        }
+
+        private async Task DeleteProductImagesAsync(Product product)
+        {
+            if (!string.IsNullOrEmpty(product.ImageUrl))
+                await _photoService.DeletePhotoAsync(product.ImageUrl);
+
+            if (product.Images != null)
+            {
+                foreach (var image in product.Images)
+                {
+                    if (!string.IsNullOrEmpty(image.ImageUrl))
+                        await _photoService.DeletePhotoAsync(image.ImageUrl);
+                }
+            }
         }
 
         public async Task<IEnumerable<ProductDTO>> Search(string query)

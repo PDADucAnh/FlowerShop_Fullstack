@@ -20,17 +20,20 @@ namespace Flower.Backend.Controllers.Api
         private readonly INotificationService _notificationService;
         private readonly IApplicationDbContext _context;
         private readonly IPriceCalculationService _priceCalculationService;
+        private readonly IPhotoService _photoService;
 
         public ProductsController(
             IProductService productService, 
             INotificationService notificationService,
             IApplicationDbContext context,
-            IPriceCalculationService priceCalculationService)
+            IPriceCalculationService priceCalculationService,
+            IPhotoService photoService)
         {
             _productService = productService;
             _notificationService = notificationService;
             _context = context;
             _priceCalculationService = priceCalculationService;
+            _photoService = photoService;
         }
 
         [AllowAnonymous]
@@ -206,6 +209,9 @@ namespace Flower.Backend.Controllers.Api
 
             if (image == null)
                 return NotFound();
+
+            if (!string.IsNullOrEmpty(image.ImageUrl))
+                await _photoService.DeletePhotoAsync(image.ImageUrl);
 
             _context.ProductImages.Remove(image);
             await _context.SaveChangesAsync();

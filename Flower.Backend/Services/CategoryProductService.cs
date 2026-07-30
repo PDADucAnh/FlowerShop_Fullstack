@@ -12,10 +12,12 @@ namespace Flower.Backend.Services
     public class CategoryProductService : ICategoryProductService
     {
         private readonly IApplicationDbContext _context;
+        private readonly IPhotoService _photoService;
 
-        public CategoryProductService(IApplicationDbContext context)
+        public CategoryProductService(IApplicationDbContext context, IPhotoService photoService)
         {
             _context = context;
+            _photoService = photoService;
         }
 
         public async Task<IEnumerable<CategoryProductDTO>> GetAll()
@@ -91,6 +93,9 @@ namespace Flower.Backend.Services
             var category = await _context.CategoriesProducts.FindAsync(id);
             if (category == null)
                 return false;
+
+            if (!string.IsNullOrEmpty(category.ImageUrl))
+                await _photoService.DeletePhotoAsync(category.ImageUrl);
 
             _context.CategoriesProducts.Remove(category);
             await _context.SaveChangesAsync();
