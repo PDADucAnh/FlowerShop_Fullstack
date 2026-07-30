@@ -294,14 +294,7 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        if (dbProvider == "PostgreSQL")
-        {
-            await context.Database.EnsureCreatedAsync();
-        }
-        else
-        {
-            await context.Database.MigrateAsync();
-        }
+        await context.Database.MigrateAsync();
     }
     catch (Exception ex)
     {
