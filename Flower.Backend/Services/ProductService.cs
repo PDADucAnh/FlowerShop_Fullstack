@@ -236,6 +236,25 @@ namespace Flower.Backend.Services
             return true;
         }
 
+        public async Task<int> BulkDeleteAsync(List<int> ids)
+        {
+            if (ids == null || ids.Count == 0)
+                return 0;
+
+            var products = await _context.Products
+                .Where(p => ids.Contains(p.Id) && p.IsActive)
+                .ToListAsync();
+
+            foreach (var product in products)
+            {
+                product.IsActive = false;
+                product.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            return products.Count;
+        }
+
         public async Task<IEnumerable<ProductDTO>> Search(string query)
         {
             if (string.IsNullOrEmpty(query))

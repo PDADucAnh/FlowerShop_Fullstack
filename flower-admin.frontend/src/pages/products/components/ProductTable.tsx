@@ -9,16 +9,39 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Pencil, Trash2 } from 'lucide-react'
 import type { Product } from '@/types/product'
 
 interface ProductTableProps {
   products: Product[]
+  selectedIds: Set<number>
+  onSelectedIdsChange: (ids: Set<number>) => void
   onDelete: (product: Product) => void
 }
 
-export function ProductTable({ products, onDelete }: ProductTableProps) {
+export function ProductTable({ products, selectedIds, onSelectedIdsChange, onDelete }: ProductTableProps) {
   const navigate = useNavigate()
+
+  const allSelected = products.length > 0 && products.every((p) => selectedIds.has(p.id))
+
+  const toggleAll = () => {
+    if (allSelected) {
+      onSelectedIdsChange(new Set())
+    } else {
+      onSelectedIdsChange(new Set(products.map((p) => p.id)))
+    }
+  }
+
+  const toggleOne = (id: number) => {
+    const next = new Set(selectedIds)
+    if (next.has(id)) {
+      next.delete(id)
+    } else {
+      next.add(id)
+    }
+    onSelectedIdsChange(next)
+  }
 
   const stockBadge = (qty: number) => {
     if (qty === 0) return <Badge variant="destructive">Hết hàng</Badge>
@@ -33,6 +56,9 @@ export function ProductTable({ products, onDelete }: ProductTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-10">
+            <Checkbox checked={allSelected} onCheckedChange={toggleAll} />
+          </TableHead>
           <TableHead className="w-12">Ảnh</TableHead>
           <TableHead>Tên sản phẩm</TableHead>
           <TableHead>SKU</TableHead>
@@ -46,6 +72,12 @@ export function ProductTable({ products, onDelete }: ProductTableProps) {
       <TableBody>
         {products.map((product) => (
           <TableRow key={product.id}>
+            <TableCell>
+              <Checkbox
+                checked={selectedIds.has(product.id)}
+                onCheckedChange={() => toggleOne(product.id)}
+              />
+            </TableCell>
             <TableCell>
               <img
                 src={product.images?.[0]?.imageUrl || product.imageUrl || '/placeholder.svg'}

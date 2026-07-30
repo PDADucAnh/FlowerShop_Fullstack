@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Flower.Backend.Models.DTOs
@@ -159,5 +160,10 @@ namespace Flower.Backend.Models.DTOs
         public string? ImageUrl { get; set; }
         public int StockQuantity { get; set; }
         public string? Description { get; set; }
+    }
+
+    public class BulkDeleteRequest
+    {
+        public List<int> ProductIds { get; set; } = new();
     }
 }

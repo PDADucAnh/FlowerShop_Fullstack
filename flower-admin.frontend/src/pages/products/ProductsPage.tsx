@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { productsApi } from '@/api/products'
 import { categoriesApi } from '@/api/categories'
 import { ProductTable } from './components/ProductTable'
@@ -15,15 +15,29 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Search, Loader2, AlertCircle } from 'lucide-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import { Plus, Search, Loader2, AlertCircle, Trash2, X } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Product } from '@/types/product'
 
 export function ProductsPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set())
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false)
   const pageSize = 20
 
   const { data: categories } = useQuery({
@@ -39,6 +53,20 @@ export function ProductsPage() {
         pageSize,
         categoryProductId: categoryFilter === 'all' ? null : Number(categoryFilter),
       }).then((r) => r.data),
+  })
+
+  const bulkDeleteMutation = useMutation({
+    mutationFn: (ids: number[]) => productsApi.bulkDelete(ids),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] })
+      toast.success(`Đã xóa ${selectedIds.size} sản phẩm`)
+      setSelectedIds(new Set())
+      setConfirmBulkDelete(false)
+    },
+    onError: () => {
+      toast.error('Không thể xóa sản phẩm')
+      setConfirmBulkDelete(false)
+    },
   })
 
   const handleSearch = () => {
@@ -102,6 +130,32 @@ export function ProductsPage() {
         </Select>
       </div>
 
+      {selectedIds.size > 0 && (
+        <div className="flex items-center justify-between rounded-lg border bg-muted/50 px-4 py-2.5">
+          <p className="text-sm">
+            Đã chọn <strong>{selectedIds.size}</strong> sản phẩm
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              <X className="mr-1 size-4" />
+              Bỏ chọn
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setConfirmBulkDelete(true)}
+            >
+              <Trash2 className="mr-1 size-4" />
+              Xóa các sản phẩm đã chọn
+            </Button>
+          </div>
+        </div>
+      )}
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base">
@@ -113,6 +167,8 @@ export function ProductsPage() {
             <div>
               <ProductTable
                 products={data.items}
+                selectedIds={selectedIds}
+                onSelectedIdsChange={setSelectedIds}
                 onDelete={setDeleteTarget}
               />
               {(data.totalPages ?? 0) > 1 && (
@@ -160,6 +216,28 @@ export function ProductsPage() {
           setDeleteTarget(null)
         }}
       />
+
+      <AlertDialog open={confirmBulkDelete} onOpenChange={setConfirmBulkDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Xóa sản phẩm hàng loạt</AlertDialogTitle>
+            <AlertDialogDescription>
+              Bạn có chắc chắn muốn xóa <strong>{selectedIds.size}</strong> sản phẩm đã chọn?
+              Sản phẩm sẽ được chuyển sang trạng thái ngừng kinh doanh. Hành động này có thể hoàn tác.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => bulkDeleteMutation.mutate([...selectedIds])}
+              disabled={bulkDeleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {bulkDeleteMutation.isPending ? 'Đang xóa…' : 'Xóa'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

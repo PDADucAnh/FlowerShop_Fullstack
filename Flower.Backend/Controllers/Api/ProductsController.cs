@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Flower.Data;
 
@@ -140,6 +141,23 @@ namespace Flower.Backend.Controllers.Api
 
             await _notificationService.NotifyEntityChanged("Product");
             return NoContent();
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("bulk-delete")]
+        public async Task<IActionResult> BulkDelete([FromBody] BulkDeleteRequest request)
+        {
+            if (request?.ProductIds == null || request.ProductIds.Count == 0)
+                return BadRequest(new { message = "Danh sách sản phẩm không hợp lệ" });
+
+            var deletedCount = await _productService.BulkDeleteAsync(request.ProductIds);
+            await _notificationService.NotifyEntityChanged("Product");
+
+            return Ok(new
+            {
+                deletedCount,
+                message = $"Đã xóa {deletedCount} sản phẩm"
+            });
         }
 
         [AllowAnonymous]

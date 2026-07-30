@@ -13,6 +13,7 @@ namespace Flower.Backend.Services.Interfaces
         Task<ProductDTO> Create(CreateProductDTO dto);
         Task<bool> Update(int id, UpdateProductDTO dto);
         Task<bool> Delete(int id);
+        Task<int> BulkDeleteAsync(List<int> ids);
         Task<IEnumerable<ProductDTO>> Search(string query);
         Task<IEnumerable<ProductDTO>> GetTrending(int count = 10);
         Task TrackView(int productId);

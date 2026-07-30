@@ -34,6 +34,10 @@ export const productsApi = {
     return apiClient.delete(`/api/Products/${id}`)
   },
 
+  bulkDelete(productIds: number[]) {
+    return apiClient.post('/api/Products/bulk-delete', { productIds })
+  },
+
   getImages(productId: number) {
     return apiClient.get(`/api/Products/${productId}/images`)
   },
