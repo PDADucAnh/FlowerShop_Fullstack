@@ -13,22 +13,19 @@ namespace Flower.Data.Migrations
             migrationBuilder.AddColumn<string>(
                 name: "Avatar",
                 table: "Users",
-                type: "nvarchar(2000)",
-                maxLength: 2000,
+                type: "text",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "Avatar",
                 table: "Customers",
-                type: "nvarchar(2000)",
-                maxLength: 2000,
+                type: "text",
                 nullable: true);
 
             migrationBuilder.AddColumn<string>(
                 name: "ImageUrl",
                 table: "CategoriesProducts",
-                type: "nvarchar(2000)",
-                maxLength: 2000,
+                type: "text",
                 nullable: true);
         }
 
