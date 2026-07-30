@@ -319,22 +319,18 @@ export function ImportPage() {
       <h1 className="text-2xl font-semibold">Import dữ liệu</h1>
 
       <Tabs defaultValue="products">
-        <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="products">Sản phẩm</TabsTrigger>
-            <TabsTrigger value="categories">Danh mục</TabsTrigger>
-          </TabsList>
-          <div className="flex gap-1">
-            {document.querySelector('[data-tab="products"]') && (
-              <Button variant="outline" size="sm" onClick={handleDownloadProductTemplate}>
-                <Download className="mr-1 size-4" />
-                Mẫu SP
-              </Button>
-            )}
-          </div>
-        </div>
+        <TabsList>
+          <TabsTrigger value="products">Sản phẩm</TabsTrigger>
+          <TabsTrigger value="categories">Danh mục</TabsTrigger>
+        </TabsList>
 
         <TabsContent value="products" className="mt-4">
+          <div className="mb-4 flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleDownloadProductTemplate}>
+              <Download className="mr-1 size-4" />
+              Tải file Excel mẫu
+            </Button>
+          </div>
           <ImportForm
             type="products"
             isPending={productMutation.isPending}
@@ -354,6 +350,12 @@ export function ImportPage() {
         </TabsContent>
 
         <TabsContent value="categories" className="mt-4">
+          <div className="mb-4 flex justify-end">
+            <Button variant="outline" size="sm" onClick={handleDownloadCategoryTemplate}>
+              <Download className="mr-1 size-4" />
+              Tải file Excel mẫu
+            </Button>
+          </div>
           <ImportForm
             type="categories"
             isPending={categoryMutation.isPending}
