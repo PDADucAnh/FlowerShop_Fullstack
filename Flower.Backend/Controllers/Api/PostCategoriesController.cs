@@ -9,11 +9,11 @@ namespace Flower.Backend.Controllers.Api
     [Authorize(Policy = "StaffOnly")]
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesController : ControllerBase
+    public class PostCategoriesController : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
+        private readonly IPostCategoryService _categoryService;
 
-        public CategoriesController(ICategoryService categoryService)
+        public PostCategoriesController(IPostCategoryService categoryService)
         {
             _categoryService = categoryService;
         }
@@ -38,7 +38,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreatePostCategoryDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -48,7 +48,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePostCategoryDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();

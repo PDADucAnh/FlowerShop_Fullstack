@@ -11,9 +11,9 @@ namespace Flower.Backend.Controllers.Api
     public class AdvertisementsController : ControllerBase
     {
         private readonly IAdvertisementService _advertisementService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public AdvertisementsController(IAdvertisementService advertisementService, INotificationService notificationService)
+        public AdvertisementsController(IAdvertisementService advertisementService, ICustomerNotificationService notificationService)
         {
             _advertisementService = advertisementService;
             _notificationService = notificationService;

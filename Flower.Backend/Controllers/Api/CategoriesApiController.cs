@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Controllers.Api
 {
-    [Route("api/categories")]
+    [Route("api/postcategories")]
     [ApiController]
     [Authorize(Policy = "StaffOnly")]
     public class CategoriesApiController : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
+        private readonly IPostCategoryService _categoryService;
 
-        public CategoriesApiController(ICategoryService categoryService)
+        public CategoriesApiController(IPostCategoryService categoryService)
         {
             _categoryService = categoryService;
         }
@@ -37,7 +37,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreatePostCategoryDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -47,7 +47,7 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryDTO dto)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdatePostCategoryDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();

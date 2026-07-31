@@ -10,11 +10,11 @@ namespace Flower.Backend.Controllers.Api
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class NotificationsController : ControllerBase
+    public class CustomerNotificationsController : ControllerBase
     {
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public NotificationsController(INotificationService notificationService)
+        public CustomerNotificationsController(ICustomerNotificationService notificationService)
         {
             _notificationService = notificationService;
         }

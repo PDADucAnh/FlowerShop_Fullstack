@@ -14,9 +14,9 @@ namespace Flower.Backend.Controllers.Api
         private readonly IPromotionService _promotionService;
         private readonly ICouponService _couponService;
         private readonly IPriceCalculationService _priceCalculationService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public PromotionsController(IPromotionService promotionService, ICouponService couponService, IPriceCalculationService priceCalculationService, INotificationService notificationService)
+        public PromotionsController(IPromotionService promotionService, ICouponService couponService, IPriceCalculationService priceCalculationService, ICustomerNotificationService notificationService)
         {
             _promotionService = promotionService;
             _couponService = couponService;

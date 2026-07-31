@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 namespace Flower.Backend.Controllers
 {
     [Authorize(Policy = "StaffOnly")]
-    public class CategoryController : Controller
+    public class PostCategoryController : Controller
     {
-        private readonly ICategoryService _categoryService;
+        private readonly IPostCategoryService _categoryService;
         private readonly IApplicationDbContext _context;
 
-        public CategoryController(ICategoryService categoryService, IApplicationDbContext context)
+        public PostCategoryController(IPostCategoryService categoryService, IApplicationDbContext context)
         {
             _categoryService = categoryService;
             _context = context;
@@ -47,7 +47,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateCategoryDTO model)
+        public async Task<IActionResult> Create(CreatePostCategoryDTO model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -68,11 +68,11 @@ namespace Flower.Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var category = await _context.Categories
+            var category = await _context.PostCategories
                 .FirstOrDefaultAsync(c => c.Id == id);
             if (category == null) return NotFound();
 
-            var model = new UpdateCategoryDTO
+            var model = new UpdatePostCategoryDTO
             {
                 Id = category.Id,
                 Name = category.Name,
@@ -84,7 +84,7 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(UpdateCategoryDTO model)
+        public async Task<IActionResult> Edit(UpdatePostCategoryDTO model)
         {
             if (!ModelState.IsValid)
                 return View(model);

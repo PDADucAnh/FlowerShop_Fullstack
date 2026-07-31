@@ -11,10 +11,10 @@ namespace Flower.Backend.Controllers
     public class PageController : Controller
     {
         private readonly IPageService _pageService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly ILogger<PageController> _logger;
 
-        public PageController(IPageService pageService, INotificationService notificationService, ILogger<PageController> logger)
+        public PageController(IPageService pageService, ICustomerNotificationService notificationService, ILogger<PageController> logger)
         {
             _pageService = pageService;
             _notificationService = notificationService;

@@ -37,10 +37,10 @@
             <div class="flex justify-between items-center border-b border-outline-variant pb-lg">
                 <div class="flex items-center gap-md">
                     <div class="size-10 bg-primary flex items-center justify-center text-on-primary font-bold text-xs uppercase tracking-widest">
-                        @(Model.CategoryName?.Substring(0, 1) ?? "E")
+                        @(Model.PostCategoryName?.Substring(0, 1) ?? "E")
                     </div>
                     <div>
-                        <p class="text-label-sm font-bold uppercase tracking-widest">@(Model.CategoryName ?? "Bài viết")</p>
+                        <p class="text-label-sm font-bold uppercase tracking-widest">@(Model.PostCategoryName ?? "Bài viết")</p>
                         <p class="text-[10px] text-secondary uppercase tracking-[0.2em]">Ngày đăng: @Model.CreatedDate.ToString("dd/MM/yyyy")</p>
                     </div>
                 </div>

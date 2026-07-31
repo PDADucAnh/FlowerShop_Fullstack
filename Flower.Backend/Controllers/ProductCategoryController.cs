@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 namespace Flower.Backend.Controllers
 {
     [Authorize(Policy = "StaffOnly")]
-    public class CategoryProductController : Controller
+    public class ProductCategoryController : Controller
     {
-        private readonly ICategoryProductService _categoryProductService;
-        private readonly INotificationService _notificationService;
+        private readonly IProductCategoryService _categoryProductService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly IApplicationDbContext _context;
 
-        public CategoryProductController(ICategoryProductService categoryProductService, INotificationService notificationService, IApplicationDbContext context)
+        public ProductCategoryController(IProductCategoryService categoryProductService, ICustomerNotificationService notificationService, IApplicationDbContext context)
         {
             _categoryProductService = categoryProductService;
             _notificationService = notificationService;
@@ -40,13 +40,13 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateCategoryProductDTO model)
+        public async Task<IActionResult> Create(CreateProductCategoryDTO model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             await _categoryProductService.Create(model);
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             TempData["Success"] = "Danh mục sản phẩm đã được tạo thành công.";
             return RedirectToAction("Index");
         }
@@ -55,7 +55,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             await _categoryProductService.Delete(id);
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             TempData["Success"] = "Danh mục sản phẩm đã được xóa.";
             return RedirectToAction("Index");
         }
@@ -63,11 +63,11 @@ namespace Flower.Backend.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(int id)
         {
-            var category = await _context.CategoriesProducts
+            var category = await _context.ProductCategories
                 .FirstOrDefaultAsync(cp => cp.Id == id);
             if (category == null) return NotFound();
 
-            var model = new UpdateCategoryProductDTO
+            var model = new UpdateProductCategoryDTO
             {
                 Id = category.Id,
                 Name = category.Name,
@@ -79,13 +79,13 @@ namespace Flower.Backend.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(UpdateCategoryProductDTO model)
+        public async Task<IActionResult> Edit(UpdateProductCategoryDTO model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             await _categoryProductService.Update(model.Id, model);
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             TempData["Success"] = "Danh mục sản phẩm đã được cập nhật.";
             return RedirectToAction("Index");
         }

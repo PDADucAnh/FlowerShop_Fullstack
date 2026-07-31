@@ -22,7 +22,7 @@ namespace Flower.Backend.Services
         public async Task<IEnumerable<PostDTO>> GetAll()
         {
             var list = await _context.Posts
-                .Include(p => p.Category)
+                .Include(p => p.PostCategory)
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
             return list.Select(p => p.ToDTO());
@@ -31,7 +31,7 @@ namespace Flower.Backend.Services
         public async Task<PagedResult<PostDTO>> GetPaged(int page, int pageSize, string? search = null)
         {
             var query = _context.Posts
-                .Include(p => p.Category)
+                .Include(p => p.PostCategory)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -59,7 +59,7 @@ namespace Flower.Backend.Services
         public async Task<PostDTO?> GetById(int id)
         {
             var post = await _context.Posts
-                .Include(p => p.Category)
+                .Include(p => p.PostCategory)
                 .FirstOrDefaultAsync(p => p.Id == id);
             return post?.ToDTO();
         }
@@ -67,8 +67,8 @@ namespace Flower.Backend.Services
         public async Task<IEnumerable<PostDTO>> GetByCategory(int categoryId)
         {
             var posts = await _context.Posts
-                .Where(p => p.CategoryId == categoryId)
-                .Include(p => p.Category)
+                .Where(p => p.PostCategoryId == categoryId)
+                .Include(p => p.PostCategory)
                 .OrderByDescending(p => p.Id)
                 .ToListAsync();
             return posts.Select(p => p.ToDTO());
@@ -86,7 +86,7 @@ namespace Flower.Backend.Services
             await _context.SaveChangesAsync();
 
             await _context.Entry(post)
-                .Reference(p => p.Category)
+                .Reference(p => p.PostCategory)
                 .LoadAsync();
 
             return post.ToDTO();

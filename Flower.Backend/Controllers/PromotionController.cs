@@ -10,9 +10,9 @@ namespace Flower.Backend.Controllers
     public class PromotionController : Controller
     {
         private readonly IPromotionService _promotionService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public PromotionController(IPromotionService promotionService, INotificationService notificationService)
+        public PromotionController(IPromotionService promotionService, ICustomerNotificationService notificationService)
         {
             _promotionService = promotionService;
             _notificationService = notificationService;

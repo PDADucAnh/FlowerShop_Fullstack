@@ -18,12 +18,12 @@ namespace Flower.Backend.Controllers
     public class PostController : Controller
     {
         private readonly IPostService _postService;
-        private readonly ICategoryService _categoryService;
-        private readonly INotificationService _notificationService;
+        private readonly IPostCategoryService _categoryService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly IApplicationDbContext _context;
         private readonly IPhotoService _photoService;
 
-        public PostController(IPostService postService, ICategoryService categoryService, INotificationService notificationService, IApplicationDbContext context, IPhotoService photoService)
+        public PostController(IPostService postService, IPostCategoryService categoryService, ICustomerNotificationService notificationService, IApplicationDbContext context, IPhotoService photoService)
         {
             _postService = postService;
             _categoryService = categoryService;
@@ -37,7 +37,7 @@ namespace Flower.Backend.Controllers
             if (id != null)
             {
                 var allPosts = await _postService.GetAll();
-                var filtered = allPosts.Where(p => p.CategoryId == id.Value).ToList();
+                var filtered = allPosts.Where(p => p.PostCategoryId == id.Value).ToList();
                 ViewData["TotalPages"] = 1;
                 ViewData["CurrentPage"] = 1;
                 ViewData["TotalCount"] = filtered.Count;
@@ -90,7 +90,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryService.GetAll();
-            ViewBag.CategoryList = new SelectList(categories, "Id", "Name");
+            ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name");
             return View();
         }
 
@@ -100,7 +100,7 @@ namespace Flower.Backend.Controllers
             if (!ModelState.IsValid)
             {
                 var categories = await _categoryService.GetAll();
-                ViewBag.CategoryList = new SelectList(categories, "Id", "Name", model.CategoryId);
+                ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name", model.PostCategoryId);
                 return View(model);
             }
 
@@ -115,7 +115,7 @@ namespace Flower.Backend.Controllers
                 {
                     ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
                     var categories = await _categoryService.GetAll();
-                    ViewBag.CategoryList = new SelectList(categories, "Id", "Name", model.CategoryId);
+                    ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name", model.PostCategoryId);
                     return View(model);
                 }
 
@@ -140,7 +140,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var categories = await _categoryService.GetAll();
-            ViewBag.CategoryList = new SelectList(categories, "Id", "Name");
+            ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name");
 
             var post = await _context.Posts
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -154,7 +154,7 @@ namespace Flower.Backend.Controllers
                 Summary = post.Summary,
                 Slug = post.Slug,
                 ImageUrl = post.ImageUrl,
-                CategoryId = post.CategoryId
+                PostCategoryId = post.PostCategoryId
             };
 
             return View(model);
@@ -167,7 +167,7 @@ namespace Flower.Backend.Controllers
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
                 var categories = await _categoryService.GetAll();
-                ViewBag.CategoryList = new SelectList(categories, "Id", "Name", model.CategoryId);
+                ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name", model.PostCategoryId);
                 return View(model);
             }
 
@@ -189,7 +189,7 @@ namespace Flower.Backend.Controllers
             {
                 TempData["Error"] = "Không thể cập nhật bài viết. Vui lòng thử lại.";
                 var categories = await _categoryService.GetAll();
-                ViewBag.CategoryList = new SelectList(categories, "Id", "Name", model.CategoryId);
+                ViewBag.PostCategoryList = new SelectList(categories, "Id", "Name", model.PostCategoryId);
                 return View(model);
             }
 

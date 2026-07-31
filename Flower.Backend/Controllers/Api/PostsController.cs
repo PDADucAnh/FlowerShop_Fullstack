@@ -12,9 +12,9 @@ namespace Flower.Backend.Controllers.Api
     public class PostsController : ControllerBase
     {
         private readonly IPostService _postService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public PostsController(IPostService postService, INotificationService notificationService)
+        public PostsController(IPostService postService, ICustomerNotificationService notificationService)
         {
             _postService = postService;
             _notificationService = notificationService;
@@ -37,10 +37,10 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [AllowAnonymous]
-        [HttpGet("category/{categoryId}")]
-        public async Task<IActionResult> GetByCategory(int categoryId)
+        [HttpGet("category/{postCategoryId}")]
+        public async Task<IActionResult> GetByCategory(int postCategoryId)
         {
-            var posts = await _postService.GetByCategory(categoryId);
+            var posts = await _postService.GetByCategory(postCategoryId);
             return Ok(posts);
         }
 

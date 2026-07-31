@@ -11,10 +11,10 @@ namespace Flower.Backend.Controllers
     public class AdvertisementController : Controller
     {
         private readonly IAdvertisementService _advertisementService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly IPhotoService _photoService;
 
-        public AdvertisementController(IAdvertisementService advertisementService, INotificationService notificationService, IPhotoService photoService)
+        public AdvertisementController(IAdvertisementService advertisementService, ICustomerNotificationService notificationService, IPhotoService photoService)
         {
             _advertisementService = advertisementService;
             _notificationService = notificationService;

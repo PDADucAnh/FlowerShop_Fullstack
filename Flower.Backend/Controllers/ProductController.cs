@@ -20,13 +20,13 @@ namespace Flower.Backend.Controllers
     public class ProductController : Controller
     {
         private readonly IProductService _productService;
-        private readonly ICategoryProductService _categoryProductService;
-        private readonly INotificationService _notificationService;
+        private readonly IProductCategoryService _categoryProductService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly IApplicationDbContext _context;
         private readonly IPhotoService _photoService;
         private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService, ICategoryProductService categoryProductService, INotificationService notificationService, IApplicationDbContext context, IPhotoService photoService, ILogger<ProductController> logger)
+        public ProductController(IProductService productService, IProductCategoryService categoryProductService, ICustomerNotificationService notificationService, IApplicationDbContext context, IPhotoService photoService, ILogger<ProductController> logger)
         {
             _productService = productService;
             _categoryProductService = categoryProductService;
@@ -50,7 +50,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Create()
         {
             var categories = await _categoryProductService.GetAll();
-            ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name");
+            ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name");
             return View();
         }
 
@@ -61,7 +61,7 @@ namespace Flower.Backend.Controllers
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
                 var categories = await _categoryProductService.GetAll();
-                ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                 return View(model);
             }
 
@@ -83,7 +83,7 @@ namespace Flower.Backend.Controllers
                     ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
                     TempData["Error"] = "File ảnh không hợp lệ.";
                     var categories = await _categoryProductService.GetAll();
-                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                     return View(model);
                 }
 
@@ -94,7 +94,7 @@ namespace Flower.Backend.Controllers
                     ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
                     TempData["Error"] = "Upload ảnh thất bại. Vui lòng thử lại hoặc kiểm tra cấu hình Cloudinary.";
                     var categories = await _categoryProductService.GetAll();
-                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                     return View(model);
                 }
             }
@@ -118,7 +118,7 @@ namespace Flower.Backend.Controllers
         public async Task<IActionResult> Edit(int id)
         {
             var categories = await _categoryProductService.GetAll();
-            ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name");
+            ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name");
 
             var product = await _context.Products
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -134,7 +134,7 @@ namespace Flower.Backend.Controllers
                 Sku = product.Sku,
                 StockQuantity = product.StockQuantity,
                 ImageUrl = product.ImageUrl ?? string.Empty,
-                CategoryProductId = product.CategoryProductId
+                ProductCategoryId = product.ProductCategoryId
             };
 
             return View(model);
@@ -154,7 +154,7 @@ namespace Flower.Backend.Controllers
             {
                 TempData["Error"] = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.";
                 var categories = await _categoryProductService.GetAll();
-                ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                 return View(model);
             }
 
@@ -170,7 +170,7 @@ namespace Flower.Backend.Controllers
                     ModelState.AddModelError("uploadImage", "File không hợp lệ. Chỉ chấp nhận file ảnh.");
                     TempData["Error"] = "File ảnh không hợp lệ.";
                     var categories = await _categoryProductService.GetAll();
-                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                     return View(model);
                 }
 
@@ -180,7 +180,7 @@ namespace Flower.Backend.Controllers
                     ModelState.AddModelError("uploadImage", "Upload ảnh thất bại. Vui lòng kiểm tra cấu hình Cloudinary.");
                     TempData["Error"] = "Upload ảnh thất bại. Vui lòng thử lại hoặc kiểm tra cấu hình Cloudinary.";
                     var categories = await _categoryProductService.GetAll();
-                    ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                    ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                     return View(model);
                 }
             }
@@ -198,7 +198,7 @@ namespace Flower.Backend.Controllers
             {
                 TempData["Error"] = "Không thể cập nhật sản phẩm. Vui lòng thử lại.";
                 var categories = await _categoryProductService.GetAll();
-                ViewBag.CategoryProductList = new SelectList(categories, "Id", "Name", model.CategoryProductId);
+                ViewBag.ProductCategoryList = new SelectList(categories, "Id", "Name", model.ProductCategoryId);
                 return View(model);
             }
 

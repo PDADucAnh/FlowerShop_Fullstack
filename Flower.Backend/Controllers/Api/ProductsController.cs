@@ -17,14 +17,14 @@ namespace Flower.Backend.Controllers.Api
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly IApplicationDbContext _context;
         private readonly IPriceCalculationService _priceCalculationService;
         private readonly IPhotoService _photoService;
 
         public ProductsController(
             IProductService productService, 
-            INotificationService notificationService,
+            ICustomerNotificationService notificationService,
             IApplicationDbContext context,
             IPriceCalculationService priceCalculationService,
             IPhotoService photoService)
@@ -43,11 +43,11 @@ namespace Flower.Backend.Controllers.Api
             [FromQuery] int pageSize = 8,
             [FromQuery] decimal? minPrice = null,
             [FromQuery] decimal? maxPrice = null,
-            [FromQuery] int? categoryProductId = null,
+            [FromQuery] int? productCategoryId = null,
             [FromQuery] bool includeInactive = false,
             [FromQuery] bool? isActive = null)
         {
-            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, categoryProductId, includeInactive, isActive);
+            var result = await _productService.GetPaged(page, pageSize, minPrice, maxPrice, productCategoryId, includeInactive, isActive);
             return Ok(result);
         }
 
@@ -68,10 +68,10 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [AllowAnonymous]
-        [HttpGet("categoryproduct/{categoryProductId}")]
-        public async Task<IActionResult> GetByCategoryProduct(int categoryProductId, [FromQuery] bool includeInactive = false)
+        [HttpGet("productcategory/{productCategoryId}")]
+        public async Task<IActionResult> GetByProductCategory(int productCategoryId, [FromQuery] bool includeInactive = false)
         {
-            var products = await _productService.GetByCategoryProduct(categoryProductId, includeInactive);
+            var products = await _productService.GetByProductCategory(productCategoryId, includeInactive);
             return Ok(products);
         }
 

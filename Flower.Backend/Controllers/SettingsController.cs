@@ -15,13 +15,13 @@ namespace Flower.Backend.Controllers
         private readonly ISystemSettingService _settingService;
         private readonly ILogger<SettingsController> _logger;
         private readonly IEmailService _emailService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
         public SettingsController(
             ISystemSettingService settingService,
             ILogger<SettingsController> logger,
             IEmailService emailService,
-            INotificationService notificationService)
+            ICustomerNotificationService notificationService)
         {
             _settingService = settingService;
             _logger = logger;

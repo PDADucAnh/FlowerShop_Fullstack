@@ -9,12 +9,12 @@ namespace Flower.Backend.Controllers.Api
     [Authorize(Policy = "StaffOnly")]
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoriesProductsController : ControllerBase
+    public class ProductCategoriesController : ControllerBase
     {
-        private readonly ICategoryProductService _categoryProductService;
-        private readonly INotificationService _notificationService;
+        private readonly IProductCategoryService _categoryProductService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public CategoriesProductsController(ICategoryProductService categoryProductService, INotificationService notificationService)
+        public ProductCategoriesController(IProductCategoryService categoryProductService, ICustomerNotificationService notificationService)
         {
             _categoryProductService = categoryProductService;
             _notificationService = notificationService;
@@ -40,18 +40,18 @@ namespace Flower.Backend.Controllers.Api
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateCategoryProductDTO dto)
+        public async Task<IActionResult> Create([FromBody] CreateProductCategoryDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var created = await _categoryProductService.Create(dto);
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateCategoryProductDTO dto)
+        public async Task<IActionResult> Update(int id, UpdateProductCategoryDTO dto)
         {
             if (id != dto.Id)
                 return BadRequest();
@@ -64,7 +64,7 @@ namespace Flower.Backend.Controllers.Api
             if (!updated)
                 return NotFound();
 
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             return NoContent();
         }
 
@@ -76,7 +76,7 @@ namespace Flower.Backend.Controllers.Api
             if (!deleted)
                 return NotFound();
 
-            await _notificationService.NotifyEntityChanged("CategoryProduct");
+            await _notificationService.NotifyEntityChanged("ProductCategory");
             return NoContent();
         }
     }

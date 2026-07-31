@@ -12,9 +12,9 @@ namespace Flower.Backend.Controllers.Api
     public class FlashSalesController : ControllerBase
     {
         private readonly IFlashSaleService _flashSaleService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public FlashSalesController(IFlashSaleService flashSaleService, INotificationService notificationService)
+        public FlashSalesController(IFlashSaleService flashSaleService, ICustomerNotificationService notificationService)
         {
             _flashSaleService = flashSaleService;
             _notificationService = notificationService;

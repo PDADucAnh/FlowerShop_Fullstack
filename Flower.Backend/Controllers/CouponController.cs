@@ -10,9 +10,9 @@ namespace Flower.Backend.Controllers
     public class CouponController : Controller
     {
         private readonly ICouponService _couponService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public CouponController(ICouponService couponService, INotificationService notificationService)
+        public CouponController(ICouponService couponService, ICustomerNotificationService notificationService)
         {
             _couponService = couponService;
             _notificationService = notificationService;
