@@ -27,10 +27,10 @@ namespace Flower.Data.Entities
 
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-        public int CategoryId { get; set; }
+        public int PostCategoryId { get; set; }
 
-        [ForeignKey("CategoryId")]
-        public virtual Category Category { get; set; }
+        [ForeignKey("PostCategoryId")]
+        public virtual PostCategory PostCategory { get; set; }
 
         public DateTime? UpdatedAt { get; set; }
     }

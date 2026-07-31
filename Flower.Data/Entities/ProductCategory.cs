@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Flower.Data.Entities
 {
-    public class CategoryProduct
+    public class ProductCategory
     {
         [Key]
         public int Id { get; set; }

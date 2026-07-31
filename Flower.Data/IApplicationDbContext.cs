@@ -10,10 +10,10 @@ namespace Flower.Data
     public interface IApplicationDbContext
     {
         DatabaseFacade Database { get; }
-        DbSet<Category> Categories { get; set; }
+        DbSet<PostCategory> PostCategories { get; set; }
         DbSet<Post> Posts { get; set; }
         DbSet<User> Users { get; set; }
-        DbSet<CategoryProduct> CategoriesProducts { get; set; }
+        DbSet<ProductCategory> ProductCategories { get; set; }
         DbSet<Product> Products { get; set; }
         DbSet<Customer> Customers { get; set; }
         DbSet<Order> Orders { get; set; }
@@ -30,7 +30,7 @@ namespace Flower.Data
         DbSet<PaymentAttempt> PaymentAttempts { get; set; }
         DbSet<CancellationPolicy> CancellationPolicies { get; set; }
         DbSet<Refund> Refunds { get; set; }
-        DbSet<Notification> Notifications { get; set; }
+        DbSet<CustomerNotification> CustomerNotifications { get; set; }
         DbSet<EmailHistory> EmailHistories { get; set; }
         DbSet<PromotionCampaign> PromotionCampaigns { get; set; }
         DbSet<PromotionProduct> PromotionProducts { get; set; }

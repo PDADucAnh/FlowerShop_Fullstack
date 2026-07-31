@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Flower.Data.Entities
 {
-    public class Notification
+    public class CustomerNotification
     {
         [Key]
         public int Id { get; set; }

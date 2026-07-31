@@ -11,10 +11,10 @@ namespace Flower.Data
 
         private bool IsPostgres => Database.ProviderName == "Npgsql.EntityFrameworkCore.PostgreSQL";
 
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<PostCategory> PostCategories { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<User> Users { get; set; }
-        public DbSet<CategoryProduct> CategoriesProducts { get; set; }
+        public DbSet<ProductCategory> ProductCategories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Order> Orders { get; set; }
@@ -31,7 +31,7 @@ namespace Flower.Data
         public DbSet<PaymentAttempt> PaymentAttempts { get; set; }
         public DbSet<CancellationPolicy> CancellationPolicies { get; set; }
         public DbSet<Refund> Refunds { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<CustomerNotification> CustomerNotifications { get; set; }
         public DbSet<EmailHistory> EmailHistories { get; set; }
         public DbSet<PromotionCampaign> PromotionCampaigns { get; set; }
         public DbSet<PromotionProduct> PromotionProducts { get; set; }
@@ -77,15 +77,15 @@ namespace Flower.Data
                 .HasFilter(IsPostgres ? "\"Sku\" IS NOT NULL" : "[Sku] IS NOT NULL");
 
             modelBuilder.Entity<Post>()
-                .HasOne(p => p.Category)
+                .HasOne(p => p.PostCategory)
                 .WithMany(c => c.Posts)
-                .HasForeignKey(p => p.CategoryId)
+                .HasForeignKey(p => p.PostCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Product>()
-                .HasOne(p => p.CategoryProduct)
+                .HasOne(p => p.ProductCategory)
                 .WithMany(cp => cp.Products)
-                .HasForeignKey(p => p.CategoryProductId)
+                .HasForeignKey(p => p.ProductCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Order>()
@@ -211,17 +211,17 @@ namespace Flower.Data
                 .IsUnique()
                 .HasDatabaseName("IX_CancellationPolicies_OrderStatus");
 
-            modelBuilder.Entity<Notification>()
+            modelBuilder.Entity<CustomerNotification>()
                 .HasOne(n => n.Customer)
                 .WithMany()
                 .HasForeignKey(n => n.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Notification>()
+            modelBuilder.Entity<CustomerNotification>()
                 .HasIndex(n => n.CustomerId)
                 .HasDatabaseName("IX_Notifications_CustomerId");
 
-            modelBuilder.Entity<Notification>()
+            modelBuilder.Entity<CustomerNotification>()
                 .HasIndex(n => new { n.CustomerId, n.IsRead })
                 .HasDatabaseName("IX_Notifications_CustomerId_IsRead");
 

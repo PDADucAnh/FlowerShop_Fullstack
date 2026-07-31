@@ -32,10 +32,10 @@ namespace Flower.Data.Entities
 
         public string? ImageUrl { get; set; }
 
-        public int CategoryProductId { get; set; }
+        public int ProductCategoryId { get; set; }
 
-        [ForeignKey("CategoryProductId")]
-        public virtual CategoryProduct? CategoryProduct { get; set; }
+        [ForeignKey("ProductCategoryId")]
+        public virtual ProductCategory? ProductCategory { get; set; }
 
         public int ViewCount { get; set; }
 
