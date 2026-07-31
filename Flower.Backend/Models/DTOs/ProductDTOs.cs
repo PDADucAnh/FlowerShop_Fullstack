@@ -14,8 +14,8 @@ namespace Flower.Backend.Models.DTOs
         public decimal? DiscountPrice { get; set; }
         public int StockQuantity { get; set; }
         public string? ImageUrl { get; set; }
-        public int CategoryProductId { get; set; }
-        public string? CategoryProductName { get; set; }
+        public int ProductCategoryId { get; set; }
+        public string? ProductCategoryName { get; set; }
         public int ViewCount { get; set; }
         public int AddToCartCount { get; set; }
         public double TrendingScore { get; set; }
@@ -78,7 +78,7 @@ namespace Flower.Backend.Models.DTOs
 
         public string? ImageUrl { get; set; }
 
-        public int CategoryProductId { get; set; }
+        public int ProductCategoryId { get; set; }
 
         public bool IsActive { get; set; } = true;
         [MaxLength(500)]
@@ -114,7 +114,7 @@ namespace Flower.Backend.Models.DTOs
 
         public string? ImageUrl { get; set; }
 
-        public int CategoryProductId { get; set; }
+        public int ProductCategoryId { get; set; }
 
         public bool IsActive { get; set; } = true;
         [MaxLength(500)]

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Flower.Backend.Models.DTOs
 {
-    public class CategoryDTO
+    public class PostCategoryDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -11,7 +11,7 @@ namespace Flower.Backend.Models.DTOs
         public System.Collections.Generic.List<PostDTO>? Posts { get; set; }
     }
 
-    public class CreateCategoryDTO
+    public class CreatePostCategoryDTO
     {
         [Required(ErrorMessage = "Tên danh mục không được để trống")]
         [MaxLength(200)]
@@ -24,7 +24,7 @@ namespace Flower.Backend.Models.DTOs
         public string? Slug { get; set; }
     }
 
-    public class UpdateCategoryDTO
+    public class UpdatePostCategoryDTO
     {
         public int Id { get; set; }
 

@@ -47,10 +47,10 @@ namespace Flower.Backend.Models.DTOs
             entity.Avatar = dto.Avatar;
         }
 
-        public static CategoryDTO ToDTO(this Category category)
+        public static PostCategoryDTO ToDTO(this PostCategory category)
         {
             if (category == null) return null;
-            return new CategoryDTO
+            return new PostCategoryDTO
             {
                 Id = category.Id,
                 Name = category.Name ?? "",
@@ -60,10 +60,10 @@ namespace Flower.Backend.Models.DTOs
             };
         }
 
-        public static Category ToEntity(this CreateCategoryDTO dto)
+        public static PostCategory ToEntity(this CreatePostCategoryDTO dto)
         {
             if (dto == null) return null;
-            return new Category
+            return new PostCategory
             {
                 Name = dto.Name,
                 Description = dto.Description,
@@ -71,7 +71,7 @@ namespace Flower.Backend.Models.DTOs
             };
         }
 
-        public static void UpdateEntity(this UpdateCategoryDTO dto, Category entity)
+        public static void UpdateEntity(this UpdatePostCategoryDTO dto, PostCategory entity)
         {
             if (dto == null || entity == null) return;
             entity.Name = dto.Name;
@@ -79,23 +79,23 @@ namespace Flower.Backend.Models.DTOs
             entity.Slug = dto.Slug;
         }
 
-        public static CategoryProductDTO ToDTO(this CategoryProduct categoryProduct)
+        public static ProductCategoryDTO ToDTO(this ProductCategory productCategory)
         {
-            if (categoryProduct == null) return null;
-            return new CategoryProductDTO
+            if (productCategory == null) return null;
+            return new ProductCategoryDTO
             {
-                Id = categoryProduct.Id,
-                Name = categoryProduct.Name ?? "",
-                Description = categoryProduct.Description,
-                Slug = categoryProduct.Slug,
-                ImageUrl = categoryProduct.ImageUrl
+                Id = productCategory.Id,
+                Name = productCategory.Name ?? "",
+                Description = productCategory.Description,
+                Slug = productCategory.Slug,
+                ImageUrl = productCategory.ImageUrl
             };
         }
 
-        public static CategoryProduct ToEntity(this CreateCategoryProductDTO dto)
+        public static ProductCategory ToEntity(this CreateProductCategoryDTO dto)
         {
             if (dto == null) return null;
-            return new CategoryProduct
+            return new ProductCategory
             {
                 Name = dto.Name,
                 Description = dto.Description,
@@ -104,7 +104,7 @@ namespace Flower.Backend.Models.DTOs
             };
         }
 
-        public static void UpdateEntity(this UpdateCategoryProductDTO dto, CategoryProduct entity)
+        public static void UpdateEntity(this UpdateProductCategoryDTO dto, ProductCategory entity)
         {
             if (dto == null || entity == null) return;
             entity.Name = dto.Name;
@@ -138,8 +138,8 @@ namespace Flower.Backend.Models.DTOs
                 DiscountPrice = product.DiscountPrice,
                 StockQuantity = product.StockQuantity,
                 ImageUrl = product.ImageUrl,
-                CategoryProductId = product.CategoryProductId,
-                CategoryProductName = product.CategoryProduct?.Name,
+                ProductCategoryId = product.ProductCategoryId,
+                ProductCategoryName = product.ProductCategory?.Name,
                 ViewCount = product.ViewCount,
                 AddToCartCount = product.AddToCartCount,
                 OriginalPrice = product.Price,
@@ -165,7 +165,7 @@ namespace Flower.Backend.Models.DTOs
                 Price = dto.Price,
                 StockQuantity = dto.StockQuantity,
                 ImageUrl = dto.ImageUrl,
-                CategoryProductId = dto.CategoryProductId,
+                ProductCategoryId = dto.ProductCategoryId,
                 IsActive = dto.IsActive,
                 FlowerMeaning = dto.FlowerMeaning,
                 Origin = dto.Origin,
@@ -183,7 +183,7 @@ namespace Flower.Backend.Models.DTOs
             entity.Price = dto.Price;
             entity.StockQuantity = dto.StockQuantity;
             entity.ImageUrl = dto.ImageUrl;
-            entity.CategoryProductId = dto.CategoryProductId;
+            entity.ProductCategoryId = dto.ProductCategoryId;
             entity.IsActive = dto.IsActive;
             entity.FlowerMeaning = dto.FlowerMeaning;
             entity.Origin = dto.Origin;
@@ -527,8 +527,8 @@ namespace Flower.Backend.Models.DTOs
                 Slug = post.Slug,
                 ImageUrl = post.ImageUrl,
                 CreatedDate = post.CreatedDate,
-                CategoryId = post.CategoryId,
-                CategoryName = post.Category?.Name
+                PostCategoryId = post.PostCategoryId,
+                PostCategoryName = post.PostCategory?.Name
             };
         }
 
@@ -563,7 +563,7 @@ namespace Flower.Backend.Models.DTOs
                 Summary = TruncateSummary(dto.Summary, dto.Content),
                 Slug = dto.Slug,
                 ImageUrl = dto.ImageUrl,
-                CategoryId = dto.CategoryId
+                PostCategoryId = dto.PostCategoryId
             };
         }
 
@@ -575,7 +575,7 @@ namespace Flower.Backend.Models.DTOs
             entity.Summary = TruncateSummary(dto.Summary, dto.Content);
             entity.Slug = dto.Slug;
             entity.ImageUrl = dto.ImageUrl;
-            entity.CategoryId = dto.CategoryId;
+            entity.PostCategoryId = dto.PostCategoryId;
         }
 
         public static PageDTO ToDTO(this Page entity) => new()

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Flower.Backend.Models.DTOs
 {
-    public class CategoryProductDTO
+    public class ProductCategoryDTO
     {
         public int Id { get; set; }
         public string Name { get; set; }
@@ -11,7 +11,7 @@ namespace Flower.Backend.Models.DTOs
         public string? ImageUrl { get; set; }
     }
 
-    public class CreateCategoryProductDTO
+    public class CreateProductCategoryDTO
     {
         [Required(ErrorMessage = "Tên danh mục không được để trống")]
         [MaxLength(200)]
@@ -27,7 +27,7 @@ namespace Flower.Backend.Models.DTOs
         public string? ImageUrl { get; set; }
     }
 
-    public class UpdateCategoryProductDTO
+    public class UpdateProductCategoryDTO
     {
         public int Id { get; set; }
 

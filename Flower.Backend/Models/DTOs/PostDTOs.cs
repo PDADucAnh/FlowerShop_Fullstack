@@ -12,8 +12,8 @@ namespace Flower.Backend.Models.DTOs
         public string? Slug { get; set; }
         public string ImageUrl { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; }
-        public int CategoryId { get; set; }
-        public string? CategoryName { get; set; }
+        public int PostCategoryId { get; set; }
+        public string? PostCategoryName { get; set; }
     }
 
     public class CreatePostDTO
@@ -32,7 +32,7 @@ namespace Flower.Backend.Models.DTOs
         public string ImageUrl { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
-        public int CategoryId { get; set; }
+        public int PostCategoryId { get; set; }
     }
 
     public class UpdatePostDTO
@@ -53,6 +53,6 @@ namespace Flower.Backend.Models.DTOs
         public string ImageUrl { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Danh mục không được để trống")]
-        public int CategoryId { get; set; }
+        public int PostCategoryId { get; set; }
     }
 }
