@@ -400,35 +400,41 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-            logger.LogInformation("Applying database migrations...");
+        logger.LogInformation("Applying database migrations...");
         db.Database.Migrate();
         logger.LogInformation("Database migrations applied successfully.");
 
         // Safety net: ensure ProductImages table exists even if the prior
         // AddProductImages migration was recorded as a no-op.
-        db.Database.ExecuteSqlRaw(@"
-            CREATE TABLE IF NOT EXISTS ""ProductImages"" (
-                ""Id"" SERIAL PRIMARY KEY,
-                ""ProductId"" INTEGER NOT NULL,
-                ""ImageUrl"" VARCHAR(2000) NOT NULL,
-                ""SortOrder"" INTEGER NOT NULL DEFAULT 0,
-                ""CreatedAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
-                CONSTRAINT ""FK_ProductImages_Products_ProductId""
-                    FOREIGN KEY (""ProductId"")
-                    REFERENCES ""Products""(""Id"")
-                    ON DELETE CASCADE
-            );
-            CREATE INDEX IF NOT EXISTS ""IX_ProductImages_ProductId""
-                ON ""ProductImages"" (""ProductId"");
-        ");
-        logger.LogInformation("ProductImages table verified.");
+        // This DDL uses PostgreSQL-specific syntax, so it only runs on Npgsql.
+        if (db.Database.ProviderName?.Contains("Npgsql", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            db.Database.ExecuteSqlRaw(@"
+                CREATE TABLE IF NOT EXISTS ""ProductImages"" (
+                    ""Id"" SERIAL PRIMARY KEY,
+                    ""ProductId"" INTEGER NOT NULL,
+                    ""ImageUrl"" VARCHAR(2000) NOT NULL,
+                    ""SortOrder"" INTEGER NOT NULL DEFAULT 0,
+                    ""CreatedAt"" TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT NOW(),
+                    CONSTRAINT ""FK_ProductImages_Products_ProductId""
+                        FOREIGN KEY (""ProductId"")
+                        REFERENCES ""Products""(""Id"")
+                        ON DELETE CASCADE
+                );
+                CREATE INDEX IF NOT EXISTS ""IX_ProductImages_ProductId""
+                    ON ""ProductImages"" (""ProductId"");
+            ");
+            logger.LogInformation("ProductImages table verified.");
+        }
+        else
+        {
+            logger.LogInformation("Skipping PostgreSQL-only ProductImages safety net on non-Npgsql provider.");
+        }
     }
     catch (Exception ex)
     {
-        logger.LogWarning(ex, "First migration attempt failed. Dropping database and retrying...");
-        db.Database.EnsureDeleted();
-        db.Database.Migrate();
-        logger.LogInformation("Database recreated and migrations applied successfully.");
+        logger.LogCritical(ex, "Database migration failed during application startup. The application is stopping to avoid data loss. Fix the migration and retry — no database was deleted.");
+        throw;
     }
 
     if (!db.Users.Any())
