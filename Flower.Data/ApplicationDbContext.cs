@@ -219,11 +219,11 @@ namespace Flower.Data
 
             modelBuilder.Entity<CustomerNotification>()
                 .HasIndex(n => n.CustomerId)
-                .HasDatabaseName("IX_Notifications_CustomerId");
+                .HasDatabaseName("IX_CustomerNotifications_CustomerId");
 
             modelBuilder.Entity<CustomerNotification>()
                 .HasIndex(n => new { n.CustomerId, n.IsRead })
-                .HasDatabaseName("IX_Notifications_CustomerId_IsRead");
+                .HasDatabaseName("IX_CustomerNotifications_CustomerId_IsRead");
 
             modelBuilder.Entity<EmailHistory>()
                 .HasOne(e => e.Customer)
