@@ -99,8 +99,10 @@ public class ImportService : IImportService
                 .Where(p => p.Sku != null)
                 .ToDictionaryAsync(p => p.Sku!, p => p, StringComparer.OrdinalIgnoreCase);
 
-            // Track pending image uploads: local path + file name per valid product
-            var pendingImages = new Dictionary<Flower.Data.Entities.Product, (string LocalPath, string FileName)>();
+            // Track pending image uploads: local path + file name per valid product.
+            // OldImageUrl holds the existing Cloudinary image to delete after a successful
+            // upload of a replacement image (update mode only).
+            var pendingImages = new Dictionary<Flower.Data.Entities.Product, (string LocalPath, string FileName, string? OldImageUrl)>();
 
             for (int row = 2; row <= rowCount; row++)
             {
@@ -186,7 +188,23 @@ public class ImportService : IImportService
                                 existingProduct.Slug = GenerateSlug(name);
                                 existingProduct.UpdatedAt = DateTime.UtcNow;
                                 if (pendingImagePath != null)
-                                    pendingImages[existingProduct] = (pendingImagePath, imageFileName!);
+                                {
+                                    var existingImageBase = GetImageFileBaseName(existingProduct.ImageUrl);
+                                    var incomingImageBase = Path.GetFileNameWithoutExtension(imageFileName!);
+                                    if (existingImageBase != null &&
+                                        string.Equals(existingImageBase, incomingImageBase, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        // Same image name as the one already on Cloudinary -> skip upload.
+                                        _logger.LogInformation(
+                                            "Import update: image '{FileName}' unchanged for SKU '{Sku}', skipping upload",
+                                            imageFileName, sku);
+                                    }
+                                    else
+                                    {
+                                        // New/replacement image -> upload then delete the old Cloudinary image.
+                                        pendingImages[existingProduct] = (pendingImagePath, imageFileName!, existingProduct.ImageUrl);
+                                    }
+                                }
                                 result.SuccessCount++;
                                 continue;
                             }
@@ -232,7 +250,7 @@ public class ImportService : IImportService
                     };
 
                     if (pendingImagePath != null)
-                        pendingImages[product] = (pendingImagePath, imageFileName!);
+                        pendingImages[product] = (pendingImagePath, imageFileName!, null);
 
                     productsToAdd.Add(product);
                     result.SuccessCount++;
@@ -249,14 +267,27 @@ public class ImportService : IImportService
             }
 
             // Upload images ONLY for validated products
-            foreach (var (product, (localPath, fileName)) in pendingImages)
+            foreach (var (product, (localPath, fileName, oldImageUrl)) in pendingImages)
             {
                 await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
                 var formFile = new FormFile(fs, 0, fs.Length, "file", fileName)
                 {
                     Headers = new HeaderDictionary()
                 };
-                product.ImageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Products);
+                var uploadedUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Products);
+                if (uploadedUrl == null)
+                {
+                    _logger.LogWarning("Import update: upload failed for image '{FileName}' of SKU '{Sku}', keeping existing image",
+                        fileName, product.Sku);
+                    continue;
+                }
+
+                product.ImageUrl = uploadedUrl;
+                if (!string.IsNullOrEmpty(oldImageUrl) &&
+                    !string.Equals(oldImageUrl, uploadedUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _photoService.DeletePhotoAsync(oldImageUrl);
+                }
             }
 
             if (productsToAdd.Count > 0)
@@ -358,7 +389,7 @@ public class ImportService : IImportService
             result.TotalRows = Math.Max(0, rowCount - 1);
 
             var itemsToAdd = new List<Flower.Data.Entities.CategoryProduct>();
-            var pendingCatImages = new Dictionary<Flower.Data.Entities.CategoryProduct, (string LocalPath, string FileName)>();
+            var pendingCatImages = new Dictionary<Flower.Data.Entities.CategoryProduct, (string LocalPath, string FileName, string? OldImageUrl)>();
 
             for (int row = 2; row <= rowCount; row++)
             {
@@ -416,7 +447,23 @@ public class ImportService : IImportService
                         existing.Description = description;
                         existing.UpdatedAt = DateTime.UtcNow;
                         if (pendingImagePath != null)
-                            pendingCatImages[existing] = (pendingImagePath, resolvedImageKey!);
+                        {
+                            var existingImageBase = GetImageFileBaseName(existing.ImageUrl);
+                            var incomingImageBase = Path.GetFileNameWithoutExtension(resolvedImageKey!);
+                            if (existingImageBase != null &&
+                                string.Equals(existingImageBase, incomingImageBase, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Same image name as the one already on Cloudinary -> skip upload.
+                                _logger.LogInformation(
+                                    "Import update: image '{FileName}' unchanged for category '{Name}', skipping upload",
+                                    resolvedImageKey, name);
+                            }
+                            else
+                            {
+                                // New/replacement image -> upload then delete the old Cloudinary image.
+                                pendingCatImages[existing] = (pendingImagePath, resolvedImageKey!, existing.ImageUrl);
+                            }
+                        }
                         result.SuccessCount++;
                         continue;
                     }
@@ -430,7 +477,7 @@ public class ImportService : IImportService
                     };
 
                     if (pendingImagePath != null)
-                        pendingCatImages[category] = (pendingImagePath, resolvedImageKey!);
+                        pendingCatImages[category] = (pendingImagePath, resolvedImageKey!, null);
 
                     itemsToAdd.Add(category);
                     result.SuccessCount++;
@@ -447,14 +494,27 @@ public class ImportService : IImportService
             }
 
             // Upload images ONLY for validated categories
-            foreach (var (cat, (localPath, fileName)) in pendingCatImages)
+            foreach (var (cat, (localPath, fileName, oldImageUrl)) in pendingCatImages)
             {
                 await using var fs = new FileStream(localPath, FileMode.Open, FileAccess.Read);
                 var formFile = new FormFile(fs, 0, fs.Length, "file", fileName)
                 {
                     Headers = new HeaderDictionary()
                 };
-                cat.ImageUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Categories);
+                var uploadedUrl = await _photoService.UploadPhotoAsync(formFile, CloudinaryFolders.Categories);
+                if (uploadedUrl == null)
+                {
+                    _logger.LogWarning("Import update: upload failed for image '{FileName}' of category '{Name}', keeping existing image",
+                        fileName, cat.Name);
+                    continue;
+                }
+
+                cat.ImageUrl = uploadedUrl;
+                if (!string.IsNullOrEmpty(oldImageUrl) &&
+                    !string.Equals(oldImageUrl, uploadedUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _photoService.DeletePhotoAsync(oldImageUrl);
+                }
             }
 
             if (itemsToAdd.Count > 0)
@@ -489,6 +549,41 @@ public class ImportService : IImportService
 
         result.FailureCount = result.Errors.Count;
         return result;
+    }
+
+    /// <summary>
+    /// Extracts the base file name (no extension) of a Cloudinary image URL.
+    /// e.g. "https://res.cloudinary.com/x/image/upload/v1234/flower-shop/products/product1.jpg" -> "product1".
+    /// Returns null when the URL is empty, local, or not a Cloudinary /upload/ URL.
+    /// </summary>
+    private string? GetImageFileBaseName(string? imageUrl)
+    {
+        if (string.IsNullOrWhiteSpace(imageUrl) || !imageUrl.StartsWith("http"))
+            return null;
+
+        try
+        {
+            var path = new Uri(imageUrl).AbsolutePath;
+            var uploadIndex = path.IndexOf("/upload/", StringComparison.OrdinalIgnoreCase);
+            if (uploadIndex < 0)
+                return null;
+
+            var afterUpload = path[(uploadIndex + 8)..];
+
+            if (afterUpload.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+            {
+                var slashIndex = afterUpload.IndexOf('/');
+                if (slashIndex > 0)
+                    afterUpload = afterUpload[(slashIndex + 1)..];
+            }
+
+            return Path.GetFileNameWithoutExtension(Path.GetFileName(afterUpload));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "GetImageFileBaseName failed for URL: {Url}", imageUrl);
+            return null;
+        }
     }
 
     private static string GenerateSlug(string name)
