@@ -190,6 +190,7 @@ builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IProductCategorySe
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IUserService, Flower.Backend.Services.UserService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAuthService, Flower.Backend.Services.AuthService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerService, Flower.Backend.Services.CustomerService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerAddressService, Flower.Backend.Services.CustomerAddressService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderService, Flower.Backend.Services.OrderService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderCancellationService, Flower.Backend.Services.OrderCancellationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderDetailService, Flower.Backend.Services.OrderDetailService>();
