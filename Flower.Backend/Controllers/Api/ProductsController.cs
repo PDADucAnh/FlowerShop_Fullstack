@@ -148,6 +148,48 @@ namespace Flower.Backend.Controllers.Api
             return NoContent();
         }
 
+        [HttpPost("{id}/variants")]
+        public async Task<IActionResult> AddVariant(int id, [FromBody] CreateProductVariantDTO dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var variant = await _productService.AddVariantAsync(id, dto);
+            if (variant == null)
+                return NotFound(new { message = "Không tìm thấy sản phẩm này" });
+
+            await _notificationService.NotifyEntityChanged("Product");
+            return CreatedAtAction(nameof(GetDetail), new { id }, variant);
+        }
+
+        [HttpPut("{id}/variants/{variantId}")]
+        public async Task<IActionResult> UpdateVariant(int id, int variantId, [FromBody] UpdateProductVariantDTO dto)
+        {
+            if (variantId != dto.Id)
+                return BadRequest();
+
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updated = await _productService.UpdateVariantAsync(variantId, dto);
+            if (!updated)
+                return NotFound();
+
+            await _notificationService.NotifyEntityChanged("Product");
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/variants/{variantId}")]
+        public async Task<IActionResult> DeleteVariant(int id, int variantId)
+        {
+            var deleted = await _productService.DeleteVariantAsync(variantId);
+            if (!deleted)
+                return NotFound();
+
+            await _notificationService.NotifyEntityChanged("Product");
+            return NoContent();
+        }
+
         [Authorize(Policy = "AdminOnly")]
         [HttpPost("bulk-delete")]
         public async Task<IActionResult> BulkDelete([FromBody] BulkDeleteRequest request)

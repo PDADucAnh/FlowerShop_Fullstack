@@ -55,7 +55,8 @@ namespace Flower.Backend.Services
         {
             IQueryable<Product> query = _context.Products
                 .Include(p => p.ProductCategory)
-                .Include(p => p.Images);
+                .Include(p => p.Images)
+                .Include(p => p.ProductVariants);
 
             if (!includeInactive)
                 query = query.Where(p => p.IsActive);
@@ -321,6 +322,62 @@ namespace Flower.Backend.Services
                 product.AddToCartCount++;
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task<ProductVariantDTO?> AddVariantAsync(int productId, CreateProductVariantDTO dto)
+        {
+            var product = await _context.Products.FindAsync(productId);
+            if (product == null) return null;
+
+            if (dto.IsDefault)
+            {
+                var others = _context.ProductVariants.Where(v => v.ProductId == productId && v.IsDefault);
+                foreach (var v in others) v.IsDefault = false;
+            }
+
+            var variant = new ProductVariant
+            {
+                ProductId = productId,
+                Name = dto.Name,
+                Price = dto.Price,
+                Sku = dto.Sku,
+                IsDefault = dto.IsDefault
+            };
+
+            _context.ProductVariants.Add(variant);
+            await _context.SaveChangesAsync();
+            return variant.ToDTO();
+        }
+
+        public async Task<bool> UpdateVariantAsync(int variantId, UpdateProductVariantDTO dto)
+        {
+            var variant = await _context.ProductVariants.FindAsync(variantId);
+            if (variant == null) return false;
+
+            if (dto.IsDefault)
+            {
+                var others = _context.ProductVariants
+                    .Where(v => v.ProductId == variant.ProductId && v.IsDefault && v.Id != variantId);
+                foreach (var v in others) v.IsDefault = false;
+            }
+
+            variant.Name = dto.Name;
+            variant.Price = dto.Price;
+            variant.Sku = dto.Sku;
+            variant.IsDefault = dto.IsDefault;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteVariantAsync(int variantId)
+        {
+            var variant = await _context.ProductVariants.FindAsync(variantId);
+            if (variant == null) return false;
+
+            _context.ProductVariants.Remove(variant);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<ProductDTO>> GetTrending(int count = 10, bool includeInactive = false)

@@ -124,6 +124,19 @@ namespace Flower.Backend.Models.DTOs
             };
         }
 
+        public static ProductVariantDTO ToDTO(this ProductVariant v)
+        {
+            return new ProductVariantDTO
+            {
+                Id = v.Id,
+                ProductId = v.ProductId,
+                Name = v.Name,
+                Price = v.Price,
+                Sku = v.Sku,
+                IsDefault = v.IsDefault
+            };
+        }
+
         public static ProductDTO ToDTO(this Product product)
         {
             if (product == null) return null;
@@ -146,6 +159,7 @@ namespace Flower.Backend.Models.DTOs
                 CurrentPrice = product.Price,
                 IsFlashSale = false,
                 Images = product.Images?.OrderBy(i => i.SortOrder).Select(i => i.ToDTO()).ToList() ?? new(),
+                Variants = product.ProductVariants?.Select(v => v.ToDTO()).ToList() ?? new List<ProductVariantDTO>(),
                 IsActive = product.IsActive,
                 FlowerMeaning = product.FlowerMeaning,
                 Origin = product.Origin,

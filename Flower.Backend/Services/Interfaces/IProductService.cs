@@ -19,5 +19,8 @@ namespace Flower.Backend.Services.Interfaces
         Task<IEnumerable<ProductDTO>> GetTrending(int count = 10, bool includeInactive = false);
         Task TrackView(int productId);
         Task TrackAddToCart(int productId);
+        Task<ProductVariantDTO?> AddVariantAsync(int productId, CreateProductVariantDTO dto);
+        Task<bool> UpdateVariantAsync(int variantId, UpdateProductVariantDTO dto);
+        Task<bool> DeleteVariantAsync(int variantId);
     }
 }

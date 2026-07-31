@@ -25,6 +25,7 @@ namespace Flower.Backend.Models.DTOs
         public string? PromotionType { get; set; }
         public bool HasFlashSale { get; set; }
         public List<ProductImageDTO> Images { get; set; } = new();
+        public List<ProductVariantDTO> Variants { get; set; } = new();
         public bool IsActive { get; set; }
         public string? FlowerMeaning { get; set; }
         public string? Origin { get; set; }
