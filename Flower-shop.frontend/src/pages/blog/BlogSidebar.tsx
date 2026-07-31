@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useBlogCategories } from '../../hooks/useCategories';
 import { usePosts } from '../../hooks/usePosts';
-import type { Category } from '../../types/category';
+import type { PostCategory } from '../../types/postCategory';
 
 interface BlogSidebarProps {
   onCategoryChange: (id: number | null) => void;
@@ -27,7 +27,7 @@ const BlogSidebar = ({ onCategoryChange, activeId }: BlogSidebarProps) => {
               Tất cả
             </button>
           </li>
-          {(categories as Category[]).map((cat) => (
+          {(categories as PostCategory[]).map((cat) => (
             <li key={cat.id}>
               <button
                 className={`bg-transparent border-0 p-0 text-label-sm uppercase tracking-widest transition-all ${activeId === cat.id ? 'text-primary font-bold' : 'text-secondary hover:text-primary'}`}

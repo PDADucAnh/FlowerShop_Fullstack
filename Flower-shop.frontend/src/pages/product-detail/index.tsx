@@ -116,7 +116,7 @@ const ProductDetailPage = () => {
   }, [product, quantity, finalOriginalPrice, finalPrice, hasPromoActive, promotionInfo, addToCart, navigate]);
 
   // Load related products
-  const { data: relatedResult } = useProductsPaged(1, 5, null, null, product?.categoryProductId || null);
+  const { data: relatedResult } = useProductsPaged(1, 5, null, null, product?.productCategoryId || null);
   const relatedProducts = relatedResult?.items?.filter((p: any) => p.id !== product?.id).slice(0, 4) || [];
 
   if (isLoading) {
@@ -157,11 +157,11 @@ const ProductDetailPage = () => {
                 <Link className="hover:text-primary transition-colors text-decoration-none" to="/shop">Cửa hàng</Link>
               </div>
             </li>
-            {product.categoryProductName && (
+            {product.productCategoryName && (
               <li>
                 <div className="flex items-center">
                   <span className="material-symbols-outlined text-sm mx-1">chevron_right</span>
-                  <span className="text-secondary">{product.categoryProductName}</span>
+                  <span className="text-secondary">{product.productCategoryName}</span>
                 </div>
               </li>
             )}
@@ -208,8 +208,8 @@ const ProductDetailPage = () => {
                   -{promotionInfo?.promotionPercent ?? product.promotionPercent ?? product.discountPercent}%
                 </span>
               )}
-              {product.categoryProductName && (
-                <span className="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full font-label-sm text-label-sm">{product.categoryProductName}</span>
+              {product.productCategoryName && (
+                <span className="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full font-label-sm text-label-sm">{product.productCategoryName}</span>
               )}
             </div>
             

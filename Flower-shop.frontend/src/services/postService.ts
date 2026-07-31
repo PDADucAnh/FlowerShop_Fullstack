@@ -48,14 +48,14 @@ const postService = {
 
     /**
      * 3. Lấy danh sách bài viết theo danh mục
-     * API Endpoint: GET https://localhost:xxxx/api/Posts/category/{categoryId}
+     * API Endpoint: GET https://localhost:xxxx/api/Posts/category/{postCategoryId}
      */
-    getPostsByCategory: async (categoryId: number | null) => {
+    getPostsByCategory: async (postCategoryId: number | null) => {
         try {
-            const response = await axiosClient.get(`/Posts/category/${categoryId}`);
+            const response = await axiosClient.get(`/Posts/category/${postCategoryId}`);
             return response.data || response;
         } catch (error) {
-            console.error(`Lỗi API getPostsByCategory với ID ${categoryId}:`, error);
+            console.error(`Lỗi API getPostsByCategory với ID ${postCategoryId}:`, error);
             throw error;
         }
     }

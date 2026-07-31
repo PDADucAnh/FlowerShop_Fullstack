@@ -18,12 +18,12 @@ export const useNotifications = () => {
     const fetchNotifications = useCallback(async () => {
         if (!isAuthenticated) return;
         try {
-            const res = await axios.get(`${apiUrl}/api/notifications`, {
+            const res = await axios.get(`${apiUrl}/api/customer-notifications`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(res.data.items);
             
-            const countRes = await axios.get(`${apiUrl}/api/notifications/unread-count`, {
+            const countRes = await axios.get(`${apiUrl}/api/customer-notifications/unread-count`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUnreadCount(countRes.data.count);
@@ -107,7 +107,7 @@ export const useNotifications = () => {
     // Actions
     const markAsRead = async (id: number) => {
         try {
-            await axios.put(`${apiUrl}/api/notifications/${id}/read`, {}, {
+            await axios.put(`${apiUrl}/api/customer-notifications/${id}/read`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => 
@@ -120,7 +120,7 @@ export const useNotifications = () => {
 
     const markAllAsRead = async () => {
         try {
-            await axios.put(`${apiUrl}/api/notifications/read-all`, {}, {
+            await axios.put(`${apiUrl}/api/customer-notifications/read-all`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(prev => 

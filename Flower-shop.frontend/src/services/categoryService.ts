@@ -2,10 +2,10 @@ import axiosClient from '../api/axiosClient';
 
 const categoryService = {
     getProductCategories: () => {
-        return axiosClient.get('/CategoriesProducts');
+        return axiosClient.get('/ProductCategories');
     },
     getBlogCategories: () => {
-        return axiosClient.get('/Categories');
+        return axiosClient.get('/PostCategories');
     }
 };
 

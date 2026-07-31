@@ -3,7 +3,7 @@ import categoryProductService from '../services/categoryProductService';
 import categoryService from '../services/categoryService';
 
 export const useProductCategories = () =>
-  useQuery({ queryKey: ['categories', 'products'], queryFn: () => categoryProductService.getAllCategoryProducts() });
+  useQuery({ queryKey: ['product-categories'], queryFn: () => categoryProductService.getAllProductCategories() });
 
 export const useBlogCategories = () =>
-  useQuery({ queryKey: ['categories', 'blog'], queryFn: () => categoryService.getBlogCategories() });
+  useQuery({ queryKey: ['post-categories'], queryFn: () => categoryService.getBlogCategories() });

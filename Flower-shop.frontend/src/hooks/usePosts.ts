@@ -16,9 +16,9 @@ export const usePostsPaged = (page: number, pageSize: number) => {
 export const usePost = (id: string | number) =>
   useQuery({ queryKey: ['posts', id], queryFn: () => postService.getPostById(id), enabled: !!id });
 
-export const usePostsByCategory = (categoryId: number | null) =>
+export const usePostsByCategory = (postCategoryId: number | null) =>
   useQuery({
-    queryKey: ['posts', 'category', categoryId],
-    queryFn: () => postService.getPostsByCategory(categoryId),
-    enabled: categoryId !== null,
+    queryKey: ['posts', 'category', postCategoryId],
+    queryFn: () => postService.getPostsByCategory(postCategoryId),
+    enabled: postCategoryId !== null,
   });

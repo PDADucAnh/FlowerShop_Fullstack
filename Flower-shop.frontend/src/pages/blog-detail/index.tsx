@@ -82,7 +82,7 @@ const BlogDetail: React.FC = () => {
                     <div className="relative z-20 max-w-4xl mx-auto text-center w-full">
                         <div className="mb-sm">
                             <span className="font-label-sm text-label-sm text-surface-container-highest uppercase border border-surface-container-highest px-xs py-[2px] rounded-DEFAULT">
-                                {post.categoryName || 'Hướng dẫn phong cách'}
+                                {post.postCategoryName || 'Hướng dẫn phong cách'}
                             </span>
                         </div>
                         <h1 className="font-display-xl text-display-xl-mobile md:text-display-xl text-on-primary mb-md uppercase tracking-tighter drop-shadow-lg">{post.title}</h1>

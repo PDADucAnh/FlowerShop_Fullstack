@@ -18,8 +18,8 @@ export interface Product {
   hasFlashSale?: boolean;
   imageUrl?: string;
   stockQuantity: number;
-  categoryProductName?: string;
-  categoryProductId?: number;
+  productCategoryName?: string;
+  productCategoryId?: number;
   viewCount?: number;
   addToCartCount?: number;
   trendingScore?: number;
@@ -41,7 +41,7 @@ export interface ProductInput {
   price: number;
   imageUrl?: string;
   stockQuantity: number;
-  categoryProductId?: number;
+  productCategoryId?: number;
 }
 
 export interface ProductFormData {
@@ -52,5 +52,5 @@ export interface ProductFormData {
   price: number;
   stockQuantity: number;
   imageUrl?: string;
-  categoryProductId: number;
+  productCategoryId: number;
 }

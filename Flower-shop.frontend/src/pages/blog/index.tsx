@@ -14,7 +14,7 @@ const BlogPage: React.FC = () => {
 
   const allPosts = paged?.items ?? [];
   const filteredPosts = selectedCategoryId
-    ? allPosts.filter((p: Post) => p.categoryId === selectedCategoryId)
+    ? allPosts.filter((p: Post) => p.postCategoryId === selectedCategoryId)
     : allPosts;
 
   const handleCategoryChange = (id: number | null) => {

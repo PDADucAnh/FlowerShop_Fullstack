@@ -6,7 +6,7 @@ const productService = {
         pageSize: number, 
         minPrice?: number | null, 
         maxPrice?: number | null, 
-        categoryProductId?: number | null,
+        productCategoryId?: number | null,
         sortBy?: string | null,
         promotionOnly?: boolean | null
     ) => {
@@ -16,7 +16,7 @@ const productService = {
             searchParams.set('pageSize', pageSize.toString());
             if (minPrice !== undefined && minPrice !== null) searchParams.set('minPrice', minPrice.toString());
             if (maxPrice !== undefined && maxPrice !== null) searchParams.set('maxPrice', maxPrice.toString());
-            if (categoryProductId !== undefined && categoryProductId !== null) searchParams.set('categoryProductId', categoryProductId.toString());
+            if (productCategoryId !== undefined && productCategoryId !== null) searchParams.set('productCategoryId', productCategoryId.toString());
             if (sortBy) searchParams.set('sortBy', sortBy);
             if (promotionOnly) searchParams.set('promotionOnly', 'true');
             
@@ -48,12 +48,12 @@ const productService = {
         }
     },
 
-    getProductsByCategory: async (categoryProductId: number | null) => {
+    getProductsByCategory: async (productCategoryId: number | null) => {
         try {
-            const response = await axiosClient.get(`/Products/categoryproduct/${categoryProductId}`);
+            const response = await axiosClient.get(`/Products/productcategory/${productCategoryId}`);
             return response.data || response;
         } catch (error) {
-            console.error(`API getProductsByCategory error for ID ${categoryProductId}:`, error);
+            console.error(`API getProductsByCategory error for ID ${productCategoryId}:`, error);
             throw error;
         }
     },

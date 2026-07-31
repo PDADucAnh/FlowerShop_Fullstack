@@ -5,8 +5,8 @@ export interface Post {
   imageUrl?: string;
   summary?: string;
   createdDate?: string;
-  categoryName?: string;
-  categoryId?: number;
+  postCategoryName?: string;
+  postCategoryId?: number;
   views?: number;
   updatedAt?: string;
 }

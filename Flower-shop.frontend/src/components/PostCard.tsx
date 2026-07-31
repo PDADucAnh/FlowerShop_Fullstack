@@ -32,7 +32,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
             </div>
             
             <span className="font-label-sm text-label-sm text-primary uppercase tracking-widest mb-2 block">
-                {post.categoryName || "Mẹo Thiết Kế"}
+                {post.postCategoryName || "Mẹo Thiết Kế"}
             </span>
 
             <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">

@@ -15,13 +15,13 @@ export const useProductsPaged = (
   pageSize: number, 
   minPrice?: number | null, 
   maxPrice?: number | null, 
-  categoryProductId?: number | null,
+  productCategoryId?: number | null,
   sortBy?: string | null,
   promotionOnly?: boolean | null
 ) => {
   return useQuery<PagedResult<Product>>({
-    queryKey: ['products', 'paged', page, pageSize, minPrice, maxPrice, categoryProductId, sortBy, promotionOnly],
-    queryFn: () => productService.getProductsPaged(page, pageSize, minPrice, maxPrice, categoryProductId, sortBy, promotionOnly),
+    queryKey: ['products', 'paged', page, pageSize, minPrice, maxPrice, productCategoryId, sortBy, promotionOnly],
+    queryFn: () => productService.getProductsPaged(page, pageSize, minPrice, maxPrice, productCategoryId, sortBy, promotionOnly),
     placeholderData: (prev) => prev,
   });
 };

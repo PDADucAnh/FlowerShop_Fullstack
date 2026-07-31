@@ -3,7 +3,7 @@ import * as signalR from '@microsoft/signalr';
 import { useQueryClient } from '@tanstack/react-query';
 
 const entityQueryMap: Record<string, string[]> = {
-  CategoryProduct: ['categories', 'products'],
+  ProductCategory: ['product-categories', 'products'],
   Product: ['products'],
   Post: ['posts'],
   PromotionCampaign: ['promotions', 'products'],
