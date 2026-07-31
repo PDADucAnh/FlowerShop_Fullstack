@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { categoriesApi } from '@/api/categories'
+import { productCategoriesApi } from '@/api/productCategories'
 import { CategoryTable } from './components/CategoryTable'
 import { CategoryDialog } from './components/CategoryDialog'
 import { DeleteCategoryDialog } from './components/DeleteCategoryDialog'
@@ -8,17 +8,17 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Plus, Loader2, ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import type { CategoryProduct } from '@/types/category'
+import type { ProductCategory } from '@/types/productCategory'
 
 export function CategoriesPage() {
   const navigate = useNavigate()
-  const [editTarget, setEditTarget] = useState<CategoryProduct | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<CategoryProduct | null>(null)
+  const [editTarget, setEditTarget] = useState<ProductCategory | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ProductCategory | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => categoriesApi.getAll().then((r) => r.data),
+    queryFn: () => productCategoriesApi.getAll().then((r) => r.data),
   })
 
   return (

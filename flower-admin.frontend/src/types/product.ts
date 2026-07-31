@@ -8,8 +8,8 @@ export interface Product {
   stockQuantity: number
   imageUrl?: string
   images: ProductImage[]
-  categoryProductId: number
-  categoryProductName?: string
+  productCategoryId: number
+  productCategoryName?: string
   isActive: boolean
   flowerMeaning?: string
   origin?: string
@@ -31,7 +31,7 @@ export interface CreateProductRequest {
   description?: string
   price: number
   stockQuantity: number
-  categoryProductId: number
+  productCategoryId: number
   imageUrl?: string
   isActive?: boolean
   flowerMeaning?: string

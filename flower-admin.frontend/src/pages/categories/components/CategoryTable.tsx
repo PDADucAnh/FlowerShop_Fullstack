@@ -8,12 +8,12 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
-import type { CategoryProduct } from '@/types/category'
+import type { ProductCategory } from '@/types/productCategory'
 
 interface CategoryTableProps {
-  categories: CategoryProduct[]
-  onEdit: (category: CategoryProduct) => void
-  onDelete: (category: CategoryProduct) => void
+  categories: ProductCategory[]
+  onEdit: (category: ProductCategory) => void
+  onDelete: (category: ProductCategory) => void
 }
 
 export function CategoryTable({ categories, onEdit, onDelete }: CategoryTableProps) {

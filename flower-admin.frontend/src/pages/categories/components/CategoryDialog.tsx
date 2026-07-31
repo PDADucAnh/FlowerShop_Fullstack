@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type ChangeEvent } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { categoriesApi } from '@/api/categories'
+import { productCategoriesApi } from '@/api/productCategories'
 import { uploadApi } from '@/api/upload'
 import {
   Dialog,
@@ -15,10 +15,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { Loader2, Upload, X } from 'lucide-react'
-import type { CategoryProduct } from '@/types/category'
+import type { ProductCategory } from '@/types/productCategory'
 
 interface CategoryDialogProps {
-  category: CategoryProduct | null
+  category: ProductCategory | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -68,8 +68,8 @@ export function CategoryDialog({ category, open, onOpenChange }: CategoryDialogP
     mutationFn: () => {
       const payload = { name, description, slug: slug || generateSlug(name), imageUrl: imageUrl || undefined }
       return isEditing
-        ? categoriesApi.update(category!.id, { ...payload, id: category!.id })
-        : categoriesApi.create(payload)
+        ? productCategoriesApi.update(category!.id, { ...payload, id: category!.id })
+        : productCategoriesApi.create(payload)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })

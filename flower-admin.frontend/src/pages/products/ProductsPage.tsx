@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { productsApi } from '@/api/products'
-import { categoriesApi } from '@/api/categories'
+import { productCategoriesApi } from '@/api/productCategories'
 import { ProductTable } from './components/ProductTable'
 import { DeleteProductDialog } from './components/DeleteProductDialog'
 import { Button } from '@/components/ui/button'
@@ -45,7 +45,7 @@ export function ProductsPage() {
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => categoriesApi.getAll().then((r) => r.data),
+    queryFn: () => productCategoriesApi.getAll().then((r) => r.data),
   })
 
   const { data, isLoading, error } = useQuery({
@@ -54,7 +54,7 @@ export function ProductsPage() {
       const params: ProductListParams = {
         page,
         pageSize,
-        categoryProductId: categoryFilter === 'all' ? null : Number(categoryFilter),
+        productCategoryId: categoryFilter === 'all' ? null : Number(categoryFilter),
       }
       if (statusFilter === 'all') {
         params.includeInactive = true

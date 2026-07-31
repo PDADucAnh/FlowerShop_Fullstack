@@ -1,4 +1,4 @@
-export interface CategoryProduct {
+export interface ProductCategory {
   id: number
   name: string
   description?: string
@@ -6,14 +6,14 @@ export interface CategoryProduct {
   imageUrl?: string
 }
 
-export interface CreateCategoryRequest {
+export interface CreateProductCategoryRequest {
   name: string
   description?: string
   slug?: string
   imageUrl?: string
 }
 
-export interface UpdateCategoryRequest {
+export interface UpdateProductCategoryRequest {
   id: number
   name: string
   description?: string

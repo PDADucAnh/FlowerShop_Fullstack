@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDropzone } from 'react-dropzone'
 import { productsApi } from '@/api/products'
-import { categoriesApi } from '@/api/categories'
+import { productCategoriesApi } from '@/api/productCategories'
 import { uploadApi } from '@/api/upload'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -73,7 +73,7 @@ export function ProductForm({ product }: ProductFormProps) {
     sku: '',
     price: 0,
     stockQuantity: 0,
-    categoryProductId: 0,
+    productCategoryId: 0,
     isActive: true,
     description: '',
     flowerMeaning: '',
@@ -90,7 +90,7 @@ export function ProductForm({ product }: ProductFormProps) {
         sku: product.sku || '',
         price: product.price,
         stockQuantity: product.stockQuantity,
-        categoryProductId: product.categoryProductId,
+        productCategoryId: product.productCategoryId,
         isActive: product.isActive,
         description: product.description || '',
         flowerMeaning: product.flowerMeaning || '',
@@ -120,7 +120,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
-    queryFn: () => categoriesApi.getAll().then((r) => r.data),
+    queryFn: () => productCategoriesApi.getAll().then((r) => r.data),
   })
 
   const handleNameChange = (name: string) => {
@@ -205,7 +205,7 @@ export function ProductForm({ product }: ProductFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.name || !form.categoryProductId || form.price <= 0) {
+    if (!form.name || !form.productCategoryId || form.price <= 0) {
       toast.error('Vui lòng điền đầy đủ thông tin bắt buộc')
       return
     }
@@ -223,7 +223,7 @@ export function ProductForm({ product }: ProductFormProps) {
         sku: form.sku || undefined,
         price: form.price,
         stockQuantity: form.stockQuantity,
-        categoryProductId: form.categoryProductId,
+        productCategoryId: form.productCategoryId,
         imageUrl: mainImage || undefined,
         isActive: form.isActive,
         description: form.description || undefined,
@@ -315,9 +315,9 @@ export function ProductForm({ product }: ProductFormProps) {
               <div>
                 <Label className="text-on-surface-variant mb-1.5 block">Danh mục</Label>
                 <Select
-                  value={String(form.categoryProductId)}
+                  value={String(form.productCategoryId)}
                   onValueChange={(v) =>
-                    setForm((prev) => ({ ...prev, categoryProductId: Number(v) }))
+                    setForm((prev) => ({ ...prev, productCategoryId: Number(v) }))
                   }
                 >
                   <SelectTrigger className="bg-surface-container-low">

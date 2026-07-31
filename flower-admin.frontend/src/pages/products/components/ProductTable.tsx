@@ -87,7 +87,7 @@ export function ProductTable({ products, selectedIds, onSelectedIdsChange, onDel
             </TableCell>
             <TableCell className="font-medium">{product.name}</TableCell>
             <TableCell className="text-muted-foreground">{product.sku || '—'}</TableCell>
-            <TableCell>{product.categoryProductName || '—'}</TableCell>
+            <TableCell>{product.productCategoryName || '—'}</TableCell>
             <TableCell className="text-right font-mono">{formatPrice(product.price)}</TableCell>
             <TableCell className="text-center">{stockBadge(product.stockQuantity)}</TableCell>
             <TableCell className="text-center">

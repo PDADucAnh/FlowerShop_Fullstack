@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { categoriesApi } from '@/api/categories'
+import { productCategoriesApi } from '@/api/productCategories'
 import {
   Dialog,
   DialogContent,
@@ -11,10 +11,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { Loader2, AlertTriangle } from 'lucide-react'
-import type { CategoryProduct } from '@/types/category'
+import type { ProductCategory } from '@/types/productCategory'
 
 interface DeleteCategoryDialogProps {
-  category: CategoryProduct | null
+  category: ProductCategory | null
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -27,7 +27,7 @@ export function DeleteCategoryDialog({
   const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => categoriesApi.delete(id),
+    mutationFn: (id: number) => productCategoriesApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] })
       toast.success('Đã xóa danh mục')

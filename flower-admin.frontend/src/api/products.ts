@@ -4,7 +4,7 @@ import type { Product, CreateProductRequest, UpdateProductRequest, PagedResponse
 export interface ProductListParams {
   page?: number
   pageSize?: number
-  categoryProductId?: number | null
+  productCategoryId?: number | null
   minPrice?: number | null
   maxPrice?: number | null
   includeInactive?: boolean
