@@ -643,5 +643,19 @@ namespace Flower.Backend.Models.DTOs
             Message = dto.Message,
             CreatedAt = DateTime.UtcNow
         };
+
+        public static PaymentMethodDTO ToDTO(this PaymentMethodDefinition m)
+        {
+            return new PaymentMethodDTO
+            {
+                Id = m.Id,
+                Code = m.Code,
+                Name = m.Name,
+                Description = m.Description,
+                IsOnline = m.IsOnline,
+                IsActive = m.IsActive,
+                DisplayOrder = m.DisplayOrder
+            };
+        }
     }
 }
