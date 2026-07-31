@@ -9,24 +9,24 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Services
 {
-    public class CategoryService : ICategoryService
+    public class PostCategoryService : IPostCategoryService
     {
         private readonly IApplicationDbContext _context;
 
-        public CategoryService(IApplicationDbContext context)
+        public PostCategoryService(IApplicationDbContext context)
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<CategoryDTO>> GetAll()
+        public async Task<IEnumerable<PostCategoryDTO>> GetAll()
         {
-            var categories = await _context.Categories.Include(c => c.Posts).ToListAsync();
+            var categories = await _context.PostCategories.Include(c => c.Posts).ToListAsync();
             return categories.Select(c => c.ToDTO());
         }
 
-        public async Task<PagedResult<CategoryDTO>> GetPaged(int page, int pageSize)
+        public async Task<PagedResult<PostCategoryDTO>> GetPaged(int page, int pageSize)
         {
-            var query = _context.Categories.OrderByDescending(c => c.Id);
+            var query = _context.PostCategories.OrderByDescending(c => c.Id);
 
             var totalCount = await query.CountAsync();
             var items = await query
@@ -35,7 +35,7 @@ namespace Flower.Backend.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new PagedResult<CategoryDTO>
+            return new PagedResult<PostCategoryDTO>
             {
                 Items = items.Select(c => c.ToDTO()).ToList(),
                 TotalCount = totalCount,
@@ -44,32 +44,32 @@ namespace Flower.Backend.Services
             };
         }
 
-        public async Task<CategoryDTO?> GetById(int id)
+        public async Task<PostCategoryDTO?> GetById(int id)
         {
-            var category = await _context.Categories
+            var category = await _context.PostCategories
                 .Include(c => c.Posts)
                 .FirstOrDefaultAsync(c => c.Id == id);
             return category?.ToDTO();
         }
 
-        public async Task<CategoryDTO> Create(CreateCategoryDTO dto)
+        public async Task<PostCategoryDTO> Create(CreatePostCategoryDTO dto)
         {
             if (string.IsNullOrEmpty(dto.Slug))
             {
                 dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Name);
             }
             var category = dto.ToEntity();
-            _context.Categories.Add(category);
+            _context.PostCategories.Add(category);
             await _context.SaveChangesAsync();
             return category.ToDTO();
         }
 
-        public async Task<bool> Update(int id, UpdateCategoryDTO dto)
+        public async Task<bool> Update(int id, UpdatePostCategoryDTO dto)
         {
             if (id != dto.Id)
                 return false;
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.PostCategories.FindAsync(id);
             if (category == null)
                 return false;
 
@@ -82,7 +82,7 @@ namespace Flower.Backend.Services
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _context.Categories.AnyAsync(e => e.Id == id))
+                if (!await _context.PostCategories.AnyAsync(e => e.Id == id))
                     return false;
                 throw;
             }
@@ -90,11 +90,11 @@ namespace Flower.Backend.Services
 
         public async Task<bool> Delete(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _context.PostCategories.FindAsync(id);
             if (category == null)
                 return false;
 
-            _context.Categories.Remove(category);
+            _context.PostCategories.Remove(category);
             await _context.SaveChangesAsync();
             return true;
         }

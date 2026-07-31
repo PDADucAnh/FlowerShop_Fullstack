@@ -14,9 +14,9 @@ namespace Flower.Backend.Services
     {
         private readonly IApplicationDbContext _context;
         private readonly PasswordHasher<Customer> _passwordHasher;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
-        public CustomerService(IApplicationDbContext context, INotificationService notificationService)
+        public CustomerService(IApplicationDbContext context, ICustomerNotificationService notificationService)
         {
             _context = context;
             _notificationService = notificationService;

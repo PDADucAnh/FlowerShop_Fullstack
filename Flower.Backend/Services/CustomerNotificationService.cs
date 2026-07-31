@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Services
 {
-    public class NotificationService : INotificationService
+    public class CustomerNotificationService : ICustomerNotificationService
     {
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly ApplicationDbContext _context;
 
-        public NotificationService(IHubContext<NotificationHub> hubContext, ApplicationDbContext context)
+        public CustomerNotificationService(IHubContext<NotificationHub> hubContext, ApplicationDbContext context)
         {
             _hubContext = hubContext;
             _context = context;
@@ -41,7 +41,7 @@ namespace Flower.Backend.Services
             int? orderId = null, string? referenceType = null, string? icon = null, 
             string? priority = "Normal", string? navigationUrl = null, string? metadata = null)
         {
-            var notification = new Notification
+            var notification = new CustomerNotification
             {
                 CustomerId = customerId,
                 Title = title,
@@ -57,7 +57,7 @@ namespace Flower.Backend.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Notifications.Add(notification);
+            _context.CustomerNotifications.Add(notification);
             await _context.SaveChangesAsync();
 
             // Push to SignalR
@@ -74,9 +74,9 @@ namespace Flower.Backend.Services
             });
         }
 
-        public async Task<(List<Notification> Items, int TotalCount)> GetCustomerNotifications(int customerId, int page, int pageSize)
+        public async Task<(List<CustomerNotification> Items, int TotalCount)> GetCustomerNotifications(int customerId, int page, int pageSize)
         {
-            var query = _context.Notifications.Where(n => n.CustomerId == customerId);
+            var query = _context.CustomerNotifications.Where(n => n.CustomerId == customerId);
             
             var totalCount = await query.CountAsync();
             var items = await query
@@ -90,13 +90,13 @@ namespace Flower.Backend.Services
 
         public async Task<int> GetCustomerUnreadCount(int customerId)
         {
-            return await _context.Notifications
+            return await _context.CustomerNotifications
                 .CountAsync(n => n.CustomerId == customerId && !n.IsRead);
         }
 
         public async Task<bool> MarkAsRead(int id, int customerId)
         {
-            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.Id == id && n.CustomerId == customerId);
+            var notification = await _context.CustomerNotifications.FirstOrDefaultAsync(n => n.Id == id && n.CustomerId == customerId);
             if (notification != null && !notification.IsRead)
             {
                 notification.IsRead = true;
@@ -113,7 +113,7 @@ namespace Flower.Backend.Services
 
         public async Task MarkAllAsRead(int customerId)
         {
-            var unread = await _context.Notifications.Where(n => n.CustomerId == customerId && !n.IsRead).ToListAsync();
+            var unread = await _context.CustomerNotifications.Where(n => n.CustomerId == customerId && !n.IsRead).ToListAsync();
             var now = DateTime.UtcNow;
             foreach (var n in unread)
             {

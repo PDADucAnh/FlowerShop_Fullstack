@@ -18,7 +18,7 @@ namespace Flower.Backend.Services
         private readonly IEmailService _emailService;
         private readonly ILogger<OrderCancellationService> _logger;
         private readonly ICouponService _couponService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
         public OrderCancellationService(
             IApplicationDbContext context,
@@ -27,7 +27,7 @@ namespace Flower.Backend.Services
             IEmailService emailService,
             ILogger<OrderCancellationService> logger,
             ICouponService couponService,
-            INotificationService notificationService)
+            ICustomerNotificationService notificationService)
         {
             _context = context;
             _deliverySlotService = deliverySlotService;

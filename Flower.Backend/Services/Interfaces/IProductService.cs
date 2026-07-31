@@ -7,8 +7,8 @@ namespace Flower.Backend.Services.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductDTO>> GetAll(bool includeInactive = false);
-        Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null, bool includeInactive = false, bool? isActive = null);
-        Task<IEnumerable<ProductDTO>> GetByCategoryProduct(int categoryProductId, bool includeInactive = false);
+        Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? productCategoryId = null, bool includeInactive = false, bool? isActive = null);
+        Task<IEnumerable<ProductDTO>> GetByProductCategory(int productCategoryId, bool includeInactive = false);
         Task<ProductDTO?> GetDetail(int id, bool includeInactive = false);
         Task<ProductDTO> Create(CreateProductDTO dto);
         Task<bool> Update(int id, UpdateProductDTO dto);

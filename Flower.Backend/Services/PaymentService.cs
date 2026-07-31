@@ -21,7 +21,7 @@ namespace Flower.Backend.Services
         private readonly IDeliverySlotService _deliverySlotService;
         private readonly IEmailService _emailService;
         private readonly ILogger<PaymentService> _logger;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
         private readonly string _webhookSecret;
 
         public PaymentService(
@@ -31,7 +31,7 @@ namespace Flower.Backend.Services
             IDeliverySlotService deliverySlotService,
             IEmailService emailService,
             ILogger<PaymentService> logger,
-            INotificationService notificationService,
+            ICustomerNotificationService notificationService,
             IConfiguration configuration)
         {
             _context = context;

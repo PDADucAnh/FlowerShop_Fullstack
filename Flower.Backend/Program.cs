@@ -185,15 +185,15 @@ builder.Services.AddScoped<IApplicationDbContext>(provider => provider.GetRequir
 
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPostService, Flower.Backend.Services.PostService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IProductService, Flower.Backend.Services.ProductService>();
-builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICategoryService, Flower.Backend.Services.CategoryService>();
-builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICategoryProductService, Flower.Backend.Services.CategoryProductService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IPostCategoryService, Flower.Backend.Services.PostCategoryService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IProductCategoryService, Flower.Backend.Services.ProductCategoryService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IUserService, Flower.Backend.Services.UserService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAuthService, Flower.Backend.Services.AuthService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerService, Flower.Backend.Services.CustomerService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderService, Flower.Backend.Services.OrderService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderCancellationService, Flower.Backend.Services.OrderCancellationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IOrderDetailService, Flower.Backend.Services.OrderDetailService>();
-builder.Services.AddScoped<Flower.Backend.Services.Interfaces.INotificationService, Flower.Backend.Services.NotificationService>();
+builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ICustomerNotificationService, Flower.Backend.Services.CustomerNotificationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IAdminNotificationService, Flower.Backend.Services.AdminNotificationService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.ISystemSettingService, Flower.Backend.Services.SystemSettingService>();
 builder.Services.AddScoped<Flower.Backend.Services.Interfaces.IShippingService, Flower.Backend.Services.ShippingService>();

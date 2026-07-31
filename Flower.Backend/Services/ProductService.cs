@@ -54,7 +54,7 @@ namespace Flower.Backend.Services
         private IQueryable<Product> BuildQuery(bool includeInactive = false)
         {
             IQueryable<Product> query = _context.Products
-                .Include(p => p.CategoryProduct)
+                .Include(p => p.ProductCategory)
                 .Include(p => p.Images);
 
             if (!includeInactive)
@@ -73,16 +73,16 @@ namespace Flower.Backend.Services
             return dtos;
         }
 
-        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? categoryProductId = null, bool includeInactive = false, bool? isActive = null)
+        public async Task<PagedResult<ProductDTO>> GetPaged(int page, int pageSize, decimal? minPrice = null, decimal? maxPrice = null, int? productCategoryId = null, bool includeInactive = false, bool? isActive = null)
         {
             var query = BuildQuery(includeInactive);
 
             if (isActive.HasValue)
                 query = query.Where(p => p.IsActive == isActive.Value);
 
-            if (categoryProductId.HasValue)
+            if (productCategoryId.HasValue)
             {
-                query = query.Where(p => p.CategoryProductId == categoryProductId.Value);
+                query = query.Where(p => p.ProductCategoryId == productCategoryId.Value);
             }
 
             if (minPrice.HasValue)
@@ -114,10 +114,10 @@ namespace Flower.Backend.Services
             };
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetByCategoryProduct(int categoryProductId, bool includeInactive = false)
+        public async Task<IEnumerable<ProductDTO>> GetByProductCategory(int productCategoryId, bool includeInactive = false)
         {
             var products = await BuildQuery(includeInactive)
-                .Where(p => p.CategoryProductId == categoryProductId)
+                .Where(p => p.ProductCategoryId == productCategoryId)
                 .ToListAsync();
             var dtos = products.Select(p => p.ToDTO()).ToList();
             await EnrichWithPromotion(dtos);
@@ -175,7 +175,7 @@ namespace Flower.Backend.Services
             }
 
             await _context.Entry(product)
-                .Reference(p => p.CategoryProduct)
+                .Reference(p => p.ProductCategory)
                 .LoadAsync();
 
             await _context.Entry(product)

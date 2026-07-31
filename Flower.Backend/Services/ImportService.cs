@@ -74,7 +74,7 @@ public class ImportService : IImportService
                 }
             }
 
-            var categoryMap = await _context.CategoriesProducts
+            var categoryMap = await _context.ProductCategories
                 .Where(c => c.Slug != null)
                 .ToDictionaryAsync(c => c.Slug!, c => c.Id, StringComparer.OrdinalIgnoreCase);
 
@@ -184,7 +184,7 @@ public class ImportService : IImportService
                                 existingProduct.Price = price;
                                 existingProduct.StockQuantity = stock;
                                 existingProduct.Description = description;
-                                existingProduct.CategoryProductId = resolvedCategoryId!.Value;
+                                existingProduct.ProductCategoryId = resolvedCategoryId!.Value;
                                 existingProduct.Slug = GenerateSlug(name);
                                 existingProduct.UpdatedAt = DateTime.UtcNow;
                                 if (pendingImagePath != null)
@@ -241,7 +241,7 @@ public class ImportService : IImportService
                         Price = price,
                         StockQuantity = stock,
                         Description = description,
-                        CategoryProductId = resolvedCategoryId!.Value,
+                        ProductCategoryId = resolvedCategoryId!.Value,
                         Slug = GenerateSlug(name),
                         IsActive = true,
                         CreatedAt = DateTime.UtcNow,
@@ -368,8 +368,8 @@ public class ImportService : IImportService
                 }
             }
 
-            var existingCategories = await _context.CategoriesProducts.ToListAsync();
-            var categoryByName = new Dictionary<string, Flower.Data.Entities.CategoryProduct>(StringComparer.OrdinalIgnoreCase);
+            var existingCategories = await _context.ProductCategories.ToListAsync();
+            var categoryByName = new Dictionary<string, Flower.Data.Entities.ProductCategory>(StringComparer.OrdinalIgnoreCase);
             foreach (var c in existingCategories)
                 categoryByName[c.Name] = c;
 
@@ -388,8 +388,8 @@ public class ImportService : IImportService
             var rowCount = worksheet.Dimension?.Rows ?? 0;
             result.TotalRows = Math.Max(0, rowCount - 1);
 
-            var itemsToAdd = new List<Flower.Data.Entities.CategoryProduct>();
-            var pendingCatImages = new Dictionary<Flower.Data.Entities.CategoryProduct, (string LocalPath, string FileName, string? OldImageUrl)>();
+            var itemsToAdd = new List<Flower.Data.Entities.ProductCategory>();
+            var pendingCatImages = new Dictionary<Flower.Data.Entities.ProductCategory, (string LocalPath, string FileName, string? OldImageUrl)>();
 
             for (int row = 2; row <= rowCount; row++)
             {
@@ -468,7 +468,7 @@ public class ImportService : IImportService
                         continue;
                     }
 
-                    var category = new Flower.Data.Entities.CategoryProduct
+                    var category = new Flower.Data.Entities.ProductCategory
                     {
                         Name = name,
                         Slug = slug,
@@ -519,7 +519,7 @@ public class ImportService : IImportService
 
             if (itemsToAdd.Count > 0)
             {
-                _context.CategoriesProducts.AddRange(itemsToAdd);
+                _context.ProductCategories.AddRange(itemsToAdd);
                 await _context.SaveChangesAsync();
             }
             else if (onDuplicate == "update")

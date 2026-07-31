@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Services.Interfaces
 {
-    public interface INotificationService
+    public interface ICustomerNotificationService
     {
         Task NotifyEntityChanged(string entityName);
         Task NotifyCustomerEvent(int customerId, string eventName, object data = null);
@@ -14,7 +14,7 @@ namespace Flower.Backend.Services.Interfaces
             int? orderId = null, string? referenceType = null, string? icon = null, 
             string? priority = "Normal", string? navigationUrl = null, string? metadata = null);
             
-        Task<(List<Notification> Items, int TotalCount)> GetCustomerNotifications(int customerId, int page, int pageSize);
+        Task<(List<CustomerNotification> Items, int TotalCount)> GetCustomerNotifications(int customerId, int page, int pageSize);
         Task<int> GetCustomerUnreadCount(int customerId);
         Task<bool> MarkAsRead(int id, int customerId);
         Task MarkAllAsRead(int customerId);

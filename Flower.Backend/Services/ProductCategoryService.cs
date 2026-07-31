@@ -9,26 +9,26 @@ using System.Threading.Tasks;
 
 namespace Flower.Backend.Services
 {
-    public class CategoryProductService : ICategoryProductService
+    public class ProductCategoryService : IProductCategoryService
     {
         private readonly IApplicationDbContext _context;
         private readonly IPhotoService _photoService;
 
-        public CategoryProductService(IApplicationDbContext context, IPhotoService photoService)
+        public ProductCategoryService(IApplicationDbContext context, IPhotoService photoService)
         {
             _context = context;
             _photoService = photoService;
         }
 
-        public async Task<IEnumerable<CategoryProductDTO>> GetAll()
+        public async Task<IEnumerable<ProductCategoryDTO>> GetAll()
         {
-            var list = await _context.CategoriesProducts.ToListAsync();
+            var list = await _context.ProductCategories.ToListAsync();
             return list.Select(c => c.ToDTO());
         }
 
-        public async Task<PagedResult<CategoryProductDTO>> GetPaged(int page, int pageSize)
+        public async Task<PagedResult<ProductCategoryDTO>> GetPaged(int page, int pageSize)
         {
-            var query = _context.CategoriesProducts.OrderByDescending(cp => cp.Id);
+            var query = _context.ProductCategories.OrderByDescending(cp => cp.Id);
 
             var totalCount = await query.CountAsync();
             var items = await query
@@ -36,7 +36,7 @@ namespace Flower.Backend.Services
                 .Take(pageSize)
                 .ToListAsync();
 
-            return new PagedResult<CategoryProductDTO>
+            return new PagedResult<ProductCategoryDTO>
             {
                 Items = items.Select(cp => cp.ToDTO()).ToList(),
                 TotalCount = totalCount,
@@ -45,31 +45,31 @@ namespace Flower.Backend.Services
             };
         }
 
-        public async Task<CategoryProductDTO?> GetById(int id)
+        public async Task<ProductCategoryDTO?> GetById(int id)
         {
-            var category = await _context.CategoriesProducts
+            var category = await _context.ProductCategories
                 .FirstOrDefaultAsync(cp => cp.Id == id);
             return category?.ToDTO();
         }
 
-        public async Task<CategoryProductDTO> Create(CreateCategoryProductDTO dto)
+        public async Task<ProductCategoryDTO> Create(CreateProductCategoryDTO dto)
         {
             if (string.IsNullOrEmpty(dto.Slug))
             {
                 dto.Slug = Flower.Backend.Utils.SlugHelper.GenerateSlug(dto.Name);
             }
             var category = dto.ToEntity();
-            _context.CategoriesProducts.Add(category);
+            _context.ProductCategories.Add(category);
             await _context.SaveChangesAsync();
             return category.ToDTO();
         }
 
-        public async Task<bool> Update(int id, UpdateCategoryProductDTO dto)
+        public async Task<bool> Update(int id, UpdateProductCategoryDTO dto)
         {
             if (id != dto.Id)
                 return false;
 
-            var category = await _context.CategoriesProducts.FindAsync(id);
+            var category = await _context.ProductCategories.FindAsync(id);
             if (category == null)
                 return false;
 
@@ -82,7 +82,7 @@ namespace Flower.Backend.Services
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!await _context.CategoriesProducts.AnyAsync(e => e.Id == id))
+                if (!await _context.ProductCategories.AnyAsync(e => e.Id == id))
                     return false;
                 throw;
             }
@@ -90,14 +90,14 @@ namespace Flower.Backend.Services
 
         public async Task<bool> Delete(int id)
         {
-            var category = await _context.CategoriesProducts.FindAsync(id);
+            var category = await _context.ProductCategories.FindAsync(id);
             if (category == null)
                 return false;
 
             if (!string.IsNullOrEmpty(category.ImageUrl))
                 await _photoService.DeletePhotoAsync(category.ImageUrl);
 
-            _context.CategoriesProducts.Remove(category);
+            _context.ProductCategories.Remove(category);
             await _context.SaveChangesAsync();
             return true;
         }

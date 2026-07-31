@@ -32,7 +32,7 @@ namespace Flower.Backend.Services
         private readonly ICouponService _couponService;
         private readonly IAdminNotificationService _adminNotificationService;
         private readonly IShippingService _shippingService;
-        private readonly INotificationService _notificationService;
+        private readonly ICustomerNotificationService _notificationService;
 
         public OrderService(
             IApplicationDbContext context,
@@ -50,7 +50,7 @@ namespace Flower.Backend.Services
             ICouponService couponService,
             IAdminNotificationService adminNotificationService,
             IShippingService shippingService,
-            INotificationService notificationService)
+            ICustomerNotificationService notificationService)
         {
             _context = context;
             _logger = logger;

@@ -46,7 +46,7 @@ namespace Flower.Backend.Services
                 .Include(od => od.Order)
                     .ThenInclude(o => o.Customer)
                 .Include(od => od.Product)
-                    .ThenInclude(p => p.CategoryProduct);
+                    .ThenInclude(p => p.ProductCategory);
 
             query = ApplyOwnershipFilter(query);
 
@@ -60,7 +60,7 @@ namespace Flower.Backend.Services
                 .Include(od => od.Order)
                     .ThenInclude(o => o.Customer)
                 .Include(od => od.Product)
-                    .ThenInclude(p => p.CategoryProduct)
+                    .ThenInclude(p => p.ProductCategory)
                 .OrderByDescending(od => od.Id);
 
             query = ApplyOwnershipFilter(query);
@@ -86,7 +86,7 @@ namespace Flower.Backend.Services
                 .Include(od => od.Order)
                     .ThenInclude(o => o.Customer)
                 .Include(od => od.Product)
-                    .ThenInclude(p => p.CategoryProduct)
+                    .ThenInclude(p => p.ProductCategory)
                 .Where(od => od.Id == id);
 
             query = ApplyOwnershipFilter(query);
@@ -102,7 +102,7 @@ namespace Flower.Backend.Services
                 .Include(od => od.Order)
                     .ThenInclude(o => o.Customer)
                 .Include(od => od.Product)
-                    .ThenInclude(p => p.CategoryProduct);
+                    .ThenInclude(p => p.ProductCategory);
 
             query = ApplyOwnershipFilter(query);
 

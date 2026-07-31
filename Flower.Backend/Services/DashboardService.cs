@@ -117,7 +117,7 @@ namespace Flower.Backend.Services
                 Expired = await _context.Advertisements.CountAsync(a => !a.IsActive),
             };
 
-            var notifications = await _context.Notifications
+            var notifications = await _context.CustomerNotifications
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(10)
                 .Select(n => new DashboardNotificationDTO
@@ -311,7 +311,7 @@ namespace Flower.Backend.Services
                 from od in _context.OrderDetails
                 join o in _context.Orders on od.OrderId equals o.Id
                 join p in _context.Products on od.ProductId equals p.Id
-                join cp in _context.CategoriesProducts on p.CategoryProductId equals cp.Id into cpJoin
+                join cp in _context.ProductCategories on p.ProductCategoryId equals cp.Id into cpJoin
                 from cp in cpJoin.DefaultIfEmpty()
                 where o.Status == OrderStatus.Completed && o.PaymentStatus == PaymentStatus.Completed
                 select new { od.UnitPrice, od.Quantity, CategoryName = cp != null ? cp.Name : "Khác" }
@@ -337,7 +337,7 @@ namespace Flower.Backend.Services
 
         public async Task<List<DashboardNotificationDTO>> GetNotifications()
         {
-            return await _context.Notifications
+            return await _context.CustomerNotifications
                 .OrderByDescending(n => n.CreatedAt)
                 .Take(20)
                 .Select(n => new DashboardNotificationDTO
