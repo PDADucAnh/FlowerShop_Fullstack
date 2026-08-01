@@ -77,7 +77,12 @@ export function FlashSalesTab() {
 
   const createMutation = useMutation({
     mutationFn: (dto: CreateFlashSaleRequest) => flashSalesApi.create(dto),
-    onSuccess: () => { invalidate(); setDialogOpen(false); toast.success('Đã tạo Flash Sale') },
+    onSuccess: (resp) => {
+      invalidate()
+      setDialogOpen(false)
+      toast.success('Đã tạo Flash Sale')
+      setBulkAddItem(resp.data)
+    },
     onError: (err: any) => toast.error(err.response?.data?.message || 'Không thể tạo Flash Sale'),
   })
 
