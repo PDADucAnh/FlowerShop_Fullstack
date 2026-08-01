@@ -91,5 +91,84 @@ namespace Flower.Backend.Controllers.Api
             await _notificationService.NotifyEntityChanged("FlashSale");
             return NoContent();
         }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("preview/category")]
+        public async Task<IActionResult> PreviewByCategory([FromBody] FlashSalePreviewRequestDto dto)
+        {
+            try
+            {
+                var items = await _flashSaleService.PreviewByCategory(dto);
+                return Ok(items);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("preview/bestseller")]
+        public async Task<IActionResult> PreviewByBestSeller([FromBody] FlashSalePreviewRequestDto dto)
+        {
+            try
+            {
+                var items = await _flashSaleService.PreviewByBestSeller(dto);
+                return Ok(items);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("preview/excel")]
+        public async Task<IActionResult> PreviewByExcel([FromForm] int flashSaleId, [FromForm] decimal? defaultDiscountPercent, [FromForm] IFormFile? file)
+        {
+            try
+            {
+                var items = await _flashSaleService.PreviewByExcel(flashSaleId, defaultDiscountPercent, file!);
+                return Ok(items);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPost("bulk-add")]
+        public async Task<IActionResult> BulkAdd([FromBody] BulkAddFlashSaleProductsDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            try
+            {
+                var count = await _flashSaleService.BulkAdd(dto);
+                await _notificationService.NotifyEntityChanged("FlashSale");
+                return Ok(new { added = count });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

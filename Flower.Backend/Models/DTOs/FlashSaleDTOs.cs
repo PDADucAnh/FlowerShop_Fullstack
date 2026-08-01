@@ -77,4 +77,52 @@ namespace Flower.Backend.Models.DTOs
         public bool? IsActive { get; set; }
         public List<CreateFlashSaleProductDTO>? Products { get; set; }
     }
+
+    public class FlashSalePreviewRequestDto
+    {
+        [Required]
+        public int FlashSaleId { get; set; }
+
+        public List<int>? ProductCategoryIds { get; set; }
+
+        public int? MinStockQuantity { get; set; }
+
+        public int? TopCount { get; set; }
+
+        public decimal? DefaultDiscountPercent { get; set; } = 15;
+    }
+
+    public class FlashSaleProductPreviewDto
+    {
+        public int ProductId { get; set; }
+        public string? Sku { get; set; }
+        public string? ProductName { get; set; }
+        public string? ProductImageUrl { get; set; }
+        public decimal OriginalPrice { get; set; }
+        public int StockQuantity { get; set; }
+        public decimal SuggestedSalePrice { get; set; }
+        public int Quantity { get; set; }
+        public decimal DiscountPercent { get; set; }
+    }
+
+    public class BulkAddFlashSaleProductsDto
+    {
+        [Required]
+        public int FlashSaleId { get; set; }
+
+        [Required]
+        public List<BulkAddFlashSaleProductDto> Products { get; set; } = new();
+    }
+
+    public class BulkAddFlashSaleProductDto
+    {
+        [Required]
+        public int ProductId { get; set; }
+
+        [Required]
+        [Range(0, double.MaxValue)]
+        public decimal SalePrice { get; set; }
+
+        public int Quantity { get; set; }
+    }
 }

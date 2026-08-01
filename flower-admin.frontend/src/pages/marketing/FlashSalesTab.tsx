@@ -16,9 +16,10 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
-import { Loader2, AlertCircle, Plus, Pencil, Trash2, X } from 'lucide-react'
+import { Loader2, AlertCircle, Plus, Pencil, Trash2, X, ListPlus } from 'lucide-react'
 import { toast } from 'sonner'
-import type { FlashSale, CreateFlashSaleRequest, UpdateFlashSaleRequest, CreateFlashSaleProductRequest } from '@/types/flashSale'
+import type { FlashSale, CreateFlashSaleRequest, UpdateFlashSaleRequest } from '@/types/flashSale'
+import { BulkAddFlashSaleModal } from './BulkAddFlashSaleModal'
 
 const now = () => new Date()
 
@@ -50,6 +51,7 @@ export function FlashSalesTab() {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editItem, setEditItem] = useState<FlashSale | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<FlashSale | null>(null)
+  const [bulkAddItem, setBulkAddItem] = useState<FlashSale | null>(null)
   const queryClient = useQueryClient()
 
   const { data: items, isLoading, error } = useQuery({
@@ -306,6 +308,7 @@ export function FlashSalesTab() {
                       <TableCell className="text-center">{item.products?.length || 0}</TableCell>
                       <TableCell><Badge variant={status.variant}>{status.label}</Badge></TableCell>
                       <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" title="Thêm hàng loạt" onClick={() => setBulkAddItem(item)}><ListPlus className="size-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="size-4" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => setDeleteConfirm(item)}><Trash2 className="size-4 text-destructive" /></Button>
                       </TableCell>
@@ -336,6 +339,13 @@ export function FlashSalesTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <BulkAddFlashSaleModal
+        open={!!bulkAddItem}
+        onOpenChange={(o) => { if (!o) setBulkAddItem(null) }}
+        flashSale={bulkAddItem}
+        onSuccess={invalidate}
+      />
     </div>
   )
 }

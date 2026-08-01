@@ -19,6 +19,8 @@ namespace Flower.Data.Entities
         [Column(TypeName = "decimal(18,2)")]
         public decimal DiscountPercent { get; set; }
 
+        public int Quantity { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         [ForeignKey("FlashSaleId")]
