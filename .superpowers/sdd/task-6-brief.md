@@ -1,147 +1,259 @@
-# Phase 2: Products & Categories Implementation Plan
+# PLAN PREAMBLE (from docs/superpowers/plans/2026-07-31-refactor-and-rename-tables.md)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** Build Products & Categories management UI (list, create, edit, delete with multi-image upload) in the admin SPA.
-
-**Architecture:** Backend adds `ProductImage` entity + image upload/association endpoints; frontend adds DataTable listing, create/edit forms with multi-image upload, and inline category CRUD dialogs.
-
-**Tech Stack:** ASP.NET Core 8, EF Core + PostgreSQL, Cloudinary (via `PhotoService`), React 19 + Vite + Tailwind v4 + shadcn/ui (Base UI) + React Query + React Router v7.
+## Task 6: ProductVariant CRUD (STEP 2)
 
 ## Global Constraints
-
-- All UI text in Vietnamese
-- API responses are raw data (not wrapped in `ApiResponse<T>`) — frontend reads `response.data` directly from axios
-- Image upload via `POST /api/Upload` (returns `{ url: string }`), not direct browser-to-Cloudinary
-- `CreateProductDTO` / `UpdateProductDTO` extended with: `IsActive`, `FlowerMeaning`, `Origin`, `CareInstruction`, `NewImages`
-- `ProductDTO` gains `List<ProductImageDTO> Images`
-- Backend creates product + `ProductImage` records in a single transaction (`NewImages` batch)
-- Existing MVC controllers (`ProductController`, `CategoryProductController`) NOT modified — only API controllers changed
-- Follow existing patterns: `ICategoryProductService` / `CategoryProductService`, `IProductService` / `ProductService`
-
+- Keep the 4 currently-unused tables **untouched**: `ProductVariants`, `CustomerAddresses`, `PaymentMethods`, `CustomerPaymentPreferences` — they exist to support future features. (Their *entities* may be renamed internally only where specified, and their table names stay.)
+- Migration must be **exactly** named `RefactorAndRenameTables` and must preserve all data (use `RenameTable`/`RenameColumn`/`RenameForeignKey`/`RenameIndex`, never drop+create).
+- Do **NOT** rename: `Order.PaymentMethod` enum (in `Flower.Data/Entities/Order.cs:26`), the `NotificationHub` SignalR route `/hubs/notifications`, `AdminNotification`/`NotificationController` (MVC admin), the `ProductImage` table, the `Product.ImageUrl` column, the Cloudinary folder constant `CloudinaryFolders.Categories`.
+- Route pattern stays `Route("api/[controller]")` unless otherwise stated, so route changes follow controller renames.
+- Entity-name strings sent via `NotifyEntityChanged("...")` must match frontend `entityQueryMap` keys in `Flower-shop.frontend/src/hooks/useRealtimeUpdates.ts`.
+- Commit style (repo convention): lowercase prefix — `refactor:`, `feat:`, `fix:`.
+- Do not add comments to code unless a file already has them in that style.
 
 ---
-### Task 6: Frontend — Delete Product Dialog
+
+## Task 6: ProductVariant CRUD (STEP 2)
 
 **Files:**
-- Create: `flower-admin.frontend/src/pages/products/components/DeleteProductDialog.tsx`
+- Create: `Flower.Backend/Models/DTOs/ProductVariantDTOs.cs`
+- Modify: `Flower.Backend/Models/DTOs/ProductDTOs.cs` (add `Variants` to `ProductDTO`)
+- Modify: `Flower.Backend/Models/DTOs/MappingExtensions.cs` (add `ProductVariant.ToDTO()`; extend `Product.ToDTO()` to map `Variants`)
+- Modify: `Flower.Backend/Services/Interfaces/IProductService.cs` (3 new methods)
+- Modify: `Flower.Backend/Services/ProductService.cs` (implement; include `ProductVariants` in `BuildQuery`)
+- Modify: `Flower.Backend/Controllers/Api/ProductsController.cs` (3 new endpoints)
 
 **Interfaces:**
-- Consumes: `productsApi`, `Product`
-- Produces: delete confirmation dialog used by ProductsPage
+- Consumes: `ProductVariant.Price`/`Sku` (Task 1), `ProductVariantDTO` (this task).
+- Produces: `IProductService.AddVariantAsync(int, CreateProductVariantDTO) → ProductVariantDTO?`, `UpdateVariantAsync(int, UpdateProductVariantDTO) → bool`, `DeleteVariantAsync(int) → bool`; `ProductDTO.Variants`.
 
-- [ ] **Step 1: Create `DeleteProductDialog.tsx`**
+- [ ] **Step 1: Create `ProductVariantDTOs.cs`**
 
-```typescript
-import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { productsApi } from '@/api/products'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { toast } from 'sonner'
-import { Loader2, AlertTriangle } from 'lucide-react'
-import type { Product } from '@/types/product'
+```csharp
+using System.ComponentModel.DataAnnotations;
 
-interface DeleteProductDialogProps {
-  product: Product | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onDeleted?: () => void
-}
+namespace Flower.Backend.Models.DTOs
+{
+    public class ProductVariantDTO
+    {
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public string? Sku { get; set; }
+        public bool IsDefault { get; set; }
+    }
 
-export function DeleteProductDialog({
-  product,
-  open,
-  onOpenChange,
-  onDeleted,
-}: DeleteProductDialogProps) {
-  const queryClient = useQueryClient()
+    public class CreateProductVariantDTO
+    {
+        [Required(ErrorMessage = "Tên size không được để trống")]
+        [MaxLength(50)]
+        public string Name { get; set; } = string.Empty;
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: number) => productsApi.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
-      toast.success('Đã xóa sản phẩm')
-      onOpenChange(false)
-      onDeleted?.()
-    },
-    onError: () => {
-      toast.error('Xóa sản phẩm thất bại')
-    },
-  })
+        [Range(0, (double)decimal.MaxValue, ErrorMessage = "Giá phải lớn hơn 0")]
+        public decimal Price { get; set; }
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="size-5 text-destructive" />
-            <DialogTitle>Xóa sản phẩm</DialogTitle>
-          </div>
-          <DialogDescription>
-            Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác.
-          </DialogDescription>
-        </DialogHeader>
+        [MaxLength(50)]
+        public string? Sku { get; set; }
 
-        {product && (
-          <div className="flex items-center gap-3 rounded-lg border bg-muted/50 p-3">
-            <img
-              src={product.images?.[0]?.imageUrl || product.imageUrl || '/placeholder.svg'}
-              alt={product.name}
-              className="size-12 rounded-md object-cover"
-            />
-            <div>
-              <p className="font-medium">{product.name}</p>
-              <p className="text-sm text-muted-foreground">SKU: {product.sku || '—'}</p>
-            </div>
-          </div>
-        )}
+        public bool IsDefault { get; set; }
+    }
 
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-            disabled={deleteMutation.isPending}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={() => product && deleteMutation.mutate(product.id)}
-            disabled={deleteMutation.isPending}
-          >
-            {deleteMutation.isPending && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
-            Xóa
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  )
+    public class UpdateProductVariantDTO
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Tên size không được để trống")]
+        [MaxLength(50)]
+        public string Name { get; set; } = string.Empty;
+
+        [Range(0, (double)decimal.MaxValue, ErrorMessage = "Giá phải lớn hơn 0")]
+        public decimal Price { get; set; }
+
+        [MaxLength(50)]
+        public string? Sku { get; set; }
+
+        public bool IsDefault { get; set; }
+    }
 }
 ```
 
-- [ ] **Step 2: Verify build**
+- [ ] **Step 2: Add `Variants` to `ProductDTO`**
 
-```bash
-npm run build
+In `ProductDTOs.cs`, add after the `Images` property (line 27):
+
+```csharp
+public List<ProductVariantDTO> Variants { get; set; } = new();
 ```
-Expected: 0 errors
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Add mapping in `MappingExtensions.cs`**
+
+Add the `ProductVariant.ToDTO()` extension method (anywhere in the static class):
+
+```csharp
+public static ProductVariantDTO ToDTO(this ProductVariant v)
+{
+    return new ProductVariantDTO
+    {
+        Id = v.Id,
+        ProductId = v.ProductId,
+        Name = v.Name,
+        Price = v.Price,
+        Sku = v.Sku,
+        IsDefault = v.IsDefault
+    };
+}
+```
+
+Then in `Product.ToDTO()`, add:
+
+```csharp
+Variants = product.ProductVariants?.Select(v => v.ToDTO()).ToList() ?? new List<ProductVariantDTO>()
+```
+
+- [ ] **Step 4: Add interface methods (`IProductService.cs`)**
+
+```csharp
+Task<ProductVariantDTO?> AddVariantAsync(int productId, CreateProductVariantDTO dto);
+Task<bool> UpdateVariantAsync(int variantId, UpdateProductVariantDTO dto);
+Task<bool> DeleteVariantAsync(int variantId);
+```
+
+- [ ] **Step 5: Implement in `ProductService.cs`**
+
+Add `using System.Collections.Generic;` if missing, and implement:
+
+```csharp
+public async Task<ProductVariantDTO?> AddVariantAsync(int productId, CreateProductVariantDTO dto)
+{
+    var product = await _context.Products.FindAsync(productId);
+    if (product == null) return null;
+
+    if (dto.IsDefault)
+    {
+        var others = _context.ProductVariants.Where(v => v.ProductId == productId && v.IsDefault);
+        foreach (var v in others) v.IsDefault = false;
+    }
+
+    var variant = new ProductVariant
+    {
+        ProductId = productId,
+        Name = dto.Name,
+        Price = dto.Price,
+        Sku = dto.Sku,
+        IsDefault = dto.IsDefault
+    };
+
+    _context.ProductVariants.Add(variant);
+    await _context.SaveChangesAsync();
+    return variant.ToDTO();
+}
+
+public async Task<bool> UpdateVariantAsync(int variantId, UpdateProductVariantDTO dto)
+{
+    var variant = await _context.ProductVariants.FindAsync(variantId);
+    if (variant == null) return false;
+
+    if (dto.IsDefault)
+    {
+        var others = _context.ProductVariants
+            .Where(v => v.ProductId == variant.ProductId && v.IsDefault && v.Id != variantId);
+        foreach (var v in others) v.IsDefault = false;
+    }
+
+    variant.Name = dto.Name;
+    variant.Price = dto.Price;
+    variant.Sku = dto.Sku;
+    variant.IsDefault = dto.IsDefault;
+
+    await _context.SaveChangesAsync();
+    return true;
+}
+
+public async Task<bool> DeleteVariantAsync(int variantId)
+{
+    var variant = await _context.ProductVariants.FindAsync(variantId);
+    if (variant == null) return false;
+
+    _context.ProductVariants.Remove(variant);
+    await _context.SaveChangesAsync();
+    return true;
+}
+```
+
+Also extend `BuildQuery` (line 54-58) to include variants:
+
+```csharp
+IQueryable<Product> query = _context.Products
+    .Include(p => p.ProductCategory)
+    .Include(p => p.Images)
+    .Include(p => p.ProductVariants);
+```
+
+> After Task 1, `p.CategoryProduct` is now `p.ProductCategory`. `ProductVariants` navigation is `Product.ProductVariants` (exists at `Product.cs:44`).
+
+- [ ] **Step 6: Add controller endpoints (`ProductsController.cs`)**
+
+Add after `Delete` (line 149), before the bulk endpoints:
+
+```csharp
+[HttpPost("{id}/variants")]
+public async Task<IActionResult> AddVariant(int id, [FromBody] CreateProductVariantDTO dto)
+{
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+    var variant = await _productService.AddVariantAsync(id, dto);
+    if (variant == null)
+        return NotFound(new { message = "Không tìm thấy sản phẩm này" });
+
+    await _notificationService.NotifyEntityChanged("Product");
+    return CreatedAtAction(nameof(GetDetail), new { id }, variant);
+}
+
+[HttpPut("{id}/variants/{variantId}")]
+public async Task<IActionResult> UpdateVariant(int id, int variantId, [FromBody] UpdateProductVariantDTO dto)
+{
+    if (variantId != dto.Id)
+        return BadRequest();
+
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+    var updated = await _productService.UpdateVariantAsync(variantId, dto);
+    if (!updated)
+        return NotFound();
+
+    await _notificationService.NotifyEntityChanged("Product");
+    return NoContent();
+}
+
+[HttpDelete("{id}/variants/{variantId}")]
+public async Task<IActionResult> DeleteVariant(int id, int variantId)
+{
+    var deleted = await _productService.DeleteVariantAsync(variantId);
+    if (!deleted)
+        return NotFound();
+
+    await _notificationService.NotifyEntityChanged("Product");
+    return NoContent();
+}
+```
+
+- [ ] **Step 7: Build + test + smoke-test**
+
+```powershell
+dotnet build
+dotnet test Flower.Tests
+```
+
+Expected: build succeeds, `37` tests pass. Manual smoke: `GET /api/Products/{id}` returns `variants: []`; `POST /api/Products/{id}/variants` with `{ "name": "Nhỏ", "price": 100000, "sku": "R-001", "isDefault": true }` returns the created variant and subsequent `GET` shows it.
+
+- [ ] **Step 8: Commit**
 
 ```bash
-git add flower-admin.frontend/src/pages/products/components/DeleteProductDialog.tsx
-git commit -m "feat: add delete product confirmation dialog"
+git add Flower.Backend
+git commit -m "feat: add product variant CRUD API"
 ```
 
 ---
-

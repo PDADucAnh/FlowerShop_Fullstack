@@ -1,322 +1,77 @@
-# Phase 2: Products & Categories Implementation Plan
+# PLAN PREAMBLE (from docs/superpowers/plans/2026-07-31-refactor-and-rename-tables.md)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** Build Products & Categories management UI (list, create, edit, delete with multi-image upload) in the admin SPA.
-
-**Architecture:** Backend adds `ProductImage` entity + image upload/association endpoints; frontend adds DataTable listing, create/edit forms with multi-image upload, and inline category CRUD dialogs.
-
-**Tech Stack:** ASP.NET Core 8, EF Core + PostgreSQL, Cloudinary (via `PhotoService`), React 19 + Vite + Tailwind v4 + shadcn/ui (Base UI) + React Query + React Router v7.
+## Task 4: Rename controllers + views + SignalR entity strings
 
 ## Global Constraints
-
-- All UI text in Vietnamese
-- API responses are raw data (not wrapped in `ApiResponse<T>`) — frontend reads `response.data` directly from axios
-- Image upload via `POST /api/Upload` (returns `{ url: string }`), not direct browser-to-Cloudinary
-- `CreateProductDTO` / `UpdateProductDTO` extended with: `IsActive`, `FlowerMeaning`, `Origin`, `CareInstruction`, `NewImages`
-- `ProductDTO` gains `List<ProductImageDTO> Images`
-- Backend creates product + `ProductImage` records in a single transaction (`NewImages` batch)
-- Existing MVC controllers (`ProductController`, `CategoryProductController`) NOT modified — only API controllers changed
-- Follow existing patterns: `ICategoryProductService` / `CategoryProductService`, `IProductService` / `ProductService`
-
+- Keep the 4 currently-unused tables **untouched**: `ProductVariants`, `CustomerAddresses`, `PaymentMethods`, `CustomerPaymentPreferences` — they exist to support future features. (Their *entities* may be renamed internally only where specified, and their table names stay.)
+- Migration must be **exactly** named `RefactorAndRenameTables` and must preserve all data (use `RenameTable`/`RenameColumn`/`RenameForeignKey`/`RenameIndex`, never drop+create).
+- Do **NOT** rename: `Order.PaymentMethod` enum (in `Flower.Data/Entities/Order.cs:26`), the `NotificationHub` SignalR route `/hubs/notifications`, `AdminNotification`/`NotificationController` (MVC admin), the `ProductImage` table, the `Product.ImageUrl` column, the Cloudinary folder constant `CloudinaryFolders.Categories`.
+- Route pattern stays `Route("api/[controller]")` unless otherwise stated, so route changes follow controller renames.
+- Entity-name strings sent via `NotifyEntityChanged("...")` must match frontend `entityQueryMap` keys in `Flower-shop.frontend/src/hooks/useRealtimeUpdates.ts`.
+- Commit style (repo convention): lowercase prefix — `refactor:`, `feat:`, `fix:`.
+- Do not add comments to code unless a file already has them in that style.
 
 ---
-### Task 4: Frontend — Products DataTable Page
+
+## Task 4: Rename controllers + views + SignalR entity strings
 
 **Files:**
-- Create: `flower-admin.frontend/src/pages/products/ProductsPage.tsx`
-- Create: `flower-admin.frontend/src/pages/products/components/ProductTable.tsx`
+- Rename: `Controllers/Api/CategoriesController.cs` → `PostCategoriesController.cs` (class + route `api/PostCategories`; `ICategoryService` → `IPostCategoryService`; DTO types → `PostCategoryDTO`/`CreatePostCategoryDTO`/`UpdatePostCategoryDTO`)
+- Rename: `Controllers/Api/CategoriesApiController.cs` → `PostCategoriesApiController.cs` (class; explicit route stays `api/postcategories`; same type renames)
+- Rename: `Controllers/Api/CategoriesProductsController.cs` → `ProductCategoriesController.cs` (class + route `api/ProductCategories`; `ICategoryProductService` → `IProductCategoryService`; `INotificationService` → `ICustomerNotificationService`; DTOs → `ProductCategoryDTO`/`CreateProductCategoryDTO`/`UpdateProductCategoryDTO`; `NotifyEntityChanged("CategoryProduct")` → `NotifyEntityChanged("ProductCategory")`)
+- Rename: `Controllers/Api/NotificationsController.cs` → `CustomerNotificationsController.cs` (class + route `api/CustomerNotifications`; `INotificationService` → `ICustomerNotificationService`)
+- Rename: `Controllers/CategoryController.cs` → `PostCategoryController.cs` (MVC; service refs)
+- Rename: `Controllers/CategoryProductController.cs` → `ProductCategoryController.cs` (MVC; `NotifyEntityChanged("CategoryProduct")` → `NotifyEntityChanged("ProductCategory")`; `INotificationService` → `ICustomerNotificationService`)
+- Rename view folders: `Views/Category/*` → `Views/PostCategory/*`; `Views/CategoryProduct/*` → `Views/ProductCategory/*` (files keep names; update `@model` types inside to the renamed DTOs)
+- Modify: `Controllers/Api/ProductsController.cs` (`categoryProductId` param at :46,50; route `categoryproduct/{categoryProductId}` at :71; `GetByCategoryProduct` at :72,74 → `GetByProductCategory` + `productcategory/{productCategoryId}`; `INotificationService` → `ICustomerNotificationService`)
+- Modify: `Controllers/Api/PostsController.cs` (any `categoryId`/`Category` refs → `postCategoryId`/`PostCategory`)
+- Modify: `Controllers/PostController.cs` (`ICategoryService` → `IPostCategoryService`, DTO types)
+- Modify: `Views/Shared/_LayoutAdmin.cshtml` (asp-controller/asp-action links to `Category`/`CategoryProduct` → `PostCategory`/`ProductCategory`)
+- Grep targets: `INotificationService`, `ICategoryService`, `ICategoryProductService`, `CategoryProductDTO`, `CategoryDTO`, `categoryProductId`, `CategoryProduct`, `_context.Categories`, `CategoriesProducts` across `Flower.Backend`
 
 **Interfaces:**
-- Consumes: `productsApi`, `categoriesApi`, `Product`, `CategoryProduct`, `PagedResponse`
-- Produces: `/products` route content (replace placeholder)
+- Consumes: Task 1-3 renames.
+- Produces: API routes `api/PostCategories`, `api/postcategories`, `api/ProductCategories`, `api/CustomerNotifications`; SignalR entity string `"ProductCategory"`; `api/Products/productcategory/{productCategoryId}`.
 
-- [ ] **Step 1: Create `ProductTable.tsx`**
+- [ ] **Step 1: Rename the 4 API controllers**
 
-```typescript
-import { useNavigate } from 'react-router-dom'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Pencil, Trash2 } from 'lucide-react'
-import type { Product } from '@/types/product'
+Apply the file renames and in-file type renames exactly as listed. Do not change action signatures or routes except where listed. The two `api/PostCategories` controllers (`PostCategoriesController` + `PostCategoriesApiController`) remain duplicates exactly as today (pre-existing, out of scope).
 
-interface ProductTableProps {
-  products: Product[]
-  onDelete: (product: Product) => void
-}
+- [ ] **Step 2: Rename the 2 MVC controllers + view folders**
 
-export function ProductTable({ products, onDelete }: ProductTableProps) {
-  const navigate = useNavigate()
+Rename files, classes, and `Views/` folders. Update `@model` directives in the `.cshtml` files to the renamed DTO types. Update `_LayoutAdmin.cshtml` menu links.
 
-  const stockBadge = (qty: number) => {
-    if (qty === 0) return <Badge variant="destructive">Hết hàng</Badge>
-    if (qty <= 5) return <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">{qty}</Badge>
-    return <Badge className="bg-green-100 text-green-800 hover:bg-green-100">{qty}</Badge>
-  }
+- [ ] **Step 3: Rename the SignalR entity string**
 
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat('vi-VN').format(price) + '₫'
+Every `NotifyEntityChanged("CategoryProduct")` → `NotifyEntityChanged("ProductCategory")`. Grep `NotifyEntityChanged("Category")` — if any exists, change to `"PostCategory"`.
 
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-12">Ảnh</TableHead>
-          <TableHead>Tên sản phẩm</TableHead>
-          <TableHead>SKU</TableHead>
-          <TableHead>Danh mục</TableHead>
-          <TableHead className="text-right">Giá</TableHead>
-          <TableHead className="text-center">Tồn kho</TableHead>
-          <TableHead className="text-center">Trạng thái</TableHead>
-          <TableHead className="w-24">Thao tác</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {products.map((product) => (
-          <TableRow key={product.id}>
-            <TableCell>
-              <img
-                src={product.images?.[0]?.imageUrl || product.imageUrl || '/placeholder.svg'}
-                alt={product.name}
-                className="size-10 rounded-md object-cover"
-              />
-            </TableCell>
-            <TableCell className="font-medium">{product.name}</TableCell>
-            <TableCell className="text-muted-foreground">{product.sku || '—'}</TableCell>
-            <TableCell>{product.categoryProductName || '—'}</TableCell>
-            <TableCell className="text-right font-mono">{formatPrice(product.price)}</TableCell>
-            <TableCell className="text-center">{stockBadge(product.stockQuantity)}</TableCell>
-            <TableCell className="text-center">
-              <Badge variant={product.isActive ? 'default' : 'outline'}>
-                {product.isActive ? 'Đang bán' : 'Ngừng bán'}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigate(`/products/${product.id}/edit`)}
-                >
-                  <Pencil className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(product)}
-                >
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+- [ ] **Step 4: Update `ProductsController.cs` and `PostsController.cs`**
+
+- ProductsController: param/route/action renames listed above; controller ctor type `INotificationService` → `ICustomerNotificationService`.
+- PostsController: rename `categoryId` params to `postCategoryId` where they filter blog posts by category.
+
+- [ ] **Step 5: Grep-sweep remaining stale identifiers**
+
+```powershell
+rg -n "INotificationService|ICategoryService|ICategoryProductService|CategoryProduct|CategoriesProducts|Categories\b|categoryProductId|CategoryDTO" Flower.Backend --type cs
 ```
 
-- [ ] **Step 2: Create `ProductsPage.tsx`**
+Fix every hit. Leave **only** these intact: `AdminNotificationService`/`IAdminNotificationService`/`AdminNotification`, `Views/Notification` (MVC admin), `Order.PaymentMethod` enum.
 
-```typescript
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { productsApi } from '@/api/products'
-import { categoriesApi } from '@/api/categories'
-import { ProductTable } from './components/ProductTable'
-import { DeleteProductDialog } from './components/DeleteProductDialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Plus, Search, Loader2, AlertCircle } from 'lucide-react'
-import type { Product } from '@/types/product'
+- [ ] **Step 6: Build + test (solution must compile again)**
 
-export function ProductsPage() {
-  const navigate = useNavigate()
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
-  const [categoryFilter, setCategoryFilter] = useState<string>('all')
-  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null)
-  const pageSize = 20
-
-  const { data: categories } = useQuery({
-    queryKey: ['categories'],
-    queryFn: () => categoriesApi.getAll().then((r) => r.data),
-  })
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['products', page, categoryFilter],
-    queryFn: () =>
-      productsApi.getPaged({
-        page,
-        pageSize,
-        categoryProductId: categoryFilter === 'all' ? null : Number(categoryFilter),
-      }).then((r) => r.data),
-  })
-
-  const handleSearch = () => {
-    if (!search.trim()) return
-    navigate(`/products?search=${encodeURIComponent(search)}`)
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-2 text-destructive">
-        <AlertCircle className="size-8" />
-        <p>Không thể tải danh sách sản phẩm</p>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Thử lại
-        </Button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Sản phẩm</h1>
-        <Button onClick={() => navigate('/products/new')}>
-          <Plus className="mr-2 size-4" />
-          Thêm sản phẩm
-        </Button>
-      </div>
-
-      <div className="flex items-center gap-3">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm sản phẩm…"
-            className="pl-9"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-          />
-        </div>
-        <Select value={categoryFilter} onValueChange={(v) => { setCategoryFilter(v); setPage(1) }}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Tất cả danh mục" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả danh mục</SelectItem>
-            {categories?.map((cat) => (
-              <SelectItem key={cat.id} value={String(cat.id)}>
-                {cat.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">
-            {data ? `${data.totalCount} sản phẩm` : ''}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {data && data.items.length > 0 ? (
-            <div>
-              <ProductTable
-                products={data.items}
-                onDelete={setDeleteTarget}
-              />
-              {/* Pagination */}
-              {(data.totalPages ?? 0) > 1 && (
-                <div className="flex items-center justify-between border-t px-4 py-3">
-                  <p className="text-sm text-muted-foreground">
-                    Trang {data.page} / {data.totalPages}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    >
-                      Trước
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={page >= (data.totalPages ?? 1)}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      Sau
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex h-48 flex-col items-center justify-center text-muted-foreground">
-              <p>Chưa có sản phẩm nào</p>
-              <Button variant="link" onClick={() => navigate('/products/new')}>
-                Thêm sản phẩm đầu tiên
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <DeleteProductDialog
-        product={deleteTarget}
-        open={!!deleteTarget}
-        onOpenChange={(open) => !open && setDeleteTarget(null)}
-        onDeleted={() => {
-          setDeleteTarget(null)
-          // Refetch will happen automatically via query invalidation in the dialog
-        }}
-      />
-    </div>
-  )
-}
+```powershell
+dotnet build
+dotnet test Flower.Tests
 ```
 
-- [ ] **Step 3: Create the Select shadcn component** (needed by ProductsPage)
+Expected: build succeeds; `37` tests pass (all renames are compile-time).
+
+- [ ] **Step 7: Commit**
 
 ```bash
-npx shadcn@canary add select -y
-```
-
-- [ ] **Step 4: Verify build**
-
-```bash
-npm run build
-```
-Expected: 0 errors (the DeleteProductDialog import will error since it doesn't exist yet — we'll handle this in Task 6; temporarily comment out the import or use a minimal placeholder)
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add flower-admin.frontend/src/pages/products/
-git add flower-admin.frontend/src/components/ui/select.tsx
-git commit -m "feat: add products list page with DataTable"
+git add Flower.Backend
+git commit -m "refactor: rename category and notification controllers and views"
 ```
 
 ---
-

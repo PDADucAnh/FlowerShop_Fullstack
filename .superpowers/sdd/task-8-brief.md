@@ -1,129 +1,121 @@
-# Phase 2: Products & Categories Implementation Plan
+# PLAN PREAMBLE (from docs/superpowers/plans/2026-07-31-refactor-and-rename-tables.md)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
-
-**Goal:** Build Products & Categories management UI (list, create, edit, delete with multi-image upload) in the admin SPA.
-
-**Architecture:** Backend adds `ProductImage` entity + image upload/association endpoints; frontend adds DataTable listing, create/edit forms with multi-image upload, and inline category CRUD dialogs.
-
-**Tech Stack:** ASP.NET Core 8, EF Core + PostgreSQL, Cloudinary (via `PhotoService`), React 19 + Vite + Tailwind v4 + shadcn/ui (Base UI) + React Query + React Router v7.
+## Task 8: PaymentMethods `active` endpoint (STEP 2)
 
 ## Global Constraints
-
-- All UI text in Vietnamese
-- API responses are raw data (not wrapped in `ApiResponse<T>`) — frontend reads `response.data` directly from axios
-- Image upload via `POST /api/Upload` (returns `{ url: string }`), not direct browser-to-Cloudinary
-- `CreateProductDTO` / `UpdateProductDTO` extended with: `IsActive`, `FlowerMeaning`, `Origin`, `CareInstruction`, `NewImages`
-- `ProductDTO` gains `List<ProductImageDTO> Images`
-- Backend creates product + `ProductImage` records in a single transaction (`NewImages` batch)
-- Existing MVC controllers (`ProductController`, `CategoryProductController`) NOT modified — only API controllers changed
-- Follow existing patterns: `ICategoryProductService` / `CategoryProductService`, `IProductService` / `ProductService`
-
+- Keep the 4 currently-unused tables **untouched**: `ProductVariants`, `CustomerAddresses`, `PaymentMethods`, `CustomerPaymentPreferences` — they exist to support future features. (Their *entities* may be renamed internally only where specified, and their table names stay.)
+- Migration must be **exactly** named `RefactorAndRenameTables` and must preserve all data (use `RenameTable`/`RenameColumn`/`RenameForeignKey`/`RenameIndex`, never drop+create).
+- Do **NOT** rename: `Order.PaymentMethod` enum (in `Flower.Data/Entities/Order.cs:26`), the `NotificationHub` SignalR route `/hubs/notifications`, `AdminNotification`/`NotificationController` (MVC admin), the `ProductImage` table, the `Product.ImageUrl` column, the Cloudinary folder constant `CloudinaryFolders.Categories`.
+- Route pattern stays `Route("api/[controller]")` unless otherwise stated, so route changes follow controller renames.
+- Entity-name strings sent via `NotifyEntityChanged("...")` must match frontend `entityQueryMap` keys in `Flower-shop.frontend/src/hooks/useRealtimeUpdates.ts`.
+- Commit style (repo convention): lowercase prefix — `refactor:`, `feat:`, `fix:`.
+- Do not add comments to code unless a file already has them in that style.
 
 ---
-### Task 8: Frontend — Routing + Sidebar + Build Verify
+
+## Task 8: PaymentMethods `active` endpoint (STEP 2)
 
 **Files:**
-- Modify: `flower-admin.frontend/src/App.tsx`
-- Modify: `flower-admin.frontend/src/components/AppSidebar.tsx`
-- Possibly delete: `flower-admin.frontend/src/pages/PlaceholderPages.tsx` (remove ProductsPage, keep others)
+- Create: `Flower.Backend/Models/DTOs/PaymentMethodDTOs.cs`
+- Modify: `Flower.Backend/Models/DTOs/MappingExtensions.cs` (add `PaymentMethodDefinition.ToDTO()`)
+- Create: `Flower.Backend/Controllers/Api/PaymentMethodsController.cs`
 
 **Interfaces:**
-- Consumes: all page components from Tasks 4-7
-- Produces: complete routing tree and sidebar with active state
+- Consumes: `PaymentMethodDefinition` entity + `IApplicationDbContext`, `PaymentMethodDTO` (this task).
+- Produces: `GET api/PaymentMethods/active` → `IEnumerable<PaymentMethodDTO>` where `IsActive == true`.
 
-- [ ] **Step 1: Update `App.tsx` routes**
+- [ ] **Step 1: Create `PaymentMethodDTOs.cs`**
 
-Add imports and routes for products and categories. Replace the existing Imports section and routes:
-
-```typescript
-// imports — add these:
-import { ProductsPage } from '@/pages/products/ProductsPage'
-import { ProductFormPage } from '@/pages/products/ProductFormPage'
-import { CategoriesPage } from '@/pages/categories/CategoriesPage'
-
-// routes — replace the existing products and add categories:
-<Route path="products" element={<ProductsPage />} />
-<Route path="products/new" element={<ProductFormPage />} />
-<Route path="products/:id/edit" element={<ProductFormPage />} />
-<Route path="products/categories" element={<CategoriesPage />} />
+```csharp
+namespace Flower.Backend.Models.DTOs
+{
+    public class PaymentMethodDTO
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public bool IsOnline { get; set; }
+        public bool IsActive { get; set; }
+        public int DisplayOrder { get; set; }
+    }
+}
 ```
 
-Remove `ProductsPage` import from PlaceholderPages if it was there (it was a placeholder, now replaced by real page).
+> Add `PaymentMethodDefinition.ToDTO()` to `MappingExtensions.cs` (Step 2).
 
-- [ ] **Step 2: Update `AppSidebar.tsx` — add Categories sub-link under Products**
+- [ ] **Step 2: Add `PaymentMethodDefinition.ToDTO()` to `MappingExtensions.cs`**
 
-In the navItems array, change the Products nav item to show a sub-menu, OR add a separate nav item for Categories below Products:
-
-```typescript
-// Option: Add a separate nav item
-{ label: 'Danh mục', href: '/products/categories', icon: FolderTree },
+```csharp
+public static PaymentMethodDTO ToDTO(this PaymentMethodDefinition m)
+{
+    return new PaymentMethodDTO
+    {
+        Id = m.Id,
+        Code = m.Code,
+        Name = m.Name,
+        Description = m.Description,
+        IsOnline = m.IsOnline,
+        IsActive = m.IsActive,
+        DisplayOrder = m.DisplayOrder
+    };
+}
 ```
 
-Import `FolderTree` from lucide-react:
-```typescript
-import { ..., FolderTree } from 'lucide-react'
+- [ ] **Step 3: Create `PaymentMethodsController.cs`**
+
+```csharp
+using Flower.Backend.Models.DTOs;
+using Flower.Data;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Flower.Backend.Controllers.Api
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PaymentMethodsController : ControllerBase
+    {
+        private readonly IApplicationDbContext _context;
+
+        public PaymentMethodsController(IApplicationDbContext context)
+        {
+            _context = context;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("active")]
+        public async Task<IActionResult> GetActive()
+        {
+            var methods = await _context.PaymentMethods
+                .Where(m => m.IsActive)
+                .OrderBy(m => m.DisplayOrder)
+                .ThenBy(m => m.Id)
+                .ToListAsync();
+
+            return Ok(methods.Select(m => m.ToDTO()));
+        }
+    }
+}
 ```
 
-Actually, a simpler approach: keep the Products item as-is, and let users navigate to categories from the products page via the "Quản lý danh mục" button. The sidebar stays clean.
+- [ ] **Step 4: Build + test + smoke-test**
 
-Let's just add a small "Danh mục" entry below Products since the spec mentions it:
-
-```typescript
-const navItems: NavItem[] = [
-  { label: 'Tổng quan', href: '/', icon: LayoutDashboard },
-  { label: 'Sản phẩm', href: '/products', icon: Package },
-  { label: 'Danh mục', href: '/products/categories', icon: FolderTree },
-  { label: 'Đơn hàng', href: '/orders', icon: ShoppingBag },
-  { label: 'Nội dung', href: '/content', icon: FileText },
-  { label: 'Marketing', href: '/marketing', icon: Megaphone },
-  { label: 'Hệ thống', href: '/system', icon: Settings },
-]
+```powershell
+dotnet build
+dotnet test Flower.Tests
 ```
 
-Add `FolderTree` to the lucide-react import.
-
-- [ ] **Step 3: Clean up old placeholder**
-
-Remove the old `ProductsPage` export from `PlaceholderPages.tsx` (it now has a real implementation).
-
-- [ ] **Step 4: Full build verification**
-
-```bash
-npm run build
-```
-Expected: 0 errors
+Expected: build succeeds, `37` tests pass. Manual smoke: `GET /api/PaymentMethods/active` returns only methods with `isActive: true`, ordered by `displayOrder`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add flower-admin.frontend/src/App.tsx
-git add flower-admin.frontend/src/components/AppSidebar.tsx
-git add flower-admin.frontend/src/pages/PlaceholderPages.tsx  # if modified
-git commit -m "feat: wire up product/category routes and sidebar"
+git add Flower.Backend
+git commit -m "feat: add payment methods active endpoint"
 ```
 
 ---
-
-## Self-Review Checklist
-
-After writing the plan, verify against the spec:
-
-1. **ProductImage entity** — Task 1, Step 1 ✓
-2. **Product.Images navigation** — Task 1, Step 2 ✓
-3. **EF migration** — Task 1, Step 6 ✓
-4. **ProductImageDTO + UploadImageResponse** — Task 2, Step 1 ✓
-5. **Extended CreateProductDTO / UpdateProductDTO** (IsActive, FlowerMeaning, Origin, CareInstruction, NewImages) — Task 2, Steps 2-3 ✓
-6. **Updated ProductDTO with Images** — Task 2, Step 4 ✓
-7. **Updated mapping extensions** — Task 2, Steps 5-8 ✓
-8. **UploadController** — Task 2, Step 12 ✓
-9. **Image CRUD endpoints** — Task 2, Step 13 ✓
-10. **ProductService.BuildQuery includes Images** — Task 2, Step 9 ✓
-11. **ProductService.Create/Update handles NewImages** — Task 2, Steps 10-11 ✓
-12. **Frontend types** — Task 3, Steps 1-2 ✓
-13. **Frontend API functions** — Task 3, Steps 3-5 ✓
-14. **Products DataTable** — Task 4 ✓
-15. **Product Create/Edit form + ImageUploader** — Task 5 ✓
-16. **Delete product dialog** — Task 6 ✓
-17. **Categories CRUD page** — Task 7 ✓
-18. **Routing + sidebar** — Task 8 ✓
