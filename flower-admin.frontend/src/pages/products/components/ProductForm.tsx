@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { Loader2, ArrowLeft, X, CloudUpload, ImagePlus, ChevronDown, ChevronUp } from 'lucide-react'
+import { Loader2, ArrowLeft, X, CloudUpload, ImagePlus, ChevronDown, ChevronUp, Plus, Save, Trash2 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import type { Product, CreateProductRequest } from '@/types/product'
 
@@ -31,6 +31,15 @@ interface ImageItem {
   isExisting: boolean
   existingId?: number
   uploading?: boolean
+}
+
+interface VariantDraft {
+  id?: number
+  name: string
+  price: number
+  sku: string
+  isDefault: boolean
+  saving?: boolean
 }
 
 function removeDiacritics(str: string): string {
@@ -161,6 +170,25 @@ export function ProductForm({ product }: ProductFormProps) {
   // Gallery images
   const [galleryImages, setGalleryImages] = useState<ImageItem[]>([])
 
+  // Variants (sizes)
+  const [variants, setVariants] = useState<VariantDraft[]>([])
+
+  useEffect(() => {
+    if (product) {
+      setVariants(
+        (product.variants || []).map((v) => ({
+          id: v.id,
+          name: v.name,
+          price: v.price,
+          sku: v.sku || '',
+          isDefault: v.isDefault,
+        }))
+      )
+    } else {
+      setVariants([])
+    }
+  }, [product])
+
   const onGalleryDrop = useCallback(async (acceptedFiles: File[]) => {
     for (const file of acceptedFiles) {
       const tempId = `gallery-${Date.now()}-${Math.random()}`
@@ -201,6 +229,77 @@ export function ProductForm({ product }: ProductFormProps) {
       })
     }
     setGalleryImages((prev) => prev.filter((img) => img.id !== item.id))
+  }
+
+  const updateVariant = (index: number, patch: Partial<VariantDraft>) => {
+    setVariants((prev) => prev.map((v, i) => (i === index ? { ...v, ...patch } : v)))
+  }
+
+  const addVariantRow = () => {
+    setVariants((prev) => [
+      ...prev,
+      { name: '', price: 0, sku: '', isDefault: prev.length === 0 },
+    ])
+  }
+
+  const removeVariantRow = (index: number) => {
+    setVariants((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const saveVariant = async (index: number) => {
+    const variant = variants[index]
+    if (!product) return
+    if (!variant.name.trim() || variant.price < 0) {
+      toast.error('Tên size và giá biến thể không hợp lệ')
+      return
+    }
+
+    setVariants((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, saving: true } : v))
+    )
+
+    const payload = {
+      name: variant.name.trim(),
+      price: variant.price,
+      sku: variant.sku.trim() || undefined,
+      isDefault: variant.isDefault,
+    }
+
+    try {
+      if (variant.id) {
+        await productsApi.updateVariant(product.id, variant.id, { ...payload, id: variant.id })
+        toast.success('Cập nhật biến thể thành công')
+      } else {
+        const { data } = await productsApi.addVariant(product.id, payload)
+        setVariants((prev) =>
+          prev.map((v, i) => (i === index ? { ...v, id: data.id, saving: false } : v))
+        )
+        toast.success('Thêm biến thể thành công')
+        return
+      }
+    } catch {
+      toast.error(variant.id ? 'Cập nhật biến thể thất bại' : 'Thêm biến thể thất bại')
+    } finally {
+      setVariants((prev) =>
+        prev.map((v, i) => (i === index ? { ...v, saving: false } : v))
+      )
+    }
+  }
+
+  const deleteVariant = async (index: number) => {
+    const variant = variants[index]
+    if (!product) return
+
+    if (variant.id) {
+      try {
+        await productsApi.deleteVariant(product.id, variant.id)
+        toast.success('Xóa biến thể thành công')
+      } catch {
+        toast.error('Xóa biến thể thất bại')
+        return
+      }
+    }
+    removeVariantRow(index)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -533,6 +632,105 @@ export function ProductForm({ product }: ProductFormProps) {
                     className="bg-surface-container-low border-input resize-none"
                   />
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Variants (sizes) */}
+          <div className="mt-6 pt-4 border-t border-border">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-medium text-on-surface">Biến thể (Size / Giá)</p>
+                <p className="text-xs text-on-surface-variant">
+                  Các size kèm giá và mã SKU riêng cho sản phẩm
+                </p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addVariantRow}
+                className="flex items-center gap-1"
+              >
+                <Plus className="size-4" />
+                Thêm biến thể
+              </Button>
+            </div>
+
+            {variants.length === 0 ? (
+              <p className="text-sm text-on-surface-variant/70 py-2">
+                Chưa có biến thể nào. Nhấn "Thêm biến thể" để tạo size riêng.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {variants.map((variant, index) => (
+                  <div
+                    key={variant.id ?? `new-${index}`}
+                    className="grid grid-cols-12 gap-3 items-center rounded-lg border border-input bg-surface-container-low p-3"
+                  >
+                    <div className="col-span-4">
+                      <Label className="text-on-surface-variant mb-1 block text-xs">Tên size</Label>
+                      <Input
+                        value={variant.name}
+                        onChange={(e) => updateVariant(index, { name: e.target.value })}
+                        placeholder="VD: Nhỏ, Vừa, Lớn"
+                        className="bg-white border-input"
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <Label className="text-on-surface-variant mb-1 block text-xs">Giá (VNĐ)</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        value={variant.price || ''}
+                        onChange={(e) => updateVariant(index, { price: Number(e.target.value) })}
+                        placeholder="0"
+                        className="bg-white border-input"
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <Label className="text-on-surface-variant mb-1 block text-xs">SKU</Label>
+                      <Input
+                        value={variant.sku}
+                        onChange={(e) => updateVariant(index, { sku: e.target.value })}
+                        placeholder="VD: SP-01-L"
+                        className="bg-white border-input"
+                      />
+                    </div>
+                    <div className="col-span-2 flex items-center justify-end gap-1">
+                      <Switch
+                        checked={variant.isDefault}
+                        onCheckedChange={(v: boolean) => updateVariant(index, { isDefault: v })}
+                        aria-label="Biến thể mặc định"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => saveVariant(index)}
+                        disabled={variant.saving}
+                        title={variant.id ? 'Lưu thay đổi' : 'Thêm'}
+                        className="flex items-center gap-1"
+                      >
+                        {variant.saving ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Save className="size-4" />
+                        )}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => deleteVariant(index)}
+                        title="Xóa biến thể"
+                        className="text-destructive"
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

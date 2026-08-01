@@ -16,12 +16,33 @@ export interface Product {
   careInstruction?: string
   viewCount: number
   createdAt?: string
+  variants?: ProductVariant[]
 }
 
 export interface ProductImage {
   id: number
   imageUrl: string
   sortOrder: number
+}
+
+export interface ProductVariant {
+  id: number
+  productId: number
+  name: string
+  price: number
+  sku?: string
+  isDefault: boolean
+}
+
+export interface CreateProductVariantRequest {
+  name: string
+  price: number
+  sku?: string
+  isDefault?: boolean
+}
+
+export interface UpdateProductVariantRequest extends CreateProductVariantRequest {
+  id: number
 }
 
 export interface CreateProductRequest {

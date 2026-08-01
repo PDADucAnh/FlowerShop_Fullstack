@@ -1,5 +1,13 @@
 import { apiClient } from './client'
-import type { Product, CreateProductRequest, UpdateProductRequest, PagedResponse } from '@/types/product'
+import type {
+  Product,
+  CreateProductRequest,
+  UpdateProductRequest,
+  PagedResponse,
+  ProductVariant,
+  CreateProductVariantRequest,
+  UpdateProductVariantRequest,
+} from '@/types/product'
 
 export interface ProductListParams {
   page?: number
@@ -54,5 +62,17 @@ export const productsApi = {
 
   deleteImage(productId: number, imageId: number) {
     return apiClient.delete(`/api/Products/${productId}/images/${imageId}`)
+  },
+
+  addVariant(productId: number, data: CreateProductVariantRequest) {
+    return apiClient.post<ProductVariant>(`/api/Products/${productId}/variants`, data)
+  },
+
+  updateVariant(productId: number, variantId: number, data: UpdateProductVariantRequest) {
+    return apiClient.put(`/api/Products/${productId}/variants/${variantId}`, data)
+  },
+
+  deleteVariant(productId: number, variantId: number) {
+    return apiClient.delete(`/api/Products/${productId}/variants/${variantId}`)
   },
 }
